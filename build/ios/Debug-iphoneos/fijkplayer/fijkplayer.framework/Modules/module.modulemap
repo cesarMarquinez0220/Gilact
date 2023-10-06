@@ -1,0 +1,6 @@
+framework module fijkplayer {
+  umbrella header "fijkplayer-umbrella.h"
+
+  export *
+  module * { export * }
+}
