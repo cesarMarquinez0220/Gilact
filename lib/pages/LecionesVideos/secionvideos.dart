@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class VideoData {
-  final String title;
+  final int id;
   final String imageAsset;
   final String timeWatched;
 
+
   VideoData({
-    required this.title,
+    required this.id,
     required this.imageAsset,
     required this.timeWatched,
+
   });
 }
 
@@ -24,43 +28,38 @@ class _SeccionVideosState extends State<SeccionVideos> {
 
   List<VideoData> videos = [
     VideoData(
-      title: 'Video 4',
+      id: 1,
       imageAsset:
-          'assets/miniaturas de videos/1.png', // Ruta de la imagen del video 4
-      timeWatched: '2:30', // Tiempo visto del video 4
+          'assets/miniaturas de videos/1.png', // Ruta de la imagen del video 1
+      timeWatched: '1:18', // Tiempo
     ),
     VideoData(
-      title: 'Video 5',
-      imageAsset:
-          'assets/miniaturas de videos/2.1.png', // Ruta de la imagen del video 5
-      timeWatched: '1:45', // Tiempo visto del video 5
+      id: 2,
+      imageAsset: 'assets/miniaturas de videos/2.1.png',
+      timeWatched: '2:38',
     ),
     VideoData(
-      title: 'Video 6',
-      imageAsset:
-          'assets/miniaturas de videos/3.1.png', // Ruta de la imagen del video 6
-      timeWatched: '3:15', // Tiempo visto del video 6
+      id: 4,
+      imageAsset: 'assets/miniaturas de videos/3.1.png',
+      timeWatched: '4:52',
     ),
   ];
 
   List<VideoData> sugeridos = [
     VideoData(
-      title: 'Video 1',
-      imageAsset:
-          'assets/miniaturas de videos/4.1.png', // Ruta de la imagen del video 1
-      timeWatched: '4:20', // Tiempo visto del video 1
+      id: 6,
+      imageAsset: 'assets/miniaturas de videos/3.3.png',
+      timeWatched: '0:50',
     ),
     VideoData(
-      title: 'Video 2',
-      imageAsset:
-          'assets/miniaturas de videos/10.png', // Ruta de la imagen del video 2
-      timeWatched: '2:10', // Tiempo visto del video 2
+      id: 11,
+      imageAsset: 'assets/miniaturas de videos/6.png',
+      timeWatched: '1:13',
     ),
     VideoData(
-      title: 'Video 3',
-      imageAsset:
-          'assets/miniaturas de videos/11.1.png', // Ruta de la imagen del video 3
-      timeWatched: '5:00', // Tiempo visto del video 3
+      id: 13,
+      imageAsset: 'assets/miniaturas de videos/8.1.png',
+      timeWatched: '0:54',
     ),
   ];
   @override
@@ -75,11 +74,13 @@ class _SeccionVideosState extends State<SeccionVideos> {
               //color: Colors.white
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
-                end: Alignment.centerRight,
+                end: Alignment.bottomRight,
                 colors: [
                   Color.fromARGB(255, 7, 139, 221),
                   Color.fromARGB(255, 7, 139, 221),
+                  Color.fromARGB(255, 82, 222, 187),
                   Color.fromARGB(255, 122, 231, 211),
+                  Color(0xffF2F2F2),
                   Color(0xffF2F2F2),
                 ],
               ),
@@ -92,12 +93,14 @@ class _SeccionVideosState extends State<SeccionVideos> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Seccion de Videos',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
+                Text(
+                  'Seccion de Videos',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.quicksand(
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                    )),
+                      color: Colors.white),
+                ),
                 _buildVideoListView("Videos", videos),
                 _buildVideoListView("Videos Relacionados", sugeridos),
               ],
@@ -139,9 +142,10 @@ class _SeccionVideosState extends State<SeccionVideos> {
           padding: const EdgeInsets.all(16),
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
+            style: GoogleFonts.quicksand(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 255, 255, 255),
             ),
           ),
         ),
@@ -151,42 +155,76 @@ class _SeccionVideosState extends State<SeccionVideos> {
             scrollDirection: Axis.horizontal,
             itemCount: videos.length,
             itemBuilder: (context, index) {
+              final videoData =
+                  videos[index]; // Obtener la instancia de VideoData
               return Container(
                 width: 200,
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage(videos[index].imageAsset),
+                    image: AssetImage(videoData.imageAsset),
                     fit: BoxFit.cover,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.black.withOpacity(0.6),
-                      child: Text(
-                        videos[index].title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                child: InkWell(
+                  onTap: () {
+                    print("URL del video: ${videoData.id}");
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ReproductorVideo(
+                          videoId: videoData.id,
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.black.withOpacity(0.6),
-                      child: Text(
-                        'Tiempo Visto: ${videos[index].timeWatched}',
-                        style: TextStyle(
+                    );
+                  },
+                  child: Stack(
+                    children: [
+                      const Center(
+                        child: Icon(
+                          Icons.play_circle_outline,
+                          size: 60,
                           color: Colors.white,
                         ),
                       ),
-                    ),
-                    
-                  ],
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${videoData.timeWatched}',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                            if (videoData.timeWatched.isNotEmpty)
+                              SizedBox(height: 4),
+                            if (videoData.timeWatched.isNotEmpty)
+                              Stack(
+                                children: [
+                                  Container(
+                                    height: 8,
+                                    color: Colors.grey,
+                                  ),
+                                  FractionallySizedBox(
+                                    widthFactor:
+                                        0.3, // Cambia este valor para indicar el progreso
+                                    child: Container(
+                                      height: 8,
+                                      color: Color.fromARGB(255, 224, 28, 14),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

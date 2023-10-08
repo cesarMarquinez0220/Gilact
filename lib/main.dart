@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_login/pages/LecionesVideos/secionvideos.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/login.dart';
-import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'firebase_options.dart';
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 
