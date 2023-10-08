@@ -18,11 +18,11 @@
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		zqGTY9GAcgQyCybaNwkNbsHYrHw=
+		oTOwGHpxg6btq4REZiGLBcvZnfQ=
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		fgZaOLzhp4dwmm7IfSL7BbcJCbU=
+		ivWUR1hOVxWDuRCCz1iEilO7iIo=
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -34,7 +34,7 @@
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		VnN9Wk3oj3i861JtRvarh793k34=
+		H9YCS7pqnhAB1XP/tTVNDCre2VI=
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -46,7 +46,7 @@
 		</data>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Q3lCK5wzErSLfMYdUJ9e1BtSECs=
+		t+NzaxNTdyHBnq0CwJWTYZEih0Y=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -73,14 +73,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Zic9Y05l2AjKwH3iOffrPnEhQrzNwphDmLk6btKPHlw=
+			I46WVEz9+5GfSvaMbIXj2MB+cc3dV/utE0pFaU5Z0co=
 			</data>
 		</dict>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			iaAbHREzEiN+SM2YXisfd+EvYuCrXpSU+3Ljfubpf/8=
+			5d0yRH4WWNFRsDHI3aXBKT1tUlxYhTZWeHOVV6FETog=
 			</data>
 		</dict>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -101,7 +101,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qV93f2J6FL71pKh+S2YoRVv8ehOWJkiM3V7EsA+A1+A=
+			6q1u9Xu8P7IQawwm0s1QKVb7FArP2udeLGufvmsS6dE=
 			</data>
 		</dict>
 		<key>Modules/FirebaseCoreInternal.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -122,7 +122,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			bocT937G8lFdmu9NDA0W+TNNPqBvf748qXkkH4Qqv20=
+			ucsC893xkQHh6ETBYqmi77ifbHV9MIulL4InSAk1r+k=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
