@@ -56,42 +56,43 @@ class _PruebaState extends State<Prueba> {
     super.dispose();
   }
 
- Future<void> guardarInformacionEnFirestore() async {
-  final userName = UserDataStorage.getUserName();
-  final usersQuery = await FirebaseFirestore.instance
-      .collection('Users')
-      .where('usuario', isEqualTo: userName)
-      .limit(1)
-      .get();
+  Future<void> guardarInformacionEnFirestore() async {
+    final userName = UserDataStorage.getUserName();
+    final usersQuery = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('usuario', isEqualTo: userName)
+        .limit(1)
+        .get();
 
-  try {
-    if (usersQuery.docs.isNotEmpty) {
-      // Si se encuentra un documento existente con el nombre de usuario,
-      // actualiza ese documento en lugar de crear uno nuevo.
-      final usuarioDocRef = usersQuery.docs[0].reference;
+    try {
+      if (usersQuery.docs.isNotEmpty) {
+        // Si se encuentra un documento existente con el nombre de usuario,
+        // actualiza ese documento en lugar de crear uno nuevo.
+        final usuarioDocRef = usersQuery.docs[0].reference;
 
-      await usuarioDocRef.update({
-        'pausas': pauseCount,
-        'adelantos': forwardCount,
-        'ultimaPosicion': lastPosition?.inMilliseconds,
-      });
+        await usuarioDocRef.update({
+          'pausas': pauseCount,
+          'adelantos': forwardCount,
+          'ultimaPosicion': lastPosition?.inMilliseconds,
+        });
 
-      // Crea una subcolección 'datosvideos' dentro del documento del usuario
-      final datosvideosRef = usuarioDocRef.collection('datosvideos');
-      await datosvideosRef.add({
-        'dato1': 'valor1',
-        'dato2': 'valor2',
-        // Agrega los datos que desees en la subcolección 'datosvideos'
-      });
+        // Crea una subcolección 'datosvideos' dentro del documento del usuario
+        final datosvideosRef = usuarioDocRef.collection('datosvideos');
+        await datosvideosRef.add({
+          'dato1': 'valor1',
+          'dato2': 'valor2',
+          // Agrega los datos que desees en la subcolección 'datosvideos'
+        });
 
-      print('Información actualizada con éxito en Firestore');
-    } else {
-      print('No se encontró un documento con el nombre de usuario: $userName');
+        print('Información actualizada con éxito en Firestore');
+      } else {
+        print(
+            'No se encontró un documento con el nombre de usuario: $userName');
+      }
+    } catch (error) {
+      print('Error al actualizar la información en Firestore: $error');
     }
-  } catch (error) {
-    print('Error al actualizar la información en Firestore: $error');
   }
-}
 
   @override
   Widget build(BuildContext context) {
