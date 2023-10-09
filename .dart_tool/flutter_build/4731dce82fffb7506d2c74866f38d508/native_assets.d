@@ -1,0 +1,1 @@
+ /Users/gitce/Documents/GitHub/Gilact/.dart_tool/flutter_build/4731dce82fffb7506d2c74866f38d508/native_assets.yaml: 
