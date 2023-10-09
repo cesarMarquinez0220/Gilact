@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
-            gradient: Gradients.myGradient //constante de gradient
+            gradient: Gradientslogin.myGradient //constante de gradient
             ),
         //padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
@@ -322,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
   //orientacion vertical
   Widget _buildPortraitLayout() {
     return Container(
-      padding: const EdgeInsets.only(top: 50, bottom: 30, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 70, bottom: 30, left: 20, right: 20),
       width: double.infinity,
       child: Center(
         child: Column(
@@ -330,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/images/womanbaby1.png",
+              "assets/images/logo-completo.png",
               alignment: Alignment.center,
               height: 0.3 * MediaQuery.of(context).size.height,
             ),
