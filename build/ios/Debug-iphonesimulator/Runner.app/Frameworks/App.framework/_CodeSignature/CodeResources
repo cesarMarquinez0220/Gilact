@@ -82,7 +82,11 @@
 		</data>
 		<key>flutter_assets/assets/images/logo-completo.png</key>
 		<data>
-		GFtNDSgdo1p0Nw5uxti9PR7lRq4=
+		ZpvT12WQP7b2gYZ1IrqNwmprKzY=
+		</data>
+		<key>flutter_assets/assets/images/logo-letras.png</key>
+		<data>
+		rZVCVtDDRegQJxUFXGpjtUfxqZI=
 		</data>
 		<key>flutter_assets/assets/images/logo-letras.png</key>
 		<data>
@@ -123,6 +127,10 @@
 		<key>flutter_assets/assets/images/salud.png</key>
 		<data>
 		yTYRr/0RGTAVnMrdJNRivwUbO0w=
+		</data>
+		<key>flutter_assets/assets/images/solo-logo.png</key>
+		<data>
+		BdrXD2jBdPGbWSS4gmIefVzsib4=
 		</data>
 		<key>flutter_assets/assets/images/splash.png</key>
 		<data>
@@ -429,7 +437,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			NAl/W7/lTVwLbM2Sxt1rHTPC8SbEInbh6piqWMykqY4=
+			bV4YA073OAXkLeMuTSasZwWZUbymrN0LWvAFu2vn4cM=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/images/logo-letras.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0Dybp3zDiZExvTc5zk7J/8gjdnQnNgb9sWImlF2xhfc=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/images/logo-letras.png</key>
@@ -500,6 +515,13 @@
 			<key>hash2</key>
 			<data>
 			xKvtlcOs2a3RqUzCafoOI/HIHwj+66dXjvZrQIIPdqg=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/images/solo-logo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			moNJUjqZudlmT9Kjro374b4F2HSqZmjbDdgLvAPlTdU=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/images/splash.png</key>
