@@ -291,7 +291,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: Color(0xff034C8C)),
           ),
           Text(
             'Cédula: $cedula\n',

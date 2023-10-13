@@ -18,19 +18,11 @@
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-<<<<<<< HEAD
-		dw5JezKPmyNgB+SaubzrzI491+0=
-		</data>
-		<key>Modules/OrderedSet.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
-		<data>
-		Bm3noGkU9lGzF9Kty4D4IAP0Bng=
-=======
 		tIgdna/RL+c7hquuV0I8k3L3UlQ=
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
 		ruDu0SoJIvOQqHjhjDLgmRtrJWY=
->>>>>>> main
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -42,11 +34,7 @@
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-<<<<<<< HEAD
-		5fCbciEFOTFLCEy2MNsxUmY1d0g=
-=======
 		uzJoJ+DyCKNVmz7ly+qk7CzPGBo=
->>>>>>> main
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -58,11 +46,7 @@
 		</data>
 		<key>Modules/OrderedSet.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-<<<<<<< HEAD
-		XHbfOr3YPoBLTa+PX3TbiFBwUmY=
-=======
 		g0pkZRCy+FVV3MmCaz84/jlqOlQ=
->>>>>>> main
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -89,22 +73,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			JavMHm+XkR1m+FxuZ/YqNOdJz2dHPlv5QhDJbqV+8z8=
-=======
 			egpayTyILogS6s+2uSV8IhMa28YzqF16waQ9rYE0PXM=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/OrderedSet.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			PkjnOXf8PG9FUapEsSR+YCYEc+FejxYUexc4l18e9/E=
-=======
 			3/ZflL/OkTgVScVdzKpC7o+SofPqCWt220lLgkduEQE=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/OrderedSet.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -125,11 +101,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			lbnaOg3VX4bEu33mK45zReWvUWEHXU0rJhHNp2OKrdI=
-=======
 			Lbw9LL6CponXK9SkAhnRkph3Q1o+TYe/mAL/SyiM2Cc=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/OrderedSet.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -150,11 +122,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			5piXdFFG1WefdEYqSXJ0x52ypVvTMXSG+TDfqr/TwvQ=
-=======
 			LDU+0x48le21IBeEYEj/zWE83X3qW+RB9JS0UhVYpZg=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
