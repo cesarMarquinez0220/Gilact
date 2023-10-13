@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
+import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class VideoData {
@@ -175,7 +176,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
                           print("URL del video: ${videoData.id}");
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ReproductorVideo(
+                              builder: (context) => Prueba(
                                 videoId: videoData.id,
                               ),
                             ),

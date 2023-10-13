@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/Videos/VideosPage.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/registro_lactancia.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:video_player/video_player.dart';
 
 class lecciones extends StatefulWidget {
   const lecciones({Key? key});
@@ -122,7 +124,7 @@ class _leccionesState extends State<lecciones> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Prueba(),
+                          builder: (context) => VideoPlayerApp(),
                         ),
                       );
                     },

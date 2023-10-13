@@ -1,9 +1,9 @@
 class VideoLinks {
   static Map<int, String> videoUrls = {
-    1: "https://drive.google.com/uc?export=view&id=1RJp-dLOzrfAgh05s2OTBa6h1x3Tgdm6W", //video 1
-    2: "https://drive.google.com/uc?export=view&id=1N1XZlXSJKRDouSeqrAjEzUkijzlGzhB4", //video 2.1
+    1: "https://youtu.be/GAhdzV6FzVc", //video 1
+    2: "https://youtu.be/crSNJTc-dmQ", //video 2.1
     3: "https://drive.google.com/uc?export=view&id=1UvAUZn7AtRmcqVkb17_r892As6rt0cDW", //video 2.2
-    4: "https://drive.google.com/uc?export=view&id=1Y68KbmHhPU5a9kQsFji3RgLqoG8p3Zmw", //video 3.1
+    4: "https://youtu.be/T3B8pVa8EhU", //video 3.1
     5: "https://drive.google.com/uc?export=view&id=1Xq9QDbrNfDLKNOhNSGvTHDjK1FCjVBKw", //video 3.2
     6: "https://drive.google.com/uc?export=view&id=1HHEDu0grAeJw84Oyb-cmv3dZM3XEe--a", //video 3.3
     7: "https://drive.google.com/uc?export=view&id=1ikyIZiltXQIzyBsD3vS2it9Q9_U3lcsu", //video 3.4

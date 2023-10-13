@@ -25,7 +25,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   int pauseCount = 0; // Contador de pausas
   int forwardCount = 0; // Contador de avances
   Duration? lastPosition; // Última posición del video antes de pausar
-
+  
   @override
   void initState() {
     super.initState();
