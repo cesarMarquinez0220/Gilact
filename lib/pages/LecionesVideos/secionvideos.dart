@@ -74,17 +74,19 @@ class _SeccionVideosState extends State<SeccionVideos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     
       body: Stack(
         children: [
           Container(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
+            height: MediaQuery.of(context).size.height*0.2,
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xff034C8C), Color(0xffF2F2F2)],
-              ),
+              color: Colors.white 
+              // gradient: LinearGradient(
+              //   begin: Alignment.topCenter,
+              //   end: Alignment.bottomCenter,
+              //   colors: [Color(0xffF2F2F2)],
+              // ),
             ),
           ),
           Column(
@@ -93,13 +95,14 @@ class _SeccionVideosState extends State<SeccionVideos> {
               Expanded(
                 child: ListView(
                   children: [
+                    SizedBox(height: 40,),
                     Text(
                       'Sección de Videos',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.quicksand(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                          color: Color(0xff034C8C)),
                     ),
                     _buildVideoListView("Videos", videos, isHorizontal: true),
                     _buildVideoListView("Videos Relacionados", sugeridos,
@@ -116,7 +119,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
             child: Container(
               height: 66,
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: Colors.white// color del fondo del 
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -147,7 +150,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
             style: GoogleFonts.quicksand(
               fontSize: 25,
               fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 255, 255, 255),
+              color: Color(0xff034C8C),
             ),
           ),
         ),
@@ -166,6 +169,9 @@ class _SeccionVideosState extends State<SeccionVideos> {
                       height: 150,
                       margin: const EdgeInsets.only(left: 8, right: 8),
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10)),
                         image: DecorationImage(
                           image: AssetImage(videoData.imageAsset),
                           fit: BoxFit.cover,
@@ -234,14 +240,30 @@ class _SeccionVideosState extends State<SeccionVideos> {
                     ),
                     Container(
                       width: 250,
-                      color: Colors.white, // Fondo blanco
                       padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(
+                                0.3), // Color y opacidad de la sombra
+                            offset:
+                                Offset(0, 8), // Desplazamiento en el eje X y Y
+                            blurRadius: 15, // Radio de desenfoque
+                            spreadRadius:
+                                0, // Radio de propagación de la sombra
+                          ),
+                        ],
+                        color: Colors.white, // Fondo blanco
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10)),
+                      ),
                       child: Center(
                         child: Text(
                           videoData.titleimage,
                           // Título del video
                           style: GoogleFonts.quicksand(
-                            color: Colors.black, // Letras negras
+                            color: Color.fromARGB(255, 117, 115, 115), // Letras negras
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -262,6 +284,9 @@ class _SeccionVideosState extends State<SeccionVideos> {
                     width: 250, // Altura fija para cada elemento vertical
                     margin: const EdgeInsets.only(left: 8, bottom: 8, top: 8),
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10)),
                       image: DecorationImage(
                         image: AssetImage(videoData.imageAsset),
                         fit: BoxFit.cover,
@@ -331,13 +356,28 @@ class _SeccionVideosState extends State<SeccionVideos> {
                   Container(
                     width: 150,
                     height: 175,
-                    color: Colors.white, // Fondo blanco
                     padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(
+                              0.3), // Color y opacidad de la sombra
+                          offset:
+                              Offset(0, 8), // Desplazamiento en el eje X y Y
+                          blurRadius: 15, // Radio de desenfoque
+                          spreadRadius: 0, // Radio de propagación de la sombra
+                        ),
+                      ],
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          bottomRight: Radius.circular(10)),
+                    ),
                     child: Center(
                       child: Text(
                         videoData.titleimage, // Título del video
                         style: GoogleFonts.quicksand(
-                          color: Colors.black, // Letras negras
+                          color: Color.fromARGB(255, 117, 115, 115), // Letras negras
                           fontWeight: FontWeight.bold,
                         ),
                       ),

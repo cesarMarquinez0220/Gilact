@@ -137,59 +137,57 @@ class _RegistroAPPState extends State<RegistroAPP> {
 
   //////////////////////construcor principal//////////////////////////////
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: Container(
-      decoration: const BoxDecoration(
-        gradient: Gradients.myGradient,
-      ),
-      child: ListView(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.10,
-          ),
-          Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.75,
-              child: Swiper(
-                controller: swiperController,
-                onIndexChanged: (index) {
-                  setState(() {
-                    currentIndex = index;
-                  });
-                },
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return buildFirstCard();
-                  } else {
-                    return buildSecondCard();
-                  }
-                },
-                viewportFraction: 0.85,
-                loop: false,
-                layout: SwiperLayout.DEFAULT,
-                itemWidth: null,
-                itemHeight: null,
-                scale: 0.5,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: Gradients.myGradient,
+        ),
+        child: ListView(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.10,
+            ),
+            Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: Swiper(
+                  controller: swiperController,
+                  onIndexChanged: (index) {
+                    setState(() {
+                      currentIndex = index;
+                    });
+                  },
+                  itemCount: 2,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return buildFirstCard();
+                    } else {
+                      return buildSecondCard();
+                    }
+                  },
+                  viewportFraction: 0.85,
+                  loop: false,
+                  layout: SwiperLayout.DEFAULT,
+                  itemWidth: null,
+                  itemHeight: null,
+                  scale: 0.5,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 15),
-          buildIndicatorRow(),
-        ],
+            const SizedBox(height: 15),
+            buildIndicatorRow(),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
+    );
+  }
 
 // primer card
   Widget buildFirstCard() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.5,
+      height: MediaQuery.of(context).size.height * 0.3,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
         color: Colors.white,
@@ -263,7 +261,7 @@ Widget build(BuildContext context) {
 
   Widget buildSecondCard() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
+      height: MediaQuery.of(context).size.height * 0.6,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
         color: Colors.white,

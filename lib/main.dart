@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_login/pages/LecionesVideos/secionvideos.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/UsersVideos/user_videos.dart';
 import 'package:flutter_login/pages/login.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
-      home: LoginScreen(),
+      home: Perfilnuevo(),
   //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(),
