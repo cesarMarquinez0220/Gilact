@@ -46,7 +46,7 @@
 		</data>
 		<key>Frameworks/App.framework/App</key>
 		<data>
-		Pfd8aedC7+EdpTR1TwRIApQY9W0=
+		yQS/C/Iu4HZxpdDQgegjAkcvPTY=
 		</data>
 		<key>Frameworks/App.framework/Info.plist</key>
 		<data>
@@ -54,15 +54,15 @@
 		</data>
 		<key>Frameworks/App.framework/_CodeSignature/CodeResources</key>
 		<data>
-		7vNqiW3sRWizqPFQ8zwNfLSED8Y=
+		ThSo61IBRTNwpucXxN7Q1Z+9bEU=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.bin</key>
 		<data>
-		vcvrRqvAuznGs4mkAT3gehH9eO8=
+		YB543xZgk1+Q1PhOLVridsPQt3w=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
 		<data>
-		dwVKd01I0ry4JJ1Sx6oivOb/TxM=
+		/kXqCpZ9Zx2v18p71btLnty3CU0=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/FontManifest.json</key>
 		<data>
@@ -130,7 +130,11 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/logo-completo.png</key>
 		<data>
-		GFtNDSgdo1p0Nw5uxti9PR7lRq4=
+		ZpvT12WQP7b2gYZ1IrqNwmprKzY=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/images/logo-letras.png</key>
+		<data>
+		rZVCVtDDRegQJxUFXGpjtUfxqZI=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/mamabebe.png</key>
 		<data>
@@ -168,6 +172,10 @@
 		<data>
 		yTYRr/0RGTAVnMrdJNRivwUbO0w=
 		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/images/solo-logo.png</key>
+		<data>
+		BdrXD2jBdPGbWSS4gmIefVzsib4=
+		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/splash.png</key>
 		<data>
 		0c6B19182e3Sbfbaq4CEEKNjdcA=
@@ -187,6 +195,22 @@
 		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.1.png</key>
 		<data>
 		9jrSBIRs1IDOod7MfgW2N2NvhDE=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.2.png</key>
+		<data>
+		6Kq1QkJ7RTAbbfCzV0+1qP0J1Ok=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.3.png</key>
+		<data>
+		qfVG0V+LU2tDCCqKBR1/cX3g3lc=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.4.png</key>
+		<data>
+		MqTatWz8tt+JXGL1c57cr1Zvtyg=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.5.png</key>
+		<data>
+		Hd+ntpX+XYDd1D170vfio/fzOaM=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/12.png</key>
 		<data>
@@ -286,7 +310,7 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/kernel_blob.bin</key>
 		<data>
-		DCu0VyFm7a6fEIPbvzfqtQ4T30I=
+		hNFZVMlbK29iChY62u5i2yZTVT4=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -590,7 +614,7 @@
 		</data>
 		<key>Frameworks/grpc.framework/grpc</key>
 		<data>
-		qTso5U0fZd44th9UhC8SOTjlaKU=
+		wBHDs4Hp0Q6w/sYwRgXSpLr/CnU=
 		</data>
 		<key>Frameworks/grpcpp.framework/Info.plist</key>
 		<data>
@@ -793,7 +817,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			UwaSGWQRPnsHRy/DlioCgOjAFcdxmn57CuKyySeJmHc=
+			3O6EVnXvPBp+tqt+LTYj3fBG8IrF4b41DxgHEg0JMD0=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/Info.plist</key>
@@ -807,21 +831,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			jcI4H/otUxOP7Q1sH9eVvrkQRISziqcrEdaXPwoSkJ4=
+			d0YYg/ANKXAhAg7ipe0SjkCjzOmGWxKChqK43dTa8Ao=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.bin</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			14syMVtqX+bBTQmmSCdApNzickwzeljW+pqksehNREk=
+			y9ldshtBMEEy8k8PYwwFDq79lONoFKcRW6g1QAUI1iI=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Wju0i9aofEz8HJvPw5JaVDFbil36kJoYXjNuvhOzrm4=
+			bH93uaPh+oyJcOH3LFOvv/VT41bl1JH1vf7itNKoPD0=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/FontManifest.json</key>
@@ -940,7 +964,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			NAl/W7/lTVwLbM2Sxt1rHTPC8SbEInbh6piqWMykqY4=
+			bV4YA073OAXkLeMuTSasZwWZUbymrN0LWvAFu2vn4cM=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/images/logo-letras.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0Dybp3zDiZExvTc5zk7J/8gjdnQnNgb9sWImlF2xhfc=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/mamabebe.png</key>
@@ -1006,6 +1037,13 @@
 			xKvtlcOs2a3RqUzCafoOI/HIHwj+66dXjvZrQIIPdqg=
 			</data>
 		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/images/solo-logo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			moNJUjqZudlmT9Kjro374b4F2HSqZmjbDdgLvAPlTdU=
+			</data>
+		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/splash.png</key>
 		<dict>
 			<key>hash2</key>
@@ -1039,6 +1077,34 @@
 			<key>hash2</key>
 			<data>
 			MaVVb33DzAw1J9ms3n7FcSN+YSIRCG+92jPUDT/X8Bs=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.2.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			6ubjLlTq7mXRDCxS9vYyuATMB/wAHfG8ZAsLdbFy8wc=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.3.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			37kHuFCAc3o6Hb942gZow5NuY71WsAB736Lyb4T81zU=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.4.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Z2ROjJsGx8P+7ij0At7eg9xI4xLmJSDa6yX+zATnWkk=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/11.5.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			h8a6xDb8Z23DVI3O9erjKgiSzmheOFtGqPcG3lOWGyM=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/mini_videos/12.png</key>
@@ -1213,7 +1279,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			dADhc8lZmlOKrRzMdeLPZsr5EJRuIFQAxIZS3XlscA0=
+			UDsA1AGvC0QiYXY/A/07YdV5mJmT2ULHQpwzZ2tffM4=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
@@ -1745,7 +1811,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Yb2UoWvo1er0ho5OWoA6i2G/74qFXQVupYN1Uf9W8/o=
+			FCVwXCe0386NafXEtuxLHsD10bt5ECrAxE05bpfbj7w=
 			</data>
 		</dict>
 		<key>Frameworks/grpcpp.framework/Info.plist</key>

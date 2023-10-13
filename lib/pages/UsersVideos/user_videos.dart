@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/UsersVideos/search_json.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class User_videos extends StatefulWidget {
   const User_videos({super.key});
@@ -14,13 +15,13 @@ class _User_videosState extends State<User_videos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 12, 2, 80),
+      backgroundColor: Color.fromARGB(119, 2, 80, 71),
       appBar: getAppBar(),
       body: getBody(),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.transparent, // Fondo transparente
-        selectedItemColor: Colors.white, // Color de ícono seleccionado
-        unselectedItemColor: Colors.grey.withOpacity(0.60), // Color de ícono no seleccionado
+        backgroundColor: Colors.transparent, 
+        selectedItemColor: Color.fromARGB(255, 114, 215, 249), 
+        unselectedItemColor: Color.fromARGB(255, 255, 255, 255).withOpacity(0.60), 
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
@@ -80,6 +81,7 @@ class _User_videosState extends State<User_videos> {
           Text(
             "Videos Disponibles",
             style: TextStyle(
+              fontFamily: 'Quicksand',
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -124,6 +126,7 @@ class _User_videosState extends State<User_videos> {
                             child: Text(
                               searchJson[index]['title'],
                               style: TextStyle(
+                                fontFamily: 'Quicksand',
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,

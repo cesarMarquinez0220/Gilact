@@ -90,31 +90,13 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: false,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(10.0),
-        child: AppBar(
-         automaticallyImplyLeading: false, 
-        ),
-      ),
       body: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 100),
             decoration: const BoxDecoration(
-              //color: Colors.white
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromARGB(255, 7, 139, 221),
-                  Color.fromARGB(255, 7, 139, 221),
-                  Color.fromARGB(255, 122, 231, 211),
-                  Color(0xffF2F2F2),
-                ],
-              ),
+              color: Color.fromARGB(96, 198, 245, 248) ,
             ),
-            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -126,26 +108,28 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hola, $nombreUsuario',
+                            'Hola $nombreUsuario',
                             style: GoogleFonts.quicksand(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: Color(0xff034C8C)),
                           ),
                           Text(
                             'Avanzamos en las lecciones?',
                             style: GoogleFonts.quicksand(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Color.fromARGB(255, 255, 255, 255)),
+                                color: Color.fromARGB(255, 117, 115, 115)),
                           ),
                         ],
                       ),
                       const SizedBox(width: 20),
                       CircleAvatar(
                         radius: 40,
-                        backgroundImage:
-                            AssetImage('assets/images/mujerperfil.png'),
+                        backgroundColor: Colors.transparent,
+                        child: ClipRRect(
+                          child: Image.asset("assets/images/solo-logo.png"),
+                        ),
                       ),
                     ],
                   ),
@@ -154,41 +138,42 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 20,
                     crossAxisSpacing: 20,
+                    childAspectRatio: 1.5,
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     shrinkWrap: true,
                     children: [
                       _buildFeatureBox(
                         'Tips',
                         Icons.lightbulb,
-                        Color.fromARGB(150, 221, 62, 179),
-                        'Consejos alimenticios',
+                        Color.fromARGB(255, 221, 62, 179),
+                        'Sobre consejos \n alimenticios y más',
                         '/lecciones',
                       ),
                       _buildFeatureBox(
                         'Videos',
                         Icons.video_library,
                         //Color.fromARGB(224, 189, 154, 211),
-                        Color.fromARGB(150, 31, 134, 113),
-                        'Aprende mas',
+                        Color.fromARGB(255, 31, 134, 113),
+                        'Aprende más\n sobre lactancia',
                         '/secciones',
                       ),
                       _buildFeatureBox(
-                        'Editar Perfil',
+                        'Editar',
                         Icons.edit,
-                        Color.fromARGB(150, 19, 19, 196),
+                        Color.fromARGB(255, 19, 19, 196),
                         'Cambia tu informacion\n personal',
                         '/lecciones',
                       ),
                       _buildFeatureBox(
                         'Progreso',
                         Icons.show_chart,
-                        Color.fromARGB(150, 255, 132, 0),
+                        Color.fromARGB(255, 255, 132, 0),
                         'Mira tu progreso de \nlecciones',
                         '/lecciones',
                       ),
                     ],
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 25),
                   FadeInUp(
                     duration: Duration(milliseconds: 1500),
                     child: Container(
@@ -215,7 +200,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       ),
                     ),
                   ),
-
+          
                   const SizedBox(height: 85),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -229,16 +214,15 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   // ),
                 ],
               ),
-            ),
           ),
           Positioned(
-            bottom: 0,
+            bottom: 15,
             left: 0,
             right: 0,
             child: Container(
               height: 66,
               decoration: BoxDecoration(
-                color: Color(0xffF2F2F2),
+                color: Colors.transparent,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -281,7 +265,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
               size: 30,
             ),
           ),
-          SizedBox(height: 2),
         ],
       ),
     );
@@ -298,7 +281,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
               "\nDatos personales",
               style: GoogleFonts.quicksand(
                   fontSize: 23,
-                  color: Color.fromARGB(255, 117, 115, 115),
+                  color: Color(0xff034C8C),
                   fontWeight: FontWeight.bold),
             ),
           ),
@@ -338,7 +321,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                 fontWeight: FontWeight.w500,
                 color: Color.fromARGB(255, 117, 115, 115)),
           ),
-          _isEditing ? _buildEditButton() : _buildEditIcon(),
           const SizedBox(
             height: 10,
           )
@@ -347,57 +329,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     );
   }
 
-  Widget _buildEditIcon() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isEditing = true;
-            });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      const Color.fromARGB(255, 162, 162, 162).withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // Cambia la dirección de la sombra
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.edit,
-                color: Color.fromARGB(255, 43, 42, 42),
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildEditButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            _updateUserData();
-          },
-          child: Text('Guardar'),
-        ),
-      ],
-    );
-  }
 
   Widget _buildFeatureBox(
     String title,
@@ -432,20 +364,20 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   child: Icon(
                     icon,
                     color: bgColor,
-                    size: 30,
+                    size: 15,
                   ),
                 ),
               ),
               Positioned(
-                bottom: 10,
+                bottom: 15,
                 left: 10,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.roboto(
-                          fontSize: 22,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
                           color: Color.fromARGB(255, 255, 255, 255),
                           fontWeight: FontWeight.w800), //titulo
                     ),

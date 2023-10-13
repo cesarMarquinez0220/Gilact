@@ -322,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
   //orientacion vertical
   Widget _buildPortraitLayout() {
     return Container(
-      padding: const EdgeInsets.only(top: 70, bottom: 30, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 120, bottom: 30, left: 20, right: 20),
       width: double.infinity,
       child: Center(
         child: Column(
