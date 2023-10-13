@@ -92,7 +92,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 29.0),
+                    padding: const EdgeInsets.only(top: 49.0),
                     child: Text(
                       'Elige tu situación actual', // Título en la parte superior
                       style: GoogleFonts.quicksand(

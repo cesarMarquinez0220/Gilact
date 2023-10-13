@@ -91,29 +91,11 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: false,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(10.0),
-        child: AppBar(
-         automaticallyImplyLeading: false, 
-        ),
-      ),
       body: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.only(top: 10),
-            decoration: const BoxDecoration(
-              //color: Colors.white
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromARGB(255, 7, 139, 221),
-                  Color.fromARGB(255, 7, 139, 221),
-                  Color.fromARGB(255, 122, 231, 211),
-                  Color(0xffF2F2F2),
-                ],
-              ),
-            ),
+            padding: const EdgeInsets.only(top: 50),
+            decoration: const BoxDecoration(color: Colors.white),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -130,7 +112,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                             style: GoogleFonts.quicksand(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: const Color(0xff034C8C)),
                           ),
                           Text(
                             'Avanzamos en las lecciones?',
@@ -160,7 +142,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       _buildFeatureBox(
                         'Tips',
                         Icons.lightbulb,
-                        Color.fromARGB(150, 221, 62, 179),
+                        Color.fromARGB(255, 221, 62, 179),
                         'Consejos alimenticios',
                         '/lecciones',
                       ),
@@ -168,21 +150,21 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         'Videos',
                         Icons.video_library,
                         //Color.fromARGB(224, 189, 154, 211),
-                        Color.fromARGB(150, 31, 134, 113),
+                        Color.fromARGB(255, 31, 134, 113),
                         'Aprende mas',
                         '/secciones',
                       ),
                       _buildFeatureBox(
                         'Editar Perfil',
                         Icons.edit,
-                        Color.fromARGB(150, 19, 19, 196),
+                        Color.fromARGB(255, 19, 19, 196),
                         'Cambia tu informacion\n personal',
                         '/lecciones',
                       ),
                       _buildFeatureBox(
                         'Progreso',
                         Icons.show_chart,
-                        Color.fromARGB(150, 255, 132, 0),
+                        Color.fromARGB(255, 255, 132, 0),
                         'Mira tu progreso de \nlecciones',
                         '/lecciones',
                       ),
@@ -298,7 +280,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
               "\nDatos personales",
               style: GoogleFonts.quicksand(
                   fontSize: 23,
-                  color: Color.fromARGB(255, 117, 115, 115),
+                  color: Color(0xff034C8C),
                   fontWeight: FontWeight.bold),
             ),
           ),
@@ -308,7 +290,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: Color(0xff034C8C)),
           ),
           Text(
             'Cédula: $cedula\n',
@@ -359,25 +341,23 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color.fromARGB(0, 192, 16, 16),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      const Color.fromARGB(255, 162, 162, 162).withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
+                  color: Colors.transparent,
+
                   offset: Offset(0, 3), // Cambia la dirección de la sombra
                 ),
               ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.edit,
-                color: Color.fromARGB(255, 43, 42, 42),
-                size: 24,
-              ),
+              // child: Icon(
+              //   Icons.edit,
+              //   color: Color.fromARGB(255, 43, 42, 42),
+              //   size: 24,
+              // ),
             ),
           ),
         ),
