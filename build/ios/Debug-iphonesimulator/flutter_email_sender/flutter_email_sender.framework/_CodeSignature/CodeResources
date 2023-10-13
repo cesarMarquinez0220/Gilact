@@ -38,7 +38,11 @@
 		</data>
 		<key>Modules/flutter_email_sender.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
+<<<<<<< HEAD
 		iDpFA3kI3kQYjb/a/BI4UUaBv2Y=
+=======
+		WdBvYN4xevgDzx8Q4Pj9JogNqkE=
+>>>>>>> main
 		</data>
 		<key>Modules/flutter_email_sender.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -50,7 +54,11 @@
 		</data>
 		<key>Modules/flutter_email_sender.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
+<<<<<<< HEAD
 		rW9j/UkpfTL9vRU0zDMvw4OdOjE=
+=======
+		1ob3Zl6f/gvoOd0dA2wLK5RgMYM=
+>>>>>>> main
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -112,7 +120,11 @@
 		<dict>
 			<key>hash2</key>
 			<data>
+<<<<<<< HEAD
 			1xLujMJoeWS+zRwh+GhVyqN65WZ12k6Weg0ojW2V0eA=
+=======
+			uNvLzXBRhW4yOCj2mkzC2Zkz99WCx8NolaNza/QrmbY=
+>>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/flutter_email_sender.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -133,7 +145,11 @@
 		<dict>
 			<key>hash2</key>
 			<data>
+<<<<<<< HEAD
 			/Wx9ST5kpHoNvukjiFRbYMIkkWLTt6GxFr5x58QacQM=
+=======
+			7CLjb3DNjebZYWDoUszi42xYtcBubwJO3kieOOVubNk=
+>>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
