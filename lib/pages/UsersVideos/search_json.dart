@@ -1,5 +1,5 @@
 const List searchJson = [
-  {
+  { 
     "img": "assets/mini_videos/1.png",
     "title": "Que es lactancia materna y su importancia",
     //"video": ,
@@ -19,13 +19,13 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/3.1.png",
-    "title": "Que es el calostro, leche de transicion y leche madura",
+    "title": "Que es el calostro, leche de transición y leche madura",
     //"video": ,
   },
 
   {
     "img": "assets/mini_videos/3.2.png",
-    "title": "Leche de transicion",
+    "title": "Leche de transición",
     //"video": ,
   },
 
@@ -37,7 +37,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/3.4.png",
-    "title": "Composicion de la leche materna",
+    "title": "Composición de la leche materna",
     //"video": ,
   },
 
@@ -49,7 +49,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/4.2.png",
-    "title": "Senales cuando el nino tiene hambre",
+    "title": "Señales cuando el nino tiene hambre",
     //"video": ,
   },
 
@@ -73,7 +73,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/8.1.png",
-    "title": "Que alimentacion debe recibir una madre durante la lactancia materna"
+    "title": "Que alimentación debe recibir una madre durante la lactancia materna"
     //"video": ,
   },
 
@@ -85,7 +85,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/9.png",
-    "title": "Puedo tomar medicamentos durante la lactancia materna?",
+    "title": "¿Puedo tomar medicamentos durante la lactancia materna?",
     //"video": ,
   },
 
@@ -109,7 +109,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/11.3.png",
-    "title": "Mastitis, infeccion en las mamas",
+    "title": "Mastitis, infección en las mamas",
     //"video": ,
   },
 
@@ -121,7 +121,7 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/11.5.png",
-    "title": "Congestion Mamaria",
+    "title": "Congestión Mamaria",
     //"video": ,
   },
 
@@ -139,25 +139,25 @@ const List searchJson = [
 
   {
     "img": "assets/mini_videos/13.2.png",
-    "title": "Extraccion manual de la leche",
+    "title": "Extracción manual de la leche",
     //"video": ,
   },
 
   {
     "img": "assets/mini_videos/13.3.png",
-    "title": "Almacenamiento y conservacion",
+    "title": "Almacenamiento y conservación",
     //"video": ,
   },
 
   {
     "img": "assets/mini_videos/14.1.png",
-    "title": "Que leyes apoyan la lactancia materna en Panama Pt.1",
+    "title": "Que leyes apoyan la lactancia materna en Panamá Pt.1",
     //"video": ,
   },
 
   {
     "img": "assets/mini_videos/14.2.png",
-    "title": "Que leyes apoyan la lactancia materna en Panama Pt.2",
+    "title": "Que leyes apoyan la lactancia materna en Panamá Pt.2",
     //"video": ,
   },
 

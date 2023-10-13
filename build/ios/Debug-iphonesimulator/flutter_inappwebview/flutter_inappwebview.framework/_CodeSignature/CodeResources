@@ -22,11 +22,11 @@
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		MkSn83AzAlwA1+I2SmPrs0BEgQ0=
+		7NZb39v0la9JqVRiFpor5t+ZNhg=
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		eB+KBJpaej40eYBaMvk3zhwtJdo=
+		xhYmKTkj5RDtpr6+7Lq8wgaWdL8=
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -38,11 +38,7 @@
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-<<<<<<< HEAD
-		efWzWvX+qNqfMoR+fTxUVieXF5U=
-=======
 		SKa9xlDRSx87carZnwpm3wpTR4w=
->>>>>>> main
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -54,11 +50,7 @@
 		</data>
 		<key>Modules/flutter_inappwebview.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-<<<<<<< HEAD
-		rRmkQJ2LdkS7cIMHerivzppCzOw=
-=======
 		Jo43Ou/fbO+EwS3X1e9FptRXvWA=
->>>>>>> main
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -108,14 +100,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			cdjC6GOCmD3vMSeAh6UXeD84na83mdrgvJILaN6kyrU=
+			RGYOzxasn4uwe4b2Dm0qBCoWGZYSW/Y11CcbZ6qO8Uw=
 			</data>
 		</dict>
 		<key>Modules/flutter_inappwebview.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			TI0rhgKwzGdu3akj+w4gHrORBmtUoYf8NDI3m/NXPns=
+			AiTf199r6VmQQsFEGMS4G5oo9a4MTJVYSN5u+7WHi0M=
 			</data>
 		</dict>
 		<key>Modules/flutter_inappwebview.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -136,11 +128,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			Lb5sbyzG8rkOo3CpnEAglCE99M1uApByfMZ++0ctiiY=
-=======
 			HnXzglhz4F9b1xLVj+udQ/v+BfYm+VQM7HWZuwTy8fs=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/flutter_inappwebview.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -161,11 +149,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-<<<<<<< HEAD
-			wW6UsHDaDHjHnjDjmTzqhcSurUSQl5ghGj/4N1JylpE=
-=======
 			GKT+Tml2+IAwCE32d7h4dITWhj+ekPPIRW/V0O4WLZo=
->>>>>>> main
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
