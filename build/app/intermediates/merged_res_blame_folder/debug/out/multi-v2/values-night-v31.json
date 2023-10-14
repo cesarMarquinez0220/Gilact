@@ -4,7 +4,7 @@
             "outputFile": "com.example.flutter_login.app-mergeDebugResources-30:/values-night-v31/values-night-v31.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Admin\\Documents\\GitHub\\Gilact\\android\\app\\src\\main\\res\\values-night-v31\\styles.xml",
+                    "source": "C:\\Users\\Admin\\Documents\\Github_gilact\\Gilact\\android\\app\\src\\main\\res\\values-night-v31\\styles.xml",
                     "from": {
                         "startLines": "3,15",
                         "startColumns": "4,4",

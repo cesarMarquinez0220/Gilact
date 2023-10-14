@@ -1,12 +1,12 @@
 -- Merging decision tree log ---
 application
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:2:5-32:19
-MERGED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
-MERGED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
-MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:15:5-48:19
-MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:15:5-48:19
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:2:5-32:19
+MERGED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
+MERGED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
+MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:15:5-48:19
+MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:15:5-48:19
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\25cee5f028ac2a6b79fd6278ff5b59e2\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:24:5-31:19
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\25cee5f028ac2a6b79fd6278ff5b59e2\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:24:5-31:19
 MERGED from [com.google.firebase:firebase-firestore:24.8.1] C:\Users\Admin\.gradle\caches\transforms-3\a9cfc3ff019179332ac9fe79037eb037\transformed\jetified-firebase-firestore-24.8.1\AndroidManifest.xml:13:5-21:19
@@ -36,20 +36,20 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\Ad
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.8.0] C:\Users\Admin\.gradle\caches\transforms-3\2fa18b2f544a798470f6ba6d29f55f60\transformed\core-1.8.0\AndroidManifest.xml:24:18-86
 	android:name
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
 manifest
-ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-MERGED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-MERGED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
-MERGED from [:wakelock_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
-MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-50:12
-MERGED from [:package_info_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
-MERGED from [:path_provider_android] C:\Users\Admin\Documents\GitHub\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
-MERGED from [:video_player_android] C:\Users\Admin\Documents\GitHub\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+MERGED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+MERGED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
+MERGED from [:wakelock_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-50:12
+MERGED from [:package_info_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:path_provider_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:video_player_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\ae81e06d24c799147c26814497a2a305\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\25cee5f028ac2a6b79fd6278ff5b59e2\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.appcompat:appcompat-resources:1.5.1] C:\Users\Admin\.gradle\caches\transforms-3\224222a8cee5dc0337aec6f0aea8f64c\transformed\jetified-appcompat-resources-1.5.1\AndroidManifest.xml:17:1-22:12
@@ -104,41 +104,41 @@ MERGED from [androidx.arch.core:core-runtime:2.1.0] C:\Users\Admin\.gradle\cache
 MERGED from [io.grpc:grpc-android:1.52.1] C:\Users\Admin\.gradle\caches\transforms-3\c438b1adc71bb659ff68d05d154f5d46\transformed\jetified-grpc-android-1.52.1\AndroidManifest.xml:2:1-11:12
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\Admin\.gradle\caches\transforms-3\a5d05b72cf3b664de17b0b9a9aff136c\transformed\jetified-protolite-well-known-types-18.0.0\AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.annotation:annotation-experimental:1.1.0] C:\Users\Admin\.gradle\caches\transforms-3\6c0c163cc77ae6c91f9f7dfcd179c29c\transformed\jetified-annotation-experimental-1.1.0\AndroidManifest.xml:17:1-24:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 	package
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-		ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-		ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 	android:versionCode
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-		ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:1-33:12
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml:1:11-69
+		ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml:1:11-69
 uses-sdk
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-MERGED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:wakelock_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:wakelock_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:package_info_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:package_info_plus] C:\Users\Admin\Documents\GitHub\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:path_provider_android] C:\Users\Admin\Documents\GitHub\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:path_provider_android] C:\Users\Admin\Documents\GitHub\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:video_player_android] C:\Users\Admin\Documents\GitHub\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
-MERGED from [:video_player_android] C:\Users\Admin\Documents\GitHub\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+MERGED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:wakelock_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:wakelock_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\wakelock_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:package_info_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:package_info_plus] C:\Users\Admin\Documents\Github_gilact\Gilact\build\package_info_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:path_provider_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:path_provider_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:video_player_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:video_player_android] C:\Users\Admin\Documents\Github_gilact\Gilact\build\video_player_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\ae81e06d24c799147c26814497a2a305\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:19:5-21:41
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\ae81e06d24c799147c26814497a2a305\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:19:5-21:41
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\25cee5f028ac2a6b79fd6278ff5b59e2\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:20:5-22:41
@@ -247,24 +247,24 @@ MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\Adm
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\Admin\.gradle\caches\transforms-3\a5d05b72cf3b664de17b0b9a9aff136c\transformed\jetified-protolite-well-known-types-18.0.0\AndroidManifest.xml:7:5-9:41
 MERGED from [androidx.annotation:annotation-experimental:1.1.0] C:\Users\Admin\.gradle\caches\transforms-3\6c0c163cc77ae6c91f9f7dfcd179c29c\transformed\jetified-annotation-experimental-1.1.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.annotation:annotation-experimental:1.1.0] C:\Users\Admin\.gradle\caches\transforms-3\6c0c163cc77ae6c91f9f7dfcd179c29c\transformed\jetified-annotation-experimental-1.1.0\AndroidManifest.xml:20:5-22:41
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
-INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
+INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\main\AndroidManifest.xml
-		INJECTED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml
 uses-permission#android.permission.INTERNET
-ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml:6:5-66
+ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml:6:5-66
 MERGED from [com.google.firebase:firebase-firestore:24.8.1] C:\Users\Admin\.gradle\caches\transforms-3\a9cfc3ff019179332ac9fe79037eb037\transformed\jetified-firebase-firestore-24.8.1\AndroidManifest.xml:11:5-67
 MERGED from [com.google.firebase:firebase-firestore:24.8.1] C:\Users\Admin\.gradle\caches\transforms-3\a9cfc3ff019179332ac9fe79037eb037\transformed\jetified-firebase-firestore-24.8.1\AndroidManifest.xml:11:5-67
 	android:name
-		ADDED from C:\Users\Admin\Documents\GitHub\Gilact\android\app\src\debug\AndroidManifest.xml:6:22-64
+		ADDED from C:\Users\Admin\Documents\Github_gilact\Gilact\android\app\src\debug\AndroidManifest.xml:6:22-64
 service#com.google.firebase.components.ComponentDiscoveryService
-ADDED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
-MERGED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
+ADDED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
+MERGED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-14:19
 MERGED from [com.google.firebase:firebase-firestore:24.8.1] C:\Users\Admin\.gradle\caches\transforms-3\a9cfc3ff019179332ac9fe79037eb037\transformed\jetified-firebase-firestore-24.8.1\AndroidManifest.xml:14:9-20:19
 MERGED from [com.google.firebase:firebase-firestore:24.8.1] C:\Users\Admin\.gradle\caches\transforms-3\a9cfc3ff019179332ac9fe79037eb037\transformed\jetified-firebase-firestore-24.8.1\AndroidManifest.xml:14:9-20:19
 MERGED from [com.google.firebase:firebase-common:20.3.3] C:\Users\Admin\.gradle\caches\transforms-3\6f9fa5902813f78de2aefcdfcdb180f7\transformed\jetified-firebase-common-20.3.3\AndroidManifest.xml:32:9-36:35
@@ -276,87 +276,87 @@ MERGED from [com.google.firebase:firebase-common:20.3.3] C:\Users\Admin\.gradle\
 	android:directBootAware
 		ADDED from [com.google.firebase:firebase-common:20.3.3] C:\Users\Admin\.gradle\caches\transforms-3\6f9fa5902813f78de2aefcdfcdb180f7\transformed\jetified-firebase-common-20.3.3\AndroidManifest.xml:34:13-43
 	android:name
-		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:10:18-89
+		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:10:18-89
 meta-data#com.google.firebase.components:io.flutter.plugins.firebase.firestore.FlutterFirebaseFirestoreRegistrar
-ADDED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-13:85
+ADDED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-13:85
 	android:value
-		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:13:17-82
+		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:13:17-82
 	android:name
-		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\GitHub\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:12:17-134
+		ADDED from [:cloud_firestore] C:\Users\Admin\Documents\Github_gilact\Gilact\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:12:17-134
 meta-data#com.google.firebase.components:io.flutter.plugins.firebase.core.FlutterFirebaseCoreRegistrar
-ADDED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-13:85
+ADDED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-13:85
 	android:value
-		ADDED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:13:17-82
+		ADDED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:13:17-82
 	android:name
-		ADDED from [:firebase_core] C:\Users\Admin\Documents\GitHub\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:12:17-124
+		ADDED from [:firebase_core] C:\Users\Admin\Documents\Github_gilact\Gilact\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:12:17-124
 queries
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-13:15
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-13:15
 intent#action:name:android.support.customtabs.action.CustomTabsService
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-12:18
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-12:18
 action#android.support.customtabs.action.CustomTabsService
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-90
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-90
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:11:21-87
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:11:21-87
 activity#com.pichillilorenzo.flutter_inappwebview.in_app_browser.InAppBrowserActivity
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:16:9-20:47
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:16:9-20:47
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:19:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:19:13-37
 	android:configChanges
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:18:13-137
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:18:13-137
 	android:theme
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:20:13-44
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:20:13-44
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:17:13-104
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:17:13-104
 activity#com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ChromeCustomTabsActivity
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:21:9-24:55
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:21:9-24:55
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:23:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:23:13-37
 	android:theme
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:24:13-52
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:24:13-52
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:22:13-112
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:22:13-112
 activity#com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.TrustedWebActivity
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:25:9-28:55
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:25:9-28:55
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:27:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:27:13-37
 	android:theme
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:28:13-52
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:28:13-52
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:26:13-106
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:26:13-106
 activity#com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ChromeCustomTabsActivitySingleInstance
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:29:9-33:55
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:29:9-33:55
 	android:launchMode
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:32:13-48
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:32:13-48
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:31:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:31:13-37
 	android:theme
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:33:13-52
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:33:13-52
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:30:13-126
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:30:13-126
 activity#com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.TrustedWebActivitySingleInstance
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:34:9-38:55
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:34:9-38:55
 	android:launchMode
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:37:13-48
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:37:13-48
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:36:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:36:13-37
 	android:theme
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:38:13-52
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:38:13-52
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:35:13-120
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:35:13-120
 receiver#com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ActionBroadcastReceiver
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:40:9-43:40
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:40:9-43:40
 	android:enabled
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:42:13-35
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:42:13-35
 	android:exported
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:43:13-37
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:43:13-37
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:41:13-111
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:41:13-111
 meta-data#io.flutter.embedded_views_preview
-ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:45:9-47:36
+ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:45:9-47:36
 	android:value
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:47:13-33
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:47:13-33
 	android:name
-		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\GitHub\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:46:13-61
+		ADDED from [:flutter_inappwebview] C:\Users\Admin\Documents\Github_gilact\Gilact\build\flutter_inappwebview\intermediates\merged_manifest\debug\AndroidManifest.xml:46:13-61
 uses-library#androidx.window.extensions
 ADDED from [androidx.window:window:1.0.0-beta04] C:\Users\Admin\.gradle\caches\transforms-3\25cee5f028ac2a6b79fd6278ff5b59e2\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:25:9-27:40
 	android:required
