@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
 
 class recuperacion extends StatefulWidget {
   const recuperacion({Key? key}) : super(key: key);
@@ -110,11 +107,6 @@ class _RecuperacionState extends State<recuperacion> {
                     controller: email,
                   ),
                   const SizedBox(height: 15),
-                  _buildButton(
-                    context,
-                    'Enviar',
-                  ),
-                  const SizedBox(height: 15),
                   const Text(
                     'Volver',
                     style: TextStyle(
@@ -129,58 +121,6 @@ class _RecuperacionState extends State<recuperacion> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(BuildContext context, String text) {
-    return SizedBox(
-      width: 300,
-      child: ElevatedButton(
-        onPressed: () async {
-          final emailToFind = email.text;
-          final userSnapshot = await FirebaseFirestore.instance
-              .collection('Users')
-              .where('email', isEqualTo: emailToFind)
-              .get();
-
-          if (userSnapshot.size > 0) {
-            final user = userSnapshot.docs.first;
-            final userEmail = user['email'];
-            final userPassword = user['contrasena'];
-
-            final smtpServer =
-                gmail('soportemedica.ayuda@gmail.com', 'G!tcesoporte!2023');
-
-            final message = Message()
-              ..from = Address('soportemedica.ayuda@gmail.com', 'Soporte App')
-              ..recipients.add(userEmail)
-              ..subject = 'Recuperación de contraseña'
-              ..text = 'Tu contraseña es: $userPassword';
-
-            try {
-              final sendReport = await send(message, smtpServer);
-              print('Mensaje enviado: ${sendReport.toString()}');
-            } catch (e) {
-              print('Error al enviar el mensaje: $e');
-            }
-          } else {
-            print('No se encontró ningún usuario con ese correo electrónico.');
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 3, 87, 140),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          shadowColor: Colors.black.withOpacity(0.5),
-          elevation: 5,
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
         ),
       ),
     );

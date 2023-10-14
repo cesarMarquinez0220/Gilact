@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
-      home: Perfilnuevo(),
+      home: LoginScreen(),
   //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(),
