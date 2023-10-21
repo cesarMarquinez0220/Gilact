@@ -82,27 +82,7 @@ class _Page1State extends State<Page1> {
             SizedBox(
               height: 120,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Pulse(
-                    infinite: true,
-                    duration: const Duration(milliseconds: 2700),
-                    //delay: Duration(milliseconds: 4500),
-                    child: Text(
-                      "<<<Desliza",
-                      style: GoogleFonts.roboto(
-                        fontSize: 15,
-                        color: Color.fromRGBO(200, 212, 210, 1),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/splashinfo/page1.dart';
@@ -5,8 +6,32 @@ import 'package:flutter_login/pages/splashinfo/page2.dart';
 import 'package:flutter_login/pages/splashinfo/page3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-class Onboar_Info extends StatelessWidget {
+class Onboar_Info extends StatefulWidget {
+  @override
+  _Onboar_InfoState createState() => _Onboar_InfoState();
+}
+
+class _Onboar_InfoState extends State<Onboar_Info> {
   final _controller = PageController();
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      // Pass to the next page
+      if (_controller.page != 2) {
+        _controller.nextPage(
+            duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +39,7 @@ class Onboar_Info extends StatelessWidget {
       body: Center(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: Gradients.myGradient
+            gradient: Gradients.myGradient,
           ),
           child: Column(
             children: [
@@ -37,7 +62,6 @@ class Onboar_Info extends StatelessWidget {
                   dotHeight: 10,
                   dotWidth: 10,
                   spacing: 16,
-                  //verticalOffset: 50,
                   jumpScale: 3,
                 ),
               ),

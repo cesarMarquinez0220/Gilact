@@ -1,9 +1,29 @@
+import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 
-class Page3 extends StatelessWidget {
+class Page3 extends StatefulWidget {
   const Page3({super.key});
+
+  @override
+  _Page3State createState() => _Page3State();
+}
+
+class _Page3State extends State<Page3> {
+  @override
+  void initState() {
+    super.initState();
+    // Agrega un temporizador para cambiar automáticamente de página después de 5 segundos
+    Timer(Duration(seconds: 5), () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Perfilnuevo(),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +35,7 @@ class Page3 extends StatelessWidget {
             children: [
               SizedBox(height: 30),
               Padding(
-                padding: EdgeInsets.only(top: 23,left:90),
+                padding: EdgeInsets.only(top: 23, left: 90),
                 child: FadeInDown(
                     duration: Duration(milliseconds: 1000),
                     child: Image.asset("assets/images/mother3.png")),
@@ -31,7 +51,7 @@ class Page3 extends StatelessWidget {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.white,
                           fontSize: 25,
                         ),
                         children: <TextSpan>[
@@ -53,34 +73,10 @@ class Page3 extends StatelessWidget {
               SizedBox(height: 25), // Separation between RichText and next text
               Text(
                 "Diabetes\n Hipertensión arterial \n Obesidad \n Cáncer (leucemia, linfoma)",
-                style: TextStyle(fontSize: 14, color: Colors.white),
+                style: TextStyle(fontSize: 18, color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ],
-          ),
-        ),
-        Positioned(
-          bottom: 40, // Ajusta la posición vertical según tus preferencias
-          right: 20, // Ajusta la posición horizontal según tus preferencias
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const Perfilnuevo(), // Reemplaza con el nombre de tu siguiente pantalla
-                ),
-              );
-            },
-            child: Container(
-              child: Text(
-                "Siguiente",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ),
           ),
         ),
       ],

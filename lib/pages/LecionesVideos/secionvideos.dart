@@ -74,20 +74,18 @@ class _SeccionVideosState extends State<SeccionVideos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       body: Stack(
         children: [
           Container(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height*0.2,
-            decoration: const BoxDecoration(
-              color: Colors.white 
-              // gradient: LinearGradient(
-              //   begin: Alignment.topCenter,
-              //   end: Alignment.bottomCenter,
-              //   colors: [Color(0xffF2F2F2)],
-              // ),
-            ),
+            height: MediaQuery.of(context).size.height * 0.2,
+            decoration: const BoxDecoration(color: Colors.white
+                // gradient: LinearGradient(
+                //   begin: Alignment.topCenter,
+                //   end: Alignment.bottomCenter,
+                //   colors: [Color(0xffF2F2F2)],
+                // ),
+                ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,7 +93,9 @@ class _SeccionVideosState extends State<SeccionVideos> {
               Expanded(
                 child: ListView(
                   children: [
-                    SizedBox(height: 40,),
+                    SizedBox(
+                      height: 40,
+                    ),
                     Text(
                       'Sección de Videos',
                       textAlign: TextAlign.center,
@@ -107,6 +107,9 @@ class _SeccionVideosState extends State<SeccionVideos> {
                     _buildVideoListView("Videos", videos, isHorizontal: true),
                     _buildVideoListView("Videos Relacionados", sugeridos,
                         isHorizontal: false),
+                    SizedBox(
+                      height: 40,
+                    )
                   ],
                 ),
               ),
@@ -118,9 +121,9 @@ class _SeccionVideosState extends State<SeccionVideos> {
             right: 0,
             child: Container(
               height: 66,
-              decoration: const BoxDecoration(
-                color: Colors.white// color del fondo del 
-              ),
+              decoration:
+                  const BoxDecoration(color: Colors.white // color del fondo del
+                      ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -263,7 +266,8 @@ class _SeccionVideosState extends State<SeccionVideos> {
                           videoData.titleimage,
                           // Título del video
                           style: GoogleFonts.quicksand(
-                            color: Color.fromARGB(255, 117, 115, 115), // Letras negras
+                            color: Color.fromARGB(
+                                255, 117, 115, 115), // Letras negras
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -377,7 +381,8 @@ class _SeccionVideosState extends State<SeccionVideos> {
                       child: Text(
                         videoData.titleimage, // Título del video
                         style: GoogleFonts.quicksand(
-                          color: Color.fromARGB(255, 117, 115, 115), // Letras negras
+                          color: Color.fromARGB(
+                              255, 117, 115, 115), // Letras negras
                           fontWeight: FontWeight.bold,
                         ),
                       ),

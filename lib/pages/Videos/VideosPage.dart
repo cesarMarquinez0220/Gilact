@@ -1,55 +1,94 @@
+import 'package:chewie/chewie.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/gradient.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/enlaces%20de%20videos/enlaces.dart';
 import 'package:video_player/video_player.dart';
 
-class VideoPlayerApp extends StatelessWidget {
-  const VideoPlayerApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Video Player Demo',
-      home: VideoPlayerScreen(),
-    );
-  }
-}
-
 class VideoPlayerScreen extends StatefulWidget {
-  const VideoPlayerScreen({super.key});
-
   @override
-  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+  _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late VideoPlayerController _controller;
-  late Future<void> _initializeVideoPlayerFuture;
+
+  int pauseCount = 0; // Contador de pausas
+  int forwardCount = 0; // Contador de avances
+  Duration? lastPosition; // Última posición del video antes de pausar
 
   @override
   void initState() {
     super.initState();
+    try {
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(
+            "https://drive.google.com/uc?export=view&id=1UvAUZn7AtRmcqVkb17_r892As6rt0cDW"),
+      );
+      // Initialize the controller and store the Future for later use.
+      //print(VideoLinks.videoUrls[widget.videoId]);
+      // Use the controller to loop the video.
+      _controller.setLooping(true);
 
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(
-        'https://drive.google.com/uc?export=view&id=1RJp-dLOzrfAgh05s2OTBa6h1x3Tgdm6W', // Reemplaza con la URL del video de Google Drive
-      ),
-    );
-
-    // Initialize the controller and store the Future for later use.
-    _initializeVideoPlayerFuture = _controller.initialize();
-
-    // Use the controller to loop the video.
-    _controller.setLooping(true);
+      // Agrega un listener al controlador de video para rastrear pausas y avances
+      _controller.addListener(() {
+        if (_controller.value.isPlaying && lastPosition != null) {
+          guardarInformacionEnFirestore();
+        }
+        lastPosition = _controller.value.position;
+      });
+    } catch (e) {
+      print("Error al cargar el video: $e");
+    }
   }
 
   @override
   void dispose() {
-    // Ensure disposing of the VideoPlayerController to free up resources.
+    // Asegúrate de disponer del VideoPlayerController para liberar recursos.
     _controller.dispose();
 
     super.dispose();
+  }
+
+  Future<void> guardarInformacionEnFirestore() async {
+    final userName = UserDataStorage.getUserName();
+    final usersQuery = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('usuario', isEqualTo: userName)
+        .limit(1)
+        .get();
+
+    try {
+      if (usersQuery.docs.isNotEmpty) {
+        // Si se encuentra un documento existente con el nombre de usuario,
+        // actualiza ese documento en lugar de crear uno nuevo.
+        final usuarioDocRef = usersQuery.docs[0].reference;
+
+        await usuarioDocRef.update({
+          'pausas': pauseCount,
+          'adelantos': forwardCount,
+          'ultimaPosicion': lastPosition?.inMilliseconds,
+        });
+
+        // Crea una subcolección 'datosvideos' dentro del documento del usuario
+        final datosvideosRef = usuarioDocRef.collection('datosvideos');
+        await datosvideosRef.add({
+          'dato1': 'valor1',
+          'dato2': 'valor2',
+          // Agrega los datos que desees en la subcolección 'datosvideos'
+        });
+
+        print('Información actualizada con éxito en Firestore');
+      } else {
+        print(
+            'No se encontró un documento con el nombre de usuario: $userName');
+      }
+    } catch (error) {
+      print('Error al actualizar la información en Firestore: $error');
+    }
   }
 
   @override
@@ -60,62 +99,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+
+    final chewieController = ChewieController(
+      videoPlayerController: _controller,
+      autoPlay: true,
+      looping: true,
+      // Otras opciones de configuración de Chewie aquí
+    );
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(gradient: Gradients.myGradient),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FutureBuilder(
-                future: _initializeVideoPlayerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    // If the VideoPlayerController has finished initialization, use
-                    // the data it provides to limit the aspect ratio of the video.
-                    return AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      // Use the VideoPlayer widget to display the video.
-                      child: VideoPlayer(_controller),
-                    );
-                  } else {
-                    // If the VideoPlayerController is still initializing, show a
-                    // loading spinner.
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                },
-              ),
-              Positioned(
-                bottom: 16,
-                top: 40,
-                child: FloatingActionButton(
-                  backgroundColor: Color.fromARGB(0, 234, 234, 234),
-                  onPressed: () {
-                    // Wrap the play or pause in a call to `setState`. This ensures the
-                    // correct icon is shown.
-                    setState(() {
-                      // If the video is playing, pause it.
-                      if (_controller.value.isPlaying) {
-                        _controller.pause();
-                      } else {
-                        // If the video is paused, play it.
-                        _controller.play();
-                      }
-                    });
-                  },
-                  // Display the correct icon depending on the state of the player.
-                  child: Icon(
-                    _controller.value.isPlaying
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                ),
-              ),
-            ],
+          Center(
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: Chewie(controller: chewieController),
+            ),
           ),
         ],
       ),

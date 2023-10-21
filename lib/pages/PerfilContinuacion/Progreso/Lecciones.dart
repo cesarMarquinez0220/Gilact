@@ -124,7 +124,7 @@ class _leccionesState extends State<lecciones> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => VideoPlayerApp(),
+                          builder: (context) => VideoPlayerScreen(),
                         ),
                       );
                     },
