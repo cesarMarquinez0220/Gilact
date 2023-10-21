@@ -18,7 +18,7 @@ class _Onboar_InfoState extends State<Onboar_Info> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       // Pass to the next page
       if (_controller.page != 2) {
         _controller.nextPage(

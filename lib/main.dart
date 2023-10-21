@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_login/pages/ComingSoonPage.dart';
 import 'package:flutter_login/pages/LecionesVideos/secionvideos.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
@@ -33,11 +34,12 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
-      home: LoginScreen(),
+      home: const LoginScreen(),
   //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(),
         '/secciones': (context) => SeccionVideos(),
+        '/comingSoon': (context) => ComingSoonPage(),
         // Otras rutas aquí...
       },
     );

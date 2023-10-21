@@ -108,7 +108,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
                     _buildVideoListView("Videos Relacionados", sugeridos,
                         isHorizontal: false),
                     SizedBox(
-                      height: 40,
+                      height: 70,
                     )
                   ],
                 ),
@@ -120,7 +120,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
             left: 0,
             right: 0,
             child: Container(
-              height: 66,
+              height: 50,
               decoration:
                   const BoxDecoration(color: Colors.white // color del fondo del
                       ),
@@ -405,9 +405,10 @@ class _SeccionVideosState extends State<SeccionVideos> {
       },
       child: Column(
         children: [
-          const SizedBox(height: 7),
+          //const SizedBox(height: 7),
           Container(
-            padding: const EdgeInsets.all(10),
+            height: 15,
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: isActive ? Colors.white : Colors.transparent,
               shape: BoxShape.circle,
@@ -420,7 +421,7 @@ class _SeccionVideosState extends State<SeccionVideos> {
               size: 30,
             ),
           ),
-          const SizedBox(height: 2),
+         // const SizedBox(height: 2),
         ],
       ),
     );

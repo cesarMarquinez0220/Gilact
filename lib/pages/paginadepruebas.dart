@@ -122,15 +122,7 @@ class _PruebaState extends State<Prueba> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Realiza un seguimiento de los avances.
-          forwardCount++;
-          // Salta adelante 10 segundos (puedes ajustar este valor según tus necesidades).
-          _controller.seekTo(Duration(seconds: _controller.value.position.inSeconds + 10));
-        },
-        child: Icon(Icons.forward),
-      ),
+      
     );
   }
 }

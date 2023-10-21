@@ -25,7 +25,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   int pauseCount = 0; // Contador de pausas
   int forwardCount = 0; // Contador de avances
   Duration? lastPosition; // Última posición del video antes de pausar
-  
+
   @override
   void initState() {
     super.initState();
@@ -125,16 +125,6 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Realiza un seguimiento de los avances.
-          forwardCount++;
-          // Salta adelante 10 segundos (puedes ajustar este valor según tus necesidades).
-          _controller
-              .seekTo(_controller.value.position + const Duration(seconds: 10));
-        },
-        child: Icon(Icons.forward),
       ),
     );
   }

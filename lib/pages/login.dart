@@ -330,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/images/logo-completo.png",
+              "assets/images/logo-completo2.png",
               alignment: Alignment.center,
               height: 0.3 * MediaQuery.of(context).size.height,
             ),

@@ -8,12 +8,14 @@ class Perfilnuevo extends StatefulWidget {
   const Perfilnuevo({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _PerfilnuevoState createState() => _PerfilnuevoState();
 }
 
 class _PerfilnuevoState extends State<Perfilnuevo> {
   int _selectedIndex = 0;
   String nombreUsuario = UserDataStorage.getUserName();
+  // ignore: unused_field
   bool _isEditing = false;
   String nombreMadre = '';
   String cedula = '';
@@ -21,10 +23,11 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   String telefono = '';
   String ubicacion = '';
 
-  TextEditingController _nombreMadreController = TextEditingController();
-  TextEditingController _fechaNacimientoController = TextEditingController();
-  TextEditingController _telefonoController = TextEditingController();
-  TextEditingController _ubicacionController = TextEditingController();
+  final TextEditingController _nombreMadreController = TextEditingController();
+  final TextEditingController _fechaNacimientoController =
+      TextEditingController();
+  final TextEditingController _telefonoController = TextEditingController();
+  final TextEditingController _ubicacionController = TextEditingController();
 
   @override
   void initState() {
@@ -50,13 +53,16 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
           telefono = userSnapshot.get('telefono');
           ubicacion = userSnapshot.get('ubicacion');
         });
+        // ignore: avoid_print
         print(userSnapshot.data());
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Error al recuperar la información del usuario: $e");
     }
   }
 
+  // ignore: unused_element
   Future<void> _updateUserData() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -82,6 +88,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         });
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Error al actualizar la información del usuario: $e");
     }
   }
@@ -93,10 +100,11 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       body: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.only(top: 100),
+            padding: const EdgeInsets.only(top: 50),
             decoration: const BoxDecoration(
-              color: Color.fromARGB(96, 198, 245, 248) ,
+              color: Color.fromARGB(96, 198, 245, 248),
             ),
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -112,14 +120,15 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                             style: GoogleFonts.quicksand(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xff034C8C)),
+                                color: const Color(0xff034C8C)),
                           ),
                           Text(
                             'Avanzamos en las lecciones?',
                             style: GoogleFonts.quicksand(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Color.fromARGB(255, 117, 115, 115)),
+                                color:
+                                    const Color.fromARGB(255, 117, 115, 115)),
                           ),
                         ],
                       ),
@@ -134,48 +143,43 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  _buildFeatureBoxes(
+                    'Lecciones',
+                    Icons.show_chart,
+                    const Color.fromARGB(255, 255, 132, 0),
+                    'Mira tu progreso de lecciones',
+                    '/lecciones',
+                  ),
+                  const SizedBox(height: 20),
                   GridView.count(
                     crossAxisCount: 2,
                     mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
+                    crossAxisSpacing: 15,
                     childAspectRatio: 1.5,
+                    physics: const NeverScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     shrinkWrap: true,
                     children: [
                       _buildFeatureBox(
                         'Tips',
                         Icons.lightbulb,
-                        Color.fromARGB(255, 221, 62, 179),
+                        const Color.fromARGB(255, 221, 62, 179),
                         'Sobre consejos \n alimenticios y más',
-                        '/lecciones',
+                        '/comingSoon',
                       ),
                       _buildFeatureBox(
-                        'Videos',
+                        'Historial de\n Videos',
                         Icons.video_library,
                         //Color.fromARGB(224, 189, 154, 211),
-                        Color.fromARGB(255, 31, 134, 113),
-                        'Aprende más\n sobre lactancia',
+                        const Color.fromARGB(255, 31, 134, 113),
+                        'Enfatiza conocimiento',
                         '/secciones',
-                      ),
-                      _buildFeatureBox(
-                        'Editar',
-                        Icons.edit,
-                        Color.fromARGB(255, 19, 19, 196),
-                        'Cambia tu informacion\n personal',
-                        '/lecciones',
-                      ),
-                      _buildFeatureBox(
-                        'Progreso',
-                        Icons.show_chart,
-                        Color.fromARGB(255, 255, 132, 0),
-                        'Mira tu progreso de \nlecciones',
-                        '/lecciones',
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 20),
                   FadeInUp(
-                    duration: Duration(milliseconds: 1500),
+                    duration: const Duration(milliseconds: 1500),
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.9,
                       decoration: BoxDecoration(
@@ -183,8 +187,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           BoxShadow(
                             color: Colors.black.withOpacity(
                                 0.3), // Color y opacidad de la sombra
-                            offset:
-                                Offset(0, 8), // Desplazamiento en el eje X y Y
+                            offset: const Offset(
+                                0, 8), // Desplazamiento en el eje X y Y
                             blurRadius: 15, // Radio de desenfoque
                             spreadRadius:
                                 0, // Radio de propagación de la sombra
@@ -193,27 +197,25 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(223, 253, 253, 253),
+                          color: const Color.fromARGB(223, 253, 253, 253),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: _buildProfileInfo(),
                       ),
                     ),
                   ),
-          
+                  const SizedBox(height: 20),
+                  _buildFeatureBoxes(
+                    'Editar',
+                    Icons.edit,
+                    const Color.fromARGB(255, 19, 19, 196),
+                    'Cambia tu informacion personal',
+                    '/comingSoon',
+                  ),
                   const SizedBox(height: 85),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: [
-                  //     _buildNotificationButton(Icons.home, _selectedIndex == 0, 0),
-                  //     _buildNotificationButton(
-                  //         Icons.bar_chart, _selectedIndex == 1, 1),
-                  //     _buildNotificationButton(
-                  //         Icons.settings, _selectedIndex == 2, 2),
-                  //   ],
-                  // ),
                 ],
               ),
+            ),
           ),
           Positioned(
             bottom: 15,
@@ -221,7 +223,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
             right: 0,
             child: Container(
               height: 66,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.transparent,
               ),
               child: Row(
@@ -250,7 +252,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       },
       child: Column(
         children: [
-          SizedBox(height: 7),
+          const SizedBox(height: 7),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -281,45 +283,45 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
               "\nDatos personales",
               style: GoogleFonts.quicksand(
                   fontSize: 23,
-                  color: Color(0xff034C8C),
+                  color: const Color(0xff034C8C),
                   fontWeight: FontWeight.bold),
             ),
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           Text(
             'Nombre de la madre: $nombreMadre\n',
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color(0xff034C8C)),
+                color: const Color(0xff034C8C)),
           ),
           Text(
             'Cédula: $cedula\n',
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: const Color.fromARGB(255, 117, 115, 115)),
           ),
           Text(
             'Fecha de nacimiento: $fechaNacimiento\n',
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: const Color.fromARGB(255, 117, 115, 115)),
           ),
           Text(
             'Teléfono: $telefono\n',
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: const Color.fromARGB(255, 117, 115, 115)),
           ),
           Text(
             'Ubicación: $ubicacion',
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Color.fromARGB(255, 117, 115, 115)),
+                color: const Color.fromARGB(255, 117, 115, 115)),
           ),
           const SizedBox(
             height: 10,
@@ -328,8 +330,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       ),
     );
   }
-
-
 
   Widget _buildFeatureBox(
     String title,
@@ -343,7 +343,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         Navigator.pushNamed(context, route);
       },
       child: FadeInUp(
-        duration: Duration(milliseconds: 1500), // Duración de la animación
+        duration:
+            const Duration(milliseconds: 1500), // Duración de la animación
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -357,7 +358,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                 right: 10,
                 child: Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color.fromARGB(255, 255, 255, 255),
                     shape: BoxShape.circle,
                   ),
@@ -378,16 +379,90 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       title,
                       style: GoogleFonts.quicksand(
                           fontSize: 18,
-                          color: Color.fromARGB(255, 255, 255, 255),
+                          color: const Color.fromARGB(255, 255, 255, 255),
                           fontWeight: FontWeight.w800), //titulo
                     ),
                     const SizedBox(height: 5),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
                         infoText,
                         style: const TextStyle(
                             fontSize: 12,
+                            color: Color.fromARGB(255, 255, 255, 255)), //cuerpo
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureBoxes(
+    String title,
+    IconData icon,
+    Color bgColor,
+    String infoText,
+    String route,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, route);
+      },
+      child: FadeInUp(
+        duration:
+            const Duration(milliseconds: 1500), // Duración de la animación
+        child: Container(
+          //parametros para que el cuadro sea responsive
+          height: MediaQuery.of(context).size.height * 0.1,
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: bgColor,
+                    size: 15,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 15,
+                left: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 20,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          fontWeight: FontWeight.w800), //titulo
+                    ),
+                    const SizedBox(height: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        infoText,
+                        style: const TextStyle(
+                            fontSize: 15,
                             color: Color.fromARGB(255, 255, 255, 255)), //cuerpo
                       ),
                     ),
