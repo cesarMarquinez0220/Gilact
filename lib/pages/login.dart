@@ -35,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Guarda el nombre de usuario en UserDataStorage
         UserDataStorage.setUserName(nombreUsuario);
+        UserDataStorage.setUserEmail(email);
 
         return true; // Se encontró un usuario con el correo electrónico
       } else {

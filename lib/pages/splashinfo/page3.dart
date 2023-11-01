@@ -20,7 +20,7 @@ class _Page3State extends State<Page3> {
 
     // Agrega un temporizador para cambiar automáticamente de página después de 5 segundos
     _timer = Timer(Duration(seconds: 2), () {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const Perfilnuevo(),

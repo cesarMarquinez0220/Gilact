@@ -10,11 +10,15 @@ class Perfilnuevo extends StatefulWidget {
   @override
   // ignore: library_private_types_in_public_api
   _PerfilnuevoState createState() => _PerfilnuevoState();
+  static _PerfilnuevoState? of(BuildContext context) {
+    return context.findAncestorStateOfType<_PerfilnuevoState>();
+  }
 }
 
 class _PerfilnuevoState extends State<Perfilnuevo> {
   int _selectedIndex = 0;
   String nombreUsuario = UserDataStorage.getUserName();
+  String email = UserDataStorage.getUserEmail();
   // ignore: unused_field
   bool _isEditing = false;
   String nombreMadre = '';
@@ -86,6 +90,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         setState(() {
           _isEditing = false;
         });
+        _fetchUserData();
       }
     } catch (e) {
       // ignore: avoid_print
@@ -210,7 +215,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                     Icons.edit,
                     const Color.fromARGB(255, 19, 19, 196),
                     'Cambia tu informacion personal',
-                    '/comingSoon',
+                    '/edicion',
                   ),
                   const SizedBox(height: 85),
                 ],
