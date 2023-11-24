@@ -1,100 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
-class editProfile extends StatelessWidget {
+// ignore: camel_case_types
+class editProfile extends StatefulWidget {
+  const editProfile({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                right: 0,
-                child: Container(
-                  width: double.infinity,
-                  height: 275,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/prueba.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 5,
-                top: 15,
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.black,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 260,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 92, 66, 66),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-
-                  child:
-                      EditProfileForm(), // Proporciona un GlobalKey// Agregar el formulario de edición de perfil
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class EditProfileForm extends StatefulWidget {
-  @override
+  // ignore: library_private_types_in_public_api
   _EditProfileFormState createState() => _EditProfileFormState();
-
-  static _EditProfileFormState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_EditProfileFormState>();
-  }
 }
 
-class _EditProfileFormState extends State<EditProfileForm> {
+class _EditProfileFormState extends State<editProfile> {
   String email = UserDataStorage.getUserEmail();
   String nombreUsuario1 = '';
   String fechaNacimiento = '';
   String telefono = '';
   String ubicacion = '';
+  TextEditingController _birthdateController = TextEditingController();
+  late FocusNode _birthdateFocusNode;
 
   final TextEditingController _nombreUsuarioController =
-      TextEditingController();
-  final TextEditingController _fechaNacimientoController =
       TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _ubicacionController = TextEditingController();
 
   @override
   void initState() {
+    _birthdateController = TextEditingController();
+    _birthdateFocusNode = FocusNode();
     super.initState();
     _fetchUserData();
+  }
+
+  @override
+  void dispose() {
+    _birthdateController =
+        TextEditingController(); // Agrega esta línea para liberar recursos
+    _birthdateFocusNode = FocusNode();
+    super.dispose();
   }
 
   Future<void> _fetchUserData() async {
@@ -109,13 +57,16 @@ class _EditProfileFormState extends State<EditProfileForm> {
         DocumentSnapshot userSnapshot = usersSnapshot.docs.first;
         setState(() {
           nombreUsuario1 = userSnapshot.get('usuario');
-          fechaNacimiento = userSnapshot.get('fechaNacimiento');
+          fechaNacimiento = DateFormat('yyyy-MM-dd').format(
+              DateFormat('MM/dd/yyyy')
+                  .parse(userSnapshot.get('fechaNacimiento')));
+
           telefono = userSnapshot.get('telefono');
           ubicacion = userSnapshot.get('ubicacion');
         });
 
         _nombreUsuarioController.text = nombreUsuario1;
-        _fechaNacimientoController.text = fechaNacimiento;
+        _birthdateController.text = fechaNacimiento;
         _telefonoController.text = telefono;
         _ubicacionController.text = ubicacion;
       }
@@ -141,7 +92,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
       // Recopila los datos de los controladores
       String nuevoNombre = _nombreUsuarioController.text;
-      String nuevaFechaNacimiento = _fechaNacimientoController.text;
+      String nuevaFechaNacimiento = _birthdateController.text;
       String nuevoTelefono = _telefonoController.text;
       String nuevaUbicacion = _ubicacionController.text;
 
@@ -168,53 +119,182 @@ class _EditProfileFormState extends State<EditProfileForm> {
     }
   }
 
+  void _selectDate(BuildContext context) async {
+    print("Tapped on date field");
+
+    DateTime initialDate = DateTime.now();
+    if (_birthdateController.text.isNotEmpty) {
+      initialDate = DateTime.parse(_birthdateController.text);
+    }
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      final formattedDate = DateFormat('MM/dd/yyyy').format(picked);
+      setState(() {
+        _birthdateController.text = formattedDate;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          const Text(
-            'Edición de perfil',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+    return Scaffold(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(0.3),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Icon(Icons.arrow_back, color: Colors.black),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: Gradientslogin.myGradient,
+            ),
+            child: Center(
+              child: Container(
+                constraints:
+                    const BoxConstraints(maxWidth: 360, maxHeight: 480),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: const Color.fromARGB(251, 255, 255, 255),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Perfil de Madre',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 33,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(162, 0, 0, 0),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInputField(
+                      controller: _nombreUsuarioController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre',
+                      ),
+                      icon: Icons.person,
+                    ),
+                    _buildInputField(
+                      controller: _birthdateController,
+                      focusNode: _birthdateFocusNode,
+                      decoration: const InputDecoration(),
+                      icon: Icons.calendar_month,
+                      onTap: () => _selectDate(context),
+                    ),
+                    _buildInputField(
+                      controller: _telefonoController,
+                      decoration: const InputDecoration(
+                        labelText: 'Telefono',
+                      ),
+                      icon: Icons.phone,
+                    ),
+                    _buildInputField(
+                      controller: _ubicacionController,
+                      decoration: const InputDecoration(
+                        labelText: 'Ubicacion',
+                      ),
+                      icon: Icons.location_on,
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: 320,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromRGBO(27, 167, 214, 1),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          shadowColor: Colors.black.withOpacity(0.5),
+                          elevation: 5,
+                        ),
+                        onPressed: _onSave,
+                        child: Text(
+                          'Guardar',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _nombreUsuarioController,
-            decoration: const InputDecoration(
-              labelText: 'Nombre',
-            ),
-          ),
-          TextFormField(
-            controller: _fechaNacimientoController,
-            decoration: const InputDecoration(
-              labelText: 'fecha de nacimiento',
-            ),
-          ),
-          TextFormField(
-            controller: _telefonoController,
-            decoration: const InputDecoration(
-              labelText: 'Telefono',
-            ),
-          ),
+        ),
+      ),
+    );
+  }
 
-          TextFormField(
-            controller: _ubicacionController,
-            decoration: const InputDecoration(
-              labelText: 'Ubicacion',
+  Widget _buildInputField({
+    FocusNode? focusNode,
+    required IconData icon,
+    TextEditingController? controller,
+    bool obscureText = false,
+    required InputDecoration decoration,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      child: Container(
+        height: 48,
+        width: 320,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: const Color.fromARGB(255, 255, 255, 255),
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
+              spreadRadius: 0.1,
+              blurRadius: 5,
+              offset: const Offset(0, 6),
             ),
+          ],
+        ),
+        child: TextFormField(
+          controller: controller,
+          onTap: onTap,
+          obscureText: obscureText,
+          style: GoogleFonts.quicksand(fontSize: 18, color: Colors.black),
+          decoration: InputDecoration(
+            hintStyle: GoogleFonts.quicksand(
+              fontSize: 18,
+              color: Color.fromARGB(255, 204, 202, 202),
+            ),
+            prefixIcon: Icon(
+              icon,
+              color: Colors.grey,
+              size: 24.0,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: InputBorder.none,
           ),
-          // Agrega más campos de edición según la información del perfil
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _onSave,
-            child: const Text('Guardar'),
-          ),
-        ],
+        ),
       ),
     );
   }

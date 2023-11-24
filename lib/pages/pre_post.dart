@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/registro_bebe.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Prepost extends StatefulWidget {
   @override
@@ -14,6 +16,10 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
   late Animation<double> _imageScaleAnimation;
   late Animation<double> _textOpacityAnimation;
   late Animation<Offset> _textSlideAnimation;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late String
+      email; // Asegúrate de tener el correo electrónico del usuario disponible
 
   @override
   void initState() {
@@ -34,7 +40,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(0.1, 0.5), // Retrasar la aparición del texto
+        curve: Interval(0.1, 0.5),
       ),
     );
 
@@ -44,7 +50,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(0.0, 0.5), // Retrasar la aparición del texto
+        curve: Interval(0.0, 0.5),
       ),
     );
 
@@ -57,16 +63,48 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  // Navegación para la sección preparto
+  Future<void> _saveUserSituation(String situation) async {
+    String email = UserDataStorage.getUserEmail();
+    try {
+      // Construir la referencia al documento del usuario
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (usersSnapshot.docs.isNotEmpty) {
+        // El usuario ya existe en la base de datos
+        DocumentSnapshot userDocument = usersSnapshot.docs.first;
+
+        // Obtener la referencia al documento del usuario
+        DocumentReference userRef = userDocument.reference;
+
+        // Crear una referencia a la subcolección  dentro del documento del usuario
+        CollectionReference situationsRef = userRef.collection('situacion');
+
+        // Añadir un nuevo documento a la subcolección con la información de la situación
+        await situationsRef.add({'situacion': situation});
+        print('Situación registrada con éxito para el usuario: $email');
+      } else {
+        // El usuario no existe en la base de datos
+        print('El usuario no existe en la base de datos.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   void navigateToPreparto(BuildContext context) {
+    _saveUserSituation('Pre-Parto');
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Onboar_Info()),
     );
   }
 
-  // Navegación para la sección postparto
   void navigateToPostparto(BuildContext context) {
+    _saveUserSituation('Post-Parto');
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegistroBebe()),
@@ -75,7 +113,6 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Bloquear la rotación de la pantalla
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -94,7 +131,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
                   Padding(
                     padding: const EdgeInsets.only(top: 49.0),
                     child: Text(
-                      'Elige tu situación actual', // Título en la parte superior
+                      'Elige tu situación actual',
                       style: GoogleFonts.quicksand(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -145,7 +182,6 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.5,
               color: Color(0xff03588C),
-              //child: SingleChildScrollView(
               child: Row(
                 children: [
                   SlideTransition(
@@ -179,7 +215,6 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
                   ),
                 ],
               ),
-              // ),
             ),
           ),
         ],

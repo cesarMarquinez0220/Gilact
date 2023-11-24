@@ -1,5 +1,8 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/pre_post.dart';
 import 'package:lottie/lottie.dart';
 
@@ -55,20 +58,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   _controller
                     ..duration = compos.duration
                     ..forward().then((value) {
-                      Navigator.pushReplacement(
-                        context,
-                        PageRouteBuilder(
-                          transitionDuration: Duration(milliseconds: 1000),
-                          pageBuilder: (BuildContext context,
-                              Animation<double> animation,
-                              Animation<double> secondaryAnimation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: Prepost(),
-                            );
-                          },
-                        ),
-                      );
+                      // Agregar la lógica de verificación después de que la animación se cargue
+                      _checkUserSituation();
                     });
                 },
               ),
@@ -91,5 +82,47 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _checkUserSituation() async {
+    String email = UserDataStorage.getUserEmail();
+
+    try {
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (usersSnapshot.docs.isNotEmpty) {
+        DocumentSnapshot userDocument = usersSnapshot.docs.first;
+        DocumentReference userRef = userDocument.reference;
+
+        bool situacionExists = await userRef
+            .collection('situacion')
+            .limit(1)
+            .get()
+            .then((snapshot) => snapshot.docs.isNotEmpty);
+
+        if (situacionExists) {
+          // El usuario ya tiene la subcolección "situacion"
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Perfilnuevo()),
+          );
+        } else {
+          // El usuario no tiene la subcolección "situacion", ir a prepost
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Prepost()),
+          );
+        }
+      } else {
+        // El usuario no existe en la base de datos.
+        print('El usuario no existe en la base de datos.');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 }
