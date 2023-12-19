@@ -6,8 +6,16 @@ import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/UsersVideos/user_videos.dart';
+import 'package:flutter_login/pages/completeinfo/beneficios_bebe.dart';
+import 'package:flutter_login/pages/completeinfo/beneficios_mama.dart';
+import 'package:flutter_login/pages/completeinfo/calostro.dart';
+import 'package:flutter_login/pages/completeinfo/lactancia_exitosa.dart';
+import 'package:flutter_login/pages/completeinfo/postura_agarre.dart';
 import 'package:flutter_login/pages/login.dart';
+import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
+import 'package:flutter_login/pages/splashinfo/page1.dart';
+import 'package:flutter_login/pages/tips.dart';
 import 'firebase_options.dart';
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -35,13 +43,14 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
-      home: const LoginScreen(),
+      home: LoginScreen(),
       //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(),
         '/secciones': (context) => SeccionVideos(),
         '/comingSoon': (context) => ComingSoonPage(),
         '/edicion': (context) => editProfile(),
+        '/tips': (context) => Tips(),
         // Otras rutas aquí...
       },
     );

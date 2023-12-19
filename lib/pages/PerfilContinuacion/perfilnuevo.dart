@@ -170,7 +170,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         Icons.lightbulb,
                         const Color.fromARGB(255, 221, 62, 179),
                         'Sobre consejos \n alimenticios y más',
-                        '/comingSoon',
+                        '/tips',
                       ),
                       _buildFeatureBox(
                         'Historial de\n Videos',
