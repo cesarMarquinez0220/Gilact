@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:video_player/video_player.dart';
-import 'package:flutter_login/pages/Videos/VideosPage.dart';
-import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/registro_lactancia.dart';
+
+class UserProgress {
+  Map<int, double> lessonProgress = {};
+
+  void updateLessonProgress(int lessonId, double progress) {
+    lessonProgress[lessonId] = progress;
+  }
+
+  double getLessonProgress(int lessonId) {
+    return lessonProgress.containsKey(lessonId) ? lessonProgress[lessonId]! : 0.0;
+  }
+}
+
 
 class lecciones extends StatefulWidget {
   const lecciones({Key? key});
@@ -14,11 +25,32 @@ class lecciones extends StatefulWidget {
 }
 
 class _leccionesState extends State<lecciones> {
+  UserProgress userProgress = UserProgress();
   int _selectedIndex = 0;
-  double _percentage = 75.0;
+
+  Future<void> _navigateToReproductorVideo(int videoId, int duracionId) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReproductorVideo(
+          videoId: videoId,
+          duracionId: duracionId,
+        ),
+      ),
+    );
+
+   
+  if (result != null && result is double) {
+    // Actualizar el progreso de la lección y el estado del widget
+    setState(() {
+      userProgress.updateLessonProgress(videoId, result);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -50,8 +82,8 @@ class _leccionesState extends State<lecciones> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title:
-                                    const Text("Sección de Lecciones de Videos"),
+                                title: const Text(
+                                    "Sección de Lecciones de Videos"),
                                 content: const Text(
                                     "En esta sección se encuentran las lecciones de videos a ver."),
                                 actions: <Widget>[
@@ -84,59 +116,126 @@ class _leccionesState extends State<lecciones> {
                   ),
                 ),
                 _Subtitle('Lactancia materna y sus beneficios'),
-                _PercentIndicatorRight(69.0, 'Homevideo.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'Writingvideo.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'working.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'food1.png', Colors.blue),
+                _PercentIndicatorRight(
+                  69.0,
+                  'Homevideo.png',
+                  Colors.blue,
+                  1,
+                  1,
+                  isEnabled: true,
+                ),
+                _PercentIndicatorLeft(
+                  69.0,
+                  'Writingvideo.png',
+                  Colors.blue,
+                  2,
+                  2,
+                  
+                ),
+                _PercentIndicatorRight(
+                  69.0,
+                  'working.png',
+                  Colors.blue,
+                  3,
+                  3,
+                  
+                ),
+                _PercentIndicatorLeft(
+                  69.0,
+                  'food1.png',
+                  Colors.blue,
+                  12,
+                  12,
+                  
+                ),
                 _Title('Lección 2'),
                 _Subtitle('Calostro, leche de transisicon y leche madura'),
-                _PercentIndicatorRight(69.0, 'Softvideo.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'bebemujer1.png', Colors.red),
-                _PercentIndicatorRight(69.0, 'bebevientre.png', Colors.yellow),
+                _PercentIndicatorRight(
+                  69.0,
+                  'Softvideo.png',
+                  Colors.blue,
+                  4,
+                  4,
+                  
+                ),
+                _PercentIndicatorLeft(69.0, 'bebemujer1.png', Colors.red, 5, 5,
+                    ),
+                _PercentIndicatorRight(
+                    69.0, 'bebevientre.png', Colors.yellow, 6, 6,
+                    ),
                 _Title('Lección 3'),
                 _Subtitle('Medicamentos durante la lactancia materna'),
-                _PercentIndicatorLeft(69.0, 'health2.png', Colors.yellow),
+                _PercentIndicatorLeft(
+                    69.0, 'health2.png', Colors.yellow, 15, 15,
+                    ),
                 _Title('Lección 4'),
                 _Subtitle('Composición Nutricional de la Leche Materna'),
-                _PercentIndicatorRight(69.0, 'mujereshablando.png', Colors.green),
+                _PercentIndicatorRight(
+                    69.0, 'mujereshablando.png', Colors.green, 7, 7,
+                    ),
                 _Title('Lección 5'),
                 _Subtitle('¿Cómo saber que el bebé se alimentó lo suficiente?'),
-                _PercentIndicatorLeft(69.0, 'food2.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'food3.png', Colors.blue),
+                _PercentIndicatorLeft(69.0, 'food2.png',
+                    const Color.fromARGB(255, 243, 33, 180), 8, 8,
+                   ),
+                _PercentIndicatorRight(69.0, 'food3.png', Colors.blue, 9, 9,
+                   ),
                 _Title('Lección 6'),
                 _Subtitle('Hitos de peso a vigilar'),
-                _PercentIndicatorLeft(69.0, 'health1.png', Colors.blue),
+                _PercentIndicatorLeft(69.0, 'health1.png', Colors.blue, 10, 10,
+                   ),
                 _Title('Lección 7'),
                 _Subtitle('Higiene de manos y técnicas de lactancia materna'),
-                _PercentIndicatorRight(69.0, 'health3.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'health4.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'health5.png', Colors.blue),
+                _PercentIndicatorRight(69.0, 'health3.png', Colors.blue, 13, 13,
+                    ),
+                _PercentIndicatorLeft(69.0, 'health4.png', Colors.blue, 14, 14,
+                   ),
+                _PercentIndicatorRight(69.0, 'health5.png', Colors.blue, 16, 16,
+                    ),
                 _Title('Lección 8'),
                 _Subtitle('Signos o Complicaciones en la Lactancia'),
-                _PercentIndicatorLeft(69.0, 'problema1.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'problema2.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'problema3.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'problema4.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'problema5.png', Colors.blue),
+                _PercentIndicatorLeft(
+                    69.0, 'problema1.png', Colors.blue, 17, 17),
+                _PercentIndicatorRight(69.0, 'problema2.png',
+                    const Color.fromARGB(255, 145, 243, 33), 18, 18,
+                    ),
+                _PercentIndicatorLeft(
+                    69.0, 'problema3.png', Colors.blue, 19, 19,
+                    ),
+                _PercentIndicatorRight(
+                    69.0, 'problema4.png', Colors.blue, 20, 20,
+                    ),
+                _PercentIndicatorLeft(
+                    69.0, 'problema5.png', Colors.blue, 21, 21,
+                   ),
                 _Title('Lección 9'),
                 _Subtitle('Masajes al seno antes de iniciar la lactancia'),
-                _PercentIndicatorRight(69.0, 'cuidadomujer.png', Colors.blue),
+                _PercentIndicatorRight(
+                    69.0, 'cuidadomujer.png', Colors.blue, 22, 22,
+                   ),
                 _Title('Lección 10'),
                 _Subtitle('Mi banco de leche en casa y su preservacion'),
-                _PercentIndicatorLeft(69.0, 'banco1.png', Colors.blue),
-                _PercentIndicatorRight(69.0, 'banco2.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'banco3.png', Colors.blue),
+                _PercentIndicatorLeft(69.0, 'banco1.png', Colors.blue, 23, 23,
+                   ),
+                _PercentIndicatorRight(69.0, 'banco2.png', Colors.blue, 24, 24,
+                    ),
+                _PercentIndicatorLeft(69.0, 'banco3.png', Colors.blue, 25, 25,
+                    ),
                 _Title('Lección 11'),
                 _Subtitle('Leyes en Panamá que apoyan la lactancia materna'),
-                _PercentIndicatorRight(69.0, 'ley1.png', Colors.blue),
-                _PercentIndicatorLeft(69.0, 'ley2.png', Colors.blue),
+                _PercentIndicatorRight(69.0, 'ley1.png', Colors.blue, 26, 26,
+                    ),
+                _PercentIndicatorLeft(69.0, 'ley2.png', Colors.blue, 27, 27,
+                    ),
                 _Title('Lección 12'),
                 _Subtitle(
                     'Diferencias entre la leche materna y la leche de vaca'),
-                _PercentIndicatorRight(69.0, 'milk1.png', Colors.blue),
+                _PercentIndicatorRight(69.0, 'milk1.png', Colors.blue, 28, 28,
+                   ),
                 _Title('Lección 13'),
                 _Subtitle('Mitos de la lactancia materna'),
-                _PercentIndicatorLeft(69.0, 'mitos.png', Colors.blue),
+                _PercentIndicatorLeft(69.0, 'mitos.png', Colors.blue, 29, 29,
+                   ),
                 _buildElevatedButton(),
                 _buildBottomNavigationBar(),
               ],
@@ -194,19 +293,48 @@ class _leccionesState extends State<lecciones> {
 
   //circulo indicador de la derecha
   // ignore: non_constant_identifier_names
-  Widget _PercentIndicatorRight(double radius, String imageName, Color color) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 40.0, top: 10),
-        child: CircularPercentIndicator(
-          radius: radius,
-          lineWidth: 9.0,
-          percent: _percentage / 75,
-          center: _buildImageContainer(imageName),
-          circularStrokeCap: CircularStrokeCap.butt,
-          progressColor: color,
-          backgroundColor: Colors.white,
+  Widget _PercentIndicatorRight(double radius, String imageName, Color color,
+      int videoId, int duracionId,{bool isEnabled = false}) {
+     double progress = userProgress.getLessonProgress(videoId);
+    return GestureDetector(
+      onTap: () {
+        if (isEnabled) {
+          _navigateToReproductorVideo(videoId, duracionId);
+        } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Lección no disponible"),
+                content: const Text(
+                  "Debes completar las lecciones anteriores antes de acceder a esta lección.",
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Cerrar"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 40.0, top: 10),
+          child: CircularPercentIndicator(
+            radius: radius,
+            lineWidth: 9.0,
+            percent: isEnabled ? 1.0 : progress,
+            center: _buildImageContainer(imageName),
+            circularStrokeCap: CircularStrokeCap.butt,
+            progressColor: color,
+            backgroundColor: Colors.white,
+          ),
         ),
       ),
     );
@@ -214,19 +342,48 @@ class _leccionesState extends State<lecciones> {
 
   //circulo indicador de la izquierda
   // ignore: non_constant_identifier_names
-  Widget _PercentIndicatorLeft(double radius, String imageName, Color color) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 40.0, bottom: 40, top: 10),
-        child: CircularPercentIndicator(
-          radius: radius,
-          lineWidth: 9.0,
-          percent: _percentage / 75,
-          center: _buildImageContainer(imageName),
-          circularStrokeCap: CircularStrokeCap.butt,
-          progressColor: color,
-          backgroundColor: Colors.white,
+  Widget _PercentIndicatorLeft(double radius, String imageName, Color color,
+      int videoId, int duracionId, {bool isEnabled = false}) {
+ double progress = userProgress.getLessonProgress(videoId);
+    return GestureDetector(
+      onTap: () {
+        if (isEnabled) {
+          _navigateToReproductorVideo(videoId, duracionId);
+        } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Lección no disponible"),
+                content: const Text(
+                  "Debes completar las lecciones anteriores antes de acceder a esta lección.",
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Cerrar"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 40.0, bottom: 40, top: 10),
+          child: CircularPercentIndicator(
+            radius: radius,
+            lineWidth: 9.0,
+            percent: isEnabled ? 1.0 :progress,
+            center: _buildImageContainer(imageName),
+            circularStrokeCap: CircularStrokeCap.butt,
+            progressColor: color,
+            backgroundColor: Colors.white,
+          ),
         ),
       ),
     );

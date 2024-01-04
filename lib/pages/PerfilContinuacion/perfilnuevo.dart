@@ -211,7 +211,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   ),
                   const SizedBox(height: 20),
                   _buildFeatureBoxes(
-                    'Editar',
+                    'Editar Perfil',
                     Icons.edit,
                     const Color.fromARGB(255, 19, 19, 196),
                     'Cambia tu informacion personal',
