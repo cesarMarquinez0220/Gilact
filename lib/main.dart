@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(),
-        '/secciones': (context) => SeccionVideos(),
+        //'/secciones': (context) => SeccionVideos(),
         '/comingSoon': (context) => ComingSoonPage(),
         '/edicion': (context) => editProfile(),
         '/tips': (context) => Tips(),
