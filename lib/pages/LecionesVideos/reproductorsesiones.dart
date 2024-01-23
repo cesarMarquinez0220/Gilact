@@ -31,15 +31,12 @@ class FirestoreService {
         final videoDoc = await videoDocRef.get();
 
         if (videoDoc.exists) {
-          final int contadorVisualizaciones =
-              (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
           // Update existing document
           await videoDocRef.update({
             'pausas': pausas,
             'adelantos': adelantos,
             'ultimaPosicion': ultimaPosicion,
             'duracion': duracion,
-            'contadorVisualizaciones': contadorVisualizaciones,
           });
         } else {
           // Create a new document
@@ -100,11 +97,99 @@ class FirestoreService {
 
     return {};
   }
+
+  // Future<void> actualizarContadorVisualizaciones(
+  //     String usuario, int videoId) async {
+  //   try {
+  //     final usuarioDocRef = await _getUsuarioDocumento(usuario);
+
+  //     if (usuarioDocRef != null) {
+  //       final videoDocRef =
+  //           usuarioDocRef.collection('videos').doc(videoId.toString());
+
+  //       final videoDoc = await videoDocRef.get();
+
+  //       if (videoDoc.exists) {
+  //         final int contadorVisualizaciones =
+  //             (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
+
+  //         await videoDocRef.update({
+  //           'contadorVisualizaciones': contadorVisualizaciones,
+  //         });
+  //       }else {
+  //       // El documento no existe, crearlo con contadorVisualizaciones en 1
+  //       await videoDocRef.set({
+  //         'contadorVisualizaciones': 1,
+  //         // Puedes agregar otros campos aquí si es necesario
+  //       });
+  //     }
+  //     } else {
+  //       print('No se encontró un usuario con el nombre: $usuario');
+  //     }
+  //   } catch (error) {
+  //     print('Error al actualizar contador de visualizaciones: $error');
+  //   }
+  // }
+
+  Future<void> guardarInformacionProgresoLeccion({
+    required String usuario,
+    required int leccionId,
+    required double progreso,
+    required bool completada,
+  }) async {
+    try {
+      final usuarioDocRef = await _getUsuarioDocumento(usuario);
+
+      if (usuarioDocRef != null) {
+        // Guardar información en la colección 'progresoLecciones'
+        final leccionDocRef = usuarioDocRef
+            .collection('progresoLecciones')
+            .doc(leccionId.toString());
+
+        await leccionDocRef.set({
+          'progreso': progreso,
+          'completada': completada,
+        });
+
+        print(
+            'Información de progreso de lección guardada con éxito en Firestore');
+      } else {
+        print('No se encontró un usuario con el nombre: $usuario');
+      }
+    } catch (error) {
+      print('Error al guardar información de progreso en Firestore: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> obtenerInformacionProgresoLeccion(
+      String usuario, int leccionId) async {
+    try {
+      final usuarioDocRef = await _getUsuarioDocumento(usuario);
+
+      if (usuarioDocRef != null) {
+        final leccionDoc = await usuarioDocRef
+            .collection('progresoLecciones')
+            .doc(leccionId.toString())
+            .get();
+
+        if (leccionDoc.exists) {
+          return leccionDoc.data() as Map<String, dynamic>;
+        }
+      } else {
+        print('No se encontró un usuario con el nombre: $usuario');
+      }
+    } catch (error) {
+      print('Error al obtener información de progreso en Firestore: $error');
+    }
+
+    return {};
+  }
 }
 
 class ReproductorVideo extends StatefulWidget {
   final int videoId;
   final int duracionId;
+  
 
   ReproductorVideo({
     Key? key,
@@ -124,7 +209,6 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   int forwardCount = 0; // Contador de avances
   Duration? lastPosition; // Última posición del video antes de pausar
 
-  UserProgress userProgress = UserProgress();
   @override
   void initState() {
     super.initState();
@@ -136,8 +220,6 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
     _controller.dispose();
     super.dispose();
   }
-
-
 
   Future<void> _initializeYoutubePlayer() async {
     print('Inicializando Youtube Player para video ID: ${widget.videoId}');
@@ -197,18 +279,52 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   }
 
   Future<void> guardarInformacionEnFirestore() async {
-    final userName = UserDataStorage.getUserName();
-    print('Guardando información en Firestore...');
-    print(widget.duracionId);
-    await FirestoreService().guardarInformacionVideo(
-      usuario: userName,
-      videoId: widget.videoId,
-      pausas: pauseCount,
-      adelantos: forwardCount,
-      ultimaPosicion: _controller.value.position.inMilliseconds,
-      duracion: VideoDuration.videoDuracion[widget.duracionId] ?? 0,
-    );
+    try {
+      final userName = UserDataStorage.getUserName();
+      final videoId = widget.videoId; // Asegúrate de tener acceso a esto
+      final usuarioDocRef =
+          await FirestoreService()._getUsuarioDocumento(userName);
+
+      if (usuarioDocRef != null) {
+        final videoDocRef =
+            usuarioDocRef.collection('videos').doc(videoId.toString());
+
+        final videoDoc = await videoDocRef.get();
+
+        if (videoDoc.exists) {
+          // El documento ya existe, actualizar el contador
+          final int contadorVisualizaciones =
+              (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
+
+          await videoDocRef.update({
+            'contadorVisualizaciones': contadorVisualizaciones,
+          });
+        } else {
+          // El documento no existe, crearlo con contadorVisualizaciones en 1
+          await videoDocRef.set({
+            'contadorVisualizaciones': 1,
+            // Puedes agregar otros campos aquí si es necesario
+          });
+        }
+
+        print('Guardando información en Firestore...');
+        print(widget.duracionId);
+        await FirestoreService().guardarInformacionVideo(
+          usuario: userName,
+          videoId: widget.videoId,
+          pausas: pauseCount,
+          adelantos: forwardCount,
+          ultimaPosicion: _controller.value.position.inMilliseconds,
+          duracion: VideoDuration.videoDuracion[widget.duracionId] ?? 0,
+        );
+      } else {
+        print('No se encontró un usuario con el nombre: $userName');
+      }
+    } catch (error) {
+      print('Error al actualizar contador de visualizaciones: $error');
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +354,11 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
                 child: YoutubePlayer(
                   controller: _controller,
                   showVideoProgressIndicator: true,
+                  onEnded: (metaData) {
+                    print("se mando el true");
+                    guardarInformacionEnFirestore();
+                    Navigator.pop(context, true);
+                  },
                 ),
               ),
             ),

@@ -2,7 +2,7 @@ class VideoDuration {
   static Map<int, int> videoDuracion = {
     1: 70800, // Duracion video 1
     2: 142800, // Duracion video 2.1
-    3: 6600, // Duracion video 2.2
+    3: 66600, // Duracion video 2.2
     4: 271200, // Duracion video 3.1
     5: 27000, // Duracion video 3.2
     6: 30000, // Duracion video 3.3
