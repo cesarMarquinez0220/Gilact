@@ -4,10 +4,11 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LeccionCompletada extends StatefulWidget {
-  const LeccionCompletada({super.key});
+  final bool startAnimationAutomatically;
+
+  const LeccionCompletada({Key? key, this.startAnimationAutomatically = true});
 
   @override
-  // ignore: library_private_types_in_public_api
   _LeccionCompletadaState createState() => _LeccionCompletadaState();
 }
 
@@ -22,12 +23,16 @@ class _LeccionCompletadaState extends State<LeccionCompletada>
       vsync: this,
       duration: const Duration(seconds: 1), // Reducir la duración
     );
-
-    // Iniciar la animación de entrada
-    _controller.forward().whenComplete(() {
-      // Iniciar la animación continua de las estrellas
-      _startStarAnimation();
-    });
+    if (widget.startAnimationAutomatically) {
+      _controller.forward().whenComplete(() {
+        _startStarAnimation();
+      });
+    }
+    // // Iniciar la animación de entrada
+    // _controller.forward().whenComplete(() {
+    //   // Iniciar la animación continua de las estrellas
+    //   _startStarAnimation();
+    // });
   }
 
   void _startStarAnimation() async {
@@ -103,103 +108,97 @@ class _LeccionCompletadaState extends State<LeccionCompletada>
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    return Center(
-      child: ZoomIn(
-        animate: true,
-        child: Stack(
-          children: [
-            Container(
-              width: screenSize.width * 0.8,
-              height: screenSize.height * 0.6,
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 228, 222, 222),
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Barra animada de completada
-                  AnimatedContainer(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeInOut,
-                    width: double.infinity,
-                    height: screenSize.height * 0.05,
-                    color: Colors.green,
-                    child: Center(
-                      child: Material(
-                        color: Colors.green,
-                        child: Text(
-                          '¡Lección Completada!',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.quicksand(
-                            color: Colors.white,
-                            fontSize: screenSize.width * 0.05,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Espaciador
-                  SizedBox(height: screenSize.height * 0.025),
-
-                  // Estrellas moviéndose constantemente
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildAnimatedStar(isBig: false),
-                      _buildAnimatedStar(isBig: true),
-                      _buildAnimatedStar(isBig: false),
-                    ],
-                  ),
-                  // Espaciador
-                  SizedBox(height: screenSize.height * 0.04),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Image.asset(
-                          'assets/images/prueba.png',
-                          height: 50.0,
-                        ),
-                      ),
-                      _buildMotivationMessage(),
-                    ],
-                  ),
-                  // Espaciador
-                  SizedBox(height: screenSize.height * 0.019),
-
-                  // Botón 'Regresar'
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
-                      padding: EdgeInsets.symmetric(
-                        vertical: screenSize.height * 0.02,
-                        horizontal: screenSize.width * 0.09,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.5),
-                      elevation: 5,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      'Regresar',
-                      style: GoogleFonts.quicksand(
-                        color: Colors.white,
-                        fontSize: screenSize.width * 0.04,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: screenSize.width * 0.1,
+        vertical: screenSize.height * 0.2,
+      ),
+      child: Center(
+        child: ZoomIn(
+          animate: true,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 228, 222, 222),
+              borderRadius: BorderRadius.circular(15.0),
             ),
-          ],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.easeInOut,
+                  width: double.infinity,
+                  height: screenSize.height * 0.05,
+                  color: Colors.green,
+                  child: Center(
+                    child: Material(
+                      color: Colors.green,
+                      child: Text(
+                        '¡Lección Completada!',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.quicksand(
+                          color: Colors.white,
+                          fontSize: screenSize.width * 0.05,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.025),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildAnimatedStar(isBig: false),
+                    _buildAnimatedStar(isBig: true),
+                    _buildAnimatedStar(isBig: false),
+                  ],
+                ),
+                SizedBox(height: screenSize.height * 0.04),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/images/prueba.png',
+                        height: 50.0,
+                      ),
+                    ),
+                    _buildMotivationMessage(),
+                  ],
+                ),
+                SizedBox(height: screenSize.height * 0.019),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenSize.height * 0.02,
+                      horizontal: screenSize.width * 0.09,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.5),
+                    elevation: 5,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Regresar',
+                    style: GoogleFonts.quicksand(
+                      color: Colors.white,
+                      fontSize: screenSize.width * 0.04,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
