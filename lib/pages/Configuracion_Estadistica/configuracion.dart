@@ -8,19 +8,14 @@ class ConfiguracionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
         title: Text('Configuración'),
         backgroundColor: Colors.transparent, // Fondo transparente
-
       ),
-
       body: Container(
-         width: double.infinity, // Establece el ancho al máximo
-      height: double.infinity, // Establece la altura al máximo
-        decoration: BoxDecoration(
-          gradient: Gradientslogin.myGradient
-        ),
+        width: double.infinity, // Establece el ancho al máximo
+        height: double.infinity, // Establece la altura al máximo
+        decoration: BoxDecoration(gradient: Gradientslogin.myGradient),
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -53,7 +48,7 @@ class ConfiguracionScreen extends StatelessWidget {
                         .cambiarNotificaciones(value);
                   },
                 ),
-                
+
                 Divider(),
                 Text(
                   'Cuenta',
@@ -88,7 +83,7 @@ class ConfiguracionScreen extends StatelessWidget {
                   ),
                 ),
                 // Fin del formulario
-                
+
                 Divider(),
                 Text(
                   'Versión de la Aplicación',
@@ -104,7 +99,7 @@ class ConfiguracionScreen extends StatelessWidget {
                   ),
                 ),
                 // Muestra la versión actual de la aplicación y permite a los usuarios actualizar si hay una versión más reciente disponible
-                
+
                 Divider(),
                 Center(
                   child: ElevatedButton(
