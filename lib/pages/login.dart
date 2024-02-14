@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -334,6 +336,9 @@ class _LoginScreenState extends State<LoginScreen> {
               "assets/images/logo-completo2.png",
               alignment: Alignment.center,
               height: 0.3 * MediaQuery.of(context).size.height,
+            ),
+            SizedBox(
+              height: MediaQuery.sizeOf(context).height*0.05,
             ),
             Container(
               constraints: const BoxConstraints(maxWidth: 360),

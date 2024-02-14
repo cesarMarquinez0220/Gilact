@@ -7,6 +7,7 @@ import 'package:flutter_login/pages/pre_post.dart';
 import 'package:lottie/lottie.dart';
 
 class WelcomeScreen extends StatefulWidget {
+  // ignore: use_super_parameters
   const WelcomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -33,7 +34,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color.fromRGBO(254, 254, 254, 1),
@@ -47,7 +48,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
         ),
         child: FadeIn(
-          delay: Duration(milliseconds: 500),
+          delay: const Duration(milliseconds: 500),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -64,9 +65,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 },
               ),
               FadeInUp(
-                duration: Duration(milliseconds: 1000),
-                delay: Duration(milliseconds: 200),
-                child: Center(
+                duration: const Duration(milliseconds: 1000),
+                delay: const Duration(milliseconds: 200),
+                child: const Center(
                   child: Text(
                     "Bienvenidos",
                     style: TextStyle(
@@ -106,12 +107,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
         if (situacionExists) {
           // El usuario ya tiene la subcolección "situacion"
+          // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Perfilnuevo()),
+            MaterialPageRoute(builder: (context) => const Perfilnuevo()),
           );
         } else {
           // El usuario no tiene la subcolección "situacion", ir a prepost
+          // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Prepost()),
@@ -119,10 +122,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         }
       } else {
         // El usuario no existe en la base de datos.
-        print('El usuario no existe en la base de datos.');
+        //print('El usuario no existe en la base de datos.');
       }
     } catch (e) {
-      print('Error: $e');
+      //print('Error: $e');
     }
   }
 }

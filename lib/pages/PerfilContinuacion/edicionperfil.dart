@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
@@ -166,84 +167,98 @@ class _EditProfileFormState extends State<editProfile> {
               gradient: Gradientslogin.myGradient,
             ),
             child: Center(
-              child: Container(
-                constraints:
-                    const BoxConstraints(maxWidth: 360, maxHeight: 480),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: const Color.fromARGB(251, 255, 255, 255),
-                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Perfil de Madre',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 33,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(162, 0, 0, 0),
-                      ),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.38,
+                  width: MediaQuery.of(context).size.width * 0.47,
+                  child: FadeInRight(
+                    duration: const Duration(milliseconds: 1000),
+                    delay: const Duration(milliseconds: 500),
+                    child: Image.asset(
+                      "assets/tips/9_CONSEJO_LACTANCIA.png",
                     ),
-                    const SizedBox(height: 20),
-                    _buildInputField(
-                      controller: _nombreUsuarioController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
-                      ),
-                      icon: Icons.person,
-                    ),
-                    _buildInputField(
-                      controller: _birthdateController,
-                      focusNode: _birthdateFocusNode,
-                      decoration: const InputDecoration(),
-                      icon: Icons.calendar_month,
-                      onTap: () => _selectDate(context),
-                    ),
-                    _buildInputField(
-                      controller: _telefonoController,
-                      decoration: const InputDecoration(
-                        labelText: 'Telefono',
-                      ),
-                      icon: Icons.phone,
-                    ),
-                    _buildInputField(
-                      controller: _ubicacionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Ubicacion',
-                      ),
-                      icon: Icons.location_on,
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: 320,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromRGBO(27, 167, 214, 1),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          shadowColor: Colors.black.withOpacity(0.5),
-                          elevation: 5,
-                        ),
-                        onPressed: _onSave,
-                        child: Text(
-                          'Guardar',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+                Container(
+                  constraints:
+                      const BoxConstraints(maxWidth: 360, maxHeight: 480),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    color: const Color.fromARGB(251, 255, 255, 255),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Perfil de Madre',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 33,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(162, 0, 0, 0),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildInputField(
+                        controller: _nombreUsuarioController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre',
+                        ),
+                        icon: Icons.person,
+                      ),
+                      _buildInputField(
+                        controller: _birthdateController,
+                        focusNode: _birthdateFocusNode,
+                        decoration: const InputDecoration(),
+                        icon: Icons.calendar_month,
+                        onTap: () => _selectDate(context),
+                      ),
+                      _buildInputField(
+                        controller: _telefonoController,
+                        decoration: const InputDecoration(
+                          labelText: 'Telefono',
+                        ),
+                        icon: Icons.phone,
+                      ),
+                      _buildInputField(
+                        controller: _ubicacionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Ubicacion',
+                        ),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: 320,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(27, 167, 214, 1),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            shadowColor: Colors.black.withOpacity(0.5),
+                            elevation: 5,
+                          ),
+                          onPressed: _onSave,
+                          child: Text(
+                            'Guardar',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ],
+            )),
           ),
         ),
       ),

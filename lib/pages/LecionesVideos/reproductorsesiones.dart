@@ -2,11 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/Progreso/LeccionCompletada.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/enlaces%20de%20videos/duracion_enlaces.dart';
 import 'package:flutter_login/pages/enlaces%20de%20videos/enlaces.dart';
+import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
+import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class FirestoreService {
@@ -190,7 +191,6 @@ class FirestoreService {
 class ReproductorVideo extends StatefulWidget {
   final int videoId;
   final int duracionId;
-  
 
   ReproductorVideo({
     Key? key,
@@ -326,7 +326,6 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -356,9 +355,14 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
                   controller: _controller,
                   showVideoProgressIndicator: true,
                   onEnded: (metaData) {
-                    print("se mando el true");
+                    print("se mando el true\n id del video$widget");
                     guardarInformacionEnFirestore();
                     Navigator.pop(context, true);
+                    //cambio de estado de la lista por ID
+                    //LeccionesProvider().marcarVideoComoVisto(widget.videoId);
+                    context
+                        .read<LeccionesProvider>()
+                        .marcarVideoComoVisto(widget.videoId);
                   },
                 ),
               ),

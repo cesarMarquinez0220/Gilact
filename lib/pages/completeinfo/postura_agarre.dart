@@ -7,95 +7,129 @@ class PosturaAgarreInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
+
     return WillPopScope(
       onWillPop: () async {
         return detection.isLoggedIn;
       },
       child: SafeArea(
         child: Container(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                FadeInDown(
-                  duration: Duration(milliseconds: 1000),
-                  delay: Duration(milliseconds: 500),
-                  child: Image.asset(
-                    "assets/images/prueba.png",
-                    width: 150, // Ajusta el tamaño según sea necesario
-                    height: 150,
-                  ), // Reemplaza "tu_imagen.png" con la ruta correcta de tu imagen
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 1000),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    'Cuida tu Postura y el Agarre\nConsejos para una Buena Postura y Agarre',
-                    style: TextStyle(color: Colors.white70,fontSize: 30, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 1200),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    'Cuidar la postura y el agarre es esencial para una lactancia exitosa:',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 1400),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    '- Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                    textAlign: TextAlign.center,
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  child: FadeInDown(
+                    duration: const Duration(milliseconds: 1000),
+                    delay: const Duration(milliseconds: 500),
+                    child: Image.asset(
+                      "assets/tips/4_POSTURA.png"
+                    ),
                   ),
                 ),
                 FadeInDown(
-                  duration: Duration(milliseconds: 1400),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    '- La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 1600),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    'El Agarre Apropiado es Importante:',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 1800),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    '- La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón).',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 10),
-                FadeInDown(
-                  duration: Duration(milliseconds: 2000),
-                  delay: Duration(milliseconds: 500),
-                  child: Text(
-                    '\n\nCuantas más veces coloques a tu bebé al pecho, más leche producirás.',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                    duration: const Duration(milliseconds: 1000),
+                    delay: const Duration(milliseconds: 500),
+                    child: Container(
+                      width: width * .9,
+                      height: height * .42,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 4,
+                            blurRadius: 6,
+                            offset: const Offset(2, 6),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: [
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 1000),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                'Consejos para una Buena Postura y Agarre',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 73, 140, 240),
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 1400),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                '- Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromARGB(255, 86, 86, 86)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 1400),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                '- La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromARGB(255, 86, 86, 86)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 1600),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                'El Agarre Apropiado es Importante:',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 73, 140, 240),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 1800),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                '- La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón).',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromARGB(255, 86, 86, 86)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 2000),
+                              delay: const Duration(milliseconds: 500),
+                              child: const Text(
+                                '¡Cuantas más veces coloques a tu bebé al pecho, más leche producirás!',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromARGB(255, 86, 86, 86)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ))
               ],
             ),
           ),

@@ -1,5 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
     <application
+        tools:replace="android:label"
         android:label="sfgd"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -30,4 +32,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:minSdkVersion="34" android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 </manifest>

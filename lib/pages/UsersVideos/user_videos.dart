@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/UsersVideos/search_json.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,35 +13,71 @@ class User_videos extends StatefulWidget {
 }
 
 class _User_videosState extends State<User_videos> {
-   int _selectedIndex = 0;
-   
+  int _selectedIndex = 0;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late String usuario;
+  int lastCompletedLesson = 0;
+
+  Future<void> _getUltimaLeccionCompletada() async {
+    try {
+      final usuarioDocRef = await _getUsuarioDocumento(usuario);
+      if (usuarioDocRef != null) {
+        final videosCollectionRef = usuarioDocRef.collection('videos');
+        final videosCollection =
+            await videosCollectionRef.orderBy(FieldPath.documentId).get();
+
+        if (videosCollection.docs.isNotEmpty) {
+          // Filtrar los documentos con contadorVisualizaciones distinto de 0
+          final videosConContador = videosCollection.docs
+              .where(
+                  (videoDoc) => (videoDoc['contadorVisualizaciones'] ?? 0) > 0)
+              .toList();
+
+          if (videosConContador.isNotEmpty) {
+            // Ordenar los documentos de menor a mayor (por número de lección)
+            videosConContador
+                .sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
+
+            // Obtener el último documento (mayor número de lección)
+            final lastLessonDoc = videosConContador.last;
+
+            // Obtener el número de lección
+            setState(() {
+              lastCompletedLesson = int.parse(lastLessonDoc.id);
+              print('Ultima leccion $lastCompletedLesson');
+            });
+          }
+        }
+      }
+      print('Ultima leccion $lastCompletedLesson');
+    } catch (error) {
+      print('Error al obtener la última lección completada: $error');
+    }
+  }
+
+  Future<DocumentReference?> _getUsuarioDocumento(String usuario) async {
+    final usersQuery = await _firestore
+        .collection('Users')
+        .where('usuario', isEqualTo: usuario)
+        .limit(1)
+        .get();
+
+    return usersQuery.docs.isNotEmpty ? usersQuery.docs[0].reference : null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    usuario = UserDataStorage.getUserName();
+    _getUltimaLeccionCompletada();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(119, 2, 80, 71),
       appBar: getAppBar(),
       body: getBody(),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.transparent, 
-        selectedItemColor: Color.fromARGB(255, 114, 215, 249), 
-        unselectedItemColor: Color.fromARGB(255, 255, 255, 255).withOpacity(0.60), 
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favoritos',
-          ),
-        ],
-      ),
     );
   }
 
@@ -63,7 +102,7 @@ class _User_videosState extends State<User_videos> {
               Icons.search,
               color: Colors.white.withOpacity(0.5),
             ),
-            contentPadding: EdgeInsets.symmetric(vertical: 10.0), 
+            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
           ),
         ),
       ),
@@ -73,97 +112,117 @@ class _User_videosState extends State<User_videos> {
   SingleChildScrollView getBody() {
     var size = MediaQuery.of(context).size;
     return SingleChildScrollView(
-     child: Padding(
-       padding: const EdgeInsets.only(top: 35, left: 20, right: 18),
-       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Videos Disponibles",
-            style: TextStyle(
-              fontFamily: 'Quicksand',
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 35, left: 20, right: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Videos Disponibles",
+              style: TextStyle(
+                fontFamily: 'Quicksand',
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          SizedBox(height: 12),
-          Column(
-            children: List.generate(searchJson.length, (index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: (size.width - 40) * 0.8,
-                      height: 80,
-                      child: Row(
-                        children: [
-                          Stack(
+            SizedBox(height: 12),
+            Column(
+              children: List.generate(searchJson.length, (index) {
+                // Filtrar los videos que pertenecen a la última lección completada
+                if (searchJson[index]['title'] != null &&
+                    index + 1 <= lastCompletedLesson) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: (size.width - 40) * 0.8,
+                          height: 80,
+                          child: Row(
                             children: [
-                              Container(
-                                width: 120,
-                                height: 70,
-                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),
-                                image: DecorationImage(
-                                    image: AssetImage(searchJson[index]['img']),
-                                    fit: BoxFit.cover,
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 120,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            searchJson[index]['img']),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  Container(
+                                    width: 120,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.2),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              SizedBox(width: 15),
                               Container(
-                                width: 120,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.2),
+                                width: (size.width - 36) * 0.4,
+                                child: Text(
+                                  searchJson[index]['title'],
+                                  style: TextStyle(
+                                    fontFamily: 'Quicksand',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(width: 15),
-                          Container(
-                            width: (size.width - 36) * 0.4,
-                            child: Text(
-                              searchJson[index]['title'],
-                              style: TextStyle(
-                                fontFamily: 'Quicksand',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                        ),
+                        Container(
+                          width: (size.width - 36) * 0.2,
+                          height: 80,
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ReproductorVideo(
+                                            videoId: searchJson[index]['id'],
+                                            duracionId: searchJson[index]
+                                                ['duracion'])));
+                              },
+                              child: Container(
+                                width: 35,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border:
+                                      Border.all(width: 2, color: Colors.white),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.play_arrow,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: (size.width - 36) * 0.2,
-                      height: 80,
-                      child: Center(
-                        child: Container(
-                          width: 35,
-                          height: 35,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(width: 2, color: Colors.white),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.play_arrow,
-                              color: Colors.white,
-                            ),
-                          ),
                         ),
-                      )
+                      ],
                     ),
-                  ],
-                ),
-              );
-            })
-          ),
-        ],
-       ),
-     ),
+                  );
+                } else {
+                  return SizedBox(); // Si el video no corresponde a la última lección completada, no se muestra
+                }
+              }),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -173,5 +232,3 @@ class _User_videosState extends State<User_videos> {
     });
   }
 }
-
-

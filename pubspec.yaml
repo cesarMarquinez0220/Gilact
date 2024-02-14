@@ -40,16 +40,19 @@ dependencies:
   animate_do: ^3.0.2
   firebase_core: ^2.15.1
   cloud_firestore: ^4.8.5
-  intl: ^0.18.1
+  intl: ^0.19.0
   smooth_page_indicator: ^1.1.0
   card_swiper: ^3.0.1
-  lottie: ^2.6.0
+  lottie: ^3.0.0
   percent_indicator: ^4.2.3
   youtube_player_flutter: ^8.1.2
   video_player: ^2.7.2
   chewie: ^1.7.1
   provider: ^6.1.1
-  fl_chart: ^0.65.0
+  fl_chart: ^0.66.2
+  flutter_local_notifications: ^16.3.2
+  shared_preferences: ^2.2.2
+  background_fetch: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -60,7 +63,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 
   
@@ -167,9 +170,19 @@ flutter:
    - assets/mini_videos/14.2.png
    - assets/mini_videos/15.png
    - assets/mini_videos/16.png
-
-
-  
+   - assets/tips/1_ALIMENTACION.png
+   - assets/tips/2_LACTANCIA.png
+   - assets/tips/3_BENEFICIOS.png   
+   - assets/tips/4_POSTURA.png 
+   - assets/tips/5_CALOSTRO.png 
+   - assets/tips/6_CONSEJOS.png  
+   - assets/tips/7_EXTRACCION.png 
+   - assets/tips/7.1_EXTRACCION.png 
+   - assets/tips/8_HIGIENE.png 
+   - assets/tips/9_CONSEJO_LACTANCIA.png 
+   - assets/tips/10_PADRE.png 
+   - assets/tips/11_PROBLEMAS.png
+   - assets/tips/12_LIKE.png  
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

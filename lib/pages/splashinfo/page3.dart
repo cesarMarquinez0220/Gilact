@@ -7,6 +7,7 @@ class Page3 extends StatefulWidget {
   const Page3({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _Page3State createState() => _Page3State();
 }
 
@@ -19,7 +20,7 @@ class _Page3State extends State<Page3> {
     super.initState();
 
     // Agrega un temporizador para cambiar automáticamente de página después de 5 segundos
-    _timer = Timer(Duration(seconds: 2), () {
+    _timer = Timer(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -47,27 +48,28 @@ class _Page3State extends State<Page3> {
       },
       child: Stack(
         children: [
+          // ignore: avoid_unnecessary_containers
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Padding(
-                  padding: EdgeInsets.only(top: 23, left: 90),
+                  padding: const EdgeInsets.only(top: 23, left: 90),
                   child: FadeInDown(
-                      duration: Duration(milliseconds: 1000),
+                      duration: const Duration(milliseconds: 1000),
                       child: Image.asset("assets/images/mother3.png")),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
                     child: FadeInUp(
-                      duration: Duration(milliseconds: 1000),
-                      delay: Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 1000),
+                      delay: const Duration(milliseconds: 500),
                       child: RichText(
                         textAlign: TextAlign.center,
-                        text: TextSpan(
+                        text: const TextSpan(
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 25,
@@ -88,9 +90,9 @@ class _Page3State extends State<Page3> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                     height: 25), // Separation between RichText and next text
-                Text(
+                const Text(
                   "Diabetes\n Hipertensión arterial \n Obesidad \n Cáncer (leucemia, linfoma)",
                   style: TextStyle(fontSize: 18, color: Colors.white),
                   textAlign: TextAlign.center,

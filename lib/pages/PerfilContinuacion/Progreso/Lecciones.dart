@@ -2,11 +2,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/Progreso/LeccionCompletada.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:flutter_login/pages/registro_lactancia.dart';
+import 'package:provider/provider.dart';
 
 class lecciones extends StatefulWidget {
   const lecciones({Key? key});
@@ -23,6 +24,7 @@ class _leccionesState extends State<lecciones> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String usuario;
   int lastCompletedLesson = 0; // Número de la última lección completada
+  
 
   @override
   void initState() {
@@ -194,7 +196,7 @@ class _leccionesState extends State<lecciones> {
   //   print(
   //       'Se regresó del reproductor y se actualizó la interfaz, PARTE DEL AWAIT');
 
-  //   // Por ejemplo, puedes llamar a _getUltimaLeccionCompletada nuevamente si es necesario
+  // Por ejemplo, puedes llamar a _getUltimaLeccionCompletada nuevamente si es necesario
   //   await _getUltimaLeccionCompletada();
 
   //   // Finalmente, si necesitas reconstruir la interfaz, puedes llamar a setState
@@ -270,7 +272,7 @@ class _leccionesState extends State<lecciones> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  _Title('Lección 1'),
+                                  _Title1('Lección 1'),
                                   GestureDetector(
                                     onTap: () {
                                       // Mostrar un mensaje cuando se presione
@@ -312,8 +314,8 @@ class _leccionesState extends State<lecciones> {
                                 ],
                               ),
                             ),
-                            _Subtitle('Lactancia materna y sus beneficios'),
-                            _PercentIndicator(
+                            _Subtitle1('Lactancia materna y sus beneficios'),
+                            _PercentIndicator1(
                               69.0,
                               'Homevideo.png',
                               Colors.blue,
@@ -328,7 +330,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'Writingvideo.png',
                               Colors.blue,
@@ -343,7 +345,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'working.png',
                               Colors.blue,
@@ -358,10 +360,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 2'),
-                            _Subtitle(
+                            _Title1('Lección 2'),
+                            _Subtitle1(
                                 'Calostro, leche de transisicon y leche madura'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'Softvideo.png',
                               Colors.blue,
@@ -376,7 +378,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'bebemujer1.png',
                               Colors.blue,
@@ -391,7 +393,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'bebevientre.png',
                               Colors.blue,
@@ -403,13 +405,13 @@ class _leccionesState extends State<lecciones> {
                                 top: MediaQuery.of(context).size.height * 0.02,
                                 right: MediaQuery.of(context).size.width * 0.1,
                                 bottom:
-                                    MediaQuery.of(context).size.height * 0.01,
-                              ),
-                            ),
-                            _Title('Lección 4'),
-                            _Subtitle(
+                                    MediaQuery.of(context).size.height * 0.01,),),
+                                
+
+                            _Title1('Lección 4'),
+                            _Subtitle1(
                                 'Composición Nutricional de la Leche Materna'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'mujereshablando.png',
                               Colors.blue,
@@ -424,10 +426,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 5'),
-                            _Subtitle(
+                            _Title1('Lección 5'),
+                            _Subtitle1(
                                 '¿Cómo saber que el bebé se alimentó lo suficiente?'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'food2.png',
                               Colors.blue,
@@ -442,7 +444,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'food3.png',
                               Colors.blue,
@@ -457,9 +459,9 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 6'),
-                            _Subtitle('Hitos de peso a vigilar'),
-                            _PercentIndicator(
+                            _Title1('Lección 6'),
+                            _Subtitle1('Hitos de peso a vigilar'),
+                            _PercentIndicator1(
                               69.0,
                               'health1.png',
                               Colors.blue,
@@ -474,7 +476,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'salud.png',
                               Colors.blue,
@@ -489,7 +491,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'food1.png',
                               Colors.blue,
@@ -504,10 +506,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 7'),
-                            _Subtitle(
+                            _Title1('Lección 7'),
+                            _Subtitle1(
                                 'Higiene de manos y técnicas de lactancia materna'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'health3.png',
                               Colors.blue,
@@ -522,7 +524,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'health4.png',
                               Colors.blue,
@@ -537,10 +539,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 8'),
-                            _Subtitle(
+                            _Title1('Lección 8'),
+                            _Subtitle1(
                                 'Medicamentos durante la lactancia materna'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'health2.png',
                               Colors.yellow,
@@ -555,7 +557,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'health5.png',
                               Colors.blue,
@@ -570,10 +572,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 9'),
-                            _Subtitle(
+                            _Title1('Lección 9'),
+                            _Subtitle1(
                                 'Signos o Complicaciones en la Lactancia'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'problema1.png',
                               Colors.blue,
@@ -588,7 +590,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'problema2.png',
                               const Color.fromARGB(255, 145, 243, 33),
@@ -603,7 +605,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'problema3.png',
                               Colors.blue,
@@ -618,7 +620,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'problema4.png',
                               Colors.blue,
@@ -633,7 +635,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'problema5.png',
                               Colors.blue,
@@ -648,10 +650,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 10'),
-                            _Subtitle(
+                            _Title1('Lección 10'),
+                            _Subtitle1(
                                 'Masajes al seno antes de iniciar la lactancia'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'cuidadomujer.png',
                               Colors.blue,
@@ -666,10 +668,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 11'),
-                            _Subtitle(
+                            _Title1('Lección 11'),
+                            _Subtitle1(
                                 'Mi banco de leche en casa y su preservacion'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'banco1.png',
                               Colors.blue,
@@ -684,7 +686,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'banco2.png',
                               Colors.blue,
@@ -699,7 +701,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'banco3.png',
                               Colors.blue,
@@ -714,10 +716,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 12'),
-                            _Subtitle(
+                            _Title1('Lección 12'),
+                            _Subtitle1(
                                 'Leyes en Panamá que apoyan la lactancia materna'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'ley1.png',
                               Colors.blue,
@@ -732,7 +734,7 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'ley2.png',
                               Colors.blue,
@@ -747,10 +749,10 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 13'),
-                            _Subtitle(
+                            _Title1('Lección 13'),
+                            _Subtitle1(
                                 'Diferencias entre la leche materna y la leche de vaca'),
-                            _PercentIndicator(
+                            _PercentIndicator1(
                               69.0,
                               'milk1.png',
                               Colors.blue,
@@ -765,9 +767,9 @@ class _leccionesState extends State<lecciones> {
                                     MediaQuery.of(context).size.height * 0.01,
                               ),
                             ),
-                            _Title('Lección 14'),
-                            _Subtitle('Mitos de la lactancia materna'),
-                            _PercentIndicator(
+                            _Title1('Lección 14'),
+                            _Subtitle1('Mitos de la lactancia materna'),
+                            _PercentIndicator1(
                               69.0,
                               'mitos.png',
                               Colors.blue,
@@ -783,24 +785,20 @@ class _leccionesState extends State<lecciones> {
                               ),
                             ),
                             _buildElevatedButton(),
-                            _buildBottomNavigationBar(),
+                            
                           ],
                         ),
                       ),
                     ),
                   ),
-                  if (_showLeccionCompletada)
-                    Positioned.fill(
-                      child: LeccionCompletada(
-                          // Puedes pasar cualquier parámetro necesario
-                          ),
-                    ),
+                  
                 ]),
               );
             }
           }),
     );
-  }
+  }               
+            
 
   Widget _buildAppBar() {
     return AppBar(
@@ -813,7 +811,7 @@ class _leccionesState extends State<lecciones> {
   }
 
   // ignore: non_constant_identifier_names
-  Widget _Title(String title) {
+  Widget _Title1(String title) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
@@ -831,7 +829,7 @@ class _leccionesState extends State<lecciones> {
   }
 
   // ignore: non_constant_identifier_names
-  Widget _Subtitle(String subtitle) {
+  Widget _Subtitle1(String subtitle) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
@@ -849,7 +847,7 @@ class _leccionesState extends State<lecciones> {
 
   //circulo indicador de la derecha
   // ignore: non_constant_identifier_names
-  Widget _PercentIndicator(
+  Widget _PercentIndicator1(
     double radius,
     String imageName,
     Color color,
@@ -983,49 +981,4 @@ class _leccionesState extends State<lecciones> {
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 60,
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 240, 237, 237),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildNotificationButton(Icons.home, _selectedIndex == 0, 0),
-          _buildNotificationButton(Icons.bar_chart, _selectedIndex == 1, 1),
-          _buildNotificationButton(Icons.settings, _selectedIndex == 2, 2),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationButton(IconData icon, bool isActive, int i) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {});
-      },
-      child: Column(
-        children: [
-          const SizedBox(height: 7),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isActive ? Colors.white : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: isActive
-                  ? Colors.blue
-                  : const Color.fromARGB(255, 150, 148, 148),
-              size: 30,
-            ),
-          ),
-          const SizedBox(height: 2),
-        ],
-      ),
-    );
-  }
 }

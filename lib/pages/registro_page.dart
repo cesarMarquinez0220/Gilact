@@ -9,9 +9,11 @@ import 'package:intl/intl.dart';
 import '../gradient.dart';
 
 class RegistroAPP extends StatefulWidget {
+  // ignore: use_super_parameters
   const RegistroAPP({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _RegistroAPPState createState() => _RegistroAPPState();
 }
 
@@ -55,6 +57,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
   }
 
 // funcion para validar correo electronico
+  // ignore: unused_element
   bool _isValidEmail(String email) {
     final emailRegex = RegExp(
       r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
@@ -62,6 +65,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
     return emailRegex.hasMatch(email);
   }
 
+  // ignore: non_constant_identifier_names
   final Firebase = FirebaseFirestore.instance;
 //funcion para enviar los datos a la base de datos
   _registerMDButtonPressed() async {
@@ -99,16 +103,17 @@ class _RegistroAPPState extends State<RegistroAPP> {
         'ubicacion': ubicacionController.text,
         'telefono': telefonoController.text
       });
+      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
+          return const AlertDialog(
             title: Text("Exitoso"),
             content: Text("Registro Exitoso"),
           );
         },
       );
-      Future.delayed(Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 2), () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -118,7 +123,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
       });
       return true;
     } catch (e) {
-      print("ERROR HAAAAAAAA" + e.toString());
+      //print("ERROR HAAAAAAAA" + e.toString());
     }
 
     // Realizar acciones posteriores al registro si es necesario
@@ -199,7 +204,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
         //   ),
         // ],
       ),
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -210,7 +215,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
             style: GoogleFonts.quicksand(
               fontSize: 33,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(162, 0, 0, 0),
+              color: const Color.fromARGB(162, 0, 0, 0),
             ),
           ),
           const SizedBox(height: 34),
@@ -238,7 +243,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
               swiperController.next();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color.fromRGBO(27, 167, 214, 1),
+              backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -266,7 +271,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
         borderRadius: BorderRadius.circular(20.0),
         color: Colors.white,
       ),
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -277,7 +282,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
               style: GoogleFonts.quicksand(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(162, 0, 0, 0),
+                color: const Color.fromARGB(162, 0, 0, 0),
               ),
               textAlign: TextAlign.center,
             ),
@@ -371,14 +376,14 @@ class _RegistroAPPState extends State<RegistroAPP> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(2, (index) {
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: 4.0),
+          margin: const EdgeInsets.symmetric(horizontal: 4.0),
           width: 10.0,
           height: 10.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: index == currentIndex
-                ? Color.fromARGB(255, 13, 156, 0)
-                : Color.fromARGB(255, 127, 224, 103),
+                ? const Color.fromARGB(255, 13, 156, 0)
+                : const Color.fromARGB(255, 127, 224, 103),
           ),
         );
       }),
@@ -425,7 +430,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
           hintText: hintText,
           hintStyle: GoogleFonts.quicksand(
             fontSize: 15,
-            color: Color.fromARGB(255, 204, 202, 202),
+            color: const Color.fromARGB(255, 204, 202, 202),
           ),
           prefixIcon: Icon(
             icon,
@@ -450,7 +455,7 @@ class _RegistroAPPState extends State<RegistroAPP> {
           _registerMDButtonPressed();
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromRGBO(27, 167, 214, 1),
+          backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -521,29 +526,13 @@ class CustomCedulaInputFormatter extends TextInputFormatter {
     if (length <= 3) {
       return input;
     } else if (length <= 6) {
-      return input.substring(0, 1) + '-' + input.substring(1, length);
+      return '${input.substring(0, 1)}-${input.substring(1, length)}';
     } else if (length <= 9) {
-      return input.substring(0, 1) +
-          '-' +
-          input.substring(1, 4) +
-          '-' +
-          input.substring(4, length);
+      return '${input.substring(0, 1)}-${input.substring(1, 4)}-${input.substring(4, length)}';
     } else if (length <= 12) {
-      return input.substring(0, 1) +
-          '-' +
-          input.substring(1, 4) +
-          '-' +
-          input.substring(4, 7) +
-          '-' +
-          input.substring(7, length);
+      return '${input.substring(0, 1)}-${input.substring(1, 4)}-${input.substring(4, 7)}-${input.substring(7, length)}';
     }
-    return input.substring(0, 1) +
-        '-' +
-        input.substring(1, 4) +
-        '-' +
-        input.substring(4, 7) +
-        '-' +
-        input.substring(7, 10);
+    return '${input.substring(0, 1)}-${input.substring(1, 4)}-${input.substring(4, 7)}-${input.substring(7, 10)}';
   }
 }
 
