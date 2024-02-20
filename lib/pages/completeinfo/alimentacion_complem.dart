@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
 
 class AlimentacionComplementariaInfo extends StatelessWidget {
+  // ignore: use_super_parameters
   const AlimentacionComplementariaInfo({Key? key}) : super(key: key);
 
   @override
@@ -17,6 +17,7 @@ class AlimentacionComplementariaInfo extends StatelessWidget {
         return detection.isLoggedIn;
       },
       child: SafeArea(
+        // ignore: avoid_unnecessary_containers
         child: Container(
           child: SingleChildScrollView(
             child: Column(

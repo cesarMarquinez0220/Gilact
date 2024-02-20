@@ -18,7 +18,8 @@ Future<void> initNotifications() async {
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
 
-Future<void> mostrarNotificacion() async {
+
+Future<void> notificacionPrueba() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   DateTime lastOpened = DateTime.parse(prefs.getString('last_opened') ?? '');
   DateTime now = DateTime.now();

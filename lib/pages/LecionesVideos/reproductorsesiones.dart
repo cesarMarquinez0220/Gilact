@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/enlaces%20de%20videos/duracion_enlaces.dart';
 import 'package:flutter_login/pages/enlaces%20de%20videos/enlaces.dart';
@@ -189,14 +188,16 @@ class FirestoreService {
 }
 
 class ReproductorVideo extends StatefulWidget {
+  final String videoUrl;
   final int videoId;
   final int duracionId;
 
   ReproductorVideo({
     Key? key,
+    required this.videoUrl,
     required this.videoId,
     required this.duracionId,
-  }) : super(key: ValueKey<int>(videoId));
+  }) : super(key: ValueKey<String>(videoUrl));
 
   @override
   _ReproductorVideoState createState() => _ReproductorVideoState();
@@ -226,7 +227,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
     print('Inicializando Youtube Player para video ID: ${widget.videoId}');
     _controller = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId(
-            VideoLinks.videoUrls[widget.videoId]!,
+            widget.videoUrl,
           ) ??
           '',
       flags: const YoutubePlayerFlags(
@@ -316,7 +317,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
           pausas: pauseCount,
           adelantos: forwardCount,
           ultimaPosicion: _controller.value.position.inMilliseconds,
-          duracion: VideoDuration.videoDuracion[widget.duracionId] ?? 0,
+          duracion: widget.duracionId,
         );
       } else {
         print('No se encontró un usuario con el nombre: $userName');

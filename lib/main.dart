@@ -1,6 +1,6 @@
 import 'package:background_fetch/background_fetch.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_login/pages/ComingSoonPage.dart';
@@ -27,20 +27,21 @@ void main() async {
   await initNotifications();
   await updateLastOpened();
 
-// Configura el plugin background_fetch
+  // Configura el plugin background_fetch
   await BackgroundFetch.configure(
-    BackgroundFetchConfig(
-      minimumFetchInterval: 2, // Ejecutar cada 2 minutos
-      stopOnTerminate: false,
-      enableHeadless: true,
-      requiresBatteryNotLow: false,
-      requiresCharging: false,
-      requiresStorageNotLow: false,
-      requiresDeviceIdle: false,
-      requiredNetworkType:NetworkType.NONE,
-    ),
-    mostrarNotificacion, // Función para ejecutar
-  );
+      BackgroundFetchConfig(
+        minimumFetchInterval: 2, // Ejecutar cada 2 minutos
+        stopOnTerminate: false,
+        enableHeadless: true,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+        requiredNetworkType: NetworkType.NONE,
+      ),
+     notificacionPrueba,
+      );
+
   // TODO:1
   // MARK: ///// CONFIGURACION DE FIRESTORE //////////
   // final FirebaseFirestore database = FirebaseFirestore.instance;
@@ -68,8 +69,6 @@ void main() async {
   );
 }
 
-
-
 Future<void> updateLastOpened() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   DateTime now = DateTime.now();
@@ -82,18 +81,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final changeTheme = Provider.of<TemaProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
+      theme: changeTheme.temaOscuro?ThemeData.dark():ThemeData.light(),
       home: LoginScreen(),
       //home: SeccionVideos(),
       routes: {
-        '/lecciones': (context) => lecciones(),
+        '/lecciones': (context) => lecciones(videos: []),
         '/secciones': (context) => User_videos(),
-        '/comingSoon': (context) => ComingSoonPage(),
         '/edicion': (context) => editProfile(),
         '/tips': (context) => Tips(),
-        // Otras rutas aquí...
+     
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LeccionesProvider with ChangeNotifier {
+  // ignore: non_constant_identifier_names
   Map<int, bool> lecciones_list = {
     1: true, //video 1
     2: false, //video 2.1
@@ -36,20 +37,30 @@ class LeccionesProvider with ChangeNotifier {
     if (lecciones_list.containsKey(id)) {
       lecciones_list[id] = true; // Marcar el video actual como visto
       // Actualizar el estado del siguiente video si existe
-      print("se recibio el id $id");
       int siguienteId = id + 1;
       if (lecciones_list.containsKey(siguienteId)) {
         lecciones_list[siguienteId] = true;
-        print("siguiente video de la lista cambiado a $lecciones_list");
       }
       notifyListeners(); // Notificar a los oyentes que el estado ha cambiado
     }
   }
 
-
-  
   bool isLeccionCompletada(int leccionId) {
-  return lecciones_list[leccionId] ?? false;
-}
+    return lecciones_list[leccionId] ?? false;
+  }
 
+  void updateVideosVistos(List<bool> videosVistos) {
+    // Actualizar la lista de videos vistos con la nueva información
+    for (int i = 0; i < videosVistos.length; i++) {
+      lecciones_list[i + 1] = videosVistos[i];
+      // Marcar el siguiente video como visto si el video actual está marcado como visto
+      if (videosVistos[i]) {
+        int siguienteId = i + 2; // Obtener el ID del siguiente video
+        if (lecciones_list.containsKey(siguienteId)) {
+          lecciones_list[siguienteId] = true;
+        }
+      }
+    }
+    notifyListeners(); // Notificar a los oyentes que el estado ha cambiado
+  }
 }

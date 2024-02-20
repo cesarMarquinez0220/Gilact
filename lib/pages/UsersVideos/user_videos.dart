@@ -190,9 +190,11 @@ class _User_videosState extends State<User_videos> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => ReproductorVideo(
-                                            videoId: searchJson[index]['id'],
-                                            duracionId: searchJson[index]
-                                                ['duracion'])));
+                                              videoId: searchJson[index]['id'],
+                                              duracionId: searchJson[index]
+                                                  ['duracion'],
+                                              videoUrl: 'url',
+                                            )));
                               },
                               child: Container(
                                 width: 35,

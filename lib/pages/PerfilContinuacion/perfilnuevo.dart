@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/estadistica.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
+import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 class Perfilnuevo extends StatefulWidget {
   const Perfilnuevo({Key? key}) : super(key: key);
@@ -21,6 +24,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   int _selectedIndex = 0;
   String nombreUsuario = UserDataStorage.getUserName();
   String email = UserDataStorage.getUserEmail();
+  late String usuario;
   // ignore: unused_field
   bool _isEditing = false;
   String nombreMadre = '';
@@ -34,6 +38,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _ubicacionController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Video> _videos = [];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -44,7 +50,9 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   @override
   void initState() {
     super.initState();
+    usuario = UserDataStorage.getUserName();
     _fetchUserData(); // Recuperar los datos del usuario desde la base de datos
+    _loadVideosFromFirestore();
   }
 
   Future<void> _fetchUserData() async {
@@ -72,6 +80,93 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       // ignore: avoid_print
       print("Error al recuperar la información del usuario: $e");
     }
+  }
+
+  Future<void> _loadVideosFromFirestore() async {
+    try {
+      // Cargar videos desde Firestore
+      List<Video> videos = await FirestoreServiceLecciones().getVideos();
+
+      // Obtener el último ID de lección completada
+      int? lastCompletedLesson  = await _getUltimaLeccionCompletada() ;
+
+      // Actualizar la lista de videos vistos en LeccionesProvider
+      Provider.of<LeccionesProvider>(context, listen: false)
+          .updateVideosVistos(videos.map((video) {
+        if (lastCompletedLesson != null &&
+            video.videoId <= lastCompletedLesson+1) {
+          // Marcar como visto si la lección es menor o igual al último completado
+          return true;
+        } else {
+          return false;
+        }
+      }).toList());
+
+      setState(() {
+        _videos = videos;
+      });
+      print('Aqui esta la informacion $_videos');
+    } catch (e) {
+      print('Error cargando videos desde Firestore: $e');
+      // Manejar el error
+    }
+  }
+
+  Future<int?> _getUltimaLeccionCompletada() async {
+    try {
+      final usuarioDocRef = await _getUsuarioDocumento(usuario);
+      if (usuarioDocRef != null) {
+        final videosCollectionRef = usuarioDocRef.collection('videos');
+        final videosCollection =
+            await videosCollectionRef.orderBy(FieldPath.documentId).get();
+
+        if (videosCollection.docs.isNotEmpty) {
+          // Filtrar los documentos con contadorVisualizaciones distinto de 0
+          final videosConContador = videosCollection.docs
+              .where(
+                  (videoDoc) => (videoDoc['contadorVisualizaciones'] ?? 0) > 0)
+              .toList();
+
+          if (videosConContador.isNotEmpty) {
+            // Ordenar los documentos de menor a mayor (por número de lección)
+            videosConContador
+                .sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
+
+            // Obtener el último documento (mayor número de lección)
+            final lastLessonDoc = videosConContador.last;
+            print('Este es el ultima leccion $lastLessonDoc');
+            // Obtener el número de lección
+            return int.parse(lastLessonDoc.id);
+          }
+        }
+      }
+      return null;
+    } catch (error) {
+      print('Error al obtener la última lección completada: $error');
+      return null;
+    }
+  }
+
+  Future<DocumentReference?> _getUsuarioDocumento(String usuario) async {
+    final usersQuery = await _firestore
+        .collection('Users')
+        .where('usuario', isEqualTo: usuario)
+        .limit(1)
+        .get();
+
+    return usersQuery.docs.isNotEmpty ? usersQuery.docs[0].reference : null;
+  }
+
+  void _navigateToEdicion() {
+    Navigator.pushNamed(context, '/edicion');
+  }
+
+  void _navigateToLecciones() {
+    Navigator.pushNamed(
+      context,
+      '/lecciones',
+      arguments: {'videos': _videos},
+    );
   }
 
   // ignore: unused_element
@@ -198,7 +293,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       Icons.show_chart,
                       const Color.fromARGB(255, 255, 132, 0),
                       'Mira tu progreso de lecciones',
-                      '/lecciones',
+                      _navigateToLecciones, // Pasa la función como argumento
                     ),
                     const SizedBox(height: 15),
                     GridView.count(
@@ -260,7 +355,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       Icons.edit,
                       const Color.fromARGB(255, 19, 19, 196),
                       'Cambia tu informacion personal',
-                      '/edicion',
+                      _navigateToEdicion,
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * .02),
                   ],
@@ -408,12 +503,10 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     IconData icon,
     Color bgColor,
     String infoText,
-    String route,
+    VoidCallback onTap,
   ) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, route);
-      },
+      onTap: onTap,
       child: FadeInUp(
         duration:
             const Duration(milliseconds: 1500), // Duración de la animación
