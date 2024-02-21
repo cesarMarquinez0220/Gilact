@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
       //home: SeccionVideos(),
       routes: {
         '/lecciones': (context) => lecciones(videos: []),
-        '/secciones': (context) => User_videos(),
+        '/secciones': (context) => User_videos(videos: []),
         '/edicion': (context) => editProfile(),
         '/tips': (context) => Tips(),
      

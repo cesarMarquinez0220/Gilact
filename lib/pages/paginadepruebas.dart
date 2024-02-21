@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
@@ -144,13 +145,26 @@ class _leccionesState extends State<lecciones> {
 
   Widget _buildLessons(List<Video> videos) {
     int previousLessonId = -1; // Almacena el ID de la lección anterior
+    int lastCompletedIndex = -1;
+
+    // Encuentra el índice del último video completado
+    for (int i = 0; i < videos.length; i++) {
+      if (context
+          .read<LeccionesProvider>()
+          .isLeccionCompletada(videos[i].videoId)) {
+        lastCompletedIndex = i;
+      } else {
+        break; // Detiene el bucle cuando encuentra el primer video no completado
+      }
+    }
 
     return Column(
       children: videos.asMap().entries.map((entry) {
         final index = entry.key;
         final video = entry.value;
         final isOdd = index.isOdd;
-        final currentLessonId = video.leccionId; // ID de la lección actual
+        final currentLessonId = video.leccionId;
+        final isLastCompleted = index == lastCompletedIndex;
 
         // Verifica si es necesario mostrar el encabezado
         final showHeader = currentLessonId != previousLessonId;
@@ -177,7 +191,10 @@ class _leccionesState extends State<lecciones> {
                 child: _PercentIndicator(
                   69.0,
                   video.imageName,
-                  Colors.blue,
+                  isLastCompleted
+                      ? Colors.green
+                      : Colors
+                          .blue, // Cambia el color si es el último completado
                   video.videoId,
                   video.leccionId,
                   leccionId: video.leccionId,
@@ -277,53 +294,96 @@ class _leccionesState extends State<lecciones> {
     required int duration,
   }) {
     return Consumer<LeccionesProvider>(
-        builder: (context, leccionesProvider, child) {
-      return GestureDetector(
-        onTap: () {
-          final isEnabled =
-              context.read<LeccionesProvider>().isLeccionCompletada(videoId);
-          if (isEnabled) {
-            print("Lección $videoId completada");
-            _navigateToReproductorVideoHelper(
-                videoId, duracionId, videoURL, duration);
-          } else {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Lección no disponible"),
-                  content: const Text(
-                      "Debes completar esta lección antes de acceder a la siguiente."),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text("Cerrar"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+      builder: (context, leccionesProvider, child) {
+        final ultimoId = leccionesProvider.ultimoIdEnEstadoTrue(
+          leccionesProvider.lecciones_list,
+        );
+        final esUltimoId = videoId == ultimoId;
+
+        return GestureDetector(
+          onTap: () {
+            final isEnabled =
+                context.read<LeccionesProvider>().isLeccionCompletada(videoId);
+            if (isEnabled) {
+              print("Lección $videoId completada");
+              _navigateToReproductorVideoHelper(
+                  videoId, duracionId, videoURL, duration);
+            } else {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Lección no disponible"),
+                    content: const Text(
+                      "Debes completar esta lección antes de acceder a la siguiente.",
                     ),
-                  ],
-                );
-              },
-            );
-          }
-        },
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: CircularPercentIndicator(
-            radius: radius,
-            lineWidth: 9.0,
-            percent:
-                context.read<LeccionesProvider>().isLeccionCompletada(videoId)
-                    ? 1.0
-                    : 0.0,
-            center: _buildImageContainer(imageName),
-            circularStrokeCap: CircularStrokeCap.butt,
-            progressColor: color,
-            backgroundColor: Colors.white,
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text("Cerrar"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          },
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: esUltimoId
+                ? Dance(
+                    infinite: true,
+                    child: Container(
+                      width: radius * 2,
+                      height: radius * 2,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.yellow,
+                            spreadRadius: 5,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: CircularPercentIndicator(
+                        radius: radius,
+                        lineWidth: 9.0,
+                        percent: context
+                                .read<LeccionesProvider>()
+                                .isLeccionCompletada(videoId)
+                            ? 1.0
+                            : 0.0,
+                        center: _buildImageContainer(imageName),
+                        circularStrokeCap: CircularStrokeCap.butt,
+                        progressColor: color,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: radius * 2,
+                    height: radius * 2,
+                    child: CircularPercentIndicator(
+                      radius: radius,
+                      lineWidth: 9.0,
+                      percent: context
+                              .read<LeccionesProvider>()
+                              .isLeccionCompletada(videoId)
+                          ? 1.0
+                          : 0.0,
+                      center: _buildImageContainer(imageName),
+                      circularStrokeCap: CircularStrokeCap.butt,
+                      progressColor: color,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Widget _buildImageContainer(String imageName) {

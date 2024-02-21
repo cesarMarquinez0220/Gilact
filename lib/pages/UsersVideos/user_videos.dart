@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/UsersVideos/search_json.dart';
+import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class User_videos extends StatefulWidget {
-  const User_videos({super.key});
+  const User_videos({Key? key, required List<Video> videos});
 
   @override
   State<User_videos> createState() => _User_videosState();
 }
 
 class _User_videosState extends State<User_videos> {
-  int _selectedIndex = 0;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String usuario;
   int lastCompletedLesson = 0;
+  List<Video>? _videos;
 
   Future<void> _getUltimaLeccionCompletada() async {
     try {
@@ -74,10 +75,13 @@ class _User_videosState extends State<User_videos> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    _videos = args['videos'] as List<Video>;
     return Scaffold(
       backgroundColor: Color.fromARGB(119, 2, 80, 71),
       appBar: getAppBar(),
-      body: getBody(),
+      body: getBody(_videos!),
     );
   }
 
@@ -109,7 +113,7 @@ class _User_videosState extends State<User_videos> {
     );
   }
 
-  SingleChildScrollView getBody() {
+  SingleChildScrollView getBody(List<Video> videos) {
     var size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Padding(
@@ -128,10 +132,10 @@ class _User_videosState extends State<User_videos> {
             ),
             SizedBox(height: 12),
             Column(
-              children: List.generate(searchJson.length, (index) {
-                // Filtrar los videos que pertenecen a la última lección completada
-                if (searchJson[index]['title'] != null &&
-                    index + 1 <= lastCompletedLesson) {
+              children: List.generate(videos.length, (index) {
+                final video = videos[index];
+                // Verifica si el video pertenece a la última lección completada
+                if (video.videoId <= lastCompletedLesson) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
@@ -150,7 +154,7 @@ class _User_videosState extends State<User_videos> {
                                       borderRadius: BorderRadius.circular(5),
                                       image: DecorationImage(
                                         image: AssetImage(
-                                            searchJson[index]['img']),
+                                            'assets/mini_videos/${video.imgvideos}'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -168,7 +172,7 @@ class _User_videosState extends State<User_videos> {
                               Container(
                                 width: (size.width - 36) * 0.4,
                                 child: Text(
-                                  searchJson[index]['title'],
+                                  video.title,
                                   style: TextStyle(
                                     fontFamily: 'Quicksand',
                                     fontSize: 14,
@@ -187,14 +191,15 @@ class _User_videosState extends State<User_videos> {
                             child: GestureDetector(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ReproductorVideo(
-                                              videoId: searchJson[index]['id'],
-                                              duracionId: searchJson[index]
-                                                  ['duracion'],
-                                              videoUrl: 'url',
-                                            )));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ReproductorVideo(
+                                      videoId: video.videoId,
+                                      duracionId: video.duration,
+                                      videoUrl: video.videoURL,
+                                    ),
+                                  ),
+                                );
                               },
                               child: Container(
                                 width: 35,
@@ -226,11 +231,5 @@ class _User_videosState extends State<User_videos> {
         ),
       ),
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 }

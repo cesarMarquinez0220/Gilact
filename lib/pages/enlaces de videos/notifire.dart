@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LeccionesProvider with ChangeNotifier {
+  int _lastCompletedLesson = 0;
   // ignore: non_constant_identifier_names
   Map<int, bool> lecciones_list = {
     1: true, //video 1
@@ -33,6 +34,13 @@ class LeccionesProvider with ChangeNotifier {
     28: false, //video 15
     29: false, //video 16
   };
+  int get lastCompletedLesson => _lastCompletedLesson;
+
+  void updateLastCompletedLesson(int lessonNumber) {
+    _lastCompletedLesson = lessonNumber;
+    notifyListeners();
+  }
+
   void marcarVideoComoVisto(int id) {
     if (lecciones_list.containsKey(id)) {
       lecciones_list[id] = true; // Marcar el video actual como visto
@@ -62,5 +70,15 @@ class LeccionesProvider with ChangeNotifier {
       }
     }
     notifyListeners(); // Notificar a los oyentes que el estado ha cambiado
+  }
+
+  int ultimoIdEnEstadoTrue(Map<int, bool> lecciones_list) {
+    int? ultimoId;
+    lecciones_list.forEach((id, estado) {
+      if (estado) {
+        ultimoId = id;
+      }
+    });
+    return ultimoId ?? -1;
   }
 }

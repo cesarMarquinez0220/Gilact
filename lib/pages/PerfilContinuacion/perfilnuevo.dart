@@ -88,13 +88,13 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       List<Video> videos = await FirestoreServiceLecciones().getVideos();
 
       // Obtener el último ID de lección completada
-      int? lastCompletedLesson  = await _getUltimaLeccionCompletada() ;
+      int? lastCompletedLesson = await _getUltimaLeccionCompletada();
 
       // Actualizar la lista de videos vistos en LeccionesProvider
       Provider.of<LeccionesProvider>(context, listen: false)
           .updateVideosVistos(videos.map((video) {
         if (lastCompletedLesson != null &&
-            video.videoId <= lastCompletedLesson+1) {
+            video.videoId <= lastCompletedLesson + 1) {
           // Marcar como visto si la lección es menor o igual al último completado
           return true;
         } else {
@@ -165,6 +165,14 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     Navigator.pushNamed(
       context,
       '/lecciones',
+      arguments: {'videos': _videos},
+    );
+  }
+
+  void _navigateToHistorial() {
+    Navigator.pushNamed(
+      context,
+      '/secciones',
       arguments: {'videos': _videos},
     );
   }
@@ -312,13 +320,13 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           'Sobre consejos \n alimenticios y más',
                           '/tips',
                         ),
-                        _buildFeatureBox(
+                        _buildFeatureBoxes(
                           'Historial de\n Videos',
                           Icons.video_library,
                           //Color.fromARGB(224, 189, 154, 211),
                           const Color.fromARGB(255, 31, 134, 113),
                           'Enfatiza conocimiento',
-                          '/secciones',
+                          _navigateToHistorial,
                         ),
                       ],
                     ),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreServiceLecciones {
@@ -16,6 +18,8 @@ class Video {
   final String imageName;
   final int leccionId;
   final int videoId;
+  final String title;
+  final String imgvideos;
 
   Video({
     required this.videoURL,
@@ -23,11 +27,15 @@ class Video {
     required this.imageName,
     required this.leccionId,
     required this.videoId,
+    required this.title,
+    required this.imgvideos,
   });
 
   // Método para crear un objeto Video a partir de un documento de Firestore
   factory Video.fromDocument(QueryDocumentSnapshot doc) {
     return Video(
+      imgvideos: doc.get('imgVideos') as String,
+      title: doc.get('title') as String,
       videoURL: doc.get('url') as String,
       duration: doc.get('duracion') as int,
       imageName: doc.get('imagen') as String,
