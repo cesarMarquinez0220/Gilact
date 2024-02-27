@@ -250,6 +250,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   }
 
   Widget _buildPerfilNuevo() {
+    final double width = MediaQuery.of(context).size.width;
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -265,32 +266,41 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hola $nombreUsuario',
-                              style: GoogleFonts.quicksand(
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Hola $nombreUsuario',
+                                style: GoogleFonts.quicksand(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xff034C8C)),
-                            ),
-                            Text(
-                              'Avanzamos en las lecciones?',
-                              style: GoogleFonts.quicksand(
-                                  fontSize: 18,
+                                  color: const Color(0xff034C8C),
+                                ),
+                              ),
+                              Text(
+                                'Avanzamos en las lecciones?',
+                                style: GoogleFonts.quicksand(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * .05,
                                   fontWeight: FontWeight.w500,
                                   color:
-                                      const Color.fromARGB(255, 117, 115, 115)),
-                            ),
-                          ],
+                                      const Color.fromARGB(255, 117, 115, 115),
+                                ),
+                              ),
+                              
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 20),
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.transparent,
-                          child: ClipRRect(
-                            child: Image.asset("assets/images/solo-logo.png"),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.transparent,
+                            child: ClipRRect(
+                              child: Image.asset("assets/images/solo-logo.png"),
+                            ),
                           ),
                         ),
                       ],

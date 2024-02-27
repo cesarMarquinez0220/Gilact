@@ -333,8 +333,8 @@ class _leccionesState extends State<lecciones> {
           child: Align(
             alignment: Alignment.centerRight,
             child: esUltimoId
-                ? Dance(
-                    infinite: true,
+                ? Flash(
+                    duration: const Duration(seconds: 2),
                     child: Container(
                       width: radius * 2,
                       height: radius * 2,

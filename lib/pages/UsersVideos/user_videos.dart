@@ -140,53 +140,55 @@ class _User_videosState extends State<User_videos> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       children: [
-                        Container(
-                          width: (size.width - 40) * 0.8,
-                          height: 80,
-                          child: Row(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    width: 120,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/mini_videos/${video.imgvideos}'),
-                                        fit: BoxFit.cover,
+                        Expanded(
+                          flex:
+                              5, // Ocupa el 50% del espacio disponible en la fila
+                          child: Container(
+                            height: 80,
+                            child: Row(
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: 120,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/mini_videos/${video.imgvideos}'),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    width: 120,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.2),
+                                    Container(
+                                      width: 120,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.2),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    video.title,
+                                    style: TextStyle(
+                                      fontFamily: 'Quicksand',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ],
-                              ),
-                              SizedBox(width: 15),
-                              Container(
-                                width: (size.width - 36) * 0.4,
-                                child: Text(
-                                  video.title,
-                                  style: TextStyle(
-                                    fontFamily: 'Quicksand',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                        Container(
-                          width: (size.width - 36) * 0.2,
-                          height: 80,
+                        Flexible(
+                          flex:
+                              1, // Ocupa el 10% del espacio disponible en la fila
                           child: Center(
                             child: GestureDetector(
                               onTap: () {
@@ -202,7 +204,7 @@ class _User_videosState extends State<User_videos> {
                                 );
                               },
                               child: Container(
-                                width: 35,
+                                width: size.width * 0.5,
                                 height: 35,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,

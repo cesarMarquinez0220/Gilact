@@ -162,9 +162,12 @@ class _LoginScreenState extends State<LoginScreen> {
     TextEditingController? controller,
     bool obscureText = false,
   }) {
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
+
     return Container(
-      height: 48,
-      width: 320,
+      height: height * .1,
+      width: width * .8,
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
@@ -203,32 +206,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // widget encargado del boton para enviar los datos y su diseño
   Widget _buildButton(BuildContext context, String text) {
-    return SizedBox(
-      width: 320,
-      child: ElevatedButton(
-        onPressed: () async {
-          if (emailAPP.text.isEmpty || contrasena.text.isEmpty) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text(
-                    textAlign: TextAlign.center,
-                    "Alerta",
-                    style: TextStyle(color: Color.fromARGB(255, 253, 40, 40)),
-                  ),
-                  content: Text(
-                      textAlign: TextAlign.center,
-                      'Todos los campos son obligatorios'),
-                );
-              },
-            );
-          } else {
-            bool isValid = await validarDatos();
-            if (!isValid) {
-              setState(() {
-                loginAttempts++; // Incrementar el contador de intentos
-              });
+    final double width = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.only(right: width * .05, left: width * .05),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 1,
+        child: ElevatedButton(
+          onPressed: () async {
+            if (emailAPP.text.isEmpty || contrasena.text.isEmpty) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -239,50 +224,73 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Color.fromARGB(255, 253, 40, 40)),
                     ),
                     content: Text(
-                        textAlign: TextAlign.start,
-                        'Credenciales incorrectos o no esta registrado'),
+                        textAlign: TextAlign.center,
+                        'Todos los campos son obligatorios'),
                   );
                 },
               );
             } else {
-              bool foundUser = await buscarNombreDeUsuario(emailAPP.text);
-              //query para extraer el nombre de usuario a partir del correo
-              if (foundUser) {
+              bool isValid = await validarDatos();
+              if (!isValid) {
                 setState(() {
-                  loginAttempts = 0; // Restablecer el contador de intentos
+                  loginAttempts++; // Incrementar el contador de intentos
                 });
-
-                // inicio de sesión exitoso
-                detection.login();
-                print('Inicio de sesión exitoso');
-                detection.login();
-                Future.delayed(Duration(milliseconds: 500), () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WelcomeScreen(),
-                    ),
-                  );
-                });
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(
+                        textAlign: TextAlign.center,
+                        "Alerta",
+                        style:
+                            TextStyle(color: Color.fromARGB(255, 253, 40, 40)),
+                      ),
+                      content: Text(
+                          textAlign: TextAlign.start,
+                          'Credenciales incorrectos o no esta registrado'),
+                    );
+                  },
+                );
               } else {
-                // Resto del código si el usuario no fue encontrado
+                bool foundUser = await buscarNombreDeUsuario(emailAPP.text);
+                //query para extraer el nombre de usuario a partir del correo
+                if (foundUser) {
+                  setState(() {
+                    loginAttempts = 0; // Restablecer el contador de intentos
+                  });
+
+                  // inicio de sesión exitoso
+                  detection.login();
+                  print('Inicio de sesión exitoso');
+                  detection.login();
+                  Future.delayed(Duration(milliseconds: 500), () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WelcomeScreen(),
+                      ),
+                    );
+                  });
+                } else {
+                  // Resto del código si el usuario no fue encontrado
+                }
               }
             }
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromRGBO(27, 167, 214, 1),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            shadowColor: Colors.black.withOpacity(0.5),
+            elevation: 5,
           ),
-          shadowColor: Colors.black.withOpacity(0.5),
-          elevation: 5,
-        ),
-        child: Text(
-          text,
-          style: GoogleFonts.quicksand(
-              fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+          child: Text(
+            text,
+            style: GoogleFonts.quicksand(
+                fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -325,7 +333,11 @@ class _LoginScreenState extends State<LoginScreen> {
   //orientacion vertical
   Widget _buildPortraitLayout() {
     return Container(
-      padding: const EdgeInsets.only(top: 120, bottom: 30, left: 20, right: 20),
+      padding: EdgeInsets.only(
+          top: MediaQuery.of(context).size.height * 0.1,
+          bottom: 30,
+          left: 20,
+          right: 20),
       width: double.infinity,
       child: Center(
         child: Column(
@@ -338,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 0.3 * MediaQuery.of(context).size.height,
             ),
             SizedBox(
-              height: MediaQuery.sizeOf(context).height*0.05,
+              height: MediaQuery.sizeOf(context).height * 0.05,
             ),
             Container(
               constraints: const BoxConstraints(maxWidth: 360),
