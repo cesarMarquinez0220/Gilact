@@ -1,10 +1,12 @@
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/estadistica.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
+import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +14,8 @@ import 'package:provider/provider.dart';
 class Perfilnuevo extends StatefulWidget {
   const Perfilnuevo({Key? key}) : super(key: key);
 
+  // ignore: duplicate_ignore
   @override
-  // ignore: library_private_types_in_public_api
   _PerfilnuevoState createState() => _PerfilnuevoState();
   static _PerfilnuevoState? of(BuildContext context) {
     return context.findAncestorStateOfType<_PerfilnuevoState>();
@@ -53,8 +55,16 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     usuario = UserDataStorage.getUserName();
     _fetchUserData(); // Recuperar los datos del usuario desde la base de datos
     _loadVideosFromFirestore();
-  }
+    _actualizarListaVideosCompletados();
 
+  }
+ Future<void> _actualizarListaVideosCompletados() async {
+    final obtenerInfoAvance = ObtenerInfoAvance();
+    final listaIdsVideosCompletados = await obtenerInfoAvance.obtenerIdsVideosCompletadosDesdeFirestore(nombreUsuario);
+
+    // Actualizar la lista en el proveedor Avancesprovider
+    context.read<Avancesprovider>().actualizarListaIdsVideosCompletados(listaIdsVideosCompletados);
+  }
   Future<void> _fetchUserData() async {
     try {
       QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
@@ -73,11 +83,10 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
           telefono = userSnapshot.get('telefono');
           ubicacion = userSnapshot.get('ubicacion');
         });
-        // ignore: avoid_print
+
         print(userSnapshot.data());
       }
     } catch (e) {
-      // ignore: avoid_print
       print("Error al recuperar la información del usuario: $e");
     }
   }
@@ -204,7 +213,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         _fetchUserData();
       }
     } catch (e) {
-      // ignore: avoid_print
       print("Error al actualizar la información del usuario: $e");
     }
   }
@@ -241,7 +249,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       case 0:
         return _buildPerfilNuevo();
       case 1:
-        return Estadistica(); // La pantalla de estadísticas
+        return const Estadistica(); // La pantalla de estadísticas
       case 2:
         return ConfiguracionScreen(); // La pantalla de configuración
       default:
@@ -250,7 +258,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   }
 
   Widget _buildPerfilNuevo() {
-    final double width = MediaQuery.of(context).size.width;
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -263,18 +270,20 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(width: 10),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.9,
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.05),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Hola $nombreUsuario',
                                 style: GoogleFonts.quicksand(
-                                  fontSize: 24,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.06,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xff034C8C),
                                 ),
@@ -283,20 +292,26 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                                 'Avanzamos en las lecciones?',
                                 style: GoogleFonts.quicksand(
                                   fontSize:
-                                      MediaQuery.of(context).size.width * .05,
+                                      MediaQuery.of(context).size.width * 0.05,
                                   fontWeight: FontWeight.w500,
                                   color:
                                       const Color.fromARGB(255, 117, 115, 115),
                                 ),
                               ),
-                              
                             ],
                           ),
                         ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.5,
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height *
+                                0.02), // Espaciado entre los textos y el avatar
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width *
+                              0.2, // Ancho del avatar
+                          height: MediaQuery.of(context).size.width *
+                              0.2, // Altura del avatar
                           child: CircleAvatar(
-                            radius: 40,
+                            radius: MediaQuery.of(context).size.width *
+                                0.1, // Radio del avatar
                             backgroundColor: Colors.transparent,
                             child: ClipRRect(
                               child: Image.asset("assets/images/solo-logo.png"),

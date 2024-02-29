@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, use_super_parameters
+
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
@@ -39,11 +41,11 @@ class _RegistroBebeState extends State<RegistroBebe> {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Color.fromARGB(255, 156, 155, 155)
+                                  color:const Color.fromARGB(255, 156, 155, 155)
                                       .withOpacity(0.5),
                                   spreadRadius: 0.1,
                                   blurRadius: 5,
-                                  offset: Offset(0, 6),
+                                  offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
@@ -76,7 +78,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                           "Fecha de Nacimiento",
                                           Icons.date_range),
                                     ),
-                                    SizedBox(
+                                   const SizedBox(
                                         width: 10), // Espacio entre los campos
                                     Flexible(
                                       flex: 1, // Ajustar la flexibilidad
@@ -103,7 +105,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                           "Fecha de Lactancia",
                                           Icons.date_range),
                                     ),
-                                    SizedBox(
+                                   const SizedBox(
                                         width: 10), // Espacio entre los campos
                                     Flexible(
                                       flex: 1, // Ajustar la flexibilidad
@@ -140,7 +142,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                 Container(
                                   width: double.infinity,
                                   height: 1,
-                                  color: Color.fromARGB(117, 209, 204, 204),
+                                  color:const Color.fromARGB(117, 209, 204, 204),
                                 ),
                                 const SizedBox(height: 15),
                               ],

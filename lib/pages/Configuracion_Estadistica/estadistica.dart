@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, unused_element, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -6,6 +8,8 @@ import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/claseGlobal/colores.dart';
 
 class Estadistica extends StatefulWidget {
+  const Estadistica({super.key});
+
   @override
   _EstadisticaState createState() => _EstadisticaState();
 }
@@ -46,7 +50,7 @@ class _EstadisticaState extends State<Estadistica>
                   width: MediaQuery.of(context).size.width * 0.9,
                   height: MediaQuery.of(context).size.height * 0.7,
                   decoration: BoxDecoration(
-                    color: Color.fromRGBO(25, 33, 49, 30),
+                    color:const Color.fromRGBO(25, 33, 49, 30),
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: FutureBuilder(
@@ -75,7 +79,7 @@ class _EstadisticaState extends State<Estadistica>
                                     showTitles: true,
                                     reservedSize: 30,
                                     getTitlesWidget: (value, meta) => Text(
-                                      value.toString(),
+                                      value.toInt().toString(),
                                       style: const TextStyle(
                                           fontSize: 10, color: Colors.white),
                                     ),
@@ -86,7 +90,7 @@ class _EstadisticaState extends State<Estadistica>
                                     showTitles: true,
                                     reservedSize: 30,
                                     getTitlesWidget: (value, meta) => Text(
-                                      value.toString(),
+                                      value.toInt().toString(),
                                       style: const TextStyle(
                                           fontSize: 10, color: Colors.white),
                                     ),

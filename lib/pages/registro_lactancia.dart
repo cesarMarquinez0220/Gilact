@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_unnecessary_containers, library_private_types_in_public_api, use_super_parameters
+
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,14 +24,14 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
         // Ancho igual al ancho de la pantalla
         height: double.infinity,
         width: double.infinity,
-        decoration: BoxDecoration(gradient: Gradients.myGradient),
+        decoration:const BoxDecoration(gradient: Gradients.myGradient),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 150),
+             const Padding(
+                padding:  EdgeInsets.only(top: 150),
               ),
               Container(
                 width: MediaQuery.of(context).size.width * 0.9,
@@ -39,10 +41,10 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
                   boxShadow: [
                     BoxShadow(
                       color:
-                          Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
+                         const Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
                       spreadRadius: 0.1,
                       blurRadius: 5,
-                      offset: Offset(0, 6),
+                      offset:const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -54,9 +56,9 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
                       style: GoogleFonts.quicksand(
                         fontSize: 33,
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(162, 0, 0, 0),
+                        color:const Color.fromARGB(162, 0, 0, 0),
                         shadows: [
-                          Shadow(
+                         const Shadow(
                             color: Color.fromARGB(115, 148, 144, 144),
                             blurRadius: 10,
                             offset: Offset(0, 4),
@@ -81,7 +83,7 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
                       child: Text(
                         "Veces que se le dio biberón:",
                         style: GoogleFonts.quicksand(
-                            color: Color.fromRGBO(1, 3, 3, 200)),
+                            color:const Color.fromRGBO(1, 3, 3, 200)),
                       ),
                     ),
                     //dropdown de materna
@@ -137,7 +139,7 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
                     Container(
                       width: double.infinity,
                       height: 1,
-                      color: Color.fromARGB(117, 209, 204, 205),
+                      color:const Color.fromARGB(117, 209, 204, 205),
                     ),
                     const SizedBox(height: 15),
                     GestureDetector(
@@ -175,10 +177,10 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
+            color:const Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
             spreadRadius: 0.1,
             blurRadius: 5,
-            offset: Offset(0, 6),
+            offset:const Offset(0, 6),
           ),
         ],
       ),
@@ -187,14 +189,14 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
           hintText: hintText,
           hintStyle: GoogleFonts.quicksand(
             fontSize: 17,
-            color: Color.fromARGB(255, 204, 202, 202),
+            color:const Color.fromARGB(255, 204, 202, 202),
           ),
           prefixIcon: Icon(
             icon,
             color: Colors.grey,
             size: 24.0,
           ),
-          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           border: InputBorder.none,
         ),
       ),
@@ -216,10 +218,10 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
+            color:const Color.fromARGB(255, 156, 155, 155).withOpacity(0.5),
             spreadRadius: 0.1,
             blurRadius: 5,
-            offset: Offset(0, 6),
+            offset:const Offset(0, 6),
           ),
         ],
       ),
@@ -243,7 +245,7 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
             color: Colors.grey,
             size: 24.0,
           ),
-          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           border: InputBorder.none,
         ),
       ),

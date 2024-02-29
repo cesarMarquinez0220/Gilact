@@ -9,7 +9,7 @@ class DialogExample {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color.fromARGB(255, 253, 40, 40)),
+          style:const TextStyle(color: Color.fromARGB(255, 253, 40, 40)),
         ),
         content: Text(
           message,

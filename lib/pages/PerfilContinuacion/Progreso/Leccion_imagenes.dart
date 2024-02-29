@@ -1,4 +1,6 @@
 //lista de imagenes
+// ignore_for_file: file_names
+
 List<Map<String, dynamic>> mapList = [
   {
     'assets/images/Homevideo.png': "image 1",

@@ -1,10 +1,10 @@
+// ignore_for_file: camel_case_types, use_key_in_widget_constructors, avoid_print, sized_box_for_whitespace
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/UsersVideos/search_json.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class User_videos extends StatefulWidget {
   const User_videos({Key? key, required List<Video> videos});
@@ -79,7 +79,7 @@ class _User_videosState extends State<User_videos> {
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     _videos = args['videos'] as List<Video>;
     return Scaffold(
-      backgroundColor: Color.fromARGB(119, 2, 80, 71),
+      backgroundColor: const Color.fromARGB(119, 2, 80, 71),
       appBar: getAppBar(),
       body: getBody(_videos!),
     );
@@ -92,7 +92,7 @@ class _User_videosState extends State<User_videos> {
       title: Container(
         height: 35,
         width: double.infinity,
-        margin: EdgeInsets.only(top: 15),
+        margin:const EdgeInsets.only(top: 15),
         decoration: BoxDecoration(
           color: Colors.grey.withOpacity(0.40),
           borderRadius: BorderRadius.circular(8),
@@ -106,7 +106,7 @@ class _User_videosState extends State<User_videos> {
               Icons.search,
               color: Colors.white.withOpacity(0.5),
             ),
-            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+            contentPadding:const EdgeInsets.symmetric(vertical: 10.0),
           ),
         ),
       ),
@@ -121,7 +121,7 @@ class _User_videosState extends State<User_videos> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+           const Text(
               "Videos Disponibles",
               style: TextStyle(
                 fontFamily: 'Quicksand',
@@ -130,7 +130,7 @@ class _User_videosState extends State<User_videos> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 12),
+           const SizedBox(height: 12),
             Column(
               children: List.generate(videos.length, (index) {
                 final video = videos[index];
@@ -170,11 +170,11 @@ class _User_videosState extends State<User_videos> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(width: 15),
+                               const SizedBox(width: 15),
                                 Expanded(
                                   child: Text(
                                     video.title,
-                                    style: TextStyle(
+                                    style:const TextStyle(
                                       fontFamily: 'Quicksand',
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class _User_videosState extends State<User_videos> {
                                   MaterialPageRoute(
                                     builder: (context) => ReproductorVideo(
                                       videoId: video.videoId,
-                                      duracionId: video.duration,
+                                     
                                       videoUrl: video.videoURL,
                                     ),
                                   ),
@@ -211,12 +211,12 @@ class _User_videosState extends State<User_videos> {
                                   border:
                                       Border.all(width: 2, color: Colors.white),
                                 ),
-                                child: Center(
+                                child:const Center(
                                   child: Icon(
                                     Icons.play_arrow,
                                     color: Colors.white,
                                   ),
-                                ),
+                                ) ,
                               ),
                             ),
                           ),
@@ -225,7 +225,7 @@ class _User_videosState extends State<User_videos> {
                     ),
                   );
                 } else {
-                  return SizedBox(); // Si el video no corresponde a la última lección completada, no se muestra
+                  return const SizedBox(); // Si el video no corresponde a la última lección completada, no se muestra
                 }
               }),
             ),

@@ -1,15 +1,12 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
+import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_login/pages/ComingSoonPage.dart';
-import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/services.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/Progreso/Lecciones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
 import 'package:flutter_login/pages/UsersVideos/user_videos.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
 import 'package:flutter_login/pages/login.dart';
 import 'package:flutter_login/pages/tips.dart';
 import 'package:provider/provider.dart';
@@ -59,12 +56,10 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Otros providers...
         ChangeNotifierProvider(create: (_) => LeccionesProvider()),
-        ChangeNotifierProvider(create: (_) => TemaProvider()),
-        ChangeNotifierProvider(create: (_) => NotificacionesProvider()),
+        ChangeNotifierProvider(create: (_) => Avancesprovider()),
       ],
-      child: MyApp(),
+      child:const MyApp(),
     ),
   );
 }
@@ -81,17 +76,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final changeTheme = Provider.of<TemaProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: changeTheme.temaOscuro?ThemeData.dark():ThemeData.light(),
-      home: LoginScreen(),
+      theme: ThemeData.light(),
+      home: const LoginScreen(),
       //home: SeccionVideos(),
       routes: {
-        '/lecciones': (context) => lecciones(videos: []),
-        '/secciones': (context) => User_videos(videos: []),
-        '/edicion': (context) => editProfile(),
-        '/tips': (context) => Tips(),
+        '/lecciones': (context) => const lecciones(videos: []),
+        '/secciones': (context) => const User_videos(videos: []),
+        '/edicion': (context) => const editProfile(),
+        '/tips': (context) => const Tips(),
      
       },
     );

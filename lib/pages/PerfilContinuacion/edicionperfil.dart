@@ -1,10 +1,11 @@
+// ignore_for_file: avoid_print
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/intl.dart';
 
 // ignore: camel_case_types
@@ -113,6 +114,7 @@ class _EditProfileFormState extends State<editProfile> {
           .update(datosActualizados);
 
       // Cierra el formulario
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
     } else {
       // No se encontró un documento coincidente
@@ -153,7 +155,7 @@ class _EditProfileFormState extends State<editProfile> {
           },
           backgroundColor: Colors.transparent,
           elevation: 0,
-          child: Icon(Icons.arrow_back, color: Colors.black),
+          child: const Icon(Icons.arrow_back, color: Colors.black),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
@@ -163,7 +165,7 @@ class _EditProfileFormState extends State<editProfile> {
             padding: const EdgeInsets.only(left: 20, right: 20),
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: Gradientslogin.myGradient,
             ),
             child: Center(
@@ -196,7 +198,7 @@ class _EditProfileFormState extends State<editProfile> {
                         style: GoogleFonts.quicksand(
                           fontSize: 33,
                           fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(162, 0, 0, 0),
+                          color:const Color.fromARGB(162, 0, 0, 0),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -298,7 +300,7 @@ class _EditProfileFormState extends State<editProfile> {
           decoration: InputDecoration(
             hintStyle: GoogleFonts.quicksand(
               fontSize: 18,
-              color: Color.fromARGB(255, 204, 202, 202),
+              color:const Color.fromARGB(255, 204, 202, 202),
             ),
             prefixIcon: Icon(
               icon,

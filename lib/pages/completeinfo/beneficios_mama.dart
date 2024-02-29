@@ -1,9 +1,11 @@
+// ignore_for_file: camel_case_types, deprecated_member_use, avoid_unnecessary_containers
+
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
 import 'package:animate_do/animate_do.dart';
 
 class beneficios_mama extends StatelessWidget {
-  const beneficios_mama({Key? key}) : super(key: key);
+  const beneficios_mama({super.key});
 
   @override
   Widget build(BuildContext context) {

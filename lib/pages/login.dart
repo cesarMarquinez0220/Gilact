@@ -1,4 +1,5 @@
-import 'dart:io';
+
+// ignore_for_file: avoid_print, prefer_interpolation_to_compose_strings
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
@@ -12,9 +13,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'PerfilContinuacion/user_data_storage.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
@@ -57,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       CollectionReference ref = FirebaseFirestore.instance.collection('Users');
       QuerySnapshot usuario = await ref.get();
 
+      // ignore: prefer_is_empty
       if (usuario.docs.length != 0) {
         //verificacion si hay docs en la base de datos
         for (var cursor in usuario.docs) {
@@ -166,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final double height = MediaQuery.of(context).size.height;
 
     return Container(
-      height: height * .1,
+      height: height * .07,
       width: width * .8,
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
@@ -189,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: hintText,
           hintStyle: GoogleFonts.quicksand(
             fontSize: 18,
-            color: Color.fromARGB(255, 204, 202, 202),
+            color:const Color.fromARGB(255, 204, 202, 202),
           ),
           prefixIcon: Icon(
             icon,
@@ -217,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AlertDialog(
+                  return const AlertDialog(
                     title: Text(
                       textAlign: TextAlign.center,
                       "Alerta",
@@ -235,10 +238,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 setState(() {
                   loginAttempts++; // Incrementar el contador de intentos
                 });
+                // ignore: use_build_context_synchronously
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return AlertDialog(
+                    return const AlertDialog(
                       title: Text(
                         textAlign: TextAlign.center,
                         "Alerta",
@@ -263,11 +267,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   detection.login();
                   print('Inicio de sesión exitoso');
                   detection.login();
-                  Future.delayed(Duration(milliseconds: 500), () {
+                  Future.delayed(const Duration(milliseconds: 500), () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WelcomeScreen(),
+                        builder: (context) =>const WelcomeScreen(),
                       ),
                     );
                   });
@@ -366,7 +370,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.quicksand(
                       fontSize: 33,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(162, 0, 0, 0),
+                      color:const Color.fromARGB(162, 0, 0, 0),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -423,7 +427,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: GoogleFonts.quicksand(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: Color.fromARGB(162, 0, 0, 0),
+                    color:const Color.fromARGB(162, 0, 0, 0),
                   ),
                 ),
                 const SizedBox(height: 15),

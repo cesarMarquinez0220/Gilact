@@ -1,8 +1,10 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 
 class LeccionesProvider with ChangeNotifier {
   int _lastCompletedLesson = 0;
-  // ignore: non_constant_identifier_names
+
   Map<int, bool> lecciones_list = {
     1: true, //video 1
     2: false, //video 2.1
@@ -80,5 +82,42 @@ class LeccionesProvider with ChangeNotifier {
       }
     });
     return ultimoId ?? -1;
+  }
+
+  bool isPrimerVideoHabilitado() {
+    return lecciones_list[1] ?? false;
+  }
+}
+
+class Avancesprovider with ChangeNotifier {
+  Map<int, Map<String, dynamic>> avancesMap = {};
+
+  // Método para actualizar el avance del usuario por id de video
+  void actualizarAvancePorId(int videoId, int avance) {
+    if (!avancesMap.containsKey(videoId)) {
+      avancesMap[videoId] = {};
+    }
+    avancesMap[videoId]!['avance'] = avance.toDouble(); // Convertir a double
+    notifyListeners();
+  }
+
+  void guardarProgresoPorId(int videoId, double progreso) {
+    avancesMap[videoId] = {'avance': progreso}; // Almacenar como double
+    notifyListeners();
+  }
+
+  // Método para obtener el avance del usuario por id de video
+  double obtenerAvancePorId(int videoId) {
+    if (avancesMap.containsKey(videoId)) {
+      return avancesMap[videoId]!['avance'] ?? 0.0; // Devolver como double
+    }
+    return 0.0;
+  }
+   void actualizarListaIdsVideosCompletados(List<int> listaIdsCompletados) {
+    // Iterar sobre la lista de IDs completados y marcarlos como completados en el mapa avancesMap
+    for (var id in listaIdsCompletados) {
+      avancesMap[id] = {'avance': 1.0}; // Marcar como completado
+    }
+    notifyListeners();
   }
 }

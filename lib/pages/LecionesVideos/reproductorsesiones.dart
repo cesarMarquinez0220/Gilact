@@ -1,11 +1,11 @@
+// ignore_for_file: avoid_print, library_private_types_in_public_api, unused_element, unused_local_variable, use_build_context_synchronously
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/duracion_enlaces.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/enlaces.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
+import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -18,7 +18,8 @@ class FirestoreService {
     required int pausas,
     required int adelantos,
     required int ultimaPosicion,
-    required int duracion,
+    required int totalDuration,
+    required double avance,
   }) async {
     try {
       final usuarioDocRef = await _getUsuarioDocumento(usuario);
@@ -37,7 +38,8 @@ class FirestoreService {
             'pausas': pausas,
             'adelantos': adelantos,
             'ultimaPosicion': ultimaPosicion,
-            'duracion': duracion,
+            'duracion': totalDuration,
+            'avance': avance,
           });
         } else {
           // Create a new document
@@ -45,7 +47,8 @@ class FirestoreService {
             'pausas': pausas,
             'adelantos': adelantos,
             'ultimaPosicion': ultimaPosicion,
-            'duracion': duracion,
+            'duracion': totalDuration,
+            'avance': avance,
           });
         }
 
@@ -98,105 +101,16 @@ class FirestoreService {
 
     return {};
   }
-
-  // Future<void> actualizarContadorVisualizaciones(
-  //     String usuario, int videoId) async {
-  //   try {
-  //     final usuarioDocRef = await _getUsuarioDocumento(usuario);
-
-  //     if (usuarioDocRef != null) {
-  //       final videoDocRef =
-  //           usuarioDocRef.collection('videos').doc(videoId.toString());
-
-  //       final videoDoc = await videoDocRef.get();
-
-  //       if (videoDoc.exists) {
-  //         final int contadorVisualizaciones =
-  //             (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
-
-  //         await videoDocRef.update({
-  //           'contadorVisualizaciones': contadorVisualizaciones,
-  //         });
-  //       }else {
-  //       // El documento no existe, crearlo con contadorVisualizaciones en 1
-  //       await videoDocRef.set({
-  //         'contadorVisualizaciones': 1,
-  //         // Puedes agregar otros campos aquí si es necesario
-  //       });
-  //     }
-  //     } else {
-  //       print('No se encontró un usuario con el nombre: $usuario');
-  //     }
-  //   } catch (error) {
-  //     print('Error al actualizar contador de visualizaciones: $error');
-  //   }
-  // }
-
-  Future<void> guardarInformacionProgresoLeccion({
-    required String usuario,
-    required int leccionId,
-    required double progreso,
-    required bool completada,
-  }) async {
-    try {
-      final usuarioDocRef = await _getUsuarioDocumento(usuario);
-
-      if (usuarioDocRef != null) {
-        // Guardar información en la colección 'progresoLecciones'
-        final leccionDocRef = usuarioDocRef
-            .collection('progresoLecciones')
-            .doc(leccionId.toString());
-
-        await leccionDocRef.set({
-          'progreso': progreso,
-          'completada': completada,
-        });
-
-        print(
-            'Información de progreso de lección guardada con éxito en Firestore');
-      } else {
-        print('No se encontró un usuario con el nombre: $usuario');
-      }
-    } catch (error) {
-      print('Error al guardar información de progreso en Firestore: $error');
-    }
-  }
-
-  Future<Map<String, dynamic>> obtenerInformacionProgresoLeccion(
-      String usuario, int leccionId) async {
-    try {
-      final usuarioDocRef = await _getUsuarioDocumento(usuario);
-
-      if (usuarioDocRef != null) {
-        final leccionDoc = await usuarioDocRef
-            .collection('progresoLecciones')
-            .doc(leccionId.toString())
-            .get();
-
-        if (leccionDoc.exists) {
-          return leccionDoc.data() as Map<String, dynamic>;
-        }
-      } else {
-        print('No se encontró un usuario con el nombre: $usuario');
-      }
-    } catch (error) {
-      print('Error al obtener información de progreso en Firestore: $error');
-    }
-
-    return {};
-  }
 }
 
 class ReproductorVideo extends StatefulWidget {
   final String videoUrl;
   final int videoId;
-  final int duracionId;
 
   ReproductorVideo({
     Key? key,
     required this.videoUrl,
     required this.videoId,
-    required this.duracionId,
   }) : super(key: ValueKey<String>(videoUrl));
 
   @override
@@ -210,6 +124,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   int pauseCount = 0; // Contador de pausas
   int forwardCount = 0; // Contador de avances
   Duration? lastPosition; // Última posición del video antes de pausar
+  bool videoEnded = false;
 
   @override
   void initState() {
@@ -239,36 +154,59 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
       ),
     );
 
-    // Busca la última posición del video desde Firestore y ajusta la posición del video
-    if (_controller.value.isReady) {
-      _controller.seekTo(
-        Duration(
-          milliseconds: (await FirestoreService().obtenerInformacionVideo(
-                UserDataStorage.getUserName(),
-                widget.videoId,
-              ))['ultimaPosicion'] ??
-              0,
-        ),
-      );
-    }
-
-    // Agregar un listener para detectar el final del video
+    _controller.addListener(() async {
+      if (_controller.value.isReady) {
+        Duration totalDuration = _controller.metadata.duration;
+        print('Duración total del video: ${totalDuration.inSeconds}');
+        if (isPaused) {
+          await guardarInformacionEnFirestore();
+        }
+      }
+    });
   }
 
   void _handleVideoPaused() {
     // Solo aumenta el contador si el video estaba reproduciéndose
     if (!isPaused) {
       pauseCount++;
-      print('Número de veces que se ha realizado pausa: $pauseCount');
-      guardarInformacionEnFirestore();
+      lastPosition = _controller.value.position;
+      print('Numero de veces que se ha realizado pausa: $pauseCount');
     }
     isPaused = true;
   }
 
   void _handleVideoPlay() {
-    // Reinicia el estado de pausa cuando se reanuda la reproducción
-
     isPaused = false;
+  }
+
+  void _onVideoEnded() async {
+    print('Video terminado. Incrementando contador de visualizaciones...');
+    final userName = UserDataStorage.getUserName();
+    final videoId = widget.videoId;
+    final usuarioDocRef =
+        await FirestoreService()._getUsuarioDocumento(userName);
+
+    if (usuarioDocRef != null) {
+      final videoDocRef =
+          usuarioDocRef.collection('videos').doc(videoId.toString());
+      final videoDoc = await videoDocRef.get();
+
+      if (videoDoc.exists) {
+        final int contadorVisualizaciones =
+            (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
+        await videoDocRef.update({
+          'contadorVisualizaciones': contadorVisualizaciones,
+          'completado': true,
+        });
+      } else {
+        await videoDocRef.set({
+          'contadorVisualizaciones': 1,
+          'completado': true,
+        });
+      }
+    } else {
+      print('No se encontró un usuario con el nombre: $userName');
+    }
   }
 
   void _handleSeekTo(Duration duration) {
@@ -281,9 +219,17 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   }
 
   Future<void> guardarInformacionEnFirestore() async {
+    // Obtener la última posición del video y la duración total del video
+    Duration? lastPosition = _controller.value.position;
+    Duration totalDuration = _controller.metadata.duration;
+
+    // Calcular el avance como un valor entre 0 y 1
+    double progress = lastPosition.inSeconds / totalDuration.inSeconds;
+    progress = progress.clamp(0.0, 1.0);
+
     try {
       final userName = UserDataStorage.getUserName();
-      final videoId = widget.videoId; // Asegúrate de tener acceso a esto
+      final videoId = widget.videoId;
       final usuarioDocRef =
           await FirestoreService()._getUsuarioDocumento(userName);
 
@@ -292,33 +238,17 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
             usuarioDocRef.collection('videos').doc(videoId.toString());
 
         final videoDoc = await videoDocRef.get();
-
-        if (videoDoc.exists) {
-          // El documento ya existe, actualizar el contador
-          final int contadorVisualizaciones =
-              (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
-
-          await videoDocRef.update({
-            'contadorVisualizaciones': contadorVisualizaciones,
-          });
-        } else {
-          // El documento no existe, crearlo con contadorVisualizaciones en 1
-          await videoDocRef.set({
-            'contadorVisualizaciones': 1,
-            // Puedes agregar otros campos aquí si es necesario
-          });
-        }
-
         print('Guardando información en Firestore...');
-        print(widget.duracionId);
         await FirestoreService().guardarInformacionVideo(
           usuario: userName,
           videoId: widget.videoId,
           pausas: pauseCount,
           adelantos: forwardCount,
-          ultimaPosicion: _controller.value.position.inMilliseconds,
-          duracion: widget.duracionId,
+          ultimaPosicion: _controller.value.position.inSeconds,
+          totalDuration: totalDuration.inSeconds,
+          avance: progress,
         );
+        context.read<Avancesprovider>().guardarProgresoPorId(videoId, progress);
       } else {
         print('No se encontró un usuario con el nombre: $userName');
       }
@@ -343,35 +273,26 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
             decoration: const BoxDecoration(gradient: Gradients.myGradient),
             child: Center(
               child: GestureDetector(
-                onTap: () {
-                  if (_controller.value.isPlaying) {
-                    setState(() {
-                      pauseCount++;
-                    });
-                    print('PAUSAS POR PARTE DEL GESTURE: $pauseCount');
-                    guardarInformacionEnFirestore();
-                  }
-                },
+                onTap: () {},
                 child: YoutubePlayer(
                   controller: _controller,
                   showVideoProgressIndicator: true,
                   onEnded: (metaData) {
-                    print("se mando el true\n id del video$widget");
                     guardarInformacionEnFirestore();
+                    _onVideoEnded();
                     Navigator.pop(context, true);
-                    //cambio de estado de la lista por ID
-                    //LeccionesProvider().marcarVideoComoVisto(widget.videoId);
                     context
                         .read<LeccionesProvider>()
                         .marcarVideoComoVisto(widget.videoId);
+                    context
+                        .read<Avancesprovider>()
+                        .actualizarAvancePorId(widget.videoId, 1);
                   },
                 ),
               ),
             ),
           ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.5 - 25.0,
-            left: MediaQuery.of(context).size.width * 0.5 - 25.0,
+          Center(
             child: InkWell(
               onTap: () {
                 // Manejar la pausa y reproducción manualmente
@@ -384,17 +305,15 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
                 }
               },
               child: Container(
-                width: 50.0,
-                height: 50.0,
-                decoration: BoxDecoration(
+                width: 70.0,
+                height: 70.0,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors
-                      .transparent, // Configura el fondo como transparente
+                  color: Colors.transparent,
                 ),
                 child: Icon(
                   _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors
-                      .transparent, // Configura el color del icono como transparente
+                  color: Colors.transparent,
                 ),
               ),
             ),

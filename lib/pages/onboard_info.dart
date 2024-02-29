@@ -1,3 +1,5 @@
+// ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, camel_case_types
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
@@ -46,7 +48,7 @@ class _Onboar_InfoState extends State<Onboar_Info> {
               Expanded(
                 child: PageView(
                   controller: _controller,
-                  children: [
+                  children:const [
                     Page1(),
                     Page2(),
                     Page3(),
@@ -56,7 +58,7 @@ class _Onboar_InfoState extends State<Onboar_Info> {
               SmoothPageIndicator(
                 controller: _controller,
                 count: 3,
-                effect: JumpingDotEffect(
+                effect: const JumpingDotEffect(
                   activeDotColor: Color.fromRGBO(19, 180, 153, 1),
                   dotColor: Colors.white,
                   dotHeight: 10,

@@ -1,9 +1,10 @@
+// ignore_for_file: camel_case_types, use_key_in_widget_constructors, avoid_print, sized_box_for_whitespace, unused_local_variable
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:flutter_login/pages/enlaces%20de%20videos/notifire.dart';
+import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -21,15 +22,31 @@ class _leccionesState extends State<lecciones> {
   final firestoreService = FirestoreServiceLecciones();
   List<Video>? _videos;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadVideos();
+  }
+
+  Future<void> _loadVideos() async {
+    try {
+      final videos = await firestoreService.getVideos();
+      setState(() {
+        _videos = videos;
+      });
+    } catch (error) {
+      print('Error al cargar los videos: $error');
+    }
+  }
+
   Future<void> _navigateToReproductorVideoHelper(
-      int videoId, int duracionId, String videoURL, int duration) async {
+      int videoId, int duracionId, String videoURL) async {
     print("ID del video enviado al reproductor es: $videoId");
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => ReproductorVideo(
           videoId: videoId,
-          duracionId: duration,
           videoUrl: videoURL,
         ),
         transitionsBuilder: (context, animation1, animation2, child) {
@@ -170,6 +187,8 @@ class _leccionesState extends State<lecciones> {
         final showHeader = currentLessonId != previousLessonId;
         previousLessonId = currentLessonId;
 
+        // Si es el primer video de la lección 1, habilitarlo
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -191,15 +210,11 @@ class _leccionesState extends State<lecciones> {
                 child: _PercentIndicator(
                   69.0,
                   video.imageName,
-                  isLastCompleted
-                      ? Colors.green
-                      : Colors
-                          .blue, // Cambia el color si es el último completado
+                  isLastCompleted ? Colors.green : Colors.blue,
                   video.videoId,
                   video.leccionId,
                   leccionId: video.leccionId,
                   videoURL: video.videoURL,
-                  duration: video.duration,
                 ),
               ),
             ],
@@ -223,7 +238,7 @@ class _leccionesState extends State<lecciones> {
       case 5:
         return '¿Cómo saber que el bebé se alimentó lo suficiente?';
       case 6:
-        return "Hitos de peso a vigilar'";
+        return "Hitos de peso a vigilar";
       case 7:
         return "Higiene de manos y técnicas de lactancia materna";
       case 8:
@@ -291,23 +306,28 @@ class _leccionesState extends State<lecciones> {
     int duracionId, {
     required int leccionId,
     required String videoURL,
-    required int duration,
   }) {
-    return Consumer<LeccionesProvider>(
-      builder: (context, leccionesProvider, child) {
+    return Consumer2<LeccionesProvider, Avancesprovider>(
+      builder: (context, leccionesProvider, avancesProvider, child) {
         final ultimoId = leccionesProvider.ultimoIdEnEstadoTrue(
           leccionesProvider.lecciones_list,
         );
         final esUltimoId = videoId == ultimoId;
+        // Verificar si es el primer video de la primera lección
+        final isFirstVideoOfFirstLesson = leccionId == 1 && videoId == 1;
+
+        final double progreso =
+            context.read<Avancesprovider>().obtenerAvancePorId(videoId);
 
         return GestureDetector(
           onTap: () {
-            final isEnabled =
-                context.read<LeccionesProvider>().isLeccionCompletada(videoId);
+            final isEnabled = context
+                    .read<LeccionesProvider>()
+                    .isLeccionCompletada(videoId) ||
+                isFirstVideoOfFirstLesson;
             if (isEnabled) {
               print("Lección $videoId completada");
-              _navigateToReproductorVideoHelper(
-                  videoId, duracionId, videoURL, duration);
+              _navigateToReproductorVideoHelper(videoId, duracionId, videoURL);
             } else {
               showDialog(
                 context: context,
@@ -351,11 +371,7 @@ class _leccionesState extends State<lecciones> {
                       child: CircularPercentIndicator(
                         radius: radius,
                         lineWidth: 9.0,
-                        percent: context
-                                .read<LeccionesProvider>()
-                                .isLeccionCompletada(videoId)
-                            ? 1.0
-                            : 0.0,
+                        percent: progreso,
                         center: _buildImageContainer(imageName),
                         circularStrokeCap: CircularStrokeCap.butt,
                         progressColor: color,
@@ -369,11 +385,7 @@ class _leccionesState extends State<lecciones> {
                     child: CircularPercentIndicator(
                       radius: radius,
                       lineWidth: 9.0,
-                      percent: context
-                              .read<LeccionesProvider>()
-                              .isLeccionCompletada(videoId)
-                          ? 1.0
-                          : 0.0,
+                      percent: progreso,
                       center: _buildImageContainer(imageName),
                       circularStrokeCap: CircularStrokeCap.butt,
                       progressColor: color,

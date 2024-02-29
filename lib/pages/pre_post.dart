@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
@@ -7,7 +9,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Prepost extends StatefulWidget {
+  const Prepost({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _PrepostState createState() => _PrepostState();
 }
 
@@ -17,7 +22,6 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
   late Animation<double> _textOpacityAnimation;
   late Animation<Offset> _textSlideAnimation;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String
       email; // Asegúrate de tener el correo electrónico del usuario disponible
 
@@ -27,7 +31,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _imageScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -40,17 +44,17 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(0.1, 0.5),
+        curve: const Interval(0.1, 0.5),
       ),
     );
 
     _textSlideAnimation = Tween<Offset>(
-      begin: Offset(1.0, 0.0),
-      end: Offset(0.0, 0.0),
+      begin:const Offset(1.0, 0.0),
+      end:const Offset(0.0, 0.0),
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(0.0, 0.5),
+        curve:const Interval(0.0, 0.5),
       ),
     );
 
@@ -107,7 +111,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     _saveUserSituation('Post-Parto');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RegistroBebe()),
+      MaterialPageRoute(builder: (context) =>const RegistroBebe()),
     );
   }
 
@@ -124,7 +128,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             onTap: () => navigateToPreparto(context),
             child: Container(
               height: MediaQuery.of(context).size.height * 0.5,
-              color: Color(0xff03A696),
+              color:const Color(0xff03A696),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -139,7 +143,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                 const SizedBox(height: 16),
                   Row(
                     children: [
                       SlideTransition(
@@ -181,7 +185,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             onTap: () => navigateToPostparto(context),
             child: Container(
               height: MediaQuery.of(context).size.height * 0.5,
-              color: Color(0xff03588C),
+              color:const Color(0xff03588C),
               child: Row(
                 children: [
                   SlideTransition(

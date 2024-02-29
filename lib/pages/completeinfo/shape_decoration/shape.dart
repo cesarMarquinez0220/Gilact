@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/completeinfo/shape_decoration/clip.dart';
 
 class BezierContainer extends StatelessWidget {
-  const BezierContainer({Key? key}) : super(key: key);
+  const BezierContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class BezierContainer extends StatelessWidget {
 }
 
 class OvalContainer extends StatelessWidget {
-  const OvalContainer({Key? key}) : super(key: key);
+  const OvalContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class OvalContainer extends StatelessWidget {
 }
 
 class Ovalstatic extends StatelessWidget {
-  const Ovalstatic({Key? key}) : super(key: key);
+  const Ovalstatic({super.key});
 
   @override
   Widget build(BuildContext context) {

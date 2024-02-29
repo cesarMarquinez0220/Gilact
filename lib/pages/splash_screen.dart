@@ -117,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Prepost()),
+            MaterialPageRoute(builder: (context) => const Prepost()),
           );
         }
       } else {
