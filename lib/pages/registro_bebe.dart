@@ -92,7 +92,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                     "Lugar de Nacimiento", Icons.place),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    "Peso al nacer", Icons.accessibility_new),
+                                    "Peso al nacer en kg", Icons.accessibility_new),
                                 const SizedBox(height: 20),
                                 _buildTextField(
                                     "Edad Gestacional", Icons.child_care),
@@ -126,7 +126,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        const Color.fromARGB(255, 3, 87, 140),
+                                        const Color.fromRGBO(27, 167, 214, 1),
                                     fixedSize: const Size(320, 42),
                                     shape: const StadiumBorder(),
                                     shadowColor: Colors.black.withOpacity(0.5),

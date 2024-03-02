@@ -146,7 +146,7 @@ class ConfiguracionScreen extends StatelessWidget {
               Positioned(
                 bottom: MediaQuery.of(context).size.height * 0.1 - 270,
                 right: MediaQuery.of(context).size.width * 0.1 + 120,
-                child: const Ovalstatic(),
+                child: const OvalContainer(),
               ),
             ],
           ),

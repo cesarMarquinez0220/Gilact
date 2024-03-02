@@ -1,7 +1,9 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
+import 'package:flutter_login/pages/registro_pre.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/services.dart';
@@ -86,6 +88,7 @@ class MyApp extends StatelessWidget {
         '/secciones': (context) => const User_videos(videos: []),
         '/edicion': (context) => const editProfile(),
         '/tips': (context) => const Tips(),
+        '/Onboar_Info':(context)=>  Onboar_Info(),
      
       },
     );

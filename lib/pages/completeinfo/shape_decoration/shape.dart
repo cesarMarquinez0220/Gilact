@@ -24,7 +24,6 @@ class BezierContainer extends StatelessWidget {
                 Color.fromRGBO(27, 167, 214, 1),
                 Color.fromRGBO(27, 214, 183, 1),
                 Color.fromRGBO(106, 240, 189, 1),
-                Color.fromRGBO(254, 254, 254, 1),
               ])),
         ),
       ),
@@ -49,7 +48,6 @@ class OvalContainer extends StatelessWidget {
                   begin: Alignment.topRight,
                   end: Alignment.bottomCenter,
                   colors: [
-                Color.fromRGBO(254, 254, 254, 1),
                 Color.fromRGBO(106, 240, 189, 1),
                 Color.fromRGBO(27, 214, 183, 1),
                 Color.fromRGBO(27, 167, 214, 1),
@@ -61,29 +59,30 @@ class OvalContainer extends StatelessWidget {
   }
 }
 
-class Ovalstatic extends StatelessWidget {
-  const Ovalstatic({super.key});
+class Ovalstatic1 extends StatelessWidget {
+  const Ovalstatic1({super.key});
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: pi / 2,
       child: ClipPath(
         clipper: ClipPainter(),
         child: Container(
-          height: MediaQuery.of(context).size.height * .5,
-          width: MediaQuery.of(context).size.width * .2,
+          height: MediaQuery.of(context).size.height * 0.5, // Altura ajustada
+          width: MediaQuery.of(context).size.width * 0.2, // Ancho máximo
           decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                Color.fromRGBO(254, 254, 254, 1),
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomCenter,
+              colors: [
                 Color.fromRGBO(106, 240, 189, 1),
                 Color.fromRGBO(27, 214, 183, 1),
                 Color.fromRGBO(27, 167, 214, 1),
                 Color.fromARGB(255, 98, 142, 255),
-              ])),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/registro_bebe.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_login/pages/registro_pre.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -22,8 +23,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
   late Animation<double> _textOpacityAnimation;
   late Animation<Offset> _textSlideAnimation;
 
-  late String
-      email; // Asegúrate de tener el correo electrónico del usuario disponible
+  late String email;
 
   @override
   void initState() {
@@ -49,12 +49,12 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     );
 
     _textSlideAnimation = Tween<Offset>(
-      begin:const Offset(1.0, 0.0),
-      end:const Offset(0.0, 0.0),
+      begin: const Offset(1.0, 0.0),
+      end: const Offset(0.0, 0.0),
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve:const Interval(0.0, 0.5),
+        curve: const Interval(0.0, 0.5),
       ),
     );
 
@@ -84,11 +84,12 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
         // Obtener la referencia al documento del usuario
         DocumentReference userRef = userDocument.reference;
 
-        // Crear una referencia a la subcolección  dentro del documento del usuario
-        CollectionReference situationsRef = userRef.collection('situacion');
+        // Crear una referencia al documento dentro de la subcolección con el nombre de la situación
+        DocumentReference situationRef =
+            userRef.collection('situacion').doc(situation);
 
         // Añadir un nuevo documento a la subcolección con la información de la situación
-        await situationsRef.add({'situacion': situation});
+        await situationRef.set({});
         print('Situación registrada con éxito para el usuario: $email');
       } else {
         // El usuario no existe en la base de datos
@@ -103,7 +104,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     _saveUserSituation('Pre-Parto');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Onboar_Info()),
+      MaterialPageRoute(builder: (context) => const RegistroPre()),
     );
   }
 
@@ -111,7 +112,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
     _saveUserSituation('Post-Parto');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) =>const RegistroBebe()),
+      MaterialPageRoute(builder: (context) => const RegistroBebe()),
     );
   }
 
@@ -128,7 +129,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             onTap: () => navigateToPreparto(context),
             child: Container(
               height: MediaQuery.of(context).size.height * 0.5,
-              color:const Color(0xff03A696),
+              color: const Color(0xff03A696),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -143,7 +144,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
                       ),
                     ),
                   ),
-                 const SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       SlideTransition(
@@ -185,7 +186,7 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             onTap: () => navigateToPostparto(context),
             child: Container(
               height: MediaQuery.of(context).size.height * 0.5,
-              color:const Color(0xff03588C),
+              color: const Color(0xff03588C),
               child: Row(
                 children: [
                   SlideTransition(

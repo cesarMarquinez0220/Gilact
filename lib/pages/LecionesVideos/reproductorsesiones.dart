@@ -40,6 +40,8 @@ class FirestoreService {
             'ultimaPosicion': ultimaPosicion,
             'duracion': totalDuration,
             'avance': avance,
+            
+  
           });
         } else {
           // Create a new document
@@ -49,6 +51,7 @@ class FirestoreService {
             'ultimaPosicion': ultimaPosicion,
             'duracion': totalDuration,
             'avance': avance,
+
           });
         }
 

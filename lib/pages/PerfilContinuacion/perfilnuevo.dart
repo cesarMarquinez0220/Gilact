@@ -56,15 +56,20 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     _fetchUserData(); // Recuperar los datos del usuario desde la base de datos
     _loadVideosFromFirestore();
     _actualizarListaVideosCompletados();
-
+    enviarAvanceAlProvider();
   }
- Future<void> _actualizarListaVideosCompletados() async {
+
+  Future<void> _actualizarListaVideosCompletados() async {
     final obtenerInfoAvance = ObtenerInfoAvance();
-    final listaIdsVideosCompletados = await obtenerInfoAvance.obtenerIdsVideosCompletadosDesdeFirestore(nombreUsuario);
+    final listaIdsVideosCompletados = await obtenerInfoAvance
+        .obtenerIdsVideosCompletadosDesdeFirestore(nombreUsuario);
 
     // Actualizar la lista en el proveedor Avancesprovider
-    context.read<Avancesprovider>().actualizarListaIdsVideosCompletados(listaIdsVideosCompletados);
+    context
+        .read<Avancesprovider>()
+        .actualizarListaIdsVideosCompletados(listaIdsVideosCompletados);
   }
+
   Future<void> _fetchUserData() async {
     try {
       QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
@@ -121,6 +126,30 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     }
   }
 
+  Future<void> enviarAvanceAlProvider() async {
+    try {
+      final usuarioDocRef = await _getUsuarioDocumento(usuario);
+      if (usuarioDocRef != null) {
+        final videosCollectionRef = usuarioDocRef.collection('videos');
+        final videosCollection =
+            await videosCollectionRef.orderBy(FieldPath.documentId).get();
+
+        if (videosCollection.docs.isNotEmpty) {
+          final ultimoVideoDoc = videosCollection.docs.last;
+          final avance = ultimoVideoDoc.data()['avance'] ?? 0;
+          final avance1 = avance.clamp(0.0, 1.0);
+          print('Avance del último documento: $avance');
+          print('Tipo de dato de avance: ${avance.runtimeType}');
+          print('el id del video es ${int.parse(ultimoVideoDoc.id)}');
+          context.read<Avancesprovider>().guardarProgresoPorId(
+              int.parse(ultimoVideoDoc.id), avance1 as double);
+        }
+      }
+    } catch (error) {
+      print('Error al enviar avance al provider: $error');
+    }
+  }
+
   Future<int?> _getUltimaLeccionCompletada() async {
     try {
       final usuarioDocRef = await _getUsuarioDocumento(usuario);
@@ -131,18 +160,19 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
         if (videosCollection.docs.isNotEmpty) {
           // Filtrar los documentos con contadorVisualizaciones distinto de 0
-          final videosConContador = videosCollection.docs
-              .where(
-                  (videoDoc) => (videoDoc['contadorVisualizaciones'] ?? 0) > 0)
+          final videosCompletados = videosCollection.docs
+              .where((videoDoc) =>
+                  videoDoc.data().containsKey('completado') &&
+                  videoDoc['completado'] == true)
               .toList();
 
-          if (videosConContador.isNotEmpty) {
+          if (videosCompletados.isNotEmpty) {
             // Ordenar los documentos de menor a mayor (por número de lección)
-            videosConContador
+            videosCompletados
                 .sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
 
             // Obtener el último documento (mayor número de lección)
-            final lastLessonDoc = videosConContador.last;
+            final lastLessonDoc = videosCompletados.last;
             print('Este es el ultima leccion $lastLessonDoc');
             // Obtener el número de lección
             return int.parse(lastLessonDoc.id);

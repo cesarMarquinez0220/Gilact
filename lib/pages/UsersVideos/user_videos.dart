@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
+import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
 
 class User_videos extends StatefulWidget {
   const User_videos({Key? key, required List<Video> videos});
@@ -28,29 +29,29 @@ class _User_videosState extends State<User_videos> {
             await videosCollectionRef.orderBy(FieldPath.documentId).get();
 
         if (videosCollection.docs.isNotEmpty) {
-          // Filtrar los documentos con contadorVisualizaciones distinto de 0
-          final videosConContador = videosCollection.docs
-              .where(
-                  (videoDoc) => (videoDoc['contadorVisualizaciones'] ?? 0) > 0)
+          // Filtrar los documentos con campo 'completado' igual a true
+          final videosCompletados = videosCollection.docs
+              .where((videoDoc) =>
+                  videoDoc.data().containsKey('completado') &&
+                  videoDoc['completado'] == true)
               .toList();
 
-          if (videosConContador.isNotEmpty) {
+          if (videosCompletados.isNotEmpty) {
             // Ordenar los documentos de menor a mayor (por número de lección)
-            videosConContador
+            videosCompletados
                 .sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
 
             // Obtener el último documento (mayor número de lección)
-            final lastLessonDoc = videosConContador.last;
+            final lastCompletedLessonDoc = videosCompletados.last;
 
             // Obtener el número de lección
             setState(() {
-              lastCompletedLesson = int.parse(lastLessonDoc.id);
-              print('Ultima leccion $lastCompletedLesson');
+              lastCompletedLesson = int.parse(lastCompletedLessonDoc.id);
+              print('Ultima leccion completada: $lastCompletedLesson');
             });
           }
         }
       }
-      print('Ultima leccion $lastCompletedLesson');
     } catch (error) {
       print('Error al obtener la última lección completada: $error');
     }
@@ -78,10 +79,33 @@ class _User_videosState extends State<User_videos> {
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     _videos = args['videos'] as List<Video>;
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(119, 2, 80, 71),
       appBar: getAppBar(),
-      body: getBody(_videos!),
+      body: Stack(
+        children: [
+          Positioned(
+            top: -MediaQuery.of(context).size.height * .12,
+            right: MediaQuery.of(context).size.width * .05,
+            child:
+                const BezierContainer(), 
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * .9,
+            width: double.infinity,
+            child: getBody(_videos!),
+          ),
+          Positioned(
+            bottom: MediaQuery.of(context).size.height * -0.2,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Ovalstatic1(), // Colocar aquí el widget Ovalstatic1
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -92,7 +116,7 @@ class _User_videosState extends State<User_videos> {
       title: Container(
         height: 35,
         width: double.infinity,
-        margin:const EdgeInsets.only(top: 15),
+        margin: const EdgeInsets.only(top: 15),
         decoration: BoxDecoration(
           color: Colors.grey.withOpacity(0.40),
           borderRadius: BorderRadius.circular(8),
@@ -106,7 +130,7 @@ class _User_videosState extends State<User_videos> {
               Icons.search,
               color: Colors.white.withOpacity(0.5),
             ),
-            contentPadding:const EdgeInsets.symmetric(vertical: 10.0),
+            contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
           ),
         ),
       ),
@@ -121,16 +145,16 @@ class _User_videosState extends State<User_videos> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           const Text(
+            const Text(
               "Videos Disponibles",
               style: TextStyle(
                 fontFamily: 'Quicksand',
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-           const SizedBox(height: 12),
+            const SizedBox(height: 12),
             Column(
               children: List.generate(videos.length, (index) {
                 final video = videos[index];
@@ -170,15 +194,15 @@ class _User_videosState extends State<User_videos> {
                                     ),
                                   ],
                                 ),
-                               const SizedBox(width: 15),
+                                const SizedBox(width: 15),
                                 Expanded(
                                   child: Text(
                                     video.title,
-                                    style:const TextStyle(
+                                    style: const TextStyle(
                                       fontFamily: 'Quicksand',
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Colors.black,
                                     ),
                                   ),
                                 ),
@@ -197,7 +221,6 @@ class _User_videosState extends State<User_videos> {
                                   MaterialPageRoute(
                                     builder: (context) => ReproductorVideo(
                                       videoId: video.videoId,
-                                     
                                       videoUrl: video.videoURL,
                                     ),
                                   ),
@@ -209,14 +232,14 @@ class _User_videosState extends State<User_videos> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border:
-                                      Border.all(width: 2, color: Colors.white),
+                                      Border.all(width: 2, color: Colors.black),
                                 ),
-                                child:const Center(
+                                child: const Center(
                                   child: Icon(
                                     Icons.play_arrow,
-                                    color: Colors.white,
+                                    color: Colors.black,
                                   ),
-                                ) ,
+                                ),
                               ),
                             ),
                           ),

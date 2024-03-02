@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
+import 'package:flutter_login/pages/registro_lactancia.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -80,6 +81,8 @@ class _leccionesState extends State<lecciones> {
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     _videos = args['videos'] as List<Video>;
+final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
+    avancesProvider.imprimirAvancesMap(); // Llamada para imprimir el mapa
     return Scaffold(
       body: Stack(
         children: [
@@ -100,6 +103,8 @@ class _leccionesState extends State<lecciones> {
                   children: <Widget>[
                     _buildAppBar(),
                     _buildLessons(_videos!),
+                    _buildElevatedButton(),
+                     
                   ],
                 ),
               ),
@@ -307,6 +312,8 @@ class _leccionesState extends State<lecciones> {
     required int leccionId,
     required String videoURL,
   }) {
+  
+
     return Consumer2<LeccionesProvider, Avancesprovider>(
       builder: (context, leccionesProvider, avancesProvider, child) {
         final ultimoId = leccionesProvider.ultimoIdEnEstadoTrue(
@@ -410,6 +417,44 @@ class _leccionesState extends State<lecciones> {
         child: Center(
           child:
               Image.asset('assets/images/$imageName', height: 100, width: 100),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElevatedButton() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20.0, bottom: 10),
+        child: SizedBox(
+          width: 210,
+          child: ElevatedButton(
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RegistroLactancia(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 199, 135, 240),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              shadowColor: Colors.black.withOpacity(0.5),
+              elevation: 5,
+            ),
+            child: Text(
+              'Registro Lactancia',
+              style: GoogleFonts.quicksand(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );
