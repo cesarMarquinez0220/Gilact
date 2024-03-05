@@ -89,14 +89,14 @@ class _PrepostState extends State<Prepost> with SingleTickerProviderStateMixin {
             userRef.collection('situacion').doc(situation);
 
         // Añadir un nuevo documento a la subcolección con la información de la situación
-        await situationRef.set({});
+        await situationRef.set(<String, dynamic>{});
         print('Situación registrada con éxito para el usuario: $email');
       } else {
         // El usuario no existe en la base de datos
         print('El usuario no existe en la base de datos.');
       }
     } catch (e) {
-      print('Error: $e');
+      print('Error por parte de: $e');
     }
   }
 

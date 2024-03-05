@@ -140,7 +140,7 @@ class ProblemasLactanciaInfo extends StatelessWidget {
                               duration: const Duration(milliseconds: 1200),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Acude al médico para diagnóstico y tratamiento.\n- Coloca leche materna sobre el pezón y deja secar al aire.',
+                                '- Acude al médico para diagnóstico y tratamiento.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),

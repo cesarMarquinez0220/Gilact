@@ -117,17 +117,17 @@ class PosturaAgarreInfo extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 2000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '¡Cuantas más veces coloques a tu bebé al pecho, más leche producirás!',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromARGB(255, 86, 86, 86)),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                          //   FadeInDown(
+                          //     duration: const Duration(milliseconds: 2000),
+                          //     delay: const Duration(milliseconds: 500),
+                          //     child: const Text(
+                          //       '¡Cuantas más veces coloques a tu bebé al pecho, más leche producirás!',
+                          //       style: TextStyle(
+                          //           fontSize: 14,
+                          //           color: Color.fromARGB(255, 86, 86, 86)),
+                          //       textAlign: TextAlign.center,
+                          //     ),
+                          //   ),
                           ],
                         ),
                       ),

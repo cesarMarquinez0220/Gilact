@@ -102,7 +102,9 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
                 child: Column(
                   children: <Widget>[
                     _buildAppBar(),
-                    _buildLessons(_videos!),
+                    Container(
+                      height: MediaQuery.of(context).size.height*.83,
+                      child: SingleChildScrollView(child: _buildLessons(_videos!))),
                     _buildElevatedButton(),
                      
                   ],

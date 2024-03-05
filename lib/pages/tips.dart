@@ -25,40 +25,21 @@ class Tips extends StatefulWidget {
 
 class _TipsState extends State<Tips> {
   final _controller = PageController();
-  late Timer _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
-      if (_controller.page != 8) {
-        _controller.nextPage(
-            duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
-      } else {
-        // Si estamos en la última página, regresar a la pantalla de perfil nuevo
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Perfilnuevo()),
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Center(
         child: Container(
           decoration: const BoxDecoration(color: Colors.white),
           child: Stack(
-            // Envolver PageView y Stack dentro de otro Stack
             children: [
               Positioned(
                 top: -height * .12,
@@ -69,8 +50,11 @@ class _TipsState extends State<Tips> {
                 controller: _controller,
                 onPageChanged: (index) {
                   // Detener el temporizador si estamos en la última página
-                  if (index == 10) {
-                    _timer.cancel();
+                  if (index == 11) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const Perfilnuevo()),
+                    );
                   }
                 },
                 children: const [

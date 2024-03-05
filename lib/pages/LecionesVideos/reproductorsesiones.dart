@@ -40,8 +40,6 @@ class FirestoreService {
             'ultimaPosicion': ultimaPosicion,
             'duracion': totalDuration,
             'avance': avance,
-            
-  
           });
         } else {
           // Create a new document
@@ -51,7 +49,6 @@ class FirestoreService {
             'ultimaPosicion': ultimaPosicion,
             'duracion': totalDuration,
             'avance': avance,
-
           });
         }
 
@@ -262,14 +259,8 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: Stack(
         children: [
           Container(
@@ -280,6 +271,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
                 child: YoutubePlayer(
                   controller: _controller,
                   showVideoProgressIndicator: true,
+                  onReady: () {},
                   onEnded: (metaData) {
                     guardarInformacionEnFirestore();
                     _onVideoEnded();

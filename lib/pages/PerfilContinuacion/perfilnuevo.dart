@@ -268,7 +268,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
-        unselectedItemColor: const Color.fromARGB(255, 150, 148, 148),
+        unselectedItemColor: const Color.fromARGB(255, 117, 115, 115),
         onTap: _onItemTapped,
       ),
     );
@@ -315,7 +315,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.06,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xff034C8C),
+                                  color:  Colors.black,
                                 ),
                               ),
                               Text(
@@ -442,7 +442,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
               "\nDatos personales",
               style: GoogleFonts.quicksand(
                   fontSize: 23,
-                  color: const Color(0xff034C8C),
+                  color:  Colors.black,
                   fontWeight: FontWeight.bold),
             ),
           ),
@@ -452,7 +452,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
             style: GoogleFonts.quicksand(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xff034C8C)),
+                color: const Color.fromARGB(255, 117, 115, 115)),
           ),
           Text(
             'Cédula: $cedula\n',

@@ -81,17 +81,17 @@ class _User_videosState extends State<User_videos> {
     _videos = args['videos'] as List<Video>;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: getAppBar(),
       body: Stack(
         children: [
           Positioned(
             top: -MediaQuery.of(context).size.height * .12,
             right: MediaQuery.of(context).size.width * .05,
-            child:
-                const BezierContainer(), 
+            child: const BezierContainer(),
           ),
           Container(
-            height: MediaQuery.of(context).size.height * .9,
+            height: MediaQuery.of(context).size.height * 1,
             width: double.infinity,
             child: getBody(_videos!),
           ),
@@ -113,27 +113,6 @@ class _User_videosState extends State<User_videos> {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      title: Container(
-        height: 35,
-        width: double.infinity,
-        margin: const EdgeInsets.only(top: 15),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.40),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: TextField(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Buscar",
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-            prefixIcon: Icon(
-              Icons.search,
-              color: Colors.white.withOpacity(0.5),
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
-          ),
-        ),
-      ),
     );
   }
 
@@ -141,10 +120,32 @@ class _User_videosState extends State<User_videos> {
     var size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(top: 35, left: 20, right: 18),
+        padding: const EdgeInsets.only(top: 80, left: 20, right: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 20,),
+            Container(
+              height: 35,
+              width: MediaQuery.of(context).size.width*.88,
+              margin: const EdgeInsets.only(top: 15),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.40),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Buscar",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+            ),
             const Text(
               "Videos Disponibles",
               style: TextStyle(

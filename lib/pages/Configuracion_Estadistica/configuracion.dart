@@ -36,7 +36,7 @@ class ConfiguracionScreen extends StatelessWidget {
                           fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  // SizedBox(height: MediaQuery.of(context).size.height * .05),
+                  SizedBox(height: MediaQuery.of(context).size.height * .05),
                   Text(
                     'Cuenta',
                     style: GoogleFonts.quicksand(
@@ -69,7 +69,7 @@ class ConfiguracionScreen extends StatelessWidget {
                       child: TextField(
                         controller: _comentariosController,
                         maxLines: 5,
-                        maxLength: 250,
+                        maxLength: 500,
                         decoration: InputDecoration(
                             hintText:
                                 'Escribe tus comentarios o sugerencias aquí...',
@@ -77,7 +77,7 @@ class ConfiguracionScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                   SizedBox(height: height*.15),
                   Center(
                     child: SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
@@ -108,7 +108,7 @@ class ConfiguracionScreen extends StatelessWidget {
                   ),
                   // Fin del formulario
 
-                  const Divider(),
+                  const SizedBox(height: 15),
                   Text(
                     'Versión de la Aplicación',
                     style: GoogleFonts.quicksand(
@@ -125,7 +125,7 @@ class ConfiguracionScreen extends StatelessWidget {
                   ),
                   // Muestra la versión actual de la aplicación y permite a los usuarios actualizar si hay una versión más reciente disponible
 
-                  const Divider(),
+                  const SizedBox(height: 15),
                   GestureDetector(
                     onTap: () {
                       _cerrarSesion(context);

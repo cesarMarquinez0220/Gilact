@@ -99,7 +99,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                               duration: const Duration(milliseconds: 1200),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Dale pecho a tu bebé inmediatamente después del parto.\n- Dale de mamar al recién nacido cuando lo pida (sin horario fijo).',
+                                '- Dale pecho a tu bebé inmediatamente después del parto.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -111,7 +111,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                               duration: const Duration(milliseconds: 1200),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- El bebé te hará saber cuando tiene hambre, por lo general suele mamar de 8 a 12 veces al día.',
+                                '- El bebé te hará saber cuando tiene hambre suele mamar de 8 a 12 veces al día.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -123,7 +123,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                               duration: const Duration(milliseconds: 1200),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Cada niño establece su propio horario.\n- Dale de mamar en un ambiente tranquilo.\n- Busca la posición más cómoda para amamantar.',
+                                '- Dale de mamar en un ambiente tranquilo.\n- Busca la posición más cómoda para amamantar.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
