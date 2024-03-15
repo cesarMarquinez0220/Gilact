@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/estadistica.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -251,26 +252,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildBody(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Estadisticas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuracion',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: const Color.fromARGB(255, 150, 148, 148),
-        onTap: _onItemTapped,
-      ),
+      bottomNavigationBar: BottomBar(),
     );
   }
 
@@ -371,16 +353,16 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         _buildFeatureBox(
                           'Tips',
                           Icons.lightbulb,
-                          const Color.fromARGB(255, 221, 62, 179),
-                          'Sobre consejos \n alimenticios y más',
+                          Color.fromARGB(255, 234, 38, 182),
+                          'Consejos y más',
                           '/tips',
                         ),
                         _buildFeatureBoxes(
-                          'Historial de\n Videos',
+                          'Historial',
                           Icons.video_library,
                           //Color.fromARGB(224, 189, 154, 211),
-                          const Color.fromARGB(255, 31, 134, 113),
-                          'Enfatiza conocimiento',
+                          Color.fromARGB(255, 22, 124, 104),
+                          'Enfatiza\nconocimiento',
                           _navigateToHistorial,
                         ),
                       ],
@@ -394,7 +376,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(
-                                  0.3), // Color y opacidad de la sombra
+                                  0.2), // Color y opacidad de la sombra
                               offset: const Offset(
                                   0, 8), // Desplazamiento en el eje X y Y
                               blurRadius: 15, // Radio de desenfoque
@@ -412,15 +394,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    _buildFeatureBoxes(
-                      'Editar Perfil',
-                      Icons.edit,
-                      const Color.fromARGB(255, 19, 19, 196),
-                      'Cambia tu informacion personal',
-                      _navigateToEdicion,
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * .02),
                   ],
                 ),
               ),

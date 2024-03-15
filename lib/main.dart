@@ -1,5 +1,6 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';

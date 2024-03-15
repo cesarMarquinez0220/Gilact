@@ -54,6 +54,11 @@ class _TipsState extends State<Tips> {
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Center(
         child: Container(
           decoration: const BoxDecoration(color: Colors.white),
