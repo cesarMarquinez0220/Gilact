@@ -50,16 +50,20 @@ dependencies:
   chewie: ^1.7.1
   provider: ^6.1.1
   fl_chart: ^0.66.2
-  flutter_local_notifications: ^16.3.2
   shared_preferences: ^2.2.2
   background_fetch: ^1.2.2
   firebase_auth: ^4.17.4
   table_calendar: ^3.1.0
+  animated_toggle_switch: ^0.8.2
+  firebase_messaging: ^14.7.19
+  image: ^4.1.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
- 
+  flutter_launcher_icons:
+
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -67,7 +71,12 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^3.0.1
 
-
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: 'assets/logo/logo.png'
+  adaptive_icon_background: 'assets/logo/logo.png'
+  remove_alpha_ios: true
   
 
 # For information on the generic Dart part of this file, see the
@@ -185,6 +194,9 @@ flutter:
    - assets/tips/10_PADRE.png 
    - assets/tips/11_PROBLEMAS.png
    - assets/tips/12_LIKE.png  
+   - assets/json_lottie/Guilact_splash.json
+   - assets/json_lottie/prueba2.json
+   - assets/gif/giphy.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

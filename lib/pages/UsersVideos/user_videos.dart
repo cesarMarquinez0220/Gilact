@@ -99,7 +99,7 @@ class _User_videosState extends State<User_videos> {
             bottom: MediaQuery.of(context).size.height * -0.2,
             left: 0,
             right: 0,
-            child: Align(
+            child: const Align(
               alignment: Alignment.bottomCenter,
               child: Ovalstatic1(), // Colocar aquí el widget Ovalstatic1
             ),
@@ -124,10 +124,12 @@ class _User_videosState extends State<User_videos> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             Container(
               height: 35,
-              width: MediaQuery.of(context).size.width*.88,
+              width: MediaQuery.of(context).size.width * .88,
               margin: const EdgeInsets.only(top: 15),
               decoration: BoxDecoration(
                 color: Colors.grey.withOpacity(0.40),
@@ -145,6 +147,8 @@ class _User_videosState extends State<User_videos> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
                 ),
               ),
+            ),const SizedBox(
+              height: 20,
             ),
             const Text(
               "Videos Disponibles",
@@ -200,11 +204,11 @@ class _User_videosState extends State<User_videos> {
                                   child: Text(
                                     video.title,
                                     style: const TextStyle(
-                                      fontFamily: 'Quicksand',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
+                                        fontFamily: 'Quicksand',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Color.fromARGB(255, 117, 115, 115)),
                                   ),
                                 ),
                               ],
@@ -232,13 +236,15 @@ class _User_videosState extends State<User_videos> {
                                 height: 35,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border:
-                                      Border.all(width: 2, color: Colors.black),
+                                  border: Border.all(
+                                      width: 2,
+                                      color: const Color.fromARGB(
+                                          255, 117, 115, 115)),
                                 ),
                                 child: const Center(
                                   child: Icon(
                                     Icons.play_arrow,
-                                    color: Colors.black,
+                                    color: Color.fromARGB(255, 117, 115, 115),
                                   ),
                                 ),
                               ),

@@ -24,7 +24,7 @@ class LactanciaExitosa extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.47,
+                  height: MediaQuery.of(context).size.height * 0.4,
                   width: MediaQuery.of(context).size.width * 0.47,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),

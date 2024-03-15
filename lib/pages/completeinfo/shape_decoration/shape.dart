@@ -65,24 +65,22 @@ class Ovalstatic1 extends StatelessWidget {
  @override
   Widget build(BuildContext context) {
     return Transform.rotate(
-      angle: pi / 2,
+      angle: pi / 1.6,
       child: ClipPath(
         clipper: ClipPainter(),
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.5, // Altura ajustada
-          width: MediaQuery.of(context).size.width * 0.2, // Ancho máximo
+          height: MediaQuery.of(context).size.height * .3,
+          width: MediaQuery.of(context).size.width * .4,
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromRGBO(106, 240, 189, 1),
-                Color.fromRGBO(27, 214, 183, 1),
-                Color.fromRGBO(27, 167, 214, 1),
+              gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomCenter,
+                  colors: [
                 Color.fromARGB(255, 98, 142, 255),
-              ],
-            ),
-          ),
+                Color.fromRGBO(27, 167, 214, 1),
+                Color.fromRGBO(27, 214, 183, 1),
+                Color.fromRGBO(106, 240, 189, 1),
+              ])),
         ),
       ),
     );

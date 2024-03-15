@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/registro_bebe.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/pages/registro_pre.dart';

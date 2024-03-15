@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/completeinfo/alimentacion_complem.dart';
@@ -42,7 +41,7 @@ class _TipsState extends State<Tips> {
           child: Stack(
             children: [
               Positioned(
-                top: -height * .12,
+                top: -height * .13,
                 right: width * .05,
                 child: const BezierContainer(),
               ),
@@ -72,9 +71,10 @@ class _TipsState extends State<Tips> {
                 ],
               ),
               Positioned(
-                bottom: MediaQuery.of(context).size.height * 0.1 - 270,
-                right: MediaQuery.of(context).size.width * 0.1 + 120,
-                child: const OvalContainer(),
+                bottom: -height * .15,
+                // bottom: MediaQuery.of(context).size.height * 0.1 - 260,
+                right: width * 0.1 + 190,
+                child: const Ovalstatic1(),
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -84,7 +84,7 @@ class _TipsState extends State<Tips> {
                     controller: _controller,
                     count: 11,
                     effect: const JumpingDotEffect(
-                      activeDotColor: Colors.white,
+                      activeDotColor: Color.fromARGB(255, 73, 140, 240),
                       dotColor: Colors.grey,
                       dotHeight: 10,
                       dotWidth: 10,

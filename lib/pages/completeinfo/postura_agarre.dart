@@ -24,7 +24,7 @@ class PosturaAgarreInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.45,
+                  height: MediaQuery.of(context).size.height * 0.4,
                   width: MediaQuery.of(context).size.width * 0.45,
                   child: FadeInDown(
                     duration: const Duration(milliseconds: 1000),
@@ -39,7 +39,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                     delay: const Duration(milliseconds: 500),
                     child: Container(
                       width: width * .9,
-                      height: height * .42,
+                      height: height * .38,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),

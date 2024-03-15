@@ -23,9 +23,8 @@ class HigieneLactanciaInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const SizedBox(height: 10),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.38,
+                  height: MediaQuery.of(context).size.height * 0.35,
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
@@ -33,7 +32,6 @@ class HigieneLactanciaInfo extends StatelessWidget {
                     child: Image.asset("assets/tips/7.1_EXTRACCION.png"),
                   ),
                 ),
-                const SizedBox(height: 15),
                 FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),

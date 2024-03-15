@@ -27,7 +27,7 @@ class ExtraccionAlmacenamientoInfo extends StatelessWidget {
                   height: height * .02,
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: MediaQuery.of(context).size.height * 0.35,
                   width: MediaQuery.of(context).size.width * 0.47,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),

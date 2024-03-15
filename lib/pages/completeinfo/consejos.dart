@@ -40,7 +40,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                     delay: const Duration(milliseconds: 500),
                     child: Container(
                       width: width * .9,
-                      height: height * .47,
+                      height: height * .4,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),

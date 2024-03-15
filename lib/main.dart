@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
-import 'package:flutter_login/pages/registro_pre.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/services.dart';
@@ -23,23 +22,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await initNotifications();
+  
   await updateLastOpened();
 
-  // Configura el plugin background_fetch
-  await BackgroundFetch.configure(
-      BackgroundFetchConfig(
-        minimumFetchInterval: 2, // Ejecutar cada 2 minutos
-        stopOnTerminate: false,
-        enableHeadless: true,
-        requiresBatteryNotLow: false,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresDeviceIdle: false,
-        requiredNetworkType: NetworkType.NONE,
-      ),
-     notificacionPrueba,
-      );
+
 
   // TODO:1
   // MARK: ///// CONFIGURACION DE FIRESTORE //////////
@@ -61,7 +47,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LeccionesProvider()),
         ChangeNotifierProvider(create: (_) => Avancesprovider()),
       ],
-      child:const MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -88,8 +74,7 @@ class MyApp extends StatelessWidget {
         '/secciones': (context) => const User_videos(videos: []),
         '/edicion': (context) => const editProfile(),
         '/tips': (context) => const Tips(),
-        '/Onboar_Info':(context)=>  Onboar_Info(),
-     
+        '/Onboar_Info': (context) => Onboar_Info(),
       },
     );
   }

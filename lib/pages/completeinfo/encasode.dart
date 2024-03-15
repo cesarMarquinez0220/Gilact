@@ -26,7 +26,7 @@ class ProblemasLactanciaInfo extends StatelessWidget {
                   height: height * .02,
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.35,
+                  height: MediaQuery.of(context).size.height * 0.33,
                   width: MediaQuery.of(context).size.width * 0.47,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
@@ -43,7 +43,7 @@ class ProblemasLactanciaInfo extends StatelessWidget {
                     delay: const Duration(milliseconds: 500),
                     child: Container(
                       width: width * .9,
-                      height: height * .52,
+                      height: height * .46,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -103,7 +103,7 @@ class ProblemasLactanciaInfo extends StatelessWidget {
                               duration: const Duration(milliseconds: 1200),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Amamanta con frecuencia para evitar los abcesos mamarios.\n- Consulta con un profesional.',
+                                '- Amamanta con frecuencia para evitar los abcesos mamarios.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
