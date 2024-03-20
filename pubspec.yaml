@@ -54,9 +54,7 @@ dependencies:
   background_fetch: ^1.2.2
   firebase_auth: ^4.17.4
   table_calendar: ^3.1.0
-  animated_toggle_switch: ^0.8.2
-  firebase_messaging: ^14.7.19
-  image: ^4.1.7
+  velocity_x: ^4.1.1
 
 dev_dependencies:
   flutter_test:

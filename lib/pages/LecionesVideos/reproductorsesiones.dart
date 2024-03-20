@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -260,7 +261,10 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           Container(
