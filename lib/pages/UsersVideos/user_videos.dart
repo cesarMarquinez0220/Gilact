@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
 
@@ -95,17 +96,9 @@ class _User_videosState extends State<User_videos> {
             width: double.infinity,
             child: getBody(_videos!),
           ),
-          Positioned(
-            bottom: MediaQuery.of(context).size.height * -0.2,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Ovalstatic1(), // Colocar aquí el widget Ovalstatic1
-            ),
-          ),
         ],
       ),
+      bottomNavigationBar: BottomBar(),
     );
   }
 
@@ -248,7 +241,7 @@ class _User_videosState extends State<User_videos> {
                     ),
                   );
                 } else {
-                  return const SizedBox(); // Si el video no corresponde a la última lección completada, no se muestra
+                  return const SizedBox();
                 }
               }),
             ),
