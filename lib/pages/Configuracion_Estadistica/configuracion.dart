@@ -15,17 +15,18 @@ class ConfiguracionScreen extends StatelessWidget {
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      body: Center(
-        child: Container(
-          child: Stack(
-            children: [
-              Positioned(
-                top: -height * .12,
-                right: width * .05,
-                child: const BezierContainer(),
-              ),
-              Column(
+    return Container(
+        height: MediaQuery.of(context).size.height * .83,
+
+        child: Stack(
+          children: [
+            Positioned(
+              top: -height * .12,
+              right: width * .05,
+              child: const BezierContainer(),
+            ),
+            SingleChildScrollView(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -77,7 +78,7 @@ class ConfiguracionScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                   SizedBox(height: height*.15),
+                  SizedBox(height: height * .15),
                   Center(
                     child: SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
@@ -107,7 +108,7 @@ class ConfiguracionScreen extends StatelessWidget {
                     ),
                   ),
                   // Fin del formulario
-
+                    
                   const SizedBox(height: 15),
                   Text(
                     'Versión de la Aplicación',
@@ -124,7 +125,7 @@ class ConfiguracionScreen extends StatelessWidget {
                     ),
                   ),
                   // Muestra la versión actual de la aplicación y permite a los usuarios actualizar si hay una versión más reciente disponible
-
+                    
                   const SizedBox(height: 15),
                   GestureDetector(
                     onTap: () {
@@ -141,18 +142,19 @@ class ConfiguracionScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 15),
                 ],
               ),
-              Positioned(
-                bottom: MediaQuery.of(context).size.height * 0.1 - 270,
-                right: MediaQuery.of(context).size.width * 0.1 + 120,
-                child: const OvalContainer(),
-              ),
-            ],
-          ),
+            ),
+            // Positioned(
+            //   bottom: MediaQuery.of(context).size.height * 0.1 - 270,
+            //   right: MediaQuery.of(context).size.width * 0.1 + 120,
+            //   child: const OvalContainer(),
+            // ),
+          ],
         ),
-      ),
-    );
+      )
+;
   }
 
   void _cerrarSesion(BuildContext context) async {

@@ -35,7 +35,6 @@ class LeccionesProvider with ChangeNotifier {
     27: false, //video 14.2
     28: false, //video 15
     29: false, //video 16
-
   };
   int get lastCompletedLesson => _lastCompletedLesson;
 
@@ -113,7 +112,6 @@ class Avancesprovider with ChangeNotifier {
       return avancesMap[videoId]!['avance'] ?? 0.0; // Devolver como double
     }
     return 0.0;
-    
   }
 
   void actualizarListaIdsVideosCompletados(List<int> listaIdsCompletados) {
@@ -123,9 +121,10 @@ class Avancesprovider with ChangeNotifier {
     }
     notifyListeners();
   }
-void imprimirAvancesMap() {
-  print('Aqui esta el mapa\n$avancesMap');
+
+  void imprimirAvancesMap() {
+    print('Aqui esta el mapa\n$avancesMap');
+  }
 }
 
 
-}

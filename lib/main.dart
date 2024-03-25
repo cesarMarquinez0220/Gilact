@@ -1,12 +1,11 @@
-import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/onboard_info.dart';
 import 'package:flutter_login/pages/paginadepruebas.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_login/pages/Configuracion_Estadistica/services.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
 import 'package:flutter_login/pages/UsersVideos/user_videos.dart';
 import 'package:flutter_login/pages/login.dart';
@@ -23,10 +22,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   await updateLastOpened();
-
-
 
   // TODO:1
   // MARK: ///// CONFIGURACION DE FIRESTORE //////////
@@ -71,6 +68,8 @@ class MyApp extends StatelessWidget {
       home: const LoginScreen(),
       //home: SeccionVideos(),
       routes: {
+        '/configuracion': (context) => ConfiguracionScreen(),
+        '/perfil': (context) => const Perfilnuevo(),
         '/lecciones': (context) => const lecciones(videos: []),
         '/secciones': (context) => const User_videos(videos: []),
         '/edicion': (context) => const editProfile(),

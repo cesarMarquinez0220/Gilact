@@ -4,7 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
-import 'package:flutter_login/pages/Configuracion_Estadistica/estadistica.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
@@ -26,16 +26,26 @@ class Perfilnuevo extends StatefulWidget {
 class _PerfilnuevoState extends State<Perfilnuevo> {
   bool pre = false;
   bool post = false;
-  int _selectedIndex = 0;
+  int Index = 1;
+  int _selectedIndex = 1;
   String nombreUsuario = UserDataStorage.getUserName();
   String email = UserDataStorage.getUserEmail();
   late String usuario;
-  bool positive = true;
+  bool positive = false;
   String nombreMadre = '';
   String cedula = '';
   String fechaNacimiento = '';
   String telefono = '';
   String ubicacion = '';
+  ////////////bebe/////////
+  String nombreBebe = '';
+  int edadGest = 0;
+  String fechaNacibebe = '';
+  String fechaLact = '';
+  String horaLact = '';
+  String horaNaci = '';
+  String lugarNac = '';
+  String peso = '';
   double? scrolledUnderElevation;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Video> _videos = [];
@@ -74,6 +84,38 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       }
     } catch (e) {
       print("Error al recuperar la información del usuario: $e");
+    }
+  }
+
+  Future<void> _fetchBebeData() async {
+    try {
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('usuario',
+              isEqualTo: nombreUsuario) // Filtras por el campo 'usuario'
+          .limit(1) // Limitas a 1 resultado (asumiendo que debería ser único)
+          .get();
+
+      if (usersSnapshot.docs.isNotEmpty) {
+        // El usuario existe en la base de datos
+        DocumentSnapshot userDocument = usersSnapshot.docs.first;
+        DocumentReference userRef = userDocument.reference;
+        DocumentSnapshot situacion =
+            await userRef.collection('situacion').doc('Post-Parto').get();
+
+        // Ahora puedes utilizar los datos obtenidos, por ejemplo:
+        nombreBebe = situacion['bebe'];
+        edadGest = situacion['edadGestacional'];
+        fechaLact = situacion['fechaLactancia'];
+        fechaNacibebe = situacion['fechaNacimiento'];
+        horaLact = situacion['horaLactancia'];
+        horaNaci = situacion['horaNacimiento'];
+        lugarNac = situacion['lugarNacimiento'];
+        peso = situacion['peso'];
+        print('el nombre del bebe es $nombreBebe');
+      }
+    } catch (e) {
+      print("Error al recuperar la información del usuario para el bebe: $e");
     }
   }
 
@@ -232,15 +274,12 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   void initState() {
     super.initState();
     usuario = UserDataStorage.getUserName();
+    _fetchBebeData();
     _fetchUserData(); // Recuperar los datos del usuario desde la base de datos
     _loadVideosFromFirestore();
     _actualizarListaVideosCompletados();
     enviarAvanceAlProvider();
     _verificadorPerfil();
-  }
-
-  void _navigateToEdicion() {
-    Navigator.pushNamed(context, '/edicion');
   }
 
   void _navigateToLecciones() {
@@ -259,7 +298,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     );
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -268,19 +307,54 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(),
-      bottomNavigationBar: BottomBar(),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: Colors.transparent),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      height: MediaQuery.of(context).size.height * 1,
+                      child: SingleChildScrollView(
+                        child: _buildBody(),
+                      ),
+                    ),
+                    // BottomBar(
+                    //   selectedIndex: _selectedIndex,
+                    //   onIndexChanged: _onItemTapped,
+                    // ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 5),
+              child: BottomBar(
+                selectedIndex: _selectedIndex,
+                onIndexChanged: _onItemTapped,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildBody() {
     switch (_selectedIndex) {
-      case 0:
-        return _buildPerfilNuevo();
       case 1:
-        return const Estadistica(); // La pantalla de estadísticas
+        return _buildPerfilNuevo();
       case 2:
-        return ConfiguracionScreen(); // La pantalla de configuración
+        return ConfiguracionScreen(); // La pantalla de cuenta
+      case 3:
+        return const editProfile(); // La pantalla de editar perfil
       default:
         return Container(); // Caso por defecto, puede ser un contenedor vacío
     }
@@ -314,7 +388,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.06,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  color: const Color(0xff034C8C),
                                 ),
                               ),
                               Text(
@@ -377,7 +451,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                         _buildFeatureBoxes(
                           'Historial',
                           Icons.video_library,
-                          //Color.fromARGB(224, 189, 154, 211),
                           Color.fromARGB(255, 22, 124, 104),
                           'Enfatiza\nconocimiento',
                           _navigateToHistorial,
@@ -387,15 +460,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                     const SizedBox(height: 15),
                     if (pre) _PrepartoProfile(),
                     if (post) _PostpartoProfile(),
-                    const SizedBox(height: 20),
-                    _buildFeatureBoxes(
-                      'Editar Perfil',
-                      Icons.edit,
-                      const Color.fromARGB(255, 19, 19, 196),
-                      'Cambia tu informacion personal',
-                      _navigateToEdicion,
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * .02),
                   ],
                 ),
               ),
@@ -464,12 +528,123 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   }
 
   Widget _buildBabyInfo() {
-    return SizedBox(
-      height: 100,
-      width: 100,
-      child: Container(
-        color: Colors.red, // Puedes cambiar este color según sea necesario
-        child: Text('Información del bebé'),
+    return FadeInUp(
+      duration: const Duration(milliseconds: 1500),
+      child: Column(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "\nDatos del Bebe",
+                            style: GoogleFonts.quicksand(
+                                fontSize: 23,
+                                color: Color(0xff034C8C),
+                                fontWeight: FontWeight.bold),
+                          ),
+                          // IconButton(
+                          //     icon: const Icon(Icons.edit),
+                          //     onPressed: () {
+                          //       Navigator.push(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //           builder: (context) => const editProfile(),
+                          //         ),
+                          //       );
+                          //     })
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      'Nombre del bebe: $nombreBebe\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Edad Gestacional: ${(edadGest)}\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Fecha de Nacimiento: $fechaNacibebe\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Fecha de Lactancia: $fechaLact\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Hora de Lactancia: $horaLact\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Hora de Nacimiento: $horaLact\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Lugar de Nacimiento: $lugarNac\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    Text(
+                      'Peso: $peso\n',
+                      style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: const Color.fromARGB(255, 117, 115, 115)),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 150)
+        ],
       ),
     );
   }
@@ -477,25 +652,33 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget _PrepartoProfile() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1500),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              offset: const Offset(0, 8),
-              blurRadius: 15,
-              spreadRadius: 0,
+      child: Column(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: _buildProfileInfo(),
+            ),
           ),
-          child: _buildProfileInfo(),
-        ),
+          Container(
+            decoration: BoxDecoration(color: Colors.transparent),
+            height: 170,
+          )
+        ],
       ),
     );
   }
@@ -507,12 +690,26 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Text(
-              "\nDatos personales",
-              style: GoogleFonts.quicksand(
-                  fontSize: 23,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "\nDatos personales",
+                  style: GoogleFonts.quicksand(
+                      fontSize: 23,
+                      color: Color(0xff034C8C),
+                      fontWeight: FontWeight.bold),
+                ),
+                // IconButton(
+                //     icon: const Icon(Icons.edit),
+                //     onPressed: () {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => const editProfile()),
+                //       );
+                //     })
+              ],
             ),
           ),
           const SizedBox(height: 15),

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
 
@@ -102,12 +101,12 @@ class _User_videosState extends State<User_videos> {
             right: 0,
             child: const Align(
               alignment: Alignment.bottomCenter,
-              child: Ovalstatic1(), // Colocar aquí el widget Ovalstatic1
+              child: OvalContainer(), // Colocar aquí el widget Ovalstatic1
             ),
           ),
         ],
       ),
-      bottomNavigationBar: BottomBar(),
+    //  bottomNavigationBar: BottomBar(),
     );
   }
 

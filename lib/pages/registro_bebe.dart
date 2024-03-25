@@ -1,8 +1,11 @@
 // ignore_for_file: library_private_types_in_public_api, use_super_parameters
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/alerta_dialoge.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
+import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 
 class RegistroBebe extends StatefulWidget {
   const RegistroBebe({Key? key}) : super(key: key);
@@ -11,6 +14,121 @@ class RegistroBebe extends StatefulWidget {
 }
 
 class _RegistroBebeState extends State<RegistroBebe> {
+  TextEditingController bebeController = TextEditingController();
+  TextEditingController fechaNacimientobebeController = TextEditingController();
+  TextEditingController horaNacimientoController = TextEditingController();
+  TextEditingController lugarnacimientoController = TextEditingController();
+  TextEditingController pesoController = TextEditingController();
+  TextEditingController edadController = TextEditingController();
+  TextEditingController fechaLactanciaController = TextEditingController();
+  TextEditingController horalactanciaController = TextEditingController();
+  late FocusNode fechaNacimientobebeFocusnode;
+  final Firebase = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    fechaNacimientobebeController = TextEditingController();
+    fechaNacimientobebeFocusnode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    fechaNacimientobebeController = TextEditingController();
+    fechaNacimientobebeFocusnode = FocusNode();
+    super.dispose();
+  }
+
+  _registerMDButtonPressed() async {
+    String email = UserDataStorage.getUserEmail();
+
+    // Inicializar Firebase si aún no está inicializado
+    if (bebeController.text.isEmpty ||
+        fechaNacimientobebeController.text.isEmpty ||
+        horaNacimientoController.text.isEmpty ||
+        lugarnacimientoController.text.isEmpty ||
+        pesoController.text.isEmpty ||
+        edadController.text.isEmpty ||
+        fechaLactanciaController.text.isEmpty ||
+        horalactanciaController.text.isEmpty) {
+      DialogExample.showAlertDialog(
+        context,
+        'Alerta',
+        'Todos los campos son obligatorios',
+      );
+      return false;
+    }
+
+    try {
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (usersSnapshot.docs.isNotEmpty) {
+        // El usuario ya existe en la base de datos
+        DocumentSnapshot userDocument = usersSnapshot.docs.first;
+
+        // Obtener la referencia al documento del usuario
+        DocumentReference userRef = userDocument.reference;
+
+        // Crear una referencia al documento dentro de la subcolección con el nombre de la situación
+        DocumentReference postpartoRef =
+            userRef.collection('situacion').doc('Post-Parto');
+
+        // Añadir un nuevo documento a la subcolección con la información de la situación
+        await postpartoRef.set
+            // Agregar los datos al documento del usuario
+            ({
+          'bebe': bebeController.text,
+          'fechaNacimiento': fechaNacimientobebeController.text,
+          'horaNacimiento': horaNacimientoController.text,
+          'lugarNacimiento': lugarnacimientoController.text,
+          'peso': pesoController.text,
+          'edadGestacional': int.parse(edadController.text),
+          'fechaLactancia': fechaLactanciaController.text,
+          'horaLactancia': horalactanciaController.text,
+        });
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+              title: Text("Exitoso"),
+              content: Text("Registro Exitoso"),
+            );
+          },
+        );
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Perfilnuevo(),
+            ),
+          );
+        });
+      } else {
+        // El usuario no existe en la base de datos
+        print('El usuario no existe en la base de datos.');
+      }
+    } catch (e) {
+      //print("ERROR HAAAAAAAA" + e.toString());
+    }
+
+    // Realizar acciones posteriores al registro si es necesario
+
+    // Limpiar los controladores después de agregar los datos
+    bebeController.clear();
+    fechaNacimientobebeController.clear();
+    horaNacimientoController.clear();
+    lugarnacimientoController.clear();
+    pesoController.clear();
+    edadController.clear();
+    fechaLactanciaController.clear();
+    fechaLactanciaController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,8 +159,9 @@ class _RegistroBebeState extends State<RegistroBebe> {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color:const Color.fromARGB(255, 156, 155, 155)
-                                      .withOpacity(0.5),
+                                  color:
+                                      const Color.fromARGB(255, 156, 155, 155)
+                                          .withOpacity(0.5),
                                   spreadRadius: 0.1,
                                   blurRadius: 5,
                                   offset: const Offset(0, 6),
@@ -68,61 +187,73 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                   ),
                                 ),
                                 const SizedBox(height: 15),
-                                _buildTextField("Nombre", Icons.child_care),
+                                _buildTextField(
+                                    hintText: "Nombre",
+                                    icon: Icons.child_care,
+                                    controller: bebeController),
                                 const SizedBox(height: 20),
                                 Row(
                                   children: [
                                     Flexible(
                                       flex: 2, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          "Fecha de Nacimiento",
-                                          Icons.date_range),
+                                          hintText: "Fecha de Nacimiento",
+                                          icon: Icons.date_range,
+                                          controller:
+                                              fechaNacimientobebeController),
                                     ),
-                                   const SizedBox(
+                                    const SizedBox(
                                         width: 10), // Espacio entre los campos
                                     Flexible(
                                       flex: 1, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          "Hora", Icons.hourglass_empty),
+                                          hintText: "Hora",
+                                          icon: Icons.hourglass_empty,
+                                          controller: horaNacimientoController),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    "Lugar de Nacimiento", Icons.place),
+                                    hintText: "Lugar de Nacimiento",
+                                    icon: Icons.place,
+                                    controller: lugarnacimientoController,
+                                    focusNode: fechaNacimientobebeFocusnode),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    "Peso al nacer en kg", Icons.accessibility_new),
+                                    hintText: "Peso al nacer en kg",
+                                    icon: Icons.accessibility_new,
+                                    controller: pesoController),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    "Edad Gestacional", Icons.child_care),
+                                    hintText: "Edad Gestacional",
+                                    icon: Icons.child_care,
+                                    controller: edadController),
                                 const SizedBox(height: 20),
                                 Row(
                                   children: [
                                     Flexible(
                                       flex: 2, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          "Fecha de Lactancia",
-                                          Icons.date_range),
+                                          hintText: "Fecha de Lactancia",
+                                          icon: Icons.date_range,
+                                          controller: fechaLactanciaController),
                                     ),
-                                   const SizedBox(
+                                    const SizedBox(
                                         width: 10), // Espacio entre los campos
                                     Flexible(
                                       flex: 1, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          "Hora", Icons.hourglass_empty),
+                                          hintText: "Hora",
+                                          icon: Icons.hourglass_empty,
+                                          controller: horalactanciaController),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 20),
                                 ElevatedButton(
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const Perfilnuevo()),
-                                    );
+                                    _registerMDButtonPressed();
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
@@ -142,7 +273,8 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                 Container(
                                   width: double.infinity,
                                   height: 1,
-                                  color:const Color.fromARGB(117, 209, 204, 204),
+                                  color:
+                                      const Color.fromARGB(117, 209, 204, 204),
                                 ),
                                 const SizedBox(height: 15),
                               ],
@@ -171,7 +303,11 @@ class _RegistroBebeState extends State<RegistroBebe> {
     );
   }
 
-  Widget _buildTextField(String hintText, IconData icon) {
+  Widget _buildTextField(
+      {required String hintText,
+      required IconData icon,
+      TextEditingController? controller,
+      FocusNode? focusNode}) {
     return Container(
       height: 48,
       width: 320,
@@ -188,6 +324,8 @@ class _RegistroBebeState extends State<RegistroBebe> {
         ],
       ),
       child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(
