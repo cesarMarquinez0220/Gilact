@@ -194,9 +194,7 @@ flutter:
    - assets/tips/10_PADRE.png 
    - assets/tips/11_PROBLEMAS.png
    - assets/tips/12_LIKE.png  
-   - assets/json_lottie/Guilact_splash.json
-   - assets/json_lottie/prueba2.json
-   - assets/gif/giphy.gif
+  
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

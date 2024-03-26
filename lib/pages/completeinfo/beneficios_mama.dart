@@ -85,7 +85,7 @@ class beneficios_mama extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color.fromARGB(
                                                         255, 86, 86, 86)),
-                                                textAlign: TextAlign.center),
+                                                textAlign: TextAlign.start),
                                           ),
                                           FadeInDown(
                                             duration: const Duration(
@@ -98,7 +98,7 @@ class beneficios_mama extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color.fromARGB(
                                                         255, 86, 86, 86)),
-                                                textAlign: TextAlign.center),
+                                                textAlign: TextAlign.start),
                                           ),
                                           FadeInDown(
                                             duration: const Duration(
@@ -111,7 +111,7 @@ class beneficios_mama extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color.fromARGB(
                                                         255, 86, 86, 86)),
-                                                textAlign: TextAlign.center),
+                                                textAlign: TextAlign.start),
                                           ),
                                           FadeInDown(
                                             duration: const Duration(
@@ -124,7 +124,7 @@ class beneficios_mama extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color.fromARGB(
                                                         255, 86, 86, 86)),
-                                                textAlign: TextAlign.center),
+                                                textAlign: TextAlign.start),
                                           ),
                                           FadeInDown(
                                             duration: const Duration(
@@ -137,7 +137,7 @@ class beneficios_mama extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color.fromARGB(
                                                         255, 86, 86, 86)),
-                                                textAlign: TextAlign.center),
+                                                textAlign: TextAlign.start),
                                           ),
                                         ],
                                       )),
@@ -150,8 +150,8 @@ class beneficios_mama extends StatelessWidget {
                         left: 50,
                         right: 1,
                         child: SizedBox(
-                          height: 350,
-                          width: width * 0.4,
+                          height: 300,
+                          width: width * 3.5,
                           child: FadeInRight(
                             duration: const Duration(milliseconds: 1000),
                             delay: const Duration(milliseconds: 500),

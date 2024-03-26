@@ -24,8 +24,8 @@ class PosturaAgarreInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: MediaQuery.of(context).size.height * 0.35,
+                  width: MediaQuery.of(context).size.width * 0.35,
                   child: FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
@@ -77,7 +77,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 14,
                                     color: Color.fromARGB(255, 86, 86, 86)),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -88,7 +88,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 14,
                                     color: Color.fromARGB(255, 86, 86, 86)),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -101,7 +101,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                                     color: Color.fromARGB(255, 73, 140, 240),
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -113,7 +113,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 14,
                                     color: Color.fromARGB(255, 86, 86, 86)),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(height: 10),

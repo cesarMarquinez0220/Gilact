@@ -316,6 +316,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                 child: Column(
                   children: [
                     Container(
+                      
                       height: MediaQuery.of(context).size.height * 1,
                       child: SingleChildScrollView(
                         child: _buildBody(),
@@ -511,7 +512,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   ))
                 : Center(
                     child: Text(
-                    'Personal',
+                    'Mamá',
                     style: GoogleFonts.quicksand(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,

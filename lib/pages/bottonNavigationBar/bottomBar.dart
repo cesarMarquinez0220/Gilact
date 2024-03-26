@@ -106,7 +106,7 @@ class RoundedBox extends StatelessWidget {
     return VxBox(child: child)
         .color(Vx.gray100)
         .roundedLg
-        .p24
+        .p20
         .shadowSm
         .make();
   }
