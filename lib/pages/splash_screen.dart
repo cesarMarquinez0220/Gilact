@@ -17,6 +17,7 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
+  bool _isVisible = true;
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             colors: [
               Color.fromRGBO(254, 254, 254, 1),
               Color.fromRGBO(254, 254, 254, 1),
-              Color.fromRGBO(106, 240, 189, 1),
+              Color.fromRGBO(252, 252, 252, 1),
               Color.fromRGBO(27, 167, 214, 1),
               Color.fromARGB(255, 98, 142, 255),
             ],
@@ -47,39 +48,67 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             end: Alignment.bottomRight,
           ),
         ),
-        child: FadeIn(
-          delay: const Duration(milliseconds: 500),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.network(
-                "https://lottie.host/91b2ad14-b0d8-4764-8eba-8fef283ec67e/9FK7ekJvjk.json",
-                controller: _controller,
-                onLoaded: (compos) {
-                  _controller
-                    ..duration = compos.duration
-                    ..forward().then((value) {
-                      // Agregar la lógica de verificación después de que la animación se cargue
-                      _checkUserSituation();
-                    });
-                },
-              ),
-              FadeInUp(
-                duration: const Duration(milliseconds: 1000),
-                delay: const Duration(milliseconds: 200),
-                child: const Center(
-                  child: Text(
-                    "Bienvenidos",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _isVisible
+                ? FadeIn(
+                   curve: Curves.easeIn,
+                  child: FadeIn(
+                      curve: Curves.easeIn,
+                      duration: const Duration(milliseconds: 500),
+                      child: Container(
+                        width: 300,
+                        height: 300,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/logo-completo2.png'),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      onFinish: (direction) {
+                        Future.delayed(const Duration(milliseconds: 2000), () {
+                          setState(() {
+                            _isVisible = false;
+                          });
+                          _checkUserSituation();
+                        });
+                      },
                     ),
+                )
+                : FadeOutDown(
+                   curve: Curves.easeOut,
+                  child: FadeOut(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOut,
+                      child: Container(
+                        width: 300,
+                        height: 300,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/logo-completo2.png'),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                    ),
+                ),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1000),
+              delay: const Duration(milliseconds: 200),
+              child: const Center(
+                child: Text(
+                  "",
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
