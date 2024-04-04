@@ -30,7 +30,7 @@ class beneficios_mama extends StatelessWidget {
                   child: Stack(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 260.0),
+                        padding: const EdgeInsets.only(top: 200.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +40,7 @@ class beneficios_mama extends StatelessWidget {
                                 delay: const Duration(milliseconds: 500),
                                 child: Container(
                                   width: width * .88,
-                                  height: height * .45,
+                                  height: height * .88,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(18),
@@ -150,8 +150,8 @@ class beneficios_mama extends StatelessWidget {
                         left: 50,
                         right: 1,
                         child: SizedBox(
-                          height: 350,
-                          width: width * 0.4,
+                          height: 280,
+                          width: width * 3.5,
                           child: FadeInRight(
                             duration: const Duration(milliseconds: 1000),
                             delay: const Duration(milliseconds: 500),

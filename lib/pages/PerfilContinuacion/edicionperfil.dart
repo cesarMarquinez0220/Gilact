@@ -51,7 +51,7 @@ class _EditProfileFormState extends State<editProfile> {
     try {
       QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
           .collection('Users')
-          .where('email', isEqualTo: email) // Busca por el campo 'correo'
+          .where('email', isEqualTo: email) // Busca por el campo 'correo'x
           .limit(1)
           .get();
 
