@@ -106,8 +106,11 @@ class RoundedBox extends StatelessWidget {
     return VxBox(child: child)
         .color(Vx.gray100)
         .roundedLg
-        .p20
-        .shadowSm
+        .height(75)
+        .width(70)
+        .p12
+        .margin(EdgeInsets.only(bottom: 20.0))
+        .shadowMd
         .make();
   }
 }

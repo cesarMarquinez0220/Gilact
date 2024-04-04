@@ -57,6 +57,7 @@ dependencies:
   velocity_x: ^4.1.1
   animated_toggle_switch: ^0.8.2
   flutter_gif: ^0.0.4
+  flutter_staggered_animations: ^1.1.1
 
 dev_dependencies:
   flutter_test:

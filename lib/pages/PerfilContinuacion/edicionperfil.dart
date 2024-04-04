@@ -60,7 +60,7 @@ class _EditProfileFormState extends State<editProfile> {
         setState(() {
           nombreUsuario1 = userSnapshot.get('usuario');
           fechaNacimiento = DateFormat('yyyy-MM-dd').format(
-              DateFormat('MM/dd/yyyy')
+              DateFormat('yyyy-MM-dd')
                   .parse(userSnapshot.get('fechaNacimiento')));
 
           telefono = userSnapshot.get('telefono');
@@ -193,7 +193,7 @@ class _EditProfileFormState extends State<editProfile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Perfil de Madre',
+                    'Perfil de la Madre',
                     style: GoogleFonts.quicksand(
                       fontSize: 33,
                       fontWeight: FontWeight.bold,

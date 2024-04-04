@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
-import 'package:flutter_login/pages/registro_lactancia.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
