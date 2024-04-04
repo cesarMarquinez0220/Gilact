@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -210,12 +209,7 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   }
 
   void _handleSeekTo(Duration duration) {
-    if (duration > _controller.value.position) {
-      forwardCount++;
-      _handleSeekTo(_controller.value.position);
-      print('Número de veces que se ha realizado avance: $forwardCount');
-      guardarInformacionEnFirestore();
-    }
+  
   }
 
   Future<void> guardarInformacionEnFirestore() async {

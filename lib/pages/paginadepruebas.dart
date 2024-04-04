@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
 import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
 import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
-import 'package:flutter_login/pages/registro_lactancia.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -103,9 +102,9 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
                   children: <Widget>[
                     _buildAppBar(),
                     Container(
-                      height: MediaQuery.of(context).size.height*.83,
+                      height: MediaQuery.of(context).size.height,
                       child: SingleChildScrollView(child: _buildLessons(_videos!))),
-                    _buildElevatedButton(),
+                 
                      
                   ],
                 ),
@@ -424,41 +423,4 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
     );
   }
 
-  Widget _buildElevatedButton() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-        child: SizedBox(
-          width: 210,
-          child: ElevatedButton(
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RegistroLactancia(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 199, 135, 240),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              shadowColor: Colors.black.withOpacity(0.5),
-              elevation: 5,
-            ),
-            child: Text(
-              'Registro Lactancia',
-              style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

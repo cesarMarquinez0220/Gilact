@@ -20,6 +20,7 @@ Widget build(BuildContext context) {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         FloatingActionButton(
+          heroTag: "btnHome",
           onPressed: () {
             onIndexChanged(1);
           },
@@ -35,6 +36,8 @@ Widget build(BuildContext context) {
           ),
         ),
         FloatingActionButton(
+                    heroTag: "btnConfig",
+
           onPressed: () {
            onIndexChanged(2);
           },
@@ -50,6 +53,8 @@ Widget build(BuildContext context) {
           ),
         ),
         FloatingActionButton(
+                    heroTag: "btnEdit",
+
           onPressed: () {
             onIndexChanged(3);
           },
@@ -105,7 +110,8 @@ class RoundedBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return VxBox(child: child)
         .color(Vx.gray100)
-        .roundedLg
+        .rounded
+        .margin(EdgeInsets.only(bottom: 30))
         .p24
         .shadowSm
         .make();

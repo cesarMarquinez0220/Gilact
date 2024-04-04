@@ -1,4 +1,4 @@
-// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
@@ -79,12 +79,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
           telefono = userSnapshot.get('telefono');
           ubicacion = userSnapshot.get('ubicacion');
         });
-
-        print(userSnapshot.data());
       }
-    } catch (e) {
-      print("Error al recuperar la información del usuario: $e");
-    }
+    } catch (e) {}
   }
 
   Future<void> _fetchBebeData() async {
@@ -112,7 +108,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         horaNaci = situacion['horaNacimiento'];
         lugarNac = situacion['lugarNacimiento'];
         peso = situacion['peso'];
-        print('el nombre del bebe es $nombreBebe');
       }
     } catch (e) {
       print("Error al recuperar la información del usuario para el bebe: $e");
@@ -142,7 +137,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       setState(() {
         _videos = videos;
       });
-      print('Aqui esta la informacion $_videos');
     } catch (e) {
       print('Error cargando videos desde Firestore: $e');
       // Manejar el error
@@ -161,16 +155,11 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
           final ultimoVideoDoc = videosCollection.docs.last;
           final avance = ultimoVideoDoc.data()['avance'] ?? 0;
           final avance1 = avance.clamp(0.0, 1.0);
-          print('Avance del último documento: $avance');
-          print('Tipo de dato de avance: ${avance.runtimeType}');
-          print('el id del video es ${int.parse(ultimoVideoDoc.id)}');
           context.read<Avancesprovider>().guardarProgresoPorId(
               int.parse(ultimoVideoDoc.id), avance1 as double);
         }
       }
-    } catch (error) {
-      print('Error al enviar avance al provider: $error');
-    }
+    } catch (error) {}
   }
 
   Future<int?> _getUltimaLeccionCompletada() async {
@@ -196,7 +185,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
             // Obtener el último documento (mayor número de lección)
             final lastLessonDoc = videosCompletados.last;
-            print('Este es el ultima leccion $lastLessonDoc');
             // Obtener el número de lección
             return int.parse(lastLessonDoc.id);
           }
@@ -204,7 +192,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       }
       return null;
     } catch (error) {
-      print('Error al obtener la última lección completada: $error');
       return null;
     }
   }
@@ -240,12 +227,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
         if (situationSnapshot.exists) {
           pre = true;
-          print(
-              'Documento de pre-parto encontrado: ${situationSnapshot.data()}');
-          print(pre);
         } else {
           // El documento de la situación 'pre-parto' no existe
-          print('Documento de pre-parto no encontrado.');
         }
 
         // Repite el mismo proceso para la situación 'post-parto'
@@ -254,12 +237,8 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
         if (situationSnapshot.exists) {
           post = true;
-          print(
-              'Documento de post-parto encontrado: ${situationSnapshot.data()}');
-          print(post);
         } else {
           // El documento de la situación 'post-parto' no existe
-          print('Documento de post-parto no encontrado.');
         }
       } else {
         // El usuario no existe en la base de datos
@@ -311,22 +290,17 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         children: [
           Container(
             decoration: BoxDecoration(color: Colors.transparent),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 1,
-                      child: SingleChildScrollView(
-                        child: _buildBody(),
-                      ),
-                    ),
-                    // BottomBar(
-                    //   selectedIndex: _selectedIndex,
-                    //   onIndexChanged: _onItemTapped,
-                    // ),
-                  ],
-                ),
+            child: Scaffold(
+              body: Column(
+                children: [
+                  SingleChildScrollView(
+                    child: _buildBody(),
+                  ),
+                  // BottomBar(
+                  //   selectedIndex: _selectedIndex,
+                  //   onIndexChanged: _onItemTapped,
+                  // ),
+                ],
               ),
             ),
           ),

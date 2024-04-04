@@ -38,11 +38,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
+              Color.fromARGB(255, 98, 142, 255),
+              Color.fromRGBO(27, 167, 214, 1),
               Color.fromRGBO(254, 254, 254, 1),
               Color.fromRGBO(254, 254, 254, 1),
               Color.fromRGBO(252, 252, 252, 1),
-              Color.fromRGBO(27, 167, 214, 1),
-              Color.fromARGB(255, 98, 142, 255),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -52,48 +52,42 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _isVisible
-                ? FadeIn(
-                   curve: Curves.easeIn,
-                  child: FadeIn(
-                      curve: Curves.easeIn,
-                      duration: const Duration(milliseconds: 500),
-                      child: Container(
-                        width: 300,
-                        height: 300,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/logo-completo2.png'),
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                      ),
-                      onFinish: (direction) {
-                        Future.delayed(const Duration(milliseconds: 2000), () {
-                          setState(() {
-                            _isVisible = false;
-                          });
-                          _checkUserSituation();
-                        });
-                      },
-                    ),
-                )
-                : FadeOutDown(
-                   curve: Curves.easeOut,
-                  child: FadeOut(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeOut,
-                      child: Container(
-                        width: 300,
-                        height: 300,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/logo-completo2.png'),
-                            fit: BoxFit.fill,
-                          ),
+                ? ZoomIn(
+                    curve: Curves.easeIn,
+                    duration: const Duration(milliseconds: 1500),
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/logo-completo2.png'),
+                          fit: BoxFit.fill,
                         ),
                       ),
                     ),
-                ),
+                    onFinish: (direction) {
+                      setState(() {
+                        _isVisible = false;
+                      });
+                    },
+                  )
+                : ZoomOut(
+                    duration: const Duration(milliseconds: 2000),
+                    curve: Curves.easeInExpo,
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/logo-completo2.png'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                    onFinish: (direction) {
+                      _checkUserSituation();
+                    },
+                  ),
             FadeInUp(
               duration: const Duration(milliseconds: 1000),
               delay: const Duration(milliseconds: 200),
@@ -139,7 +133,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const Perfilnuevo()),
+            MaterialPageRoute(builder: (context) => const Perfilnuevo(),),
           );
         } else {
           // El usuario no tiene la subcolección "situacion", ir a prepost

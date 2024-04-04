@@ -1,7 +1,7 @@
-
 // ignore_for_file: avoid_print, prefer_interpolation_to_compose_strings
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
@@ -10,6 +10,7 @@ import 'package:flutter_login/pages/registro_page.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'PerfilContinuacion/user_data_storage.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,6 +24,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
 // variable para controlar intento de sesiones
   int loginAttempts = 0;
+  bool saveCredentials = false;
+
 // controladores
   TextEditingController emailAPP = TextEditingController();
   TextEditingController contrasena = TextEditingController();
@@ -53,6 +56,31 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  _saveCredentialsInCache(bool saveCredentials) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (saveCredentials) {
+      prefs.setString('email', emailAPP.text);
+
+    } else {
+      prefs.remove('email');
+
+    }
+  }
+
+  _loadCredentialsFromCache() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      emailAPP.text = prefs.getString('email') ?? '';
+
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentialsFromCache();
+  }
+
 //funcion para validar datos
   validarDatos() async {
     try {
@@ -76,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       return false; // Credenciales inválidas
     } catch (e) {
-      print('Erro haaaa' + e.toString());
       return false; // Credenciales inválidas debido a un error
     }
   }
@@ -192,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: hintText,
           hintStyle: GoogleFonts.quicksand(
             fontSize: 18,
-            color:const Color.fromARGB(255, 204, 202, 202),
+            color: const Color.fromARGB(255, 204, 202, 202),
           ),
           prefixIcon: Icon(
             icon,
@@ -258,25 +285,40 @@ class _LoginScreenState extends State<LoginScreen> {
               } else {
                 bool foundUser = await buscarNombreDeUsuario(emailAPP.text);
                 //query para extraer el nombre de usuario a partir del correo
-                if (foundUser) {
+                if (foundUser &&
+                    await ConnectivityWrapper.instance.isConnected) {
                   setState(() {
                     loginAttempts = 0; // Restablecer el contador de intentos
                   });
 
                   // inicio de sesión exitoso
                   detection.login();
-                  print('Inicio de sesión exitoso');
-                  detection.login();
                   Future.delayed(const Duration(milliseconds: 500), () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>const WelcomeScreen(),
+                        builder: (context) => const WelcomeScreen(),
                       ),
                     );
                   });
                 } else {
-                  // Resto del código si el usuario no fue encontrado
+                  // ignore: use_build_context_synchronously
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const AlertDialog(
+                        title: Text(
+                          textAlign: TextAlign.center,
+                          "Alerta",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 253, 40, 40)),
+                        ),
+                        content: Text(
+                            textAlign: TextAlign.start,
+                            'Necesita conexion a internet'),
+                      );
+                    },
+                  );
                 }
               }
             }
@@ -370,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.quicksand(
                       fontSize: 33,
                       fontWeight: FontWeight.bold,
-                      color:const Color.fromARGB(162, 0, 0, 0),
+                      color: const Color.fromARGB(162, 0, 0, 0),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -387,6 +429,39 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: contrasena,
                     errorMessage:
                         loginAttempts >= 3 ? 'Contraseña incorrecta?' : '',
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 45),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Checkbox(
+                          side: const BorderSide(
+                            color: Colors.blue,
+                            width: 2.0,
+                          ),
+                          activeColor: Colors.grey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          value: saveCredentials,
+                          onChanged: (value) {
+                            setState(() {
+                              saveCredentials = value!;
+                            });
+                            _saveCredentialsInCache(saveCredentials);
+                          },
+                        ),
+                        Text(
+                          'Recuerdar',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 15),
                   _buildButton(context, 'Entrar'),
@@ -427,7 +502,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: GoogleFonts.quicksand(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color:const Color.fromARGB(162, 0, 0, 0),
+                    color: const Color.fromARGB(162, 0, 0, 0),
                   ),
                 ),
                 const SizedBox(height: 15),

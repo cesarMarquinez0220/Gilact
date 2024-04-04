@@ -2,10 +2,12 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_login/alerta_dialoge.dart';
 import 'package:flutter_login/gradient.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'package:intl/intl.dart';
 
 class RegistroBebe extends StatefulWidget {
   const RegistroBebe({Key? key}) : super(key: key);
@@ -21,22 +23,84 @@ class _RegistroBebeState extends State<RegistroBebe> {
   TextEditingController pesoController = TextEditingController();
   TextEditingController edadController = TextEditingController();
   TextEditingController fechaLactanciaController = TextEditingController();
+  TextEditingController menstruacionController = TextEditingController();
   TextEditingController horalactanciaController = TextEditingController();
-  late FocusNode fechaNacimientobebeFocusnode;
+  late FocusNode fechaNacimientobebeFocusnode,
+      menstruacionFocusnode,
+      fechaLactanciaFocusnode;
+
   final Firebase = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     fechaNacimientobebeController = TextEditingController();
+    menstruacionController = TextEditingController();
+    fechaLactanciaController = TextEditingController();
     fechaNacimientobebeFocusnode = FocusNode();
+    menstruacionFocusnode = FocusNode();
+    fechaLactanciaFocusnode = FocusNode();
   }
 
   @override
   void dispose() {
     fechaNacimientobebeController = TextEditingController();
+    menstruacionController = TextEditingController();
+    fechaLactanciaController = TextEditingController();
     fechaNacimientobebeFocusnode = FocusNode();
+    menstruacionFocusnode = FocusNode();
+    fechaLactanciaFocusnode = FocusNode();
     super.dispose();
+  }
+
+//funcion para el selector de la fecha
+  void _selectFechaNacimiento(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(3000),
+    );
+    if (picked != null) {
+      setState(() {
+        fechaNacimientobebeController.text =
+            DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  void _selectMenstruacion(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(3000),
+    );
+    if (picked != null) {
+      setState(() {
+        menstruacionController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  void _selectFechaLactancia(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(3000),
+    );
+    if (picked != null) {
+      setState(() {
+        fechaLactanciaController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  void calcGestacional(menstruacionController, fechaNacimientobebeController) {
+    final DateTime? edadGestacional;
+    edadGestacional = fechaNacimientobebeController - menstruacionController;
+    print('La edad del nene es $edadGestacional');
   }
 
   _registerMDButtonPressed() async {
@@ -134,7 +198,8 @@ class _RegistroBebeState extends State<RegistroBebe> {
     return Scaffold(
       body: Center(
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding:
+              const EdgeInsets.only(top: 40, bottom: 20, left: 20, right: 20),
           decoration: const BoxDecoration(gradient: Gradients.myGradient),
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -197,10 +262,14 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                     Flexible(
                                       flex: 2, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          hintText: "Fecha de Nacimiento",
-                                          icon: Icons.date_range,
-                                          controller:
-                                              fechaNacimientobebeController),
+                                        hintText: "Fecha de Nacimiento",
+                                        icon: Icons.date_range,
+                                        controller:
+                                            fechaNacimientobebeController,
+                                        focusNode: fechaNacimientobebeFocusnode,
+                                        onTap: () =>
+                                            _selectFechaNacimiento(context),
+                                      ),
                                     ),
                                     const SizedBox(
                                         width: 10), // Espacio entre los campos
@@ -215,10 +284,10 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                 ),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    hintText: "Lugar de Nacimiento",
-                                    icon: Icons.place,
-                                    controller: lugarnacimientoController,
-                                    focusNode: fechaNacimientobebeFocusnode),
+                                  hintText: "Lugar de Nacimiento",
+                                  icon: Icons.place,
+                                  controller: lugarnacimientoController,
+                                ),
                                 const SizedBox(height: 20),
                                 _buildTextField(
                                     hintText: "Peso al nacer en kg",
@@ -226,18 +295,25 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                     controller: pesoController),
                                 const SizedBox(height: 20),
                                 _buildTextField(
-                                    hintText: "Edad Gestacional",
-                                    icon: Icons.child_care,
-                                    controller: edadController),
+                                  hintText: "Última Menstruacion",
+                                  icon: Icons.edit_calendar_outlined,
+                                  controller: menstruacionController,
+                                  focusNode: menstruacionFocusnode,
+                                  onTap: () => _selectMenstruacion(context),
+                                ),
                                 const SizedBox(height: 20),
                                 Row(
                                   children: [
                                     Flexible(
                                       flex: 2, // Ajustar la flexibilidad
                                       child: _buildTextField(
-                                          hintText: "Fecha de Lactancia",
-                                          icon: Icons.date_range,
-                                          controller: fechaLactanciaController),
+                                        hintText: "Fecha de Lactancia",
+                                        icon: Icons.date_range,
+                                        controller: fechaLactanciaController,
+                                        focusNode: fechaLactanciaFocusnode,
+                                        onTap: () =>
+                                            _selectFechaLactancia(context),
+                                      ),
                                     ),
                                     const SizedBox(
                                         width: 10), // Espacio entre los campos
@@ -253,7 +329,8 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                 const SizedBox(height: 20),
                                 ElevatedButton(
                                   onPressed: () {
-                                    _registerMDButtonPressed();
+                                    //_registerMDButtonPressed();
+                                    calcGestacional(menstruacionController, fechaNacimientobebeController);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
@@ -268,13 +345,6 @@ class _RegistroBebeState extends State<RegistroBebe> {
                                     style: TextStyle(
                                         fontSize: 25, color: Colors.white),
                                   ),
-                                ),
-                                const SizedBox(height: 15),
-                                Container(
-                                  width: double.infinity,
-                                  height: 1,
-                                  color:
-                                      const Color.fromARGB(117, 209, 204, 204),
                                 ),
                                 const SizedBox(height: 15),
                               ],
@@ -303,11 +373,15 @@ class _RegistroBebeState extends State<RegistroBebe> {
     );
   }
 
-  Widget _buildTextField(
-      {required String hintText,
-      required IconData icon,
-      TextEditingController? controller,
-      FocusNode? focusNode}) {
+  Widget _buildTextField({
+    required String hintText,
+    required IconData icon,
+    TextEditingController? controller,
+    VoidCallback? onTap,
+    FocusNode? focusNode,
+    List<TextInputFormatter>? inputFormatters, // Agrega este parámetro
+    String? Function(String?)? validator,
+  }) {
     return Container(
       height: 48,
       width: 320,
@@ -326,6 +400,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
+        onTap: onTap,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(
