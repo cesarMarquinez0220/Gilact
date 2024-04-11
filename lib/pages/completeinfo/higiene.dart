@@ -9,8 +9,8 @@ class HigieneLactanciaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -24,20 +24,22 @@ class HigieneLactanciaInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.35,
-                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: screenHeight * 0.30,
+                  width: screenWidth * 0.35,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
-                    child: Image.asset("assets/tips/7.1_EXTRACCION.png"),
+                    child: Transform.scale(
+                      scale: 1.8, 
+                      child: Image.asset("assets/tips/7.1_EXTRACCION.png"),
+                    ),
                   ),
                 ),
                 FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: width * .9,
-                      height: height * .45,
+                      width: screenWidth * .9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -49,7 +51,7 @@ class HigieneLactanciaInfo extends StatelessWidget {
                             offset: const Offset(2, 6),
                           ),
                         ],
-                      ),
+                      ),              
                       child: Padding(
                         padding:const EdgeInsets.all(10.0),
                         child: Column(

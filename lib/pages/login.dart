@@ -453,7 +453,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         Text(
-                          'Recuerdar',
+                          'Recordar',
                           style: GoogleFonts.quicksand(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
