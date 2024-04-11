@@ -40,6 +40,9 @@ class _RegistroBebeState extends State<RegistroBebe> {
     fechaNacimientobebeFocusnode = FocusNode();
     menstruacionFocusnode = FocusNode();
     fechaLactanciaFocusnode = FocusNode();
+    //listeners
+    fechaNacimientobebeController.addListener(_calcularEdadGestacional);
+    menstruacionController.addListener(_calcularEdadGestacional);
   }
 
   @override
@@ -50,6 +53,10 @@ class _RegistroBebeState extends State<RegistroBebe> {
     fechaNacimientobebeFocusnode = FocusNode();
     menstruacionFocusnode = FocusNode();
     fechaLactanciaFocusnode = FocusNode();
+
+    // Remover los listeners
+    fechaNacimientobebeController.removeListener(_calcularEdadGestacional);
+    menstruacionController.removeListener(_calcularEdadGestacional);
     super.dispose();
   }
 
@@ -69,6 +76,30 @@ class _RegistroBebeState extends State<RegistroBebe> {
     }
   }
 
+//funcion para calculo de edad gestacional
+  void _calcularEdadGestacional() {
+    // Verificar si ambos campos tienen datos
+    if (fechaNacimientobebeController.text.isNotEmpty &&
+        menstruacionController.text.isNotEmpty) {
+      // Parsear las fechas
+      DateTime fechaNacimiento =
+          DateFormat('yyyy-MM-dd').parse(fechaNacimientobebeController.text);
+      DateTime fechaMenstruacion =
+          DateFormat('yyyy-MM-dd').parse(menstruacionController.text);
+
+      // Calcular la diferencia en días
+      Duration diferencia = fechaNacimiento.difference(fechaMenstruacion);
+
+      // Calcular la edad gestacional en semanas
+      int edadGestacionalSemanas = diferencia.inDays ~/ 7;
+
+      // Mostrar la edad gestacional en el campo de texto correspondiente
+      setState(() {
+        edadController.text = edadGestacionalSemanas.toString();
+      });
+    }
+  }
+
   void _selectMenstruacion(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -79,20 +110,6 @@ class _RegistroBebeState extends State<RegistroBebe> {
     if (picked != null) {
       setState(() {
         menstruacionController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
-  }
-
-  void _selectFechaLactancia(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(3000),
-    );
-    if (picked != null) {
-      setState(() {
-        fechaLactanciaController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
@@ -109,12 +126,10 @@ class _RegistroBebeState extends State<RegistroBebe> {
     // Inicializar Firebase si aún no está inicializado
     if (bebeController.text.isEmpty ||
         fechaNacimientobebeController.text.isEmpty ||
-        horaNacimientoController.text.isEmpty ||
         lugarnacimientoController.text.isEmpty ||
         pesoController.text.isEmpty ||
         edadController.text.isEmpty ||
-        fechaLactanciaController.text.isEmpty ||
-        horalactanciaController.text.isEmpty) {
+        menstruacionController.text.isEmpty) {
       DialogExample.showAlertDialog(
         context,
         'Alerta',
@@ -147,12 +162,10 @@ class _RegistroBebeState extends State<RegistroBebe> {
             ({
           'bebe': bebeController.text,
           'fechaNacimiento': fechaNacimientobebeController.text,
-          'horaNacimiento': horaNacimientoController.text,
           'lugarNacimiento': lugarnacimientoController.text,
           'peso': pesoController.text,
           'edadGestacional': int.parse(edadController.text),
-          'fechaLactancia': fechaLactanciaController.text,
-          'horaLactancia': horalactanciaController.text,
+          'fechaMenstruacion': menstruacionController.text,
         });
         // ignore: use_build_context_synchronously
         showDialog(
@@ -164,7 +177,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
             );
           },
         );
-        Future.delayed(const Duration(seconds: 2), () {
+         Future.delayed(const Duration(seconds: 2), () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -177,7 +190,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
         print('El usuario no existe en la base de datos.');
       }
     } catch (e) {
-      //print("ERROR HAAAAAAAA" + e.toString());
+      print("ERROR HAAAAAAAA" + e.toString());
     }
 
     // Realizar acciones posteriores al registro si es necesario
@@ -185,189 +198,162 @@ class _RegistroBebeState extends State<RegistroBebe> {
     // Limpiar los controladores después de agregar los datos
     bebeController.clear();
     fechaNacimientobebeController.clear();
-    horaNacimientoController.clear();
     lugarnacimientoController.clear();
     pesoController.clear();
     edadController.clear();
-    fechaLactanciaController.clear();
-    fechaLactanciaController.clear();
+    menstruacionController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          padding:
-              const EdgeInsets.only(top: 40, bottom: 20, left: 20, right: 20),
-          decoration: const BoxDecoration(gradient: Gradients.myGradient),
-          child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child: Stack(
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 15),
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            margin: const EdgeInsets.only(
-                                top: 110), // Agregar margen inferior
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      const Color.fromARGB(255, 156, 155, 155)
-                                          .withOpacity(0.5),
-                                  spreadRadius: 0.1,
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'Registro del Bebé',
-                                  style: TextStyle(
-                                    fontSize: 33,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color.fromARGB(162, 0, 0, 0),
-                                    shadows: [
-                                      Shadow(
-                                        color:
-                                            Color.fromARGB(115, 148, 144, 144),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-                                _buildTextField(
-                                    hintText: "Nombre",
-                                    icon: Icons.child_care,
-                                    controller: bebeController),
-                                const SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      flex: 2, // Ajustar la flexibilidad
-                                      child: _buildTextField(
-                                        hintText: "Fecha de Nacimiento",
-                                        icon: Icons.date_range,
-                                        controller:
-                                            fechaNacimientobebeController,
-                                        focusNode: fechaNacimientobebeFocusnode,
-                                        onTap: () =>
-                                            _selectFechaNacimiento(context),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                        width: 10), // Espacio entre los campos
-                                    Flexible(
-                                      flex: 1, // Ajustar la flexibilidad
-                                      child: _buildTextField(
-                                          hintText: "Hora",
-                                          icon: Icons.hourglass_empty,
-                                          controller: horaNacimientoController),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                _buildTextField(
-                                  hintText: "Lugar de Nacimiento",
-                                  icon: Icons.place,
-                                  controller: lugarnacimientoController,
-                                ),
-                                const SizedBox(height: 20),
-                                _buildTextField(
-                                    hintText: "Peso al nacer en kg",
-                                    icon: Icons.accessibility_new,
-                                    controller: pesoController),
-                                const SizedBox(height: 20),
-                                _buildTextField(
-                                  hintText: "Última Menstruacion",
-                                  icon: Icons.edit_calendar_outlined,
-                                  controller: menstruacionController,
-                                  focusNode: menstruacionFocusnode,
-                                  onTap: () => _selectMenstruacion(context),
-                                ),
-                                const SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      flex: 2, // Ajustar la flexibilidad
-                                      child: _buildTextField(
-                                        hintText: "Fecha de Lactancia",
-                                        icon: Icons.date_range,
-                                        controller: fechaLactanciaController,
-                                        focusNode: fechaLactanciaFocusnode,
-                                        onTap: () =>
-                                            _selectFechaLactancia(context),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                        width: 10), // Espacio entre los campos
-                                    Flexible(
-                                      flex: 1, // Ajustar la flexibilidad
-                                      child: _buildTextField(
-                                          hintText: "Hora",
-                                          icon: Icons.hourglass_empty,
-                                          controller: horalactanciaController),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    //_registerMDButtonPressed();
-                                    calcGestacional(menstruacionController, fechaNacimientobebeController);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromRGBO(27, 167, 214, 1),
-                                    fixedSize: const Size(320, 42),
-                                    shape: const StadiumBorder(),
-                                    shadowColor: Colors.black.withOpacity(0.5),
-                                    elevation: 5,
-                                  ),
-                                  child: const Text(
-                                    'Registrar',
-                                    style: TextStyle(
-                                        fontSize: 25, color: Colors.white),
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 45),
-                        ],
-                      ),
-                      Positioned(
-                        top: 3,
-                        left: 290,
-                        right: 1,
-                        child: Image.asset(
-                          'assets/images/doctor.png',
-                          height: 150,
-                        ),
-                      ),
-                    ],
-                  ),
+      body: Container(
+        padding:
+            const EdgeInsets.only(top: 40, bottom: 20, left: 20, right: 20),
+        decoration: const BoxDecoration(gradient: Gradients.myGradient),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-              );
-            },
-          ),
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 15),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          margin: const EdgeInsets.only(
+                              top: 110), // Agregar margen inferior
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(255, 156, 155, 155)
+                                    .withOpacity(0.5),
+                                spreadRadius: 0.1,
+                                blurRadius: 5,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Registro del Bebé',
+                                style: TextStyle(
+                                  fontSize: 33,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color.fromARGB(162, 0, 0, 0),
+                                  shadows: [
+                                    Shadow(
+                                      color: Color.fromARGB(115, 148, 144, 144),
+                                      blurRadius: 10,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              _buildTextField(
+                                  hintText: "Nombre",
+                                  icon: Icons.child_care,
+                                  controller: bebeController),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    flex: 2, // Ajustar la flexibilidad
+                                    child: _buildTextField(
+                                      hintText: "Fecha de Nacimiento",
+                                      icon: Icons.date_range,
+                                      controller: fechaNacimientobebeController,
+                                      focusNode: fechaNacimientobebeFocusnode,
+                                      onTap: () =>
+                                          _selectFechaNacimiento(context),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              _buildTextField(
+                                hintText: "Lugar de Nacimiento",
+                                icon: Icons.place,
+                                controller: lugarnacimientoController,
+                              ),
+                              const SizedBox(height: 20),
+                              _buildTextField(
+                                hintText: "Peso al nacer en kg",
+                                icon: Icons.accessibility_new,
+                                controller: pesoController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9.]')),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              _buildTextField(
+                                hintText: "Última Menstruacion",
+                                icon: Icons.edit_calendar_outlined,
+                                controller: menstruacionController,
+                                focusNode: menstruacionFocusnode,
+                                onTap: () => _selectMenstruacion(context),
+                              ),
+                              const SizedBox(height: 20),
+                              _buildTextField(
+                                hintText: "Edad Gestacional",
+                                icon: Icons.calendar_view_week,
+                                controller: edadController,
+                                enabled: true,
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _registerMDButtonPressed();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromRGBO(27, 167, 214, 1),
+                                  fixedSize: const Size(320, 42),
+                                  shape: const StadiumBorder(),
+                                  shadowColor: Colors.black.withOpacity(0.5),
+                                  elevation: 5,
+                                ),
+                                child: const Text(
+                                  'Registrar',
+                                  style: TextStyle(
+                                      fontSize: 25, color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 45),
+                      ],
+                    ),
+                    Positioned(
+                      top: 3,
+                      left: 290,
+                      right: 1,
+                      child: Image.asset(
+                        'assets/images/doctor.png',
+                        height: 150,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -379,8 +365,10 @@ class _RegistroBebeState extends State<RegistroBebe> {
     TextEditingController? controller,
     VoidCallback? onTap,
     FocusNode? focusNode,
-    List<TextInputFormatter>? inputFormatters, // Agrega este parámetro
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    bool? enabled,
   }) {
     return Container(
       height: 48,
@@ -400,6 +388,8 @@ class _RegistroBebeState extends State<RegistroBebe> {
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
         onTap: onTap,
         decoration: InputDecoration(
           hintText: hintText,

@@ -102,10 +102,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         // Ahora puedes utilizar los datos obtenidos, por ejemplo:
         nombreBebe = situacion['bebe'];
         edadGest = situacion['edadGestacional'];
-        fechaLact = situacion['fechaLactancia'];
         fechaNacibebe = situacion['fechaNacimiento'];
-        horaLact = situacion['horaLactancia'];
-        horaNaci = situacion['horaNacimiento'];
         lugarNac = situacion['lugarNacimiento'];
         peso = situacion['peso'];
       }
@@ -549,7 +546,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           color: const Color.fromARGB(255, 117, 115, 115)),
                     ),
                     Text(
-                      'Edad Gestacional: ${(edadGest)}\n',
+                      'Edad Gestacional: ${(edadGest)} semanas\n',
                       style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -562,27 +559,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           fontWeight: FontWeight.w500,
                           color: const Color.fromARGB(255, 117, 115, 115)),
                     ),
-                    Text(
-                      'Fecha de Lactancia: $fechaLact\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Hora de Lactancia: $horaLact\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Hora de Nacimiento: $horaLact\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
+                  
                     Text(
                       'Lugar de Nacimiento: $lugarNac\n',
                       style: GoogleFonts.quicksand(
@@ -591,7 +568,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           color: const Color.fromARGB(255, 117, 115, 115)),
                     ),
                     Text(
-                      'Peso: $peso\n',
+                      'Peso: $peso kg\n',
                       style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,

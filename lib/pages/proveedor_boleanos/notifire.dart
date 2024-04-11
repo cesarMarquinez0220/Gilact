@@ -94,16 +94,22 @@ class Avancesprovider with ChangeNotifier {
 
   // Método para actualizar el avance del usuario por id de video
   void actualizarAvancePorId(int videoId, int avance) {
-    if (!avancesMap.containsKey(videoId)) {
-      avancesMap[videoId] = {};
+    if (!avancesMap.containsKey(videoId) ||
+        avancesMap[videoId]!['avance'] != 1.0) {
+      if (!avancesMap.containsKey(videoId)) {
+        avancesMap[videoId] = {};
+      }
+      avancesMap[videoId]!['avance'] = avance.toDouble(); // Convertir a double
+      notifyListeners();
     }
-    avancesMap[videoId]!['avance'] = avance.toDouble(); // Convertir a double
-    notifyListeners();
   }
 
   void guardarProgresoPorId(int videoId, double progreso) {
-    avancesMap[videoId] = {'avance': progreso}; // Almacenar como double
-    notifyListeners();
+    if (!avancesMap.containsKey(videoId) ||
+        avancesMap[videoId]!['avance'] != 1.0) {
+      avancesMap[videoId] = {'avance': progreso}; // Almacenar como double
+      notifyListeners();
+    }
   }
 
   // Método para obtener el avance del usuario por id de video
@@ -126,5 +132,3 @@ class Avancesprovider with ChangeNotifier {
     print('Aqui esta el mapa\n$avancesMap');
   }
 }
-
-
