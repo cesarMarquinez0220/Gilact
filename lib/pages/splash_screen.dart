@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
 import 'package:flutter_login/pages/pre_post.dart';
-import 'package:lottie/lottie.dart';
 
 class WelcomeScreen extends StatefulWidget {
   // ignore: use_super_parameters

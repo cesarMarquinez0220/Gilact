@@ -80,7 +80,8 @@ class _leccionesState extends State<lecciones> {
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     _videos = args['videos'] as List<Video>;
-final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
+    final avancesProvider =
+        Provider.of<Avancesprovider>(context, listen: false);
     avancesProvider.imprimirAvancesMap(); // Llamada para imprimir el mapa
     return Scaffold(
       body: Stack(
@@ -101,11 +102,7 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
                 child: Column(
                   children: <Widget>[
                     _buildAppBar(),
-                    Container(
-                      height: MediaQuery.of(context).size.height,
-                      child: SingleChildScrollView(child: _buildLessons(_videos!))),
-                 
-                     
+                    SingleChildScrollView(child: _buildLessons(_videos!)),
                   ],
                 ),
               ),
@@ -116,53 +113,45 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
     );
   }
 
-  Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          BackButton(
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          GestureDetector(
-            onTap: () {
-              // Mostrar un mensaje cuando se presione
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Sección de Lecciones de Videos"),
-                    content: const Text(
-                        "En esta sección se encuentran las lecciones a visualizar."),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text("Cerrar"),
-                        onPressed: () {
-                          Navigator.of(context)
-                              .pop(); // Cerrar el cuadro de diálogo
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Container(
-              width: 40.0,
-              height: 40.0,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromARGB(255, 255, 255, 255),
-              ),
-              child: const Icon(
-                Icons.help,
-                size: 24,
-              ),
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      actions: [
+        GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Sección de Lecciones de Videos"),
+                  content: const Text(
+                      "En esta sección se encuentran las lecciones a visualizar."),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text("Cerrar"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Container(
+            width: 40.0,
+            height: 40.0,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromARGB(255, 255, 255, 255),
+            ),
+            child: const Icon(
+              Icons.help,
+              size: 24,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -216,7 +205,7 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
                 child: _PercentIndicator(
                   69.0,
                   video.imageName,
-                  isLastCompleted ? Colors.green : Colors.blue,
+                  isLastCompleted ? Colors.blue : Colors.blue,
                   video.videoId,
                   video.leccionId,
                   leccionId: video.leccionId,
@@ -313,8 +302,6 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
     required int leccionId,
     required String videoURL,
   }) {
-  
-
     return Consumer2<LeccionesProvider, Avancesprovider>(
       builder: (context, leccionesProvider, avancesProvider, child) {
         final ultimoId = leccionesProvider.ultimoIdEnEstadoTrue(
@@ -422,5 +409,4 @@ final avancesProvider = Provider.of<Avancesprovider>(context, listen: false);
       ),
     );
   }
-
 }
