@@ -294,6 +294,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
             height: screenHeight ,
             decoration: BoxDecoration(color: Colors.transparent),
             child: Scaffold(
+
               body: 
              //Column(
               //  children: [
@@ -306,6 +307,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                   // ),
                 //],
              // ),
+
             ),
           ),
           Positioned(
@@ -339,111 +341,109 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   }
 
   Widget _buildPerfilNuevo() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(top: 10),
-              decoration: const BoxDecoration(color: Colors.white),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.05),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hola $nombreUsuario',
-                                style: GoogleFonts.quicksand(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.06,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xff034C8C),
-                                ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.only(top: 10),
+            decoration: const BoxDecoration(color: Colors.white),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.05),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hola $nombreUsuario',
+                              style: GoogleFonts.quicksand(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.06,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xff034C8C),
                               ),
-                              Text(
-                                'Avanzamos en las lecciones?',
-                                style: GoogleFonts.quicksand(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.05,
-                                  fontWeight: FontWeight.w500,
-                                  color:
-                                      const Color.fromARGB(255, 117, 115, 115),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height *
-                                0.02), // Espaciado entre los textos y el avatar
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width *
-                              0.2, // Ancho del avatar
-                          height: MediaQuery.of(context).size.width *
-                              0.2, // Altura del avatar
-                          child: CircleAvatar(
-                            radius: MediaQuery.of(context).size.width *
-                                0.1, // Radio del avatar
-                            backgroundColor: Colors.transparent,
-                            child: ClipRRect(
-                              child: Image.asset("assets/images/solo-logo.png"),
                             ),
+                            Text(
+                              'Avanzamos en las lecciones?',
+                              style: GoogleFonts.quicksand(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.05,
+                                fontWeight: FontWeight.w500,
+                                color:
+                                    const Color.fromARGB(255, 117, 115, 115),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height *
+                              0.02), // Espaciado entre los textos y el avatar
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width *
+                            0.2, // Ancho del avatar
+                        height: MediaQuery.of(context).size.width *
+                            0.2, // Altura del avatar
+                        child: CircleAvatar(
+                          radius: MediaQuery.of(context).size.width *
+                              0.1, // Radio del avatar
+                          backgroundColor: Colors.transparent,
+                          child: ClipRRect(
+                            child: Image.asset("assets/images/solo-logo.png"),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _buildFeatureBoxes(
-                      'Lecciones',
-                      Icons.show_chart,
-                      const Color.fromARGB(255, 255, 132, 0),
-                      'Mira tu progreso de lecciones',
-                      _navigateToLecciones, // Pasa la función como argumento
-                    ),
-                    const SizedBox(height: 15),
-                    GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 15,
-                      childAspectRatio: 1.5,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      shrinkWrap: true,
-                      children: [
-                        _buildFeatureBox(
-                          'Tips',
-                          Icons.lightbulb,
-                          Color.fromARGB(255, 234, 38, 182),
-                          'Consejos y más',
-                          '/tips',
-                        ),
-                        _buildFeatureBoxes(
-                          'Historial',
-                          Icons.video_library,
-                          Color.fromARGB(255, 22, 124, 104),
-                          'Enfatiza\nconocimiento',
-                          _navigateToHistorial,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    if (pre) _PrepartoProfile(),
-                    if (post) _PostpartoProfile(),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildFeatureBoxes(
+                    'Lecciones',
+                    Icons.show_chart,
+                    const Color.fromARGB(255, 255, 132, 0),
+                    'Mira tu progreso de lecciones',
+                    _navigateToLecciones, // Pasa la función como argumento
+                  ),
+                  const SizedBox(height: 15),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 15,
+                    childAspectRatio: 1.5,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    shrinkWrap: true,
+                    children: [
+                      _buildFeatureBox(
+                        'Tips',
+                        Icons.lightbulb,
+                        Color.fromARGB(255, 234, 38, 182),
+                        'Consejos y más',
+                        '/tips',
+                      ),
+                      _buildFeatureBoxes(
+                        'Historial',
+                        Icons.video_library,
+                        Color.fromARGB(255, 22, 124, 104),
+                        'Enfatiza\nconocimiento',
+                        _navigateToHistorial,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  if (pre) _PrepartoProfile(),
+                  if (post) _PostpartoProfile(),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
