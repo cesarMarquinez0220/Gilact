@@ -137,73 +137,83 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   }
 
   @override
+  @protected
+  @mustCallSuper
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
   Future<void> _initializeYoutubePlayer() async {
-    print('Inicializando Youtube Player para video ID: ${widget.videoId}');
+    if (mounted) {
+      try {
+        print('Inicializando Youtube Player para video ID: ${widget.videoId}');
 
-    _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId(
-            widget.videoUrl,
-          ) ??
-          '',
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        loop: false,
-        mute: false,
-        forceHD: false,
-        controlsVisibleAtStart: true,
-      ),
-    );
+        _controller = YoutubePlayerController(
+          initialVideoId: YoutubePlayer.convertUrlToId(
+                widget.videoUrl,
+              ) ??
+              '',
+          flags: const YoutubePlayerFlags(
+            autoPlay: true,
+            loop: false,
+            mute: false,
+            forceHD: false,
+            controlsVisibleAtStart: true,
+          ),
+        );
 
-    _controller.addListener(() async {
-      if (_controller.value.isReady) {
-        Duration totalDuration = _controller.metadata.duration;
-        if (totalDuration.inSeconds > 0) {
-          // Si la duración total del video es mayor que 0 y la duración no se ha impreso, entonces imprímela
-          if (!_duracionImpresa) {
-            print('Duración total del video: ${totalDuration.inSeconds}');
-            _duracionImpresa = true; // Marca la duración como impresa
+        _controller.addListener(() async {
+          if (_controller.value.isReady) {
+            Duration totalDuration = _controller.metadata.duration;
+            if (totalDuration.inSeconds > 0) {
+              // Si la duración total del video es mayor que 0 y la duración no se ha impreso, entonces imprímela
+              if (!_duracionImpresa) {
+                print('Duración total del video: ${totalDuration.inSeconds}');
+                _duracionImpresa = true; // Marca la duración como impresa
+              }
+
+              // Si la duración del video es mayor que 0 y el guardado no se ha realizado, entonces realiza el guardado
+              if (!_guardadoRealizado) {
+                await guardarInformacionEnFirestore();
+                _guardadoRealizado = true;
+              }
+            } else {
+              // Si la duración total del video es 0, reinicia la bandera de duración impresa
+              _duracionImpresa = false;
+              _guardadoRealizado = false; // Reinicia el estado del guardado
+            }
           }
-
-          // Si la duración del video es mayor que 0 y el guardado no se ha realizado, entonces realiza el guardado
-          if (!_guardadoRealizado) {
-            await guardarInformacionEnFirestore();
-            _guardadoRealizado = true;
-          }
-        } else {
-          // Si la duración total del video es 0, reinicia la bandera de duración impresa
-          _duracionImpresa = false;
-          _guardadoRealizado = false; // Reinicia el estado del guardado
-        }
+        });
+      } catch (error) {
+        print('error por parte del mounted $error');
       }
-    });
+    }
   }
 
   Future<int> _getLastPositionFromFirestore() async {
-    final userName = UserDataStorage.getUserName();
-    final usuarioDocRef =
-        await FirestoreService()._getUsuarioDocumento(userName);
-    if (usuarioDocRef != null) {
-      final videoDoc = await usuarioDocRef
-          .collection('videos')
-          .doc(widget.videoId.toString())
-          .get();
-      if (videoDoc.exists) {
-        final ultimaPosicion = videoDoc.data()?['ultimaPosicion'];
-        if (ultimaPosicion != null) {
-          // Establecer la posición del video al valor almacenado en la base de datos
-          _controller.seekTo(Duration(seconds: ultimaPosicion));
-          print('ultima posicion es de $ultimaPosicion');
+    if (mounted) {
+      final userName = UserDataStorage.getUserName();
+      final usuarioDocRef =
+          await FirestoreService()._getUsuarioDocumento(userName);
+      if (usuarioDocRef != null) {
+        final videoDoc = await usuarioDocRef
+            .collection('videos')
+            .doc(widget.videoId.toString())
+            .get();
+        if (videoDoc.exists) {
+          final ultimaPosicion = videoDoc.data()?['ultimaPosicion'];
+          if (ultimaPosicion != null) {
+            // Establecer la posición del video al valor almacenado en la base de datos
+            _controller.seekTo(Duration(seconds: ultimaPosicion));
+            print('ultima posicion es de $ultimaPosicion');
+          }
         }
-      }
-      //     if (videoDoc.exists) {
-      //       return videoDoc.data()?['ultimaPosicion'] ?? 0;
+        //     if (videoDoc.exists) {
+        //       return videoDoc.data()?['ultimaPosicion'] ?? 0;
 
-      //     }
+        //     }
+      }
     }
     return 0; // Valor predeterminado en caso de que no se encuentre la última posición en Firestore
   }
@@ -223,45 +233,8 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
   }
 
   void _onVideoEnded() async {
-    print('Video terminado. Incrementando contador de visualizaciones...');
-    final userName = UserDataStorage.getUserName();
-    final videoId = widget.videoId;
-    final usuarioDocRef =
-        await FirestoreService()._getUsuarioDocumento(userName);
-
-    if (usuarioDocRef != null) {
-      final videoDocRef =
-          usuarioDocRef.collection('videos').doc(videoId.toString());
-      final videoDoc = await videoDocRef.get();
-
-      if (videoDoc.exists) {
-        final int contadorVisualizaciones =
-            (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
-        await videoDocRef.update({
-          'contadorVisualizaciones': contadorVisualizaciones,
-          'completado': true,
-        });
-      } else {
-        await videoDocRef.set({
-          'contadorVisualizaciones': 1,
-          'completado': true,
-        });
-      }
-    } else {
-      print('No se encontró un usuario con el nombre: $userName');
-    }
-  }
-
-  Future<void> guardarInformacionEnFirestore() async {
-    // Obtener la última posición del video y la duración total del video
-    Duration? lastPosition = _controller.value.position;
-    Duration totalDuration = _controller.metadata.duration;
-
-    // Calcular el avance como un valor entre 0 y 1
-    double progress = lastPosition.inSeconds / totalDuration.inSeconds;
-    progress = progress.clamp(0.0, 1.0);
-
-    try {
+    if (mounted) {
+      print('Video terminado. Incrementando contador de visualizaciones...');
       final userName = UserDataStorage.getUserName();
       final videoId = widget.videoId;
       final usuarioDocRef =
@@ -270,24 +243,67 @@ class _ReproductorVideoState extends State<ReproductorVideo> {
       if (usuarioDocRef != null) {
         final videoDocRef =
             usuarioDocRef.collection('videos').doc(videoId.toString());
-
         final videoDoc = await videoDocRef.get();
-        print('Guardando información en Firestore...');
-        await FirestoreService().guardarInformacionVideo(
-          usuario: userName,
-          videoId: widget.videoId,
-          pausas: pauseCount,
-          adelantos: forwardCount,
-          ultimaPosicion: _controller.value.position.inSeconds,
-          totalDuration: totalDuration.inSeconds,
-          avance: progress,
-        );
-        context.read<Avancesprovider>().guardarProgresoPorId(videoId, progress);
+
+        if (videoDoc.exists) {
+          final int contadorVisualizaciones =
+              (videoDoc.data()?['contadorVisualizaciones'] ?? 0) + 1;
+          await videoDocRef.update({
+            'contadorVisualizaciones': contadorVisualizaciones,
+            'completado': true,
+          });
+        } else {
+          await videoDocRef.set({
+            'contadorVisualizaciones': 1,
+            'completado': true,
+          });
+        }
       } else {
         print('No se encontró un usuario con el nombre: $userName');
       }
-    } catch (error) {
-      print('Error al actualizar contador de visualizaciones: $error');
+    }
+  }
+
+  Future<void> guardarInformacionEnFirestore() async {
+    // Obtener la última posición del video y la duración total del video
+    if (mounted) {
+      Duration? lastPosition = _controller.value.position;
+      Duration totalDuration = _controller.metadata.duration;
+
+      // Calcular el avance como un valor entre 0 y 1
+      double progress = lastPosition.inSeconds / totalDuration.inSeconds;
+      progress = progress.clamp(0.0, 1.0);
+
+      try {
+        final userName = UserDataStorage.getUserName();
+        final videoId = widget.videoId;
+        final usuarioDocRef =
+            await FirestoreService()._getUsuarioDocumento(userName);
+
+        if (usuarioDocRef != null) {
+          final videoDocRef =
+              usuarioDocRef.collection('videos').doc(videoId.toString());
+
+          final videoDoc = await videoDocRef.get();
+          print('Guardando información en Firestore...');
+          await FirestoreService().guardarInformacionVideo(
+            usuario: userName,
+            videoId: widget.videoId,
+            pausas: pauseCount,
+            adelantos: forwardCount,
+            ultimaPosicion: _controller.value.position.inSeconds,
+            totalDuration: totalDuration.inSeconds,
+            avance: progress,
+          );
+          context
+              .read<Avancesprovider>()
+              .guardarProgresoPorId(videoId, progress);
+        } else {
+          print('No se encontró un usuario con el nombre: $userName');
+        }
+      } catch (error) {
+        print('Error al actualizar contador de visualizaciones: $error');
+      }
     }
   }
 
