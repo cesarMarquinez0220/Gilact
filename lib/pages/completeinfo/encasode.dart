@@ -9,8 +9,8 @@ class ProblemasLactanciaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -23,18 +23,18 @@ class ProblemasLactanciaInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: height * .02,
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.33,
-                  width: MediaQuery.of(context).size.width * 0.47,
+                  height: screenHeight * 0.35,
+                  width: screenWidth * 0.35,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
-                    child: Image.asset(
-                      "assets/tips/11_PROBLEMAS.png",
-                      height: 150,
-                      width: 150,
+                    child: Transform.scale(
+                      scale: 1.2,
+                      child: Image.asset(
+                        "assets/tips/11_PROBLEMAS.png",
+                        height: 150,
+                        width: 150,
+                      ),
                     ),
                   ),
                 ),
@@ -42,8 +42,7 @@ class ProblemasLactanciaInfo extends StatelessWidget {
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: width * .9,
-                      height: height * .46,
+                      width: screenWidth * .9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),

@@ -285,13 +285,29 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Stack(
         children: [
           Container(
+            height: screenHeight ,
             decoration: BoxDecoration(color: Colors.transparent),
             child: Scaffold(
-              body: _buildBody(),
+
+              body: 
+             //Column(
+              //  children: [
+                  SingleChildScrollView(
+                    child: _buildBody(),
+                  ),
+                  // BottomBar(
+                  //   selectedIndex: _selectedIndex,
+                  //   onIndexChanged: _onItemTapped,
+                  // ),
+                //],
+             // ),
+
             ),
           ),
           Positioned(

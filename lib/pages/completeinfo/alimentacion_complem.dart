@@ -7,8 +7,8 @@ class AlimentacionComplementariaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+     double screenWidth = MediaQuery.of(context).size.width;
+     double screenHeight = MediaQuery.of(context).size.height;
 
     // ignore: deprecated_member_use
     return WillPopScope(
@@ -22,8 +22,8 @@ class AlimentacionComplementariaInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.35,
-                width: MediaQuery.of(context).size.width * 0.35,
+                height: screenHeight * 0.35,
+                width: screenWidth * 0.35,
                 child: FadeInRight(
                   duration: const Duration(milliseconds: 1000),
                   delay: const Duration(milliseconds: 500),
@@ -36,7 +36,7 @@ class AlimentacionComplementariaInfo extends StatelessWidget {
                 duration: const Duration(milliseconds: 1000),
                 delay: const Duration(milliseconds: 500),
                 child: Container(
-                  width: width * .9,
+                  width: screenWidth * .9,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(18),

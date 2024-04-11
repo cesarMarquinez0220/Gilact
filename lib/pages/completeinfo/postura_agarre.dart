@@ -1,4 +1,4 @@
-// ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
@@ -9,8 +9,8 @@ class PosturaAgarreInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+   double screenWidth = MediaQuery.of(context).size.width;
+   double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -24,8 +24,8 @@ class PosturaAgarreInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: screenHeight * 0.35,
+                  width: screenWidth * 0.35,
                   child: FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
@@ -38,8 +38,7 @@ class PosturaAgarreInfo extends StatelessWidget {
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: width * .9,
-                      height: height * .38,
+                      width: screenWidth * .9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
