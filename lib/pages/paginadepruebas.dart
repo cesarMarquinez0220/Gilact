@@ -104,7 +104,9 @@ class _leccionesState extends State<lecciones> {
                   children: <Widget>[
                     _buildAppBar(),
                     SingleChildScrollView(child: _buildLessons(_videos!)),
-                    
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .09,
+                    ),
                   ],
                 ),
               ),
