@@ -101,7 +101,7 @@ class _BeneficiosBB extends State<BeneficiosBB> {
                           duration: const Duration(milliseconds: 1400),
                           delay: const Duration(milliseconds: 500),
                           child: const Text(
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.start,
                             '- Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.',
                             style: TextStyle(
                                 fontSize: 14,
@@ -113,7 +113,7 @@ class _BeneficiosBB extends State<BeneficiosBB> {
                           duration: const Duration(milliseconds: 1600),
                           delay: const Duration(milliseconds: 500),
                           child: const Text(
-                            textAlign: TextAlign.left,
+                            textAlign: TextAlign.start,
                             '- Niños(as) más cariñosos(as).',
                             style: TextStyle(
                                 fontSize: 14,
@@ -125,7 +125,7 @@ class _BeneficiosBB extends State<BeneficiosBB> {
                           duration: const Duration(milliseconds: 1800),
                           delay: const Duration(milliseconds: 500),
                           child: const Text(
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.start,
                             '- Menos caries dentales y desarrollo de la musculatura facial y del cuello.',
                             style: TextStyle(
                                 fontSize: 14,

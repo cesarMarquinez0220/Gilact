@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
 import 'package:animate_do/animate_do.dart';
 
-class AlimentacionComplementariaInfo extends StatelessWidget {
-  const AlimentacionComplementariaInfo({Key? key}) : super(key: key);
+class SuplementoHierroInfo extends StatelessWidget {
+  const SuplementoHierroInfo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,40 +57,27 @@ class AlimentacionComplementariaInfo extends StatelessWidget {
                       children: [
                         const SizedBox(height: 10),
                         FadeInDown(
-                          duration: const Duration(milliseconds: 1000),
+                          duration: const Duration(milliseconds: 1400),
                           delay: const Duration(milliseconds: 500),
-                          child: RichText(
+                          child: const Text(
+                            'Suplementación con Hierro:',
                             textAlign: TextAlign.center,
-                            text: const TextSpan(
-                              style: TextStyle(
+                            style: TextStyle(
                                 color: Color.fromARGB(255, 73, 140, 240),
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: 'Alimentación Complementaria',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(height: 10),
                         FadeInDown(
-                          duration: const Duration(milliseconds: 1200),
+                          duration: const Duration(milliseconds: 1600),
                           delay: const Duration(milliseconds: 500),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Es recomendable dar solo leche maternal al bebe hasta los 6 meses y a partir de este momento, agregar poco a poco alimentos de acuerdo con la sugerencia del pediatra o nutricionista.  Se recomienda mantener la lactancia materna combinada con la alimentación hasta que la madre y el niño deseen.',
-                              style: TextStyle(
+                          child: const Text(
+                            'Si tu bebé tuvo bajo peso al nacer y/o es prematuro, se suplementará con hierro. \n\n*Según indicación del personal de salud.',
+                            style: TextStyle(
                                 fontSize: 14,
-                                color: Color.fromARGB(255, 86, 86, 86),
-                              ),
-                              textAlign: TextAlign.justify,
-                            ),
+                                color: Color.fromARGB(255, 86, 86, 86)),
+                            textAlign: TextAlign.left,
                           ),
                         ),
                       ],

@@ -4,8 +4,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
 
-class HigieneLactanciaInfo extends StatelessWidget {
-  const HigieneLactanciaInfo({Key? key}) : super(key: key);
+class ContinuacionHigieneLactanciaInfo extends StatelessWidget {
+  const ContinuacionHigieneLactanciaInfo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,61 +56,26 @@ class HigieneLactanciaInfo extends StatelessWidget {
                         padding:const EdgeInsets.all(10.0),
                         child: Column(
                           children: [
+                        
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                'Higiene y Medidas Generales',
+                                'Tu Dieta y la Lactancia',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                   color: Color.fromARGB(255, 73, 140, 240),
                                 ),
                               ),
                             ),
-                           const SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
+                              delay:const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Lávate bien las manos con agua y jabón antes de dar pecho.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                              ),
-                            ),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- El baño diario es suficiente para el aseo de los pezones.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                              ),
-                            ),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- Lávate las manos con agua y jabón después de cada cambio de pañal.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                              ),
-                            ),
-                            FadeInDown(
-                              duration:const  Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- Da pecho con alegría y aumentará tu producción.',
+                                'Puedes comer todo tipo de alimentos. Solo asegúrate de comer saludable y tomar mucha agua.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14,

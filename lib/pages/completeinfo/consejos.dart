@@ -79,7 +79,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -91,7 +91,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -103,7 +103,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -115,7 +115,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -127,7 +127,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -139,7 +139,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                           ],

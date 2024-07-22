@@ -4,13 +4,13 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/pages/claseGlobal/detector.dart';
 
-class HigieneLactanciaInfo extends StatelessWidget {
-  const HigieneLactanciaInfo({Key? key}) : super(key: key);
+class ContinuacionExtraccionInfo extends StatelessWidget {
+  const ContinuacionExtraccionInfo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -24,22 +24,22 @@ class HigieneLactanciaInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: screenHeight * 0.30,
-                  width: screenWidth * 0.35,
+                  height: height * .02,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.35,
+                  width: MediaQuery.of(context).size.width * 0.47,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
-                    child: Transform.scale(
-                      scale: 1.8, 
-                      child: Image.asset("assets/tips/7.1_EXTRACCION.png"),
-                    ),
+                    child: Image.asset("assets/tips/7_EXTRACCION.png"),
                   ),
                 ),
                 FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: screenWidth * .9,
+                      width: width * .9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -51,71 +51,59 @@ class HigieneLactanciaInfo extends StatelessWidget {
                             offset: const Offset(2, 6),
                           ),
                         ],
-                      ),              
+                      ),
                       child: Padding(
-                        padding:const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: Column(
                           children: [
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                'Higiene y Medidas Generales',
+                                'Continuacion Extracción, Manejo y Almacenamiento de la Leche Materna',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Color.fromARGB(255, 73, 140, 240),
                                 ),
                               ),
                             ),
-                           const SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Lávate bien las manos con agua y jabón antes de dar pecho.',
-                                textAlign: TextAlign.center,
+                                '- La leche descongelada debe consumirse y el sobrante descartarse.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- El baño diario es suficiente para el aseo de los pezones.',
-                                textAlign: TextAlign.center,
+                                '- Dejarla un rato a temperatura ambiente antes de darla.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
                               duration: const Duration(milliseconds: 1000),
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
-                                '- Lávate las manos con agua y jabón después de cada cambio de pañal.',
-                                textAlign: TextAlign.center,
+                                '- A todos los recipientes donde se pone la leche se les debe etiquetar con nombre y fecha.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                              ),
-                            ),
-                            FadeInDown(
-                              duration:const  Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- Da pecho con alegría y aumentará tu producción.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
+                                textAlign: TextAlign.start,
                               ),
                             ),
                           ],

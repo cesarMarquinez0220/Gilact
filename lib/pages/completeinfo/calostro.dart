@@ -81,7 +81,7 @@ class CalostroInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -90,7 +90,7 @@ class CalostroInfo extends StatelessWidget {
                               delay:const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Es de color amarillento y contiene alto valor nutritivo.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -102,7 +102,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Satisface al lactante porque tiene los nutrientes que necesita el bebé.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -114,7 +114,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Contiene defensas que protegen al bebé contra enfermedades.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -127,7 +127,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 'Es el único alimento que el bebé necesita en los primeros seis meses.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
