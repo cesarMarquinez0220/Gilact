@@ -1,7 +1,6 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_login/gradient.dart';
@@ -26,10 +25,6 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
   TextEditingController vecesPecho = TextEditingController();
   TextEditingController vecesBiberon = TextEditingController();
 
-  // Firebase Auth instance
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  // Firestore instance
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _guardarDatos() async {
     final email = UserDataStorage.getUserEmail();
@@ -254,7 +249,7 @@ class _RegistroLactanciaState extends State<RegistroLactancia> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Container(
+                          SizedBox(
                             width: 100, // Ajusta este valor según sea necesario
                             child: _buildDropdownField(
                               "Unidad",
