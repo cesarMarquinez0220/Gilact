@@ -6,15 +6,23 @@
 	<dict>
 		<key>Info.plist</key>
 		<data>
-		/Vq8oeZnfIPMrTcw8OIv6VU3Xjc=
+		Ukrv2xt1qWxaudtDVgwEO0PiqKE=
 		</data>
 		<key>gRPCCertificates-Cpp.bundle/Info.plist</key>
 		<data>
-		2DQwOutzbz78yjCCWVmMxai3ZIY=
+		NklpsMkHQOBCezg8HiyWsDJX+Qc=
 		</data>
 		<key>gRPCCertificates-Cpp.bundle/roots.pem</key>
 		<data>
 		fKPpDnXJArmBT4pB8zmpeWVIzCc=
+		</data>
+		<key>grpcpp.bundle/Info.plist</key>
+		<data>
+		VyJp9Seca8UWwAV1z7A/SRskSB0=
+		</data>
+		<key>grpcpp.bundle/PrivacyInfo.xcprivacy</key>
+		<data>
+		U7WM6H59FffP9Htm/es+F6Fe4q4=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -23,7 +31,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Acb4APWaY3YBOLiVOYoXndThG4KZ8bNdbwzoxXxaJ0g=
+			agdvUjR1lkWGMTYkU0Ak93HmJnLgEe2PEpr2ae1Shdg=
 			</data>
 		</dict>
 		<key>gRPCCertificates-Cpp.bundle/roots.pem</key>
@@ -31,6 +39,20 @@
 			<key>hash2</key>
 			<data>
 			lhQzRMSuEJWIElssQdXa9lSl+vxuI/rDf3uj0p2n53Y=
+			</data>
+		</dict>
+		<key>grpcpp.bundle/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			lkH+n6W6SfDnvUq5u5e0BL4hMV2zkunwdbJlU40jhMI=
+			</data>
+		</dict>
+		<key>grpcpp.bundle/PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SMwLNyeKt9zx4V4Bagi8Dg1kPZyuLQYcTZQlPy1SyIo=
 			</data>
 		</dict>
 	</dict>
