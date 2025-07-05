@@ -3,6 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
 import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
@@ -282,6 +283,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -404,14 +406,14 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       _buildFeatureBox(
                         'Tips',
                         Icons.lightbulb,
-                        Color.fromARGB(255, 234, 38, 182),
+                       const Color.fromARGB(255, 234, 38, 182),
                         'Consejos y más',
                         '/tips',
                       ),
                       _buildFeatureBoxes(
                         'Historial',
                         Icons.video_library,
-                        Color.fromARGB(255, 22, 124, 104),
+                      const  Color.fromARGB(255, 22, 124, 104),
                         'Enfatiza\nconocimiento',
                         _navigateToHistorial,
                       ),
