@@ -5,6 +5,8 @@ import 'package:flutter_login/pages/completeinfo/beneficios_bebe.dart';
 import 'package:flutter_login/pages/completeinfo/beneficios_mama.dart';
 import 'package:flutter_login/pages/completeinfo/calostro.dart';
 import 'package:flutter_login/pages/completeinfo/consejos.dart';
+import 'package:flutter_login/pages/completeinfo/continuacion_extraccion.dart';
+import 'package:flutter_login/pages/completeinfo/continuacion_higiene.dart';
 import 'package:flutter_login/pages/completeinfo/encasode.dart';
 import 'package:flutter_login/pages/completeinfo/extraccion.dart';
 import 'package:flutter_login/pages/completeinfo/higiene.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_login/pages/completeinfo/lactancia_exitosa.dart';
 import 'package:flutter_login/pages/completeinfo/padre_lactancia.dart';
 import 'package:flutter_login/pages/completeinfo/postura_agarre.dart';
 import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
+import 'package:flutter_login/pages/completeinfo/suplementacion_hierro.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Tips extends StatefulWidget {
@@ -49,7 +52,7 @@ class _TipsState extends State<Tips> {
                 controller: _controller,
                 onPageChanged: (index) {
                   // Detener el temporizador si estamos en la última página
-                  if (index == 11) {
+                  if (index == 14) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                           builder: (context) => const Perfilnuevo()),
@@ -58,13 +61,16 @@ class _TipsState extends State<Tips> {
                 },
                 children: const [
                   AlimentacionComplementariaInfo(),
+                  SuplementoHierroInfo(),
                   BeneficiosBB(),
                   beneficios_mama(),
                   PosturaAgarreInfo(),
                   CalostroInfo(),
                   ConsejosLactanciaInfo(),
                   ExtraccionAlmacenamientoInfo(),
+                  ContinuacionExtraccionInfo(),
                   HigieneLactanciaInfo(),
+                  ContinuacionHigieneLactanciaInfo(),
                   LactanciaExitosa(),
                   RolPadreLactanciaInfo(),
                   ProblemasLactanciaInfo(),
@@ -82,7 +88,7 @@ class _TipsState extends State<Tips> {
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: SmoothPageIndicator(
                     controller: _controller,
-                    count: 11,
+                    count: 14,
                     effect: const JumpingDotEffect(
                       activeDotColor: Color.fromARGB(255, 73, 140, 240),
                       dotColor: Colors.grey,

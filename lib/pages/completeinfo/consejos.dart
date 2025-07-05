@@ -9,8 +9,8 @@ class ConsejosLactanciaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -24,11 +24,11 @@ class ConsejosLactanciaInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: height * .02,
+                  height: screenHeight * .02,
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.38,
-                  width: MediaQuery.of(context).size.width * 0.47,
+                  height: screenHeight * 0.35,
+                  width: screenWidth * 0.35,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
@@ -39,8 +39,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: width * .9,
-                      height: height * .4,
+                      width: screenWidth * 0.9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -80,7 +79,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -92,7 +91,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -104,7 +103,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -116,7 +115,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -128,7 +127,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             FadeInDown(
@@ -140,7 +139,7 @@ class ConsejosLactanciaInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                           ],

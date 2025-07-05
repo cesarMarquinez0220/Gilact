@@ -36,106 +36,70 @@ class ExtraccionAlmacenamientoInfo extends StatelessWidget {
                   ),
                 ),
                 FadeInDown(
-                    duration: const Duration(milliseconds: 1000),
-                    delay: const Duration(milliseconds: 500),
-                    child: Container(
-                      width: width * .9,
-                      height: height * .46,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 4,
-                            blurRadius: 6,
-                            offset: const Offset(2, 6),
+                  duration: const Duration(milliseconds: 1000),
+                  delay: const Duration(milliseconds: 500),
+                  child: Container(
+                    width: width * .9,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 4,
+                          blurRadius: 6,
+                          offset: const Offset(2, 6),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          FadeInDown(
+                            duration: const Duration(milliseconds: 1000),
+                            delay: const Duration(milliseconds: 500),
+                            child: const Text(
+                              'Extracción, Manejo y Almacenamiento de la Leche Materna',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 73, 140, 240),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          FadeInDown(
+                            duration: const Duration(milliseconds: 1000),
+                            delay: const Duration(milliseconds: 500),
+                            child: const Text(
+                              'La extracción puede realizarse manual o mecánicamente. Para facilitar la extracción, haga estimulación aplicando compresas tibias y masajes circulares sobre toda la mama.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 86, 86, 86),
+                              ),
+                              textAlign: TextAlign.justify,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          FadeInDown(
+                            duration: const Duration(milliseconds: 1000),
+                            delay: const Duration(milliseconds: 500),
+                            child: const Text(
+                              '- No mezclar leche materna recién extraída con leche materna que ya está refrigerada.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 86, 86, 86),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                'Extracción, Manejo y Almacenamiento de la Leche Materna',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 73, 140, 240),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                'La extracción puede realizarse manual o mecánicamente. Para facilitar la extracción, haga estimulación aplicando compresas tibias y masajes circulares sobre toda la mama.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- No mezclar leche materna recién extraída con leche materna que ya está refrigerada.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- La leche descongelada debe consumirse y el sobrante descartarse.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- Dejarla un rato a temperatura ambiente antes de darla.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            FadeInDown(
-                              duration: const Duration(milliseconds: 1000),
-                              delay: const Duration(milliseconds: 500),
-                              child: const Text(
-                                '- A todos los recipientes donde se pone la leche se les debe etiquetar con nombre y fecha.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromARGB(255, 86, 86, 86),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ))
+                    ),
+                  ),
+                )
               ],
             ),
           ),

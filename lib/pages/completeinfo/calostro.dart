@@ -9,8 +9,8 @@ class CalostroInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-    final double height = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: () async {
@@ -24,20 +24,23 @@ class CalostroInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  height: screenHeight * 0.30,
+                  width: screenWidth * 0.35,
                   child: FadeInRight(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
-                    child: Image.asset("assets/tips/5_CALOSTRO.png"),
+                    child: Transform.scale(
+                      scale: 1.8, 
+                      child: Image.asset("assets/tips/5_CALOSTRO.png"),
+                    ),
                   ),
                 ),
+                SizedBox(height: 20),
                 FadeInDown(
                     duration: const Duration(milliseconds: 1000),
                     delay: const Duration(milliseconds: 500),
                     child: Container(
-                      width: width * .9,
-                      height: height * .4,
+                      width: screenWidth * .9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -78,7 +81,7 @@ class CalostroInfo extends StatelessWidget {
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -87,7 +90,7 @@ class CalostroInfo extends StatelessWidget {
                               delay:const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Es de color amarillento y contiene alto valor nutritivo.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -99,7 +102,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Satisface al lactante porque tiene los nutrientes que necesita el bebé.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -111,7 +114,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 '- Contiene defensas que protegen al bebé contra enfermedades.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
@@ -124,7 +127,7 @@ class CalostroInfo extends StatelessWidget {
                               delay: const Duration(milliseconds: 500),
                               child: const Text(
                                 'Es el único alimento que el bebé necesita en los primeros seis meses.',
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color.fromARGB(255, 86, 86, 86),
