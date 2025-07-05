@@ -84,20 +84,29 @@ class _leccionesState extends State<lecciones> {
     final avancesProvider =
         Provider.of<Avancesprovider>(context, listen: false);
     avancesProvider.imprimirAvancesMap(); // Llamada para imprimir el mapa
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.centerLeft,
-                colors: [
-                  Color(0xffD9ACF5),
-                  Color.fromARGB(255, 122, 231, 211),
+    return   Scaffold(
+
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.centerLeft,
+              colors: [
+                Color(0xffD9ACF5),
+                Color.fromARGB(255, 122, 231, 211),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  _buildAppBar(),
+                  SingleChildScrollView(child: _buildLessons(_videos!)),
                 ],
               ),
             ),
+<<<<<<< Updated upstream
             child: SafeArea(
               child: SingleChildScrollView(
                 child: Column(
@@ -123,11 +132,22 @@ class _leccionesState extends State<lecciones> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+=======
+          ),
+        ));
+  }
+
+  PreferredSizeWidget  _buildAppBar() {
+>>>>>>> Stashed changes
     return AppBar(
       backgroundColor: Colors.transparent,
       actions: [
         GestureDetector(
           onTap: () {
+<<<<<<< Updated upstream
+=======
+            // Mostrar un mensaje cuando se presione
+>>>>>>> Stashed changes
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -139,7 +159,12 @@ class _leccionesState extends State<lecciones> {
                     TextButton(
                       child: const Text("Cerrar"),
                       onPressed: () {
+<<<<<<< Updated upstream
                         Navigator.of(context).pop();
+=======
+                        Navigator.of(context)
+                            .pop(); // Cerrar el cuadro de diálogo
+>>>>>>> Stashed changes
                       },
                     ),
                   ],
@@ -191,8 +216,6 @@ class _leccionesState extends State<lecciones> {
         final showHeader = currentLessonId != previousLessonId;
         previousLessonId = currentLessonId;
 
-        // Si es el primer video de la lección 1, habilitarlo
-
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -221,6 +244,7 @@ class _leccionesState extends State<lecciones> {
                   videoURL: video.videoURL,
                 ),
               ),
+              // const SizedBox(height: 80)
             ],
           ),
         );
@@ -331,7 +355,11 @@ class _leccionesState extends State<lecciones> {
                 isFirstVideoOfFirstLesson;
             if (isEnabled) {
               print("Lección $videoId completada");
-              _navigateToReproductorVideoHelper(videoId, duracionId, videoURL);
+              _navigateToReproductorVideoHelper(
+                videoId,
+                duracionId,
+                videoURL,
+              );
             } else {
               showDialog(
                 context: context,

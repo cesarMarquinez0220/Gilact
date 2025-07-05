@@ -1,0 +1,214 @@
+# Flutter/Dart específico
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+*.lock
+
+# Archivos de configuración de IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Archivos de sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de logs
+*.log
+logs/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Archivos de configuración local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archivos de Firebase (si no quieres versionarlos)
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json
+
+# Archivos de configuración de desarrollo
+*.keystore
+*.jks
+
+# Archivos de caché
+.cache/
+*.cache
+
+# Archivos de coverage
+coverage/
+*.lcov
+
+# Archivos de análisis
+.analysis_options.yaml.bak
+
+# Archivos de dependencias específicas de Flutter
+.fvm/
+
+# Archivos de configuración de linters
+.analysis_options.yaml.bak
+
+# Archivos de configuración de CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Archivos de configuración de deployment
+fastlane/
+
+# Firebase específico
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+
+# Archivos de configuración de Android
+android/app/debug
+android/app/profile
+android/app/release
+android/gradle/
+android/local.properties
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/.idea/workspace.xml
+android/.idea/tasks.xml
+android/.idea/gradle.xml
+android/.idea/assetWizardSettings.xml
+android/.idea/dictionaries
+android/.idea/libraries
+android/.idea/jarRepositories.xml
+android/.idea/compiler.xml
+android/.idea/libraries/
+android/.idea/modules.xml
+android/.idea/navEditor.xml
+
+# Archivos de configuración de iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_assets/
+ios/ServiceDefinitions.json
+ios/Runner.xcworkspace/xcshareddata/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+
+# Archivos de configuración de macOS
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Runner.xcworkspace/xcshareddata/
+macos/Runner.xcworkspace/xcuserdata/
+macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/
+macos/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+macos/Runner.xcodeproj/xcuserdata/
+
+# Archivos de configuración de Windows
+windows/flutter/ephemeral/
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugins.cmake
+
+# Archivos de configuración de Linux
+linux/flutter/ephemeral/
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugin_registrant.h
+linux/flutter/generated_plugins.cmake
+
+# Archivos de configuración de Web
+web/firebase-messaging-sw.js
+web/firebase-messaging-sw.js.map
+
+# Archivos de configuración específicos del proyecto
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Archivos de configuración de desarrollo local
+local.properties
+local_config.dart
+config_local.dart
+
+# Archivos de configuración de testing
+test/coverage/
+test/.coverage/
+
+# Archivos de configuración de análisis estático
+.analysis_options.yaml.bak
+dart_code_metrics.yaml
+
+# Archivos de configuración de dependencias
+pubspec.lock.bak
+pubspec_overrides.yaml
+
+# Archivos de configuración de assets generados
+assets/generated/
+assets/temp/
+
+# Archivos de configuración de build específicos
+build/
+*.apk
+*.aab
+*.ipa
+*.dmg
+*.exe
+*.msi
+*.deb
+*.rpm
+*.snap
+*.AppImage
+
+# Archivos de configuración de logs específicos
+flutter_*.log
+dart_*.log
+*.log.*
+
+# Archivos de configuración de debugging
+*.dSYM.zip
+*.dSYM
+
+# Archivos de configuración de profiling
+*.trace
+*.timeline
+
+# Archivos de configuración de testing específicos
+test/widget_test.dart.bak
+test/integration_test.dart.bak
+
+# Archivos de configuración de assets temporales
+assets/temp/
+assets/cache/
+assets/processed/
+
+# Archivos de configuración de configuración local
+config/
+local_config/
+secrets/ 
