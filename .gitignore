@@ -212,3 +212,7 @@ assets/processed/
 config/
 local_config/
 secrets/ 
+*.dart
+*.swift
+/ios
+/ios

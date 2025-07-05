@@ -78,8 +78,8 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: 'assets/logo/logo.png'
-  adaptive_icon_background: 'assets/logo/logo.png'
+  image_path: 'assets/logo/icono.png'
+  adaptive_icon_background: 'assets/logo/icono.png'
   remove_alpha_ios: true
   
 

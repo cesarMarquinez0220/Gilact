@@ -285,43 +285,44 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
      double screenHeight = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            height: screenHeight ,
-            decoration: BoxDecoration(color: Colors.transparent),
-            child: Scaffold(
-
-              body: 
-             //Column(
-              //  children: [
-                  SingleChildScrollView(
-                    child: _buildBody(),
-                  ),
-                  // BottomBar(
-                  //   selectedIndex: _selectedIndex,
-                  //   onIndexChanged: _onItemTapped,
-                  // ),
-                //],
-             // ),
-
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 5),
-              child: BottomBar(
-                selectedIndex: _selectedIndex,
-                onIndexChanged: _onItemTapped,
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              height: screenHeight ,
+              decoration: BoxDecoration(color: Colors.transparent),
+              child: Scaffold(
+      
+                body: 
+               //Column(
+                //  children: [
+                    SingleChildScrollView(
+                      child: _buildBody(),
+                    ),
+                    // BottomBar(
+                    //   selectedIndex: _selectedIndex,
+                    //   onIndexChanged: _onItemTapped,
+                    // ),
+                  //],
+               // ),
+      
               ),
             ),
-          ),
-        ],
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 5),
+                child: BottomBar(
+                  selectedIndex: _selectedIndex,
+                  onIndexChanged: _onItemTapped,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
