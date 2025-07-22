@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/claseGlobal/colores.dart';
+import '../../gradient.dart';
+import '../PerfilContinuacion/user_data_storage.dart';
+import '../claseGlobal/colores.dart';
 
 class Estadistica extends StatefulWidget {
   const Estadistica({super.key});
@@ -25,22 +25,20 @@ LinearGradient get _barsGradient => LinearGradient(
 
 class _EstadisticaState extends State<Estadistica>
     with SingleTickerProviderStateMixin {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(gradient: Gradients.myGradient),
         child: Padding(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*.05),
+          padding:
+              EdgeInsets.only(top: MediaQuery.of(context).size.height * .05),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                
                 const Text(
                   'Cantidad de Vistas por Video',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -50,12 +48,13 @@ class _EstadisticaState extends State<Estadistica>
                   width: MediaQuery.of(context).size.width * 0.9,
                   height: MediaQuery.of(context).size.height * 0.7,
                   decoration: BoxDecoration(
-                    color:const Color.fromRGBO(25, 33, 49, 30),
+                    color: const Color.fromRGBO(25, 33, 49, 30),
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: FutureBuilder(
                     future: obtenerDatos(UserDataStorage.getUserName()),
-                    builder: (context, AsyncSnapshot<Map<String, int>> snapshot) {
+                    builder:
+                        (context, AsyncSnapshot<Map<String, int>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
@@ -125,7 +124,6 @@ class _EstadisticaState extends State<Estadistica>
           ),
         ),
       ),
-      
     );
   }
 
@@ -173,13 +171,9 @@ class _EstadisticaState extends State<Estadistica>
       return BarChartGroupData(
         x: datos.keys.toList().indexOf(entry.key) + 1,
         barRods: [
-          BarChartRodData(
-            toY: entry.value.toDouble(),
-            color: Colors.white
-          ),
+          BarChartRodData(toY: entry.value.toDouble(), color: Colors.white),
         ],
       );
     }).toList();
   }
-
 }

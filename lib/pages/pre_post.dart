@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/registro_bebe.dart';
+import 'PerfilContinuacion/user_data_storage.dart';
+import 'registro_bebe.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_login/pages/registro_pre.dart';
+import 'registro_pre.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

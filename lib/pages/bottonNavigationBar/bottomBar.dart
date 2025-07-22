@@ -1,7 +1,6 @@
 // ignore_for_file: file_names, library_private_types_in_public_api, use_super_parameters
 
 import 'package:flutter/material.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class BottomBar extends StatelessWidget {
   final int selectedIndex;
@@ -15,7 +14,23 @@ class BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RoundedBox(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.all(12.0),
+      height: 75,
+      width: 70,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -69,7 +84,7 @@ class BottomBar extends StatelessWidget {
           ),
         ],
       ),
-    ).p12();
+    );
   }
 }
 
@@ -95,24 +110,4 @@ class BarIcon extends StatelessWidget {
   }
 }
 
-class RoundedBox extends StatelessWidget {
-  const RoundedBox({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
 
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return VxBox(child: child)
-        .color(Vx.gray100)
-        .roundedLg
-        .height(75)
-        .width(70)
-        .p12
-        .margin(EdgeInsets.only(bottom: 20.0))
-        .shadowMd
-        .make();
-  }
-}

@@ -2,10 +2,10 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
-import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
-import 'package:flutter_login/pages/registro_lactancia.dart';
+import 'LecionesVideos/reproductorsesiones.dart';
+import 'claseGlobal/firestoreService.dart';
+import 'proveedor_boleanos/notifire.dart';
+import 'registro_lactancia.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -84,70 +84,39 @@ class _leccionesState extends State<lecciones> {
     final avancesProvider =
         Provider.of<Avancesprovider>(context, listen: false);
     avancesProvider.imprimirAvancesMap(); // Llamada para imprimir el mapa
-    return   Scaffold(
-
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.centerLeft,
-              colors: [
-                Color(0xffD9ACF5),
-                Color.fromARGB(255, 122, 231, 211),
+    
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.centerLeft,
+            colors: [
+              Color(0xffD9ACF5),
+              Color.fromARGB(255, 122, 231, 211),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                _buildAppBar(),
+                SingleChildScrollView(child: _buildLessons(_videos!)),
               ],
             ),
           ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  _buildAppBar(),
-                  SingleChildScrollView(child: _buildLessons(_videos!)),
-                ],
-              ),
-            ),
-<<<<<<< Updated upstream
-            child: SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    _buildAppBar(),
-                    SingleChildScrollView(child: _buildLessons(_videos!)),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * .09,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 16.0,
-            left: 16.0,
-            child: _buildElevatedButton(),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
-=======
-          ),
-        ));
-  }
-
-  PreferredSizeWidget  _buildAppBar() {
->>>>>>> Stashed changes
     return AppBar(
       backgroundColor: Colors.transparent,
       actions: [
         GestureDetector(
           onTap: () {
-<<<<<<< Updated upstream
-=======
-            // Mostrar un mensaje cuando se presione
->>>>>>> Stashed changes
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -159,12 +128,7 @@ class _leccionesState extends State<lecciones> {
                     TextButton(
                       child: const Text("Cerrar"),
                       onPressed: () {
-<<<<<<< Updated upstream
                         Navigator.of(context).pop();
-=======
-                        Navigator.of(context)
-                            .pop(); // Cerrar el cuadro de diálogo
->>>>>>> Stashed changes
                       },
                     ),
                   ],
@@ -240,11 +204,9 @@ class _leccionesState extends State<lecciones> {
                   isLastCompleted ? Colors.blue : Colors.blue,
                   video.videoId,
                   video.leccionId,
-                  leccionId: video.leccionId,
                   videoURL: video.videoURL,
                 ),
               ),
-              // const SizedBox(height: 80)
             ],
           ),
         );
@@ -283,7 +245,6 @@ class _leccionesState extends State<lecciones> {
         return 'Diferencias entre la leche materna y la leche de vaca';
       case 14:
         return 'Mitos de la lactancia materna';
-
       default:
         return '';
     }
@@ -298,9 +259,9 @@ class _leccionesState extends State<lecciones> {
         child: Text(
           title,
           style: GoogleFonts.quicksand(
-            color: Colors.white,
-            fontSize: 28.0,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -312,173 +273,71 @@ class _leccionesState extends State<lecciones> {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.only(left: 16.0),
+        padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
         child: Text(
           subtitle,
           style: GoogleFonts.quicksand(
+            fontSize: 16,
             color: Colors.white,
-            fontSize: 18.0,
           ),
         ),
       ),
     );
   }
 
-  //circulo indicador de la derecha
-  // ignore: non_constant_identifier_names
-  Widget _PercentIndicator(
-    double radius,
-    String imageName,
-    Color color,
-    int videoId,
-    int duracionId, {
-    required int leccionId,
-    required String videoURL,
-  }) {
-    return Consumer2<LeccionesProvider, Avancesprovider>(
-      builder: (context, leccionesProvider, avancesProvider, child) {
-        final ultimoId = leccionesProvider.ultimoIdEnEstadoTrue(
-          leccionesProvider.lecciones_list,
-        );
-        final esUltimoId = videoId == ultimoId;
-        // Verificar si es el primer video de la primera lección
-        final isFirstVideoOfFirstLesson = leccionId == 1 && videoId == 1;
-
-        final double progreso =
-            context.read<Avancesprovider>().obtenerAvancePorId(videoId);
-
-        return GestureDetector(
-          onTap: () {
-            final isEnabled = context
-                    .read<LeccionesProvider>()
-                    .isLeccionCompletada(videoId) ||
-                isFirstVideoOfFirstLesson;
-            if (isEnabled) {
-              print("Lección $videoId completada");
-              _navigateToReproductorVideoHelper(
-                videoId,
-                duracionId,
-                videoURL,
-              );
-            } else {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Lección no disponible"),
-                    content: const Text(
-                      "Debes completar esta lección antes de acceder a la siguiente.",
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text("Cerrar"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: esUltimoId
-                ? Flash(
-                    duration: const Duration(seconds: 2),
-                    child: Container(
-                      width: radius * 2,
-                      height: radius * 2,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.yellow,
-                            spreadRadius: 5,
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: CircularPercentIndicator(
-                        radius: radius,
-                        lineWidth: 9.0,
-                        percent: progreso,
-                        center: _buildImageContainer(imageName),
-                        circularStrokeCap: CircularStrokeCap.butt,
-                        progressColor: color,
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
-                  )
-                : Container(
-                    width: radius * 2,
-                    height: radius * 2,
-                    child: CircularPercentIndicator(
-                      radius: radius,
-                      lineWidth: 9.0,
-                      percent: progreso,
-                      center: _buildImageContainer(imageName),
-                      circularStrokeCap: CircularStrokeCap.butt,
-                      progressColor: color,
-                      backgroundColor: Colors.white,
-                    ),
-                  ),
-          ),
-        );
+  Widget _PercentIndicator(double percent, String imageName, Color color,
+      int videoId, int leccionId,
+      {required String videoURL}) {
+    return GestureDetector(
+      onTap: () {
+        _navigateToReproductorVideoHelper(videoId, leccionId, videoURL);
       },
-    );
-  }
-
-  Widget _buildImageContainer(String imageName) {
-    return Center(
       child: Container(
-        width: 120.0,
-        height: 120.0,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
+        width: 150,
+        height: 150,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Center(
-          child:
-              Image.asset('assets/images/$imageName', height: 100, width: 100),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildElevatedButton() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-        child: SizedBox(
-          width: 210,
-          child: ElevatedButton(
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RegistroLactancia(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 199, 135, 240),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Imagen de fondo
+              Image.asset(
+                'assets/mini_videos/$imageName',
+                width: 150,
+                height: 150,
+                fit: BoxFit.cover,
               ),
-              shadowColor: Colors.black.withOpacity(0.5),
-              elevation: 5,
-            ),
-            child: Text(
-              'Registro Lactancia',
-              style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            ),
+              // Overlay con el indicador de progreso
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                ),
+                child: CircularPercentIndicator(
+                  radius: 50.0,
+                  lineWidth: 8.0,
+                  percent: percent / 100,
+                  center: const Icon(
+                    Icons.play_arrow,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                  progressColor: color,
+                  backgroundColor: Colors.white.withOpacity(0.3),
+                ),
+              ),
+            ],
           ),
         ),
       ),

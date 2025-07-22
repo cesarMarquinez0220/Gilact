@@ -4,12 +4,12 @@ import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_login/pages/Configuracion_Estadistica/configuracion.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/edicionperfil.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/bottonNavigationBar/bottomBar.dart';
-import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:flutter_login/pages/proveedor_boleanos/notifire.dart';
+import '../Configuracion_Estadistica/configuracion.dart';
+import 'edicionperfil.dart';
+import 'user_data_storage.dart';
+import '../bottonNavigationBar/bottomBar.dart';
+import '../claseGlobal/firestoreService.dart';
+import '../proveedor_boleanos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -284,29 +284,27 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-     double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
             Container(
-              height: screenHeight ,
+              height: screenHeight,
               decoration: BoxDecoration(color: Colors.transparent),
               child: Scaffold(
-      
-                body: 
-               //Column(
-                //  children: [
+                body:
+                    //Column(
+                    //  children: [
                     SingleChildScrollView(
-                      child: _buildBody(),
-                    ),
-                    // BottomBar(
-                    //   selectedIndex: _selectedIndex,
-                    //   onIndexChanged: _onItemTapped,
-                    // ),
-                  //],
-               // ),
-      
+                  child: _buildBody(),
+                ),
+                // BottomBar(
+                //   selectedIndex: _selectedIndex,
+                //   onIndexChanged: _onItemTapped,
+                // ),
+                //],
+                // ),
               ),
             ),
             Positioned(
@@ -376,8 +374,7 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.05,
                                 fontWeight: FontWeight.w500,
-                                color:
-                                    const Color.fromARGB(255, 117, 115, 115),
+                                color: const Color.fromARGB(255, 117, 115, 115),
                               ),
                             ),
                           ],
@@ -423,14 +420,14 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                       _buildFeatureBox(
                         'Tips',
                         Icons.lightbulb,
-                       const Color.fromARGB(255, 234, 38, 182),
+                        const Color.fromARGB(255, 234, 38, 182),
                         'Consejos y más',
                         '/tips',
                       ),
                       _buildFeatureBoxes(
                         'Historial',
                         Icons.video_library,
-                      const  Color.fromARGB(255, 22, 124, 104),
+                        const Color.fromARGB(255, 22, 124, 104),
                         'Enfatiza\nconocimiento',
                         _navigateToHistorial,
                       ),
@@ -578,7 +575,6 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
                           fontWeight: FontWeight.w500,
                           color: const Color.fromARGB(255, 117, 115, 115)),
                     ),
-                  
                     Text(
                       'Lugar de Nacimiento: $lugarNac\n',
                       style: GoogleFonts.quicksand(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_login/pages/claseGlobal/detector.dart';
+import '../claseGlobal/detector.dart';
 import 'package:animate_do/animate_do.dart';
 
 class BeneficiosBB extends StatefulWidget {
@@ -40,9 +40,9 @@ class _BeneficiosBB extends State<BeneficiosBB> {
                 duration: const Duration(milliseconds: 1000),
                 delay: const Duration(milliseconds: 500),
                 child: Container(
-                   width: screenWidth * 0.9,
+                  width: screenWidth * 0.9,
                   decoration: BoxDecoration(
-                    color: Colors.white ,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(

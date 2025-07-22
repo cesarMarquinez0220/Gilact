@@ -93,14 +93,9 @@ class Avancesprovider with ChangeNotifier {
   Map<int, Map<String, dynamic>> avancesMap = {};
 
   // Método para actualizar el avance del usuario por id de video
-<<<<<<< Updated upstream
   void actualizarAvancePorId(int videoId, int avance) {
-    if (!avancesMap.containsKey(videoId) ||
-        avancesMap[videoId]!['avance'] != 1.0) {
-=======
-   void actualizarAvancePorId(int videoId, int avance) {
-    if (!avancesMap.containsKey(videoId) || avancesMap[videoId]!['avance'] != 1.0) {
->>>>>>> Stashed changes
+    if (!avancesMap.containsKey(videoId) || 
+        (avancesMap[videoId]?['avance'] as double?) != 1.0) {
       if (!avancesMap.containsKey(videoId)) {
         avancesMap[videoId] = {};
       }
@@ -110,12 +105,8 @@ class Avancesprovider with ChangeNotifier {
   }
 
   void guardarProgresoPorId(int videoId, double progreso) {
-<<<<<<< Updated upstream
-    if (!avancesMap.containsKey(videoId) ||
-        avancesMap[videoId]!['avance'] != 1.0) {
-=======
-    if (!avancesMap.containsKey(videoId) || avancesMap[videoId]!['avance'] != 1.0) {
->>>>>>> Stashed changes
+    if (!avancesMap.containsKey(videoId) || 
+        (avancesMap[videoId]?['avance'] as double?) != 1.0) {
       avancesMap[videoId] = {'avance': progreso}; // Almacenar como double
       notifyListeners();
     }
@@ -124,7 +115,7 @@ class Avancesprovider with ChangeNotifier {
   // Método para obtener el avance del usuario por id de video
   double obtenerAvancePorId(int videoId) {
     if (avancesMap.containsKey(videoId)) {
-      return avancesMap[videoId]!['avance'] ?? 0.0; // Devolver como double
+      return (avancesMap[videoId]?['avance'] as double?) ?? 0.0; // Devolver como double
     }
     return 0.0;
   }

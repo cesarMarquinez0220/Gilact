@@ -1,7 +1,7 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/claseGlobal/detector.dart';
+import '../claseGlobal/detector.dart';
 import 'package:animate_do/animate_do.dart';
 
 class CalostroInfo extends StatelessWidget {

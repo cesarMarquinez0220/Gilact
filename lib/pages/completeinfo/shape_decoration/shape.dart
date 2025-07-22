@@ -1,7 +1,7 @@
 // ignore_for_file: file_names
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/completeinfo/shape_decoration/clip.dart';
+import 'clip.dart';
 
 class BezierContainer extends StatelessWidget {
   const BezierContainer({super.key});
@@ -62,7 +62,7 @@ class OvalContainer extends StatelessWidget {
 class Ovalstatic1 extends StatelessWidget {
   const Ovalstatic1({super.key});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: pi / 1.6,

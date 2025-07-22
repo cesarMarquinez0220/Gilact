@@ -1,9 +1,9 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/pre_post.dart';
+import 'PerfilContinuacion/perfilnuevo.dart';
+import 'PerfilContinuacion/user_data_storage.dart';
+import 'pre_post.dart';
 
 class WelcomeScreen extends StatefulWidget {
   // ignore: use_super_parameters

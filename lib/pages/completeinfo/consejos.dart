@@ -2,7 +2,7 @@
 
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/claseGlobal/detector.dart';
+import '../claseGlobal/detector.dart';
 
 class ConsejosLactanciaInfo extends StatelessWidget {
   const ConsejosLactanciaInfo({Key? key}) : super(key: key);

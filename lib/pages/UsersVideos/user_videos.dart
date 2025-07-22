@@ -2,10 +2,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/LecionesVideos/reproductorsesiones.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
-import 'package:flutter_login/pages/claseGlobal/firestoreService.dart';
-import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
+import '../LecionesVideos/reproductorsesiones.dart';
+import '../PerfilContinuacion/user_data_storage.dart';
+import '../claseGlobal/firestoreService.dart';
+import '../completeinfo/shape_decoration/shape.dart';
 
 class User_videos extends StatefulWidget {
   const User_videos({Key? key, required List<Video> videos});

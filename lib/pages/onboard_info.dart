@@ -2,10 +2,10 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/splashinfo/page1.dart';
-import 'package:flutter_login/pages/splashinfo/page2.dart';
-import 'package:flutter_login/pages/splashinfo/page3.dart';
+import '../../gradient.dart';
+import 'splashinfo/page1.dart';
+import 'splashinfo/page2.dart';
+import 'splashinfo/page3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Onboar_Info extends StatefulWidget {

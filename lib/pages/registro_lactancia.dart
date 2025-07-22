@@ -3,8 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import '../../gradient.dart';
+import 'PerfilContinuacion/user_data_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 //import 'package:flutter_login/pages/registro_page.dart';
 

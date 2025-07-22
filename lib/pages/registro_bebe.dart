@@ -3,10 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_login/alerta_dialoge.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import '../alerta_dialoge.dart';
+import '../../gradient.dart';
+import 'PerfilContinuacion/perfilnuevo.dart';
+import 'PerfilContinuacion/user_data_storage.dart';
 import 'package:intl/intl.dart';
 
 class RegistroBebe extends StatefulWidget {
@@ -177,7 +177,7 @@ class _RegistroBebeState extends State<RegistroBebe> {
             );
           },
         );
-         Future.delayed(const Duration(seconds: 2), () {
+        Future.delayed(const Duration(seconds: 2), () {
           Navigator.push(
             context,
             MaterialPageRoute(

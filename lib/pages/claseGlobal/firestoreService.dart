@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         FirebaseFirestore,
         QueryDocumentSnapshot,
         QuerySnapshot;
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import '../PerfilContinuacion/user_data_storage.dart';
 
 class FirestoreServiceLecciones {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -62,13 +62,17 @@ class ObtenerInfoAvance {
     return usersQuery.docs.isNotEmpty ? usersQuery.docs[0].reference : null;
   }
 
-  Future<List<int>> obtenerIdsVideosCompletadosDesdeFirestore(String usuario) async {
+  Future<List<int>> obtenerIdsVideosCompletadosDesdeFirestore(
+      String usuario) async {
     try {
       final usuarioDocRef = await _getUsuarioDocumento(usuario);
       final List<int> idsVideosCompletados = [];
 
       if (usuarioDocRef != null) {
-        final videosQuerySnapshot = await usuarioDocRef.collection('videos').where('completado', isEqualTo: true).get();
+        final videosQuerySnapshot = await usuarioDocRef
+            .collection('videos')
+            .where('completado', isEqualTo: true)
+            .get();
 
         videosQuerySnapshot.docs.forEach((videoDocSnapshot) {
           idsVideosCompletados.add(int.parse(videoDocSnapshot.id));
@@ -79,7 +83,8 @@ class ObtenerInfoAvance {
         print('No se encontró un usuario con el nombre: $usuario');
       }
     } catch (error) {
-      print('Error al obtener información de videos completados desde Firestore: $error');
+      print(
+          'Error al obtener información de videos completados desde Firestore: $error');
     }
 
     // En caso de error, devuelve una lista vacía

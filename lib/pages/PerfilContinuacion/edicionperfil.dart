@@ -3,8 +3,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import '../../gradient.dart';
+import 'user_data_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 

@@ -2,9 +2,9 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/user_data_storage.dart';
+import 'PerfilContinuacion/user_data_storage.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_login/gradient.dart';
+import '../../gradient.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RegistroPre extends StatefulWidget {

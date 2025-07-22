@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
-import 'package:flutter_login/pages/completeinfo/alimentacion_complem.dart';
-import 'package:flutter_login/pages/completeinfo/beneficios_bebe.dart';
-import 'package:flutter_login/pages/completeinfo/beneficios_mama.dart';
-import 'package:flutter_login/pages/completeinfo/calostro.dart';
-import 'package:flutter_login/pages/completeinfo/consejos.dart';
-import 'package:flutter_login/pages/completeinfo/continuacion_extraccion.dart';
-import 'package:flutter_login/pages/completeinfo/continuacion_higiene.dart';
-import 'package:flutter_login/pages/completeinfo/encasode.dart';
-import 'package:flutter_login/pages/completeinfo/extraccion.dart';
-import 'package:flutter_login/pages/completeinfo/higiene.dart';
-import 'package:flutter_login/pages/completeinfo/lactancia_exitosa.dart';
-import 'package:flutter_login/pages/completeinfo/padre_lactancia.dart';
-import 'package:flutter_login/pages/completeinfo/postura_agarre.dart';
-import 'package:flutter_login/pages/completeinfo/shape_decoration/shape.dart';
-import 'package:flutter_login/pages/completeinfo/suplementacion_hierro.dart';
+import 'PerfilContinuacion/perfilnuevo.dart';
+import 'completeinfo/alimentacion_complem.dart';
+import 'completeinfo/beneficios_bebe.dart';
+import 'completeinfo/beneficios_mama.dart';
+import 'completeinfo/calostro.dart';
+import 'completeinfo/consejos.dart';
+import 'completeinfo/continuacion_extraccion.dart';
+import 'completeinfo/continuacion_higiene.dart';
+import 'completeinfo/encasode.dart';  
+import 'completeinfo/extraccion.dart';
+import 'completeinfo/higiene.dart';
+import 'completeinfo/lactancia_exitosa.dart';
+import 'completeinfo/padre_lactancia.dart';
+import 'completeinfo/postura_agarre.dart';
+import 'completeinfo/shape_decoration/shape.dart';
+import 'completeinfo/suplementacion_hierro.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Tips extends StatefulWidget {

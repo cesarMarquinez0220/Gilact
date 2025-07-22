@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/PerfilContinuacion/perfilnuevo.dart';
+import '../PerfilContinuacion/perfilnuevo.dart';
 
 class Page3 extends StatefulWidget {
   const Page3({super.key});

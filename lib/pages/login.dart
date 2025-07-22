@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_login/pages/claseGlobal/detector.dart';
-import 'package:flutter_login/pages/recuperacion.dart';
-import 'package:flutter_login/pages/registro_page.dart';
-import 'package:flutter_login/gradient.dart';
-import 'package:flutter_login/pages/splash_screen.dart';
+import 'claseGlobal/detector.dart';
+import 'recuperacion.dart';
+import 'registro_page.dart';
+import '../gradient.dart';
+import 'splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'PerfilContinuacion/user_data_storage.dart';
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return false; // No se encontró un usuario con el correo electrónico
       }
     } catch (e) {
-      print('Error: $e');
+      print('Error en buscarNombreDeUsuario: $e');
       return false; // Error al buscar el nombre de usuario
     }
   }
@@ -60,10 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (saveCredentials) {
       prefs.setString('email', emailAPP.text);
-
     } else {
       prefs.remove('email');
-
     }
   }
 
@@ -71,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       emailAPP.text = prefs.getString('email') ?? '';
-
     });
   }
 
@@ -81,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _loadCredentialsFromCache();
   }
 
-//funcion para validar datos
+  //funcion para validar datos
   validarDatos() async {
     try {
       CollectionReference ref = FirebaseFirestore.instance.collection('Users');
@@ -104,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       return false; // Credenciales inválidas
     } catch (e) {
+      print('Error en validarDatos: $e');
       return false; // Credenciales inválidas debido a un error
     }
   }
