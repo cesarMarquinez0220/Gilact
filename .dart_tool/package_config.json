@@ -3,39 +3,69 @@
   "packages": [
     {
       "name": "_flutterfire_internals",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/_flutterfire_internals-1.3.7",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/_flutterfire_internals-1.3.59",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.2"
     },
     {
       "name": "animate_do",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/animate_do-3.1.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/animate_do-4.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
     {
-      "name": "archive",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/archive-3.4.4",
+      "name": "animated_toggle_switch",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/animated_toggle_switch-0.8.5",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "ansicolor",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/ansicolor-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "archive",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/archive-4.0.7",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "args",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/args-2.4.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/args-2.7.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "async",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/async-2.11.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/async-2.13.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "boolean_selector",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/boolean_selector-2.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "cached_network_image",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cached_network_image-3.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "cached_network_image_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cached_network_image_platform_interface-4.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "cached_network_image_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cached_network_image_web-1.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "card_swiper",
@@ -45,199 +75,373 @@
     },
     {
       "name": "characters",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/characters-1.3.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/characters-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "chewie",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/chewie-1.7.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/chewie-1.12.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.7"
     },
     {
       "name": "clock",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/clock-1.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/clock-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "cloud_firestore",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.12",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "cloud_firestore_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore_platform_interface-6.6.12",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "cloud_firestore_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore_web-4.4.12",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "collection",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/collection-1.19.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "concentric_transition",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/concentric_transition-1.0.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
-      "name": "cloud_firestore",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore-4.9.3",
+      "name": "connectivity_plus",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/connectivity_plus-6.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "connectivity_plus_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/connectivity_plus_platform_interface-2.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
-      "name": "cloud_firestore_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore_platform_interface-5.16.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "cloud_firestore_web",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cloud_firestore_web-3.7.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "collection",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/collection-1.17.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "convert",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/convert-3.1.1",
+      "name": "connectivity_wrapper",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/connectivity_wrapper-1.2.7",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "crypto",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/crypto-3.0.3",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/crypto-3.0.6",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.4"
     },
     {
       "name": "csslib",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/csslib-1.0.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/csslib-1.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "cupertino_icons",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.6",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "dbus",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/dbus-0.7.8",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/dbus-0.7.11",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "2.17"
     },
     {
-      "name": "fake_async",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/fake_async-1.3.1",
+      "name": "equatable",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
+      "name": "fake_async",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/fake_async-1.3.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "ffi",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/ffi-2.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/ffi-2.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "file",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "firebase_core",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core-2.17.0",
+      "name": "firebase_analytics",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_analytics-11.6.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_analytics_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_analytics_platform_interface-4.4.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_analytics_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_analytics_web-0.5.10+16",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "firebase_auth",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_auth-5.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_auth_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_auth_platform_interface-7.7.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_auth_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_auth_web-5.15.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "firebase_core",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core-3.15.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "firebase_core_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core_platform_interface-4.8.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core_platform_interface-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.2"
     },
     {
       "name": "firebase_core_web",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core_web-2.8.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_core_web-2.24.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "firebase_performance",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_performance-0.10.1+10",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_performance_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_performance_platform_interface-0.1.5+10",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_performance_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/firebase_performance_web-0.1.7+16",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "fixnum",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/fixnum-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "fl_chart",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/fl_chart-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
     },
     {
       "name": "flutter",
       "rootUri": "file:///Users/gitce/Documents/dev/flutter/packages/flutter",
       "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "flutter_cache_manager",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_cache_manager-3.4.1",
+      "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "flutter_inappwebview",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview-5.8.0",
+      "name": "flutter_gif",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_gif-0.0.4",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "2.16"
     },
     {
-      "name": "flutter_lints",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3",
+      "name": "flutter_inappwebview",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview-6.1.5",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_android",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_android-1.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_internal_annotations",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_internal_annotations-1.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_inappwebview_ios",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_ios-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_macos",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_macos-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_platform_interface-1.3.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_web-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_inappwebview_windows",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_inappwebview_windows-0.6.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_native_splash",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "flutter_staggered_animations",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/flutter_staggered_animations-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_test",
       "rootUri": "file:///Users/gitce/Documents/dev/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.7"
     },
     {
       "name": "flutter_web_plugins",
       "rootUri": "file:///Users/gitce/Documents/dev/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "get",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/get-4.7.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
     },
     {
       "name": "google_fonts",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/google_fonts-6.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/google_fonts-6.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.14"
     },
     {
       "name": "html",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/html-0.15.4",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/html-0.15.6",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "http",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/http-1.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/http-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "http_parser",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/http_parser-4.0.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/http_parser-4.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/image-4.5.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "intl",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/intl-0.18.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.3"
     },
     {
-      "name": "js",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/js-0.6.7",
+      "name": "leak_tracker",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/leak_tracker-10.0.9",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
-      "name": "lints",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/lints-2.1.1",
+      "name": "leak_tracker_flutter_testing",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.9",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "leak_tracker_testing",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "lottie",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/lottie-2.6.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/lottie-3.3.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.6"
     },
     {
       "name": "matcher",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/matcher-0.12.16",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "material_color_utilities",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/material_color_utilities-0.5.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/material_color_utilities-0.11.1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "meta",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/meta-1.9.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/meta-1.16.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -248,40 +452,52 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "nm",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/nm-0.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "octo_image",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/octo_image-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "package_info_plus",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/package_info_plus-4.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/package_info_plus-8.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "package_info_plus_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
-      "name": "package_info_plus_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/package_info_plus_platform_interface-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "path",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path-1.8.3",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "path_provider",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider-2.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider-2.1.5",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.4"
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_android-2.2.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.6"
     },
     {
       "name": "path_provider_foundation",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_foundation-2.3.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "path_provider_linux",
@@ -291,49 +507,103 @@
     },
     {
       "name": "path_provider_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "path_provider_windows",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_windows-2.2.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "percent_indicator",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/percent_indicator-4.2.3",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/percent_indicator-4.2.5",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "petitparser",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/petitparser-5.4.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/petitparser-6.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.5"
     },
     {
       "name": "platform",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/platform-3.1.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/platform-3.1.6",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "plugin_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.6",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
-      "name": "pointycastle",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/pointycastle-3.7.3",
+      "name": "posix",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/posix-6.0.3",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.0"
     },
     {
       "name": "provider",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/provider-6.0.5",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/provider-6.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "rxdart",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/rxdart-0.28.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "shared_preferences",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "shared_preferences_android",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.10",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "shared_preferences_foundation",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shared_preferences_linux",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "shared_preferences_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "shared_preferences_web",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shared_preferences_windows",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "simple_gesture_detector",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/simple_gesture_detector-0.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -341,55 +611,115 @@
       "name": "sky_engine",
       "rootUri": "file:///Users/gitce/Documents/dev/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.7"
     },
     {
       "name": "smooth_page_indicator",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/smooth_page_indicator-1.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/smooth_page_indicator-1.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "source_span",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/source_span-1.10.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.1"
     },
     {
-      "name": "stack_trace",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/stack_trace-1.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "stream_channel",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/stream_channel-2.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.14"
-    },
-    {
-      "name": "string_scanner",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/string_scanner-1.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "term_glyph",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/term_glyph-1.2.1",
+      "name": "sprintf",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sprintf-7.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
-      "name": "test_api",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/test_api-0.6.0",
+      "name": "sqflite",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sqflite-2.4.2",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_android",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sqflite_android-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_common",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sqflite_common-2.5.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_darwin",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_platform_interface",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/sqflite_platform_interface-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "stack_trace",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/stack_trace-1.12.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "stream_channel",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/stream_channel-2.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "string_scanner",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/string_scanner-1.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "synchronized",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/synchronized-3.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "table_calendar",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/table_calendar-3.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "term_glyph",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/term_glyph-1.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "test_api",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/test_api-0.7.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "typed_data",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/typed_data-1.3.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/typed_data-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "universal_io",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/universal_io-2.2.2",
       "packageUri": "lib/",
       "languageVersion": "2.17"
+    },
+    {
+      "name": "uuid",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/uuid-4.5.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "vector_math",
@@ -399,84 +729,98 @@
     },
     {
       "name": "video_player",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player-2.7.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player-2.10.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.6"
     },
     {
       "name": "video_player_android",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_android-2.4.10",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_android-2.8.7",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.7"
     },
     {
       "name": "video_player_avfoundation",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.5.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.8.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.6"
     },
     {
       "name": "video_player_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.2.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.6"
     },
     {
       "name": "video_player_web",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_web-2.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player_web-2.4.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "vm_service",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/vm_service-15.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "wakelock_plus",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/wakelock_plus-1.1.1",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/wakelock_plus-1.3.2",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "wakelock_plus_platform_interface",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/wakelock_plus_platform_interface-1.1.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/wakelock_plus_platform_interface-1.2.3",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "web",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/web-0.1.4-beta",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/web-1.1.1",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.4"
     },
     {
       "name": "win32",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/win32-5.0.9",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/win32-5.14.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "xdg_directories",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/xdg_directories-1.0.3",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/xdg_directories-1.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "xml",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/xml-6.3.0",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/xml-6.5.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "yaml",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/yaml-3.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "youtube_player_flutter",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/youtube_player_flutter-8.1.2",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/youtube_player_flutter-9.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.5"
     },
     {
-      "name": "flutter_login",
+      "name": "gilact",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     }
   ],
-  "generated": "2023-10-21T19:47:15.220088Z",
   "generator": "pub",
-  "generatorVersion": "3.1.3"
+  "generatorVersion": "3.8.1",
+  "flutterRoot": "file:///Users/gitce/Documents/dev/flutter",
+  "flutterVersion": "3.32.5",
+  "pubCache": "file:///Users/gitce/.pub-cache"
 }
