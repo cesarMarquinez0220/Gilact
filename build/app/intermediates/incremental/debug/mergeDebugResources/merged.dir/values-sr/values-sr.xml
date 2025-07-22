@@ -27,6 +27,15 @@
     <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Делите помоћу"</string>
     <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Делите помоћу апликације <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
     <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Скупи"</string>
+    <string msgid="8397015543330865059" name="android.credentials.TYPE_PASSWORD_CREDENTIAL">"Лозинка"</string>
+    <string msgid="3929015085059320822" name="androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL">"Приступни кôд"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"Одговори"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Видео"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"Одбиј"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"Прекини везу"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"Долазни позив"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"Позив је у току"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"Проверава се долазни позив"</string>
     <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Омогући</string>
     <string msgid="227660514972886228" name="common_google_play_services_enable_text">%1$s неће функционисати ако не омогућите Google Play услуге.</string>
     <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Омогућите Google Play услуге</string>
@@ -45,6 +54,7 @@
     <string name="common_open_on_phone">Отвори на телефону</string>
     <string name="common_signin_button_text">Пријави ме</string>
     <string name="common_signin_button_text_long">Пријави ме на Google</string>
+    <string msgid="6083905920877235314" name="copy">"Копирај"</string>
     <string msgid="3260749812566568062" name="copy_toast_msg">"Линк је копиран у привремену меморију"</string>
     <string name="exo_download_completed">Преузимање је завршено</string>
     <string name="exo_download_description">Преузми</string>
@@ -55,9 +65,15 @@
     <string name="exo_download_paused_for_network">Преузимања чекају на мрежу</string>
     <string name="exo_download_paused_for_wifi">Преузимања чекају на WiFi</string>
     <string name="exo_download_removing">Преузимања се уклањају</string>
+    <string msgid="2427401033573778270" name="expand_button_title">"Напредно"</string>
     <string msgid="4566929209979330987" name="fallback_menu_item_copy_link">"Копирај линк"</string>
     <string msgid="3413186855122069269" name="fallback_menu_item_open_in_browser">"Отвори у прегледачу"</string>
     <string msgid="7145444925855055364" name="fallback_menu_item_share_link">"Дели линк"</string>
+    <string msgid="6573031135582639649" name="not_set">"Није подешено"</string>
+    <string msgid="6685851473431805375" name="preference_copied">"Резиме „<ns1:g id="SUMMARY">%1$s</ns1:g>“ је копиран у привремену меморију."</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Претражите"</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="9167775378838880170" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string msgid="3140233346420563315" name="v7_preference_off">"ИСКЉУЧЕНО"</string>
+    <string msgid="89551595707643515" name="v7_preference_on">"УКЉУЧЕНО"</string>
 </resources>

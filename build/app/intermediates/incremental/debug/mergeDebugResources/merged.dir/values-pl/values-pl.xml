@@ -27,6 +27,15 @@
     <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"Udostępnij przez:"</string>
     <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"Udostępnij przez: <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
     <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"Zwiń"</string>
+    <string msgid="8397015543330865059" name="android.credentials.TYPE_PASSWORD_CREDENTIAL">"Hasło"</string>
+    <string msgid="3929015085059320822" name="androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL">"Klucz"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"Odbierz"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Wideo"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"Odrzuć"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"Rozłącz"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"Połączenie przychodzące"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"Trwa połączenie"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"Filtruję połączenie przychodzące"</string>
     <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Włącz</string>
     <string msgid="227660514972886228" name="common_google_play_services_enable_text">Aplikacja %1$s nie będzie działać, jeśli nie włączysz Usług Google Play.</string>
     <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Włącz Usługi Google Play</string>
@@ -45,6 +54,7 @@
     <string name="common_open_on_phone">Otwórz na telefonie</string>
     <string name="common_signin_button_text">Zaloguj się</string>
     <string name="common_signin_button_text_long">Zaloguj się przez Google</string>
+    <string msgid="6083905920877235314" name="copy">"Kopiuj"</string>
     <string msgid="3260749812566568062" name="copy_toast_msg">"Link skopiowany do schowka"</string>
     <string name="exo_download_completed">Zakończono pobieranie</string>
     <string name="exo_download_description">Pobierz</string>
@@ -55,9 +65,15 @@
     <string name="exo_download_paused_for_network">Pobierane pliki oczekują na sieć</string>
     <string name="exo_download_paused_for_wifi">Pobierane pliki oczekują na Wi-Fi</string>
     <string name="exo_download_removing">Usuwam pobrane</string>
+    <string msgid="2427401033573778270" name="expand_button_title">"Zaawansowane"</string>
     <string msgid="4566929209979330987" name="fallback_menu_item_copy_link">"Kopiuj link"</string>
     <string msgid="3413186855122069269" name="fallback_menu_item_open_in_browser">"Otwórz w przeglądarce"</string>
     <string msgid="7145444925855055364" name="fallback_menu_item_share_link">"Udostępnij link"</string>
+    <string msgid="6573031135582639649" name="not_set">"Nie ustawiono"</string>
+    <string msgid="6685851473431805375" name="preference_copied">"Skopiowano „<ns1:g id="SUMMARY">%1$s</ns1:g>” do schowka."</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Szukaj"</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="9167775378838880170" name="summary_collapsed_preference_list">"<ns1:g id="CURRENT_ITEMS">%1$s</ns1:g>, <ns1:g id="ADDED_ITEMS">%2$s</ns1:g>"</string>
+    <string msgid="3140233346420563315" name="v7_preference_off">"WYŁ."</string>
+    <string msgid="89551595707643515" name="v7_preference_on">"WŁ."</string>
 </resources>
