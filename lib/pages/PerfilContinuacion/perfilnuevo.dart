@@ -3,7 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:ui';
 import '../Configuracion_Estadistica/configuracion.dart';
 import 'edicionperfil.dart';
 import 'user_data_storage.dart';
@@ -13,6 +13,7 @@ import '../proveedor_boleanos/notifire.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Perfilnuevo extends StatefulWidget {
   const Perfilnuevo({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class Perfilnuevo extends StatefulWidget {
   }
 }
 
-class _PerfilnuevoState extends State<Perfilnuevo> {
+class _PerfilnuevoState extends State<Perfilnuevo> with TickerProviderStateMixin {
   bool pre = false;
   bool post = false;
   int Index = 1;
@@ -50,6 +51,10 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   double? scrolledUnderElevation;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Video> _videos = [];
+  
+  // Animación controllers (simplificados)
+  late AnimationController _backgroundController;
+  late AnimationController _pulseController;
 
   Future<void> _actualizarListaVideosCompletados() async {
     final obtenerInfoAvance = ObtenerInfoAvance();
@@ -100,102 +105,44 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
         DocumentSnapshot situacion =
             await userRef.collection('situacion').doc('Post-Parto').get();
 
-        // Ahora puedes utilizar los datos obtenidos, por ejemplo:
-        nombreBebe = situacion['bebe'];
-        edadGest = situacion['edadGestacional'];
-        fechaNacibebe = situacion['fechaNacimiento'];
-        lugarNac = situacion['lugarNacimiento'];
-        peso = situacion['peso'];
+        if (situacion.exists) {
+          setState(() {
+            nombreBebe = situacion.get('nombre bebe');
+            edadGest = situacion.get('edad gestacional');
+            fechaNacibebe = situacion.get('fecha nacimiento bebe');
+            fechaLact = situacion.get('fecha lactancia');
+            horaLact = situacion.get('hora lactancia');
+            horaNaci = situacion.get('hora nacimiento');
+            lugarNac = situacion.get('lugar nacimiento');
+            peso = situacion.get('peso');
+          });
+        }
       }
-    } catch (e) {
-      print("Error al recuperar la información del usuario para el bebe: $e");
-    }
+    } catch (e) {}
   }
 
   Future<void> _loadVideosFromFirestore() async {
     try {
-      // Cargar videos desde Firestore
-      List<Video> videos = await FirestoreServiceLecciones().getVideos();
-
-      // Obtener el último ID de lección completada
-      int? lastCompletedLesson = await _getUltimaLeccionCompletada();
-
-      // Actualizar la lista de videos vistos en LeccionesProvider
-      Provider.of<LeccionesProvider>(context, listen: false)
-          .updateVideosVistos(videos.map((video) {
-        if (lastCompletedLesson != null &&
-            video.videoId <= lastCompletedLesson + 1) {
-          // Marcar como visto si la lección es menor o igual al último completado
-          return true;
-        } else {
-          return false;
-        }
-      }).toList());
-
+      QuerySnapshot videosSnapshot = await _firestore.collection('videos').get();
+      List<Video> videos = [];
+      for (var doc in videosSnapshot.docs) {
+        videos.add(Video.fromDocument(doc));
+      }
       setState(() {
         _videos = videos;
       });
     } catch (e) {
-      print('Error cargando videos desde Firestore: $e');
-      // Manejar el error
+      print('Error loading videos: $e');
     }
   }
 
   Future<void> enviarAvanceAlProvider() async {
-    try {
-      final usuarioDocRef = await _getUsuarioDocumento(usuario);
-      if (usuarioDocRef != null) {
-        final videosCollectionRef = usuarioDocRef.collection('videos');
-        final videosCollection =
-            await videosCollectionRef.orderBy(FieldPath.documentId).get();
-
-        if (videosCollection.docs.isNotEmpty) {
-          final ultimoVideoDoc = videosCollection.docs.last;
-          final avance = ultimoVideoDoc.data()['avance'] ?? 0;
-          final avance1 = avance.clamp(0.0, 1.0);
-          context.read<Avancesprovider>().guardarProgresoPorId(
-              int.parse(ultimoVideoDoc.id), avance1 as double);
-        }
-      }
-    } catch (error) {}
+    // Esta función se mantiene para compatibilidad pero no hace nada específico
+    // ya que el avance se maneja de manera diferente en la nueva implementación
   }
 
-  Future<int?> _getUltimaLeccionCompletada() async {
-    try {
-      final usuarioDocRef = await _getUsuarioDocumento(usuario);
-      if (usuarioDocRef != null) {
-        final videosCollectionRef = usuarioDocRef.collection('videos');
-        final videosCollection =
-            await videosCollectionRef.orderBy(FieldPath.documentId).get();
-
-        if (videosCollection.docs.isNotEmpty) {
-          // Filtrar los documentos con contadorVisualizaciones distinto de 0
-          final videosCompletados = videosCollection.docs
-              .where((videoDoc) =>
-                  videoDoc.data().containsKey('completado') &&
-                  videoDoc['completado'] == true)
-              .toList();
-
-          if (videosCompletados.isNotEmpty) {
-            // Ordenar los documentos de menor a mayor (por número de lección)
-            videosCompletados
-                .sort((a, b) => int.parse(a.id).compareTo(int.parse(b.id)));
-
-            // Obtener el último documento (mayor número de lección)
-            final lastLessonDoc = videosCompletados.last;
-            // Obtener el número de lección
-            return int.parse(lastLessonDoc.id);
-          }
-        }
-      }
-      return null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  Future<DocumentReference?> _getUsuarioDocumento(String usuario) async {
-    final usersQuery = await _firestore
+  Future<DocumentReference?> _getUserDocumentReference() async {
+    QuerySnapshot usersQuery = await FirebaseFirestore.instance
         .collection('Users')
         .where('usuario', isEqualTo: usuario)
         .limit(1)
@@ -247,9 +194,39 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     }
   }
 
+  Future<void> _signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Limpiar datos locales
+      UserDataStorage.setUserName('');
+      UserDataStorage.setUserEmail('');
+      // Navegar a la pantalla de login
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } catch (e) {
+      print('Error al cerrar sesión: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    
+    // Inicializar animaciones PRIMERO
+    _backgroundController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    
+    // Animaciones simplificadas - solo inicializar los controladores
+    
+    _backgroundController.forward();
+    
+    // Luego inicializar datos
     usuario = UserDataStorage.getUserName();
     _fetchBebeData();
     _fetchUserData(); // Recuperar los datos del usuario desde la base de datos
@@ -257,6 +234,13 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     _actualizarListaVideosCompletados();
     enviarAvanceAlProvider();
     _verificadorPerfil();
+  }
+
+  @override
+  void dispose() {
+    _backgroundController.dispose();
+    _pulseController.dispose();
+    super.dispose();
   }
 
   void _navigateToLecciones() {
@@ -285,41 +269,218 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    
     return SafeArea(
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              height: screenHeight,
-              decoration: BoxDecoration(color: Colors.transparent),
-              child: Scaffold(
-                body:
-                    //Column(
-                    //  children: [
-                    SingleChildScrollView(
-                  child: _buildBody(),
-                ),
-                // BottomBar(
-                //   selectedIndex: _selectedIndex,
-                //   onIndexChanged: _onItemTapped,
-                // ),
-                //],
-                // ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF667eea),
+                Color(0xFF764ba2),
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Elementos decorativos de fondo
+              _buildBackgroundElements(screenWidth, screenHeight),
+              
+              // Contenido principal
+              Column(
+                children: [
+                  // Header modernizado
+                  _buildModernHeader(),
+                  
+                  // Contenido principal
+                  Expanded(
+                    child: _buildBody(),
+                  ),
+                  
+                  // BottomBar
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: BottomBar(
+                      selectedIndex: _selectedIndex,
+                      onIndexChanged: _onItemTapped,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackgroundElements(double width, double height) {
+    return Stack(
+      children: [
+        // Círculos decorativos estáticos
+        Positioned(
+          top: -height * 0.1,
+          right: -width * 0.1,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.transparent,
+                ],
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 5),
-                child: BottomBar(
-                  selectedIndex: _selectedIndex,
-                  onIndexChanged: _onItemTapped,
-                ),
-              ),
+          ),
+        ),
+        
+        // Partículas estáticas
+        ...List.generate(8, (index) => _buildStaticParticle(index)),
+      ],
+    );
+  }
+
+  Widget _buildStaticParticle(int index) {
+    final left = (index * 50.0) % MediaQuery.of(context).size.width;
+    final top = (index * 80.0) % MediaQuery.of(context).size.height;
+    
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: 4 + (index % 3) * 2.0,
+        height: 4 + (index % 3) * 2.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.3),
+              blurRadius: 4,
+              spreadRadius: 1,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernHeader() {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hola $nombreUsuario',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '¿Avanzamos en las lecciones?',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  // Avatar modernizado
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.1),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Image.asset(
+                        "assets/images/solo-logo.png",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Botón de cerrar sesión
+                  GestureDetector(
+                    onTap: _signOut,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.red.withValues(alpha: 0.3),
+                            Colors.red.withValues(alpha: 0.1),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.5),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -340,107 +501,172 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
 
   Widget _buildPerfilNuevo() {
     return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.only(top: 10),
-            decoration: const BoxDecoration(color: Colors.white),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+          const SizedBox(height: 20),
+          
+          // Tarjeta de Lecciones modernizada
+          _buildModernFeatureCard(
+            'Lecciones',
+            Icons.show_chart,
+            const LinearGradient(
+              colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+            ),
+            'Mira tu progreso de lecciones',
+            _navigateToLecciones,
+            isLarge: true,
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Grid de Tips e Historial
+          Row(
+            children: [
+              Expanded(
+                child: _buildModernFeatureCard(
+                  'Tips',
+                  Icons.lightbulb,
+                  const LinearGradient(
+                    colors: [Color(0xFFEA26B6), Color(0xFFF06292)],
+                  ),
+                  'Consejos y más',
+                  () => Navigator.pushNamed(context, '/tips'),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: _buildModernFeatureCard(
+                  'Historial',
+                  Icons.video_library,
+                  const LinearGradient(
+                    colors: [Color(0xFF16A085), Color(0xFF1ABC9C)],
+                  ),
+                  'Enfatiza conocimiento',
+                  _navigateToHistorial,
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Secciones de perfil
+          if (pre) _PrepartoProfile(),
+          if (post) _PostpartoProfile(),
+          
+          const SizedBox(height: 100), // Espacio para el bottom bar
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernFeatureCard(
+    String title,
+    IconData icon,
+    LinearGradient gradient,
+    String infoText,
+    VoidCallback onTap, {
+    bool isLarge = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: isLarge ? 120 : 140,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: gradient,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.1),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                ),
+              ),
+              child: Stack(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal:
-                                MediaQuery.of(context).size.width * 0.05),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hola $nombreUsuario',
-                              style: GoogleFonts.quicksand(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.06,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xff034C8C),
-                              ),
-                            ),
-                            Text(
-                              'Avanzamos en las lecciones?',
-                              style: GoogleFonts.quicksand(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.05,
-                                fontWeight: FontWeight.w500,
-                                color: const Color.fromARGB(255, 117, 115, 115),
-                              ),
-                            ),
-                          ],
-                        ),
+                  // Icono en la esquina superior derecha
+                  Positioned(
+                    top: 15,
+                    right: 15,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height *
-                              0.02), // Espaciado entre los textos y el avatar
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width *
-                            0.2, // Ancho del avatar
-                        height: MediaQuery.of(context).size.width *
-                            0.2, // Altura del avatar
-                        child: CircleAvatar(
-                          radius: MediaQuery.of(context).size.width *
-                              0.1, // Radio del avatar
-                          backgroundColor: Colors.transparent,
-                          child: ClipRRect(
-                            child: Image.asset("assets/images/solo-logo.png"),
+                      child: Icon(
+                        icon,
+                        color: gradient.colors.first,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  
+                  // Contenido principal
+                  Positioned(
+                    bottom: 15,
+                    left: 15,
+                    right: 15,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.quicksand(
+                            fontSize: isLarge ? 22 : 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                offset: const Offset(1, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 5),
+                        Text(
+                          infoText,
+                          style: GoogleFonts.quicksand(
+                            fontSize: isLarge ? 14 : 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  _buildFeatureBoxes(
-                    'Lecciones',
-                    Icons.show_chart,
-                    const Color.fromARGB(255, 255, 132, 0),
-                    'Mira tu progreso de lecciones',
-                    _navigateToLecciones, // Pasa la función como argumento
-                  ),
-                  const SizedBox(height: 15),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 15,
-                    childAspectRatio: 1.5,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    shrinkWrap: true,
-                    children: [
-                      _buildFeatureBox(
-                        'Tips',
-                        Icons.lightbulb,
-                        const Color.fromARGB(255, 234, 38, 182),
-                        'Consejos y más',
-                        '/tips',
-                      ),
-                      _buildFeatureBoxes(
-                        'Historial',
-                        Icons.video_library,
-                        const Color.fromARGB(255, 22, 124, 104),
-                        'Enfatiza\nconocimiento',
-                        _navigateToHistorial,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  if (pre) _PrepartoProfile(),
-                  if (post) _PostpartoProfile(),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -450,49 +676,78 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
       duration: const Duration(milliseconds: 1500),
       child: Column(
         children: [
-          AnimatedToggleSwitch<bool>.dual(
-            current: positive,
-            first: false,
-            second: true,
-            spacing: 50.0,
-            style: const ToggleStyle(
-              borderColor: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: Offset(0, 1.5),
-                ),
-              ],
+          // Toggle switch modernizado
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.25),
+                  Colors.white.withValues(alpha: 0.15),
+                ],
+              ),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1,
+              ),
             ),
-            borderWidth: 5.0,
-            height: 55,
-            onChanged: (b) => setState(() => positive = b),
-            styleBuilder: (b) => ToggleStyle(
-                indicatorColor:
-                    b ? const Color(0xFF3BBFB2) : const Color(0xFF1EA4D9)),
-            iconBuilder: (value) => value
-                ? const Icon(Icons.baby_changing_station, color: Colors.white)
-                : const Icon(Icons.woman, color: Colors.white),
-            textBuilder: (value) => value
-                ? Center(
-                    child: Text(
-                    'Bebé',
-                    style: GoogleFonts.quicksand(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 117, 115, 115)),
-                  ))
-                : Center(
-                    child: Text(
-                    'Personal',
-                    style: GoogleFonts.quicksand(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 117, 115, 115)),
-                  )),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: AnimatedToggleSwitch<bool>.dual(
+                  current: positive,
+                  first: false,
+                  second: true,
+                  spacing: 50.0,
+                  style: const ToggleStyle(
+                    borderColor: Colors.transparent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        spreadRadius: 1,
+                        blurRadius: 2,
+                        offset: Offset(0, 1.5),
+                      ),
+                    ],
+                  ),
+                  borderWidth: 5.0,
+                  height: 55,
+                  onChanged: (b) => setState(() => positive = b),
+                  styleBuilder: (b) => ToggleStyle(
+                    indicatorColor: b ? const Color(0xFF3BBFB2) : const Color(0xFF1EA4D9),
+                  ),
+                  iconBuilder: (value) => value
+                      ? const Icon(Icons.baby_changing_station, color: Colors.white)
+                      : const Icon(Icons.woman, color: Colors.white),
+                  textBuilder: (value) => value
+                      ? Center(
+                          child: Text(
+                            'Bebé',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            'Personal',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+            ),
           ),
+          
           const SizedBox(height: 15),
           if (positive == true) _buildBabyInfo(),
           const SizedBox(height: 15),
@@ -505,99 +760,100 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget _buildBabyInfo() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1500),
-      child: Column(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.25),
+              Colors.white.withValues(alpha: 0.15),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "\nDatos del Bebe",
-                            style: GoogleFonts.quicksand(
-                                fontSize: 23,
-                                color: Color(0xff034C8C),
-                                fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "Datos del Bebé",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 23,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
+                            blurRadius: 2,
                           ),
-                          // IconButton(
-                          //     icon: const Icon(Icons.edit),
-                          //     onPressed: () {
-                          //       Navigator.push(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //           builder: (context) => const editProfile(),
-                          //         ),
-                          //       );
-                          //     })
                         ],
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    Text(
-                      'Nombre del bebe: $nombreBebe\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Edad Gestacional: ${(edadGest)} semanas\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Fecha de Nacimiento: $fechaNacibebe\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Lugar de Nacimiento: $lugarNac\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    Text(
-                      'Peso: $peso kg\n',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 117, 115, 115)),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    )
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildInfoRow('Nombre del bebé', nombreBebe),
+                  _buildInfoRow('Edad Gestacional', '${edadGest} semanas'),
+                  _buildInfoRow('Fecha de Nacimiento', fechaNacibebe),
+                  _buildInfoRow('Lugar de Nacimiento', lugarNac),
+                  _buildInfoRow('Peso', '$peso kg'),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 150)
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 8, right: 12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -606,110 +862,63 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
   Widget _PrepartoProfile() {
     return FadeInUp(
       duration: const Duration(milliseconds: 1500),
-      child: Column(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.25),
+              Colors.white.withValues(alpha: 0.15),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "Datos Personales",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 23,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildInfoRow('Nombre de la madre', nombreMadre),
+                  _buildInfoRow('Cédula', cedula),
+                  _buildInfoRow('Fecha de nacimiento', fechaNacimiento),
+                  _buildInfoRow('Teléfono', telefono),
+                  _buildInfoRow('Ubicación', ubicacion),
+                ],
               ),
-              child: _buildProfileInfo(),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(color: Colors.transparent),
-            height: 170,
-          )
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildProfileInfo() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "\nDatos personales",
-                  style: GoogleFonts.quicksand(
-                      fontSize: 23,
-                      color: Color(0xff034C8C),
-                      fontWeight: FontWeight.bold),
-                ),
-                // IconButton(
-                //     icon: const Icon(Icons.edit),
-                //     onPressed: () {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => const editProfile()),
-                //       );
-                //     })
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-          Text(
-            'Nombre de la madre: $nombreMadre\n',
-            style: GoogleFonts.quicksand(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(255, 117, 115, 115)),
-          ),
-          Text(
-            'Cédula: $cedula\n',
-            style: GoogleFonts.quicksand(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(255, 117, 115, 115)),
-          ),
-          Text(
-            'Fecha de nacimiento: $fechaNacimiento\n',
-            style: GoogleFonts.quicksand(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(255, 117, 115, 115)),
-          ),
-          Text(
-            'Teléfono: $telefono\n',
-            style: GoogleFonts.quicksand(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(255, 117, 115, 115)),
-          ),
-          Text(
-            'Ubicación: $ubicacion',
-            style: GoogleFonts.quicksand(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(255, 117, 115, 115)),
-          ),
-          const SizedBox(
-            height: 10,
-          )
-        ],
-      ),
-    );
-  }
-
+  // Mantener las funciones originales para compatibilidad
   Widget _buildFeatureBox(
     String title,
     IconData icon,
@@ -717,67 +926,12 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     String infoText,
     String route,
   ) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, route);
-      },
-      child: FadeInUp(
-        duration:
-            const Duration(milliseconds: 1500), // Duración de la animación
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: bgColor,
-                    size: 15,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 15,
-                left: 10,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          fontWeight: FontWeight.w800), //titulo
-                    ),
-                    const SizedBox(height: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        infoText,
-                        style: const TextStyle(
-                            fontSize: 12,
-                            color: Color.fromARGB(255, 255, 255, 255)), //cuerpo
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _buildModernFeatureCard(
+      title,
+      icon,
+      LinearGradient(colors: [bgColor, bgColor.withValues(alpha: 0.8)]),
+      infoText,
+      () => Navigator.pushNamed(context, route),
     );
   }
 
@@ -788,68 +942,13 @@ class _PerfilnuevoState extends State<Perfilnuevo> {
     String infoText,
     VoidCallback onTap,
   ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: FadeInUp(
-        duration:
-            const Duration(milliseconds: 1500), // Duración de la animación
-        child: Container(
-          //parametros para que el cuadro sea responsive
-          height: MediaQuery.of(context).size.height * 0.1,
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: bgColor,
-                    size: 15,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 15,
-                left: 10,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.quicksand(
-                          fontSize: 20,
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          fontWeight: FontWeight.w800), //titulo
-                    ),
-                    const SizedBox(height: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        infoText,
-                        style: const TextStyle(
-                            fontSize: 15,
-                            color: Color.fromARGB(255, 255, 255, 255)), //cuerpo
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _buildModernFeatureCard(
+      title,
+      icon,
+      LinearGradient(colors: [bgColor, bgColor.withValues(alpha: 0.8)]),
+      infoText,
+      onTap,
+      isLarge: true,
     );
   }
 }
