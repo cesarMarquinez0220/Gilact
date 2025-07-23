@@ -22,7 +22,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		6rvYvzAPEh5w00AxrNEU4NrDvYE=
+		3bkzfNFKt/uENZfvZqlyA6XLo1Y=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -33,6 +33,10 @@
 	<dict>
 		<key>Headers/UIApplication+idleTimerLock.h</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			YTUSYlLEcqVFMEzw+Cl8lwIunOc=
+			</data>
 			<key>hash2</key>
 			<data>
 			excvSMeR9Ejdxe4/LLVxuOFlTXAH87SpM2IaQcGLCX0=
@@ -40,6 +44,10 @@
 		</dict>
 		<key>Headers/WakelockPlusPlugin.h</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			CgN5ZMgbRC31bI4QinvoB5vpgPs=
+			</data>
 			<key>hash2</key>
 			<data>
 			9POtJZxTm6bR5xnxHSKpG0Brjnt894r5R9MgxTLeDpo=
@@ -47,6 +55,10 @@
 		</dict>
 		<key>Headers/messages.g.h</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			CC9KBLbjcLh3WHdeAJHKqlsD864=
+			</data>
 			<key>hash2</key>
 			<data>
 			bu+TL12Zd/U2jtv+OggmjNrpW5wCdZLtWP88DNELIvA=
@@ -54,6 +66,10 @@
 		</dict>
 		<key>Headers/wakelock_plus-umbrella.h</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			JDYtCvbb7arIBdYAeqJLoBwVHCg=
+			</data>
 			<key>hash2</key>
 			<data>
 			XR0C/9iOqu23oa+XAO1zFUy61wPsztFH3QW9FVfqvwQ=
@@ -61,6 +77,10 @@
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			JScamNczBp1Ky08bwTRjCRzLoRc=
+			</data>
 			<key>hash2</key>
 			<data>
 			3qjNiub65h6XizhwhZ9k38mARyYF7XZ7tzou8qAV80M=
