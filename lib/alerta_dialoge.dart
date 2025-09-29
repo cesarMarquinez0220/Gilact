@@ -4,7 +4,10 @@ import 'dart:ui';
 
 class DialogExample {
   static void showAlertDialog(
-      BuildContext context, String title, String message) {
+    BuildContext context,
+    String title,
+    String message,
+  ) {
     showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -20,7 +23,11 @@ class DialogExample {
   }
 
   static void showSuccessDialog(
-      BuildContext context, String title, String message, VoidCallback? onContinue) {
+    BuildContext context,
+    String title,
+    String message,
+    VoidCallback? onContinue,
+  ) {
     showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -38,7 +45,10 @@ class DialogExample {
   }
 
   static void showErrorDialog(
-      BuildContext context, String title, String message) {
+    BuildContext context,
+    String title,
+    String message,
+  ) {
     showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -54,7 +64,10 @@ class DialogExample {
   }
 
   static void showInfoDialog(
-      BuildContext context, String title, String message) {
+    BuildContext context,
+    String title,
+    String message,
+  ) {
     showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -93,19 +106,19 @@ class DialogExample {
                 borderRadius: BorderRadius.circular(25),
                 gradient: LinearGradient(
                   colors: [
-                    Colors.white.withOpacity(0.9),
-                    Colors.white.withOpacity(0.8),
+                    Colors.white.withValues(alpha: 0.9),
+                    Colors.white.withValues(alpha: 0.8),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     spreadRadius: 5,
                     offset: const Offset(0, 10),
@@ -124,19 +137,15 @@ class DialogExample {
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
                         colors: [
-                          iconColor.withOpacity(0.2),
-                          iconColor.withOpacity(0.1),
+                          iconColor.withValues(alpha: 0.2),
+                          iconColor.withValues(alpha: 0.1),
                         ],
                       ),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 40,
-                      color: iconColor,
-                    ),
+                    child: Icon(icon, size: 40, color: iconColor),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Título
                   Text(
                     title,
@@ -148,7 +157,7 @@ class DialogExample {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Mensaje
                   Text(
                     message,
@@ -160,7 +169,7 @@ class DialogExample {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Botones
                   Row(
                     children: [
@@ -176,11 +185,13 @@ class DialogExample {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      
+
                       // Botón principal
                       Expanded(
                         child: _buildDialogButton(
-                          text: onContinue != null ? (continueText ?? 'Aceptar') : 'Entendido',
+                          text: onContinue != null
+                              ? (continueText ?? 'Aceptar')
+                              : 'Entendido',
                           onPressed: () {
                             Navigator.of(context).pop();
                             if (onContinue != null) {
@@ -214,24 +225,18 @@ class DialogExample {
         borderRadius: BorderRadius.circular(25),
         gradient: isPrimary
             ? LinearGradient(
-                colors: [
-                  primaryColor,
-                  primaryColor.withOpacity(0.8),
-                ],
+                colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
             : null,
         border: isPrimary
             ? null
-            : Border.all(
-                color: Colors.grey.withOpacity(0.3),
-                width: 1.5,
-              ),
+            : Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1.5),
         boxShadow: isPrimary
             ? [
                 BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
+                  color: primaryColor.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -241,7 +246,9 @@ class DialogExample {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? Colors.transparent : Colors.white.withOpacity(0.7),
+          backgroundColor: isPrimary
+              ? Colors.transparent
+              : Colors.white.withValues(alpha: 0.7),
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
@@ -267,7 +274,10 @@ class DialogExample {
     );
   }
 
-  static void showRegistrationSuccessDialog(BuildContext context, VoidCallback onContinue) {
+  static void showRegistrationSuccessDialog(
+    BuildContext context,
+    VoidCallback onContinue,
+  ) {
     showSuccessDialog(
       context,
       '¡Registro Exitoso!',

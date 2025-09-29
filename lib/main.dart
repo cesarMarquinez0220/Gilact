@@ -1,24 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'pages/Configuracion_Estadistica/configuracion.dart';
-import 'pages/PerfilContinuacion/perfilnuevo.dart';
-import 'pages/onboard_info.dart';
-import 'pages/paginadepruebas.dart';
-import 'pages/proveedor_boleanos/notifire.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_performance/firebase_performance.dart';
-// import 'package:firebase_analytics/firebase_analytics.dart';
-import 'pages/PerfilContinuacion/edicionperfil.dart';
-import 'pages/UsersVideos/user_videos.dart';
-import 'pages/login.dart';
-import 'pages/tips.dart';
-import 'package:provider/provider.dart';
-// import 'services/performance_service.dart';
-// import 'services/security_analysis_service.dart';
-// import 'pages/performance_analysis_page.dart';
 import 'firebase_options.dart';
-//import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+import 'features/settings/presentation/pages/settings_page.dart';
+import 'features/lessons/presentation/pages/lessons_page.dart';
+import 'features/tips/presentation/pages/tips_page.dart';
+import 'features/navigation/presentation/pages/main_navigation_page.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -50,15 +39,7 @@ void main() async {
 
   await updateLastOpened();
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LeccionesProvider()),
-        ChangeNotifierProvider(create: (_) => Avancesprovider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 Future<void> updateLastOpened() async {
@@ -73,22 +54,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
-      home: const LoginScreen(),
-      //home: SeccionVideos(),
+      home: const LoginPage(),
       routes: {
-        '/configuracion': (context) => ConfiguracionScreen(),
-        '/perfil': (context) => const Perfilnuevo(),
-        '/lecciones': (context) => const lecciones(videos: []),
-        '/secciones': (context) => const User_videos(videos: []),
-        '/edicion': (context) => const editProfile(),
-        '/tips': (context) => const Tips(),
-        '/Onboar_Info': (context) => Onboar_Info(),
-        // '/performance': (context) => const PerformanceAnalysisPage(),
+        '/configuracion': (context) => const SettingsPage(),
+        '/perfil': (context) => const MainNavigationPage(),
+        '/lecciones': (context) => const LessonsPage(),
+        '/secciones': (context) => const MainNavigationPage(),
+        '/edicion': (context) => const MainNavigationPage(),
+        '/tips': (context) => const TipsPage(),
+        '/Onboar_Info': (context) => const MainNavigationPage(),
       },
     );
   }
