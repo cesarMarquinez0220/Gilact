@@ -13,6 +13,7 @@ import 'features/lessons/presentation/pages/lessons_page.dart';
 import 'features/tips/presentation/pages/tips_page.dart';
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
+import 'features/videos/presentation/pages/user_videos_page.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
           '/perfil': (context) => const MainNavigationPage(),
           '/lecciones': (context) => const LessonsPage(),
           '/secciones': (context) => const MainNavigationPage(),
+          '/historial': (context) => const UserVideosPage(),
           '/edicion': (context) => const MainNavigationPage(),
           '/tips': (context) => const TipsPage(),
           '/Onboar_Info': (context) => const MainNavigationPage(),

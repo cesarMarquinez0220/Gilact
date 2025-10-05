@@ -510,7 +510,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   }
 
   void _navigateToHistorial() {
-    Navigator.pushNamed(context, '/secciones');
+    Navigator.pushNamed(context, '/historial');
   }
 
   Widget _buildPostpartoProfile(UserProfile userProfile) {
