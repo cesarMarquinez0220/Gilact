@@ -8,6 +8,7 @@ import 'dart:ui';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../tips/presentation/pages/tips_page.dart';
 import '../../../lessons/presentation/pages/lessons_page.dart';
+import '../../../lactation/presentation/pages/lactation_calendar_demo.dart';
 import '../../../auth/domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
 import '../../../user/domain/entities/user_profile_entities.dart';
@@ -102,6 +103,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           _buildPerfilNuevoPage(),
           const LessonsPage(),
           const TipsPage(),
+          const LactationCalendarDemo(),
           _buildProfilePage(),
         ],
       ),
@@ -351,7 +353,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
           const SizedBox(height: 20),
 
-          // Grid de Tips e Historial
+          // Grid de Tips, Calendario e Historial
           Row(
             children: [
               Expanded(
@@ -368,16 +370,29 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               const SizedBox(width: 15),
               Expanded(
                 child: _buildModernFeatureCard(
-                  'Historial',
-                  Icons.video_library,
+                  'Calendario',
+                  Icons.calendar_today,
                   const LinearGradient(
                     colors: [Color(0xFF16A085), Color(0xFF1ABC9C)],
                   ),
-                  'Enfatiza conocimiento',
-                  _navigateToHistorial,
+                  'Registro de lactancia',
+                  _navigateToCalendar,
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Historial
+          _buildModernFeatureCard(
+            'Historial',
+            Icons.video_library,
+            const LinearGradient(
+              colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+            ),
+            'Enfatiza conocimiento',
+            _navigateToHistorial,
           ),
 
           const SizedBox(height: 20),
@@ -507,6 +522,15 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   void _navigateToLecciones() {
     Navigator.pushNamed(context, '/lecciones');
+  }
+
+  void _navigateToCalendar() {
+    setState(() => _currentIndex = 3);
+    _pageController.animateToPage(
+      3,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _navigateToHistorial() {
@@ -1004,6 +1028,11 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               icon: Icon(Icons.lightbulb_outline),
               activeIcon: Icon(Icons.lightbulb),
               label: 'Consejos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined),
+              activeIcon: Icon(Icons.calendar_today),
+              label: 'Calendario',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
