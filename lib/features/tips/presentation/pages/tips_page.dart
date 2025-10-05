@@ -421,19 +421,19 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
     } catch (_) {}
     const assets = [
       '1_ALIMENTACION.png',
-      '6_CONSEJOS.png',
-      '3_BENEFICIOS.png',
+      '2_LACTANCIA.png',
       '3_BENEFICIOS.png',
       '4_POSTURA.png',
       '5_CALOSTRO.png',
       '6_CONSEJOS.png',
+      '6_CONSEJOS.png',
       '7_EXTRACCION.png',
       '7.1_EXTRACCION.png',
       '8_HIGIENE.png',
-      '8_HIGIENE.png',
-      '2_LACTANCIA.png',
+      '9_CONSEJO_LACTANCIA.png',
       '10_PADRE.png',
       '11_PROBLEMAS.png',
+      '12_LIKE.png',
     ];
     if (index >= 0 && index < assets.length) {
       return 'assets/tips/${assets[index]}';

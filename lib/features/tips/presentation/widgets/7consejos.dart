@@ -26,33 +26,44 @@ class ConsejosLactanciaInfo extends StatelessWidget {
           style: TipTypography.headingLarge,
         ),
       ),
-      body: const [
-        Text(
+      body:const [
+         Text(
           '- ¡No te rindas! Tú puedes amamantar.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+         SizedBox(height: 8),
+         Text(
           '- La madre debe continuar la suplementación con hierro y ácido fólico durante los primeros 3 meses de la lactancia.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+         SizedBox(height: 8),
+         Text(
           '- Dale pecho a tu bebé inmediatamente después del parto.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+         SizedBox(height: 8),
+         Text(
           '- El bebé te hará saber cuando tiene hambre suele mamar de 8 a 12 veces al día.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
-          '- Dale de mamar en un ambiente tranquilo.\n- Busca la posición más cómoda para amamantar.',
+         SizedBox(height: 8),
+         Text(
+          '- Dale de mamar en un ambiente tranquilo.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+         SizedBox(height: 8),
+         Text(
+          '- Busca la posición más cómoda para amamantar.',
+          style: TipTypography.paragraph,
+          textAlign: TextAlign.start,
+        ),
+         SizedBox(height: 8),
+         Text(
           '- Toma abundante agua.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,

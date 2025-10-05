@@ -21,7 +21,7 @@ class ExtraccionAlmacenamientoInfo extends StatelessWidget {
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
         child: const Text(
-          'Extracción, Manejo y Almacenamiento de la Leche Materna',
+          'Extracción, Manejo y Almacenamiento',
           textAlign: TextAlign.center,
           style: TipTypography.headingLarge,
         ),

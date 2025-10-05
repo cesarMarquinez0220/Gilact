@@ -13,7 +13,7 @@ class BeneficiosBebeInfo extends StatelessWidget {
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.lactancia),
+        child: Image.asset(TipAssets.like),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 800),
@@ -26,10 +26,8 @@ class BeneficiosBebeInfo extends StatelessWidget {
       ),
       body: const [
         SizedBox(height: 8),
-        Text(
+        _P(
           'Durante los primeros 6 meses de vida:',
-          textAlign: TextAlign.center,
-          style: TipTypography.paragraph,
         ),
         SizedBox(height: 10),
         _P('- Mayor coeficiente intelectual y mejor rendimiento escolar.'),

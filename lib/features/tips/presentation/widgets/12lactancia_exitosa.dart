@@ -6,8 +6,8 @@ import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
 
-class HigieneLactanciaInfo extends StatelessWidget {
-  const HigieneLactanciaInfo({Key? key}) : super(key: key);
+class LactanciaExitosa extends StatelessWidget {
+  const LactanciaExitosa({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,16 +15,13 @@ class HigieneLactanciaInfo extends StatelessWidget {
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Transform.scale(
-          scale: 1.8,
-          child: Image.asset(TipAssets.extraccion2),
-        ),
+        child: Image.asset(TipAssets.consejolactancia),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
         child: const Text(
-          'Higiene y Medidas Generales',
+          'Consejos para una Lactancia Exitosa',
           textAlign: TextAlign.center,
           style: TipTypography.headingXL,
         ),
@@ -34,36 +31,49 @@ class HigieneLactanciaInfo extends StatelessWidget {
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
           child: const Text(
-            '- Lávate bien las manos con agua y jabón antes de dar pecho.',
-            textAlign: TextAlign.center,
+            '- Infórmate y prepárate todo lo que puedas acerca de la lactancia antes del momento del parto.',
             style: TipTypography.paragraph,
+            textAlign: TextAlign.center,
           ),
         ),
+        const SizedBox(height: 8),
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
           child: const Text(
-            '- El baño diario es suficiente para el aseo de los pezones.',
-            textAlign: TextAlign.center,
+            '- Da el pecho inmediatamente después del parto, esto facilita el inicio de la lactancia.',
             style: TipTypography.paragraph,
+            textAlign: TextAlign.center,
           ),
         ),
+        const SizedBox(height: 8),
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
           child: const Text(
-            '- Lávate las manos con agua y jabón después de cada cambio de pañal.',
-            textAlign: TextAlign.center,
+            '- Toma mucha agua.',
             style: TipTypography.paragraph,
+            textAlign: TextAlign.center,
           ),
         ),
+        const SizedBox(height: 8),
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
           child: const Text(
-            '- Da pecho con alegría y aumentará tu producción.',
-            textAlign: TextAlign.center,
+            '- Confía en ti y en tu capacidad de alimentar a tu bebé: ¡sí tienes leche!',
             style: TipTypography.paragraph,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 8),
+        FadeInDown(
+          duration: const Duration(milliseconds: 1000),
+          delay: const Duration(milliseconds: 500),
+          child: const Text(
+            '- Coloca al bebé con frecuencia en el pecho: deja que lacte a libre demanda.',
+            style: TipTypography.paragraph,
+            textAlign: TextAlign.center,
           ),
         ),
       ],

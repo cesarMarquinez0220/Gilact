@@ -16,7 +16,7 @@ class SuplementoHierroInfo extends StatelessWidget {
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.alimentacion),
+        child: Image.asset(TipAssets.lactancia),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 1400),

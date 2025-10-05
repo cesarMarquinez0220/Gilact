@@ -29,47 +29,58 @@ class ProblemasLactanciaInfo extends StatelessWidget {
           style: TipTypography.headingLarge,
         ),
       ),
-      body: const [
-        SizedBox(height: 10),
-        Text(
+      body: [
+        const SizedBox(height: 10),
+        const Text(
           'Congestión Mamaria:',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        Text(
+        const SizedBox(height: 8),
+        const Text(
           '- No suspendas la lactancia; hazte masajes circulares en toda la mama.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+        const SizedBox(height: 8),
+        const Text(
           '- Amamanta con frecuencia para evitar los abcesos mamarios.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        SizedBox(height: 10),
-        Text(
+        const SizedBox(height: 10),
+        const Text(
           'Fisuras y Erosiones del Pezón:',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        Text(
+        const SizedBox(height: 8),
+        const Text(
           '- Verifica si el niño tiene sapito (Moniliasis oral en el bebé o la madre).',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
+        const SizedBox(height: 8),
+        const Text(
           '- Acude al médico para diagnóstico y tratamiento.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        SizedBox(height: 10),
-        Text(
+        const SizedBox(height: 10),
+        const Text(
           'Baja Producción de Leche:',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        Text(
-          '- Toma más agua.\n- Descansa y trata de relajarte.',
+        const SizedBox(height: 8),
+        const Text(
+          '- Toma más agua.',
+          style: TipTypography.paragraph,
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          '- Descansa y trata de relajarte.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),

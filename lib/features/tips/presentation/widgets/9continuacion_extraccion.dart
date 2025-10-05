@@ -15,7 +15,7 @@ class ContinuacionExtraccionInfo extends StatelessWidget {
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.extraccion),
+        child: Image.asset(TipAssets.extraccion2),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),

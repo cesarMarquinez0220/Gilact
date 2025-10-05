@@ -15,10 +15,7 @@ class ContinuacionHigieneLactanciaInfo extends StatelessWidget {
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Transform.scale(
-          scale: 1.8,
-          child: Image.asset(TipAssets.extraccion2),
-        ),
+        child: Image.asset(TipAssets.consejos),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),

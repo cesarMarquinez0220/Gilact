@@ -15,19 +15,26 @@ class TipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
+    final double availableHeight =
+        size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom -
+        200; // Espacio para header y navegación
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(height: size.height * .02),
-            SizedBox(
-              height: size.height * 0.35,
-              width: size.width * 0.47,
-              child: image,
-            ),
-            Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          SizedBox(height: size.height * .02),
+          // Imagen con altura fija proporcional
+          SizedBox(
+            height: size.height * 0.25, // Reducido de 0.35 a 0.25
+            width: size.width * 0.47,
+            child: image,
+          ),
+          // Contenido que se ajusta al espacio restante
+          Expanded(
+            child: Container(
               width: size.width * .9,
               margin: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
@@ -45,12 +52,28 @@ class TipCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
-                  children: [title, const SizedBox(height: 10), ...body],
+                  children: [
+                    // Título con altura mínima
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: 40,
+                        maxHeight: availableHeight * 0.15,
+                      ),
+                      child: title,
+                    ),
+                    const SizedBox(height: 10),
+                    // Contenido que se expande para llenar el espacio restante
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(children: body),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
