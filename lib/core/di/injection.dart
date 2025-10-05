@@ -16,6 +16,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/videos/data/repositories/video_repository_impl.dart';
 import '../../features/tips/data/repositories/tip_repository_impl.dart';
 import '../../features/user/data/repositories/user_profile_repository_impl.dart';
+import '../../features/lessons/data/repositories/lesson_repository_impl.dart';
 
 // Use Cases - Solo los básicos necesarios
 import '../../features/ui/domain/usecases/ui_usecases.dart' as ui_usecases;
@@ -26,6 +27,8 @@ import '../../features/videos/domain/usecases/video_usecases.dart'
 import '../../features/tips/domain/usecases/tip_usecases.dart' as tip_usecases;
 import '../../features/user/domain/usecases/user_profile_usecases.dart'
     as user_usecases;
+import '../../features/lessons/domain/usecases/lesson_usecases.dart'
+    as lesson_usecases;
 
 // BLoCs
 import '../../features/ui/presentation/bloc/ui_bloc.dart';
@@ -33,6 +36,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/videos/presentation/bloc/video_bloc.dart';
 import '../../features/tips/presentation/bloc/tip_bloc.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
+import '../../features/lessons/presentation/bloc/lesson_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -82,6 +86,9 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<UserProfileRepositoryImpl>(
     () => UserProfileRepositoryImpl(getIt<UserProfileRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<LessonRepositoryImpl>(
+    () => LessonRepositoryImpl(),
   );
 
   // Use Cases - UI
@@ -202,6 +209,38 @@ Future<void> configureDependencies() async {
     () => user_usecases.SignOutUseCase(getIt<UserProfileRepositoryImpl>()),
   );
 
+  // Use Cases - Lessons
+  getIt.registerLazySingleton(
+    () => lesson_usecases.GetAllLessonsUseCase(getIt<LessonRepositoryImpl>()),
+  );
+  getIt.registerLazySingleton(
+    () => lesson_usecases.GetLessonByIdUseCase(getIt<LessonRepositoryImpl>()),
+  );
+  getIt.registerLazySingleton(
+    () => lesson_usecases.GetLessonsByCategoryUseCase(
+      getIt<LessonRepositoryImpl>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => lesson_usecases.SearchLessonsUseCase(getIt<LessonRepositoryImpl>()),
+  );
+  getIt.registerLazySingleton(
+    () => lesson_usecases.MarkLessonAsCompletedUseCase(
+      getIt<LessonRepositoryImpl>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () =>
+        lesson_usecases.GetLessonProgressUseCase(getIt<LessonRepositoryImpl>()),
+  );
+  getIt.registerLazySingleton(
+    () => lesson_usecases.GetUserProgressUseCase(getIt<LessonRepositoryImpl>()),
+  );
+  getIt.registerLazySingleton(
+    () =>
+        lesson_usecases.GetUserStatisticsUseCase(getIt<LessonRepositoryImpl>()),
+  );
+
   // BLoCs - Solo los básicos necesarios para que funcione la app
   getIt.registerFactory(
     () => UIBloc(
@@ -268,6 +307,23 @@ Future<void> configureDependencies() async {
       getUserProfileUseCase: getIt<user_usecases.GetUserProfileUseCase>(),
       updateUserProfileUseCase: getIt<user_usecases.UpdateUserProfileUseCase>(),
       signOutUseCase: getIt<user_usecases.SignOutUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => LessonBloc(
+      getAllLessonsUseCase: getIt<lesson_usecases.GetAllLessonsUseCase>(),
+      getLessonByIdUseCase: getIt<lesson_usecases.GetLessonByIdUseCase>(),
+      getLessonsByCategoryUseCase:
+          getIt<lesson_usecases.GetLessonsByCategoryUseCase>(),
+      searchLessonsUseCase: getIt<lesson_usecases.SearchLessonsUseCase>(),
+      markLessonAsCompletedUseCase:
+          getIt<lesson_usecases.MarkLessonAsCompletedUseCase>(),
+      getLessonProgressUseCase:
+          getIt<lesson_usecases.GetLessonProgressUseCase>(),
+      getUserProgressUseCase: getIt<lesson_usecases.GetUserProgressUseCase>(),
+      getUserStatisticsUseCase:
+          getIt<lesson_usecases.GetUserStatisticsUseCase>(),
     ),
   );
 }
