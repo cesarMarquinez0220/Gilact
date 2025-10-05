@@ -212,7 +212,9 @@ assets/processed/
 config/
 local_config/
 secrets/ 
-*.dart
-*.swift
-/ios
-/ios
+
+# Archivos Dart específicos (no todos los archivos .dart)
+lib/generated/
+lib/temp/
+*.dart.bak
+*.swift.bak

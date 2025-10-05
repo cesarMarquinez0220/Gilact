@@ -72,10 +72,17 @@ dependencies:
   dartz: ^0.10.1
   get_it: ^7.7.0
   injectable: ^2.4.2
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^3.0.0
 
 flutter_launcher_icons:
     android: true
@@ -83,12 +90,6 @@ flutter_launcher_icons:
     image_path: 'assets/logo/icono.png'
     adaptive_icon_background: 'assets/logo/icono.png'
     remove_alpha_ios: true
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-flutter_lints: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -154,6 +155,7 @@ flutter:
    - assets/images/mother2.png
    - assets/images/mother3.png
    - assets/images/motherchild.png
+   - assets/images/logo-completo.png
    - assets/images/logo-completo2.png
    - assets/images/logo-letras.png
    - assets/images/solo-logo.png

@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
+import 'core/di/injection.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/user/presentation/bloc/user_profile_bloc.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/lessons/presentation/pages/lessons_page.dart';
 import 'features/tips/presentation/pages/tips_page.dart';
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
+import 'features/auth/presentation/pages/welcome_screen.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -39,6 +44,9 @@ void main() async {
 
   await updateLastOpened();
 
+  // Configurar inyección de dependencias
+  await configureDependencies();
+
   runApp(const MyApp());
 }
 
@@ -54,19 +62,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      home: const LoginPage(),
-      routes: {
-        '/configuracion': (context) => const SettingsPage(),
-        '/perfil': (context) => const MainNavigationPage(),
-        '/lecciones': (context) => const LessonsPage(),
-        '/secciones': (context) => const MainNavigationPage(),
-        '/edicion': (context) => const MainNavigationPage(),
-        '/tips': (context) => const TipsPage(),
-        '/Onboar_Info': (context) => const MainNavigationPage(),
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(create: (context) => getIt<AuthBloc>()),
+        BlocProvider<UserProfileBloc>(
+          create: (context) => getIt<UserProfileBloc>(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.light(),
+        home: const LoginPage(),
+        routes: {
+          '/welcome': (context) => const WelcomeScreen(),
+          '/home': (context) => const MainNavigationPage(),
+          '/configuracion': (context) => const SettingsPage(),
+          '/perfil': (context) => const MainNavigationPage(),
+          '/lecciones': (context) => const LessonsPage(),
+          '/secciones': (context) => const MainNavigationPage(),
+          '/edicion': (context) => const MainNavigationPage(),
+          '/tips': (context) => const TipsPage(),
+          '/Onboar_Info': (context) => const MainNavigationPage(),
+        },
+      ),
     );
   }
 }
