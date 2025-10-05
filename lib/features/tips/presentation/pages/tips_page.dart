@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../widgets/tip_widgets.dart';
+import '../widgets/decorations/shape.dart';
 
 import '../bloc/tip_bloc.dart';
 
@@ -18,6 +21,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
   late Animation<double> _pulseAnimation;
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -67,97 +71,184 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       body: BlocBuilder<TipBloc, TipState>(
         builder: (context, state) {
-          if (state is TipLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is TipsLoaded) {
-            return _buildTipsCarousel(state.tips);
-          } else if (state is TipFailure) {
-            return _buildErrorWidget(state.message);
-          } else {
-            return const Center(child: Text('No hay tips disponibles'));
-          }
+          final tips = (state is TipsLoaded) ? state.tips : const [];
+          return _buildTipsCarousel(tips);
         },
       ),
     );
   }
 
   Widget _buildTipsCarousel(List<dynamic> tips) {
+    const List<Widget> staticTipWidgets = [
+      AlimentacionComplementariaInfo(),
+      SuplementoHierroInfo(),
+      BeneficiosBebeInfo(),
+      BeneficiosMamaInfo(),
+      PosturaAgarreInfo(),
+      CalostroInfo(),
+      ConsejosLactanciaInfo(),
+      ExtraccionAlmacenamientoInfo(),
+      ContinuacionExtraccionInfo(),
+      HigieneLactanciaInfo(),
+      ContinuacionHigieneLactanciaInfo(),
+      LactanciaExitosa(),
+      RolPadreLactanciaInfo(),
+      ProblemasLactanciaInfo(),
+    ];
+
+    final int pageCount = staticTipWidgets.length;
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF03A696), Color(0xFF26A69A), Color(0xFF4DB6AC)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
         ),
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Consejos de Lactancia',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => _showFavoriteTips(),
-                    icon: const Icon(
-                      Icons.favorite,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      child: Stack(
+        children: [
+          // Elementos decorativos de fondo (círculo y partículas)
+          _buildBackgroundElements(context),
 
-            // PageView con tips
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  // Página cambiada - se puede usar para analytics o lógica adicional
-                },
-                itemCount: tips.length,
-                itemBuilder: (context, index) {
-                  final tip = tips[index];
-                  return _buildTipCard(tip, index);
-                },
-              ),
+          // Visel/forma turquesa (Bezier y óvalo) del diseño original
+          Positioned(
+            top: -MediaQuery.of(context).size.height * .13,
+            right: MediaQuery.of(context).size.width * .05,
+            child: const BezierContainer(),
+          ),
+          Positioned(
+            bottom: -MediaQuery.of(context).size.height * .15,
+            left: 0,
+            right: 0,
+            child: const Align(
+              alignment: Alignment.bottomCenter,
+              child: Ovalstatic1(),
             ),
+          ),
 
-            // Indicador de páginas
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: SmoothPageIndicator(
-                controller: _pageController,
-                count: tips.length,
-                effect: const WormEffect(
-                  dotColor: Colors.white54,
-                  activeDotColor: Colors.white,
-                  dotHeight: 8,
-                  dotWidth: 8,
-                  spacing: 16,
+          SafeArea(
+            child: Column(
+              children: [
+                // AppBar/Encabezado
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Botón volver con glassmorphism
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withValues(alpha: 0.2),
+                              Colors.white.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                      Text(
+                        'Tips de Lactancia',
+                        style: GoogleFonts.quicksand(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              offset: const Offset(1, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => _showFavoriteTips(),
+                        icon: const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+
+                // Header con progreso (glassmorphism)
+                _buildProgressHeader(
+                  current: _currentPage + 1,
+                  total: pageCount,
+                ),
+
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: pageCount,
+                    onPageChanged: (index) {
+                      setState(() => _currentPage = index);
+                    },
+                    itemBuilder: (context, index) {
+                      final tip = (tips.length > index) ? tips[index] : null;
+                      return _buildTipCard(
+                        tip,
+                        index,
+                        tipContent: staticTipWidgets[index],
+                      );
+                    },
+                  ),
+                ),
+
+                // Indicador de páginas modernizado
+                _buildModernPageIndicator(pageCount),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTipCard(dynamic tip, int index) {
+  Widget _buildTipCard(dynamic tip, int index, {Widget? tipContent}) {
+    // Si tenemos un widget estático (diseño original), lo mostramos tal cual
+    if (tipContent != null) {
+      return AnimatedBuilder(
+        animation: _fadeAnimation,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _slideAnimation.value),
+            child: Opacity(
+              opacity: _fadeAnimation.value,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: tipContent,
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) {
@@ -190,7 +281,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                           top: Radius.circular(20),
                         ),
                         image: DecorationImage(
-                          image: AssetImage('assets/tips/${tip.imageUrl}'),
+                          image: AssetImage(_resolveImageAsset(tip, index)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -223,12 +314,16 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                                 return Transform.scale(
                                   scale: _pulseAnimation.value,
                                   child: IconButton(
-                                    onPressed: () => _toggleFavorite(tip.id),
+                                    onPressed: tip == null
+                                        ? null
+                                        : () => _toggleFavorite(tip.id),
                                     icon: Icon(
-                                      tip.isFavorite
+                                      (tip != null && (tip.isFavorite == true))
                                           ? Icons.favorite
                                           : Icons.favorite_border,
-                                      color: tip.isFavorite
+                                      color:
+                                          (tip != null &&
+                                              (tip.isFavorite == true))
                                           ? Colors.red
                                           : Colors.white,
                                       size: 28,
@@ -253,7 +348,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                tip.category,
+                                _resolveCategory(tip, index),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -276,7 +371,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            tip.title,
+                            _resolveTitle(tip, index),
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -285,16 +380,26 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                           ),
                           const SizedBox(height: 12),
                           Expanded(
-                            child: Text(
-                              tip.description,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF7F8C8D),
-                                height: 1.5,
-                              ),
-                              maxLines: 4,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            child: tipContent != null
+                                ? DefaultTextStyle(
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 16,
+                                      color: const Color(0xFF2D3748),
+                                      height: 1.6,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    child: tipContent,
+                                  )
+                                : Text(
+                                    _resolveDescription(tip),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF7F8C8D),
+                                      height: 1.5,
+                                    ),
+                                    maxLines: 4,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                           ),
                         ],
                       ),
@@ -309,31 +414,241 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Error al cargar tips',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.read<TipBloc>().add(const GetAllTipsRequested());
+  String _resolveImageAsset(dynamic tip, int index) {
+    try {
+      final url = tip?.imageUrl?.toString();
+      if (url != null && url.isNotEmpty) return 'assets/tips/$url';
+    } catch (_) {}
+    const assets = [
+      '1_ALIMENTACION.png',
+      '6_CONSEJOS.png',
+      '3_BENEFICIOS.png',
+      '3_BENEFICIOS.png',
+      '4_POSTURA.png',
+      '5_CALOSTRO.png',
+      '6_CONSEJOS.png',
+      '7_EXTRACCION.png',
+      '7.1_EXTRACCION.png',
+      '8_HIGIENE.png',
+      '8_HIGIENE.png',
+      '2_LACTANCIA.png',
+      '10_PADRE.png',
+      '11_PROBLEMAS.png',
+    ];
+    if (index >= 0 && index < assets.length) {
+      return 'assets/tips/${assets[index]}';
+    }
+    return 'assets/tips/1_ALIMENTACION.png';
+  }
+
+  String _resolveTitle(dynamic tip, int index) {
+    try {
+      final t = tip?.title?.toString();
+      if (t != null && t.isNotEmpty) return t;
+    } catch (_) {}
+    const titles = [
+      'Alimentación Complementaria',
+      'Suplementación de Hierro',
+      'Beneficios para el Bebé',
+      'Beneficios para la Mamá',
+      'Postura y Agarre',
+      'Calostro',
+      'Consejos de Lactancia',
+      'Extracción y Almacenamiento',
+      'Continuación Extracción',
+      'Higiene en Lactancia',
+      'Continuación Higiene',
+      'Lactancia Exitosa',
+      'Rol del Padre',
+      'Problemas Comunes',
+    ];
+    return (index >= 0 && index < titles.length) ? titles[index] : 'Tip';
+  }
+
+  String _resolveCategory(dynamic tip, int index) {
+    try {
+      final c = tip?.category?.toString();
+      if (c != null && c.isNotEmpty) return c;
+    } catch (_) {}
+    return 'Consejo';
+  }
+
+  String _resolveDescription(dynamic tip) {
+    try {
+      final d = tip?.description?.toString();
+      if (d != null && d.isNotEmpty) return d;
+    } catch (_) {}
+    return '';
+  }
+
+  // Fondo decorativo similar al diseño anterior
+  Widget _buildBackgroundElements(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    return Stack(
+      children: [
+        Positioned(
+          top: -height * 0.1,
+          right: -width * 0.1,
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _pulseAnimation.value,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: 0.1),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              );
             },
-            child: const Text('Reintentar'),
           ),
-        ],
+        ),
+        ...List.generate(6, (index) => _buildFloatingParticle(context, index)),
+      ],
+    );
+  }
+
+  Widget _buildFloatingParticle(BuildContext context, int index) {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final animationValue = _pulseController.value;
+        final left = (index * 60.0) % MediaQuery.of(context).size.width;
+        final top = (index * 100.0) % MediaQuery.of(context).size.height;
+        return Positioned(
+          left: left + (animationValue * 25 * (index % 2 == 0 ? 1 : -1)),
+          top: top + (animationValue * 20 * (index % 3 == 0 ? 1 : -1)),
+          child: Opacity(
+            opacity: 0.4 + (animationValue * 0.3),
+            child: Container(
+              width: 6 + (index % 3) * 2.0,
+              height: 6 + (index % 3) * 2.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.7),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProgressHeader({int current = 1, int total = 14}) {
+    return AnimatedBuilder(
+      animation: _backgroundController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _slideAnimation.value),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.25),
+                    Colors.white.withValues(alpha: 0.15),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Progreso',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        '$current / $total',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Barra de progreso inferior al título
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: current / total,
+                      minHeight: 6,
+                      backgroundColor: Colors.white.withValues(alpha: 0.3),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildModernPageIndicator(int count) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: SmoothPageIndicator(
+        controller: _pageController,
+        count: count,
+        effect: const WormEffect(
+          activeDotColor: Colors.white,
+          dotColor: Colors.white54,
+          dotHeight: 8,
+          dotWidth: 8,
+          spacing: 8,
+          strokeWidth: 24,
+          type: WormType.thin,
+        ),
       ),
     );
   }

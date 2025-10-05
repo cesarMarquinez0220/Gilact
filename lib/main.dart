@@ -11,6 +11,7 @@ import 'features/user/presentation/bloc/user_profile_bloc.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/lessons/presentation/pages/lessons_page.dart';
 import 'features/tips/presentation/pages/tips_page.dart';
+import 'features/tips/presentation/bloc/tip_bloc.dart';
 import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/videos/presentation/pages/user_videos_page.dart';
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<UserProfileBloc>(
           create: (context) => getIt<UserProfileBloc>(),
         ),
+        BlocProvider<TipBloc>(create: (context) => getIt<TipBloc>()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
