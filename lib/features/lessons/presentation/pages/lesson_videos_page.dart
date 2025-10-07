@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/video.dart';
@@ -96,145 +95,395 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.centerLeft,
-            colors: [Color(0xffD9ACF5), Color.fromARGB(255, 122, 231, 211)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF2C5F5D), // Azul teal oscuro
+              Color(0xFF1A365D), // Azul marino oscuro
+              Color(0xFF4FD1C7), // Verde azulado vibrante
+            ],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                _buildAppBar(),
-                SingleChildScrollView(
-                  child: _videos != null
-                      ? _buildLessons(_videos!)
-                      : const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(50.0),
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
+          child: Column(
+            children: [
+              // Header con navegación
+              _buildHeader(),
+
+              // Contenido principal - Camino de lecciones
+              Expanded(
+                child: _videos == null
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
                           ),
                         ),
+                      )
+                    : _buildLessonPath(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+          ),
+          const Expanded(
+            child: Text(
+              'Camino de Lactancia',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Camino de Lactancia"),
+                    content: const Text(
+                      "Sigue el camino paso a paso para aprender sobre lactancia materna.",
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text("Cerrar"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Container(
+              width: 40.0,
+              height: 40.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: const Icon(Icons.help, size: 24, color: Color(0xFF2C5F5D)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLessonPath() {
+    if (_videos == null || _videos!.isEmpty) {
+      return const Center(
+        child: Text(
+          'No hay lecciones disponibles',
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+      );
+    }
+
+    // Agrupar videos por lección
+    Map<int, List<Video>> lessonsMap = {};
+    for (var video in _videos!) {
+      lessonsMap.putIfAbsent(video.leccionId, () => []).add(video);
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Column(
+        children: lessonsMap.entries.map((entry) {
+          final lessonId = entry.key;
+          final videos = entry.value;
+          return _buildLessonSection(lessonId, videos);
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildLessonSection(int lessonId, List<Video> videos) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título de la lección
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lección $lessonId',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  _getSubtitleForLesson(lessonId),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
                 ),
               ],
             ),
           ),
-        ),
+
+          const SizedBox(height: 20),
+
+          // Camino de videos
+          _buildVideoPath(videos),
+        ],
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Sección de Lecciones de Videos"),
-                  content: const Text(
-                    "En esta sección se encuentran las lecciones a visualizar.",
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text("Cerrar"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-          child: Container(
-            width: 40.0,
-            height: 40.0,
-            margin: const EdgeInsets.only(right: 16.0),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromARGB(255, 255, 255, 255),
-            ),
-            child: const Icon(Icons.help, size: 24, color: Color(0xffD9ACF5)),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildVideoPath(List<Video> videos) {
+    return CustomPaint(
+      painter: LessonPathPainter(videos.length),
+      child: Column(
+        children: videos.asMap().entries.map((entry) {
+          final index = entry.key;
+          final video = entry.value;
 
-  Widget _buildLessons(List<Video> videos) {
-    int previousLessonId = -1;
-    int lastCompletedIndex = -1;
-
-    // Encuentra el índice del último video completado
-    for (int i = 0; i < videos.length; i++) {
-      if (context.read<LeccionesProvider>().isLeccionCompletada(
-        videos[i].videoId,
-      )) {
-        lastCompletedIndex = i;
-      } else {
-        break;
-      }
-    }
-
-    return Column(
-      children: videos.asMap().entries.map((entry) {
-        final index = entry.key;
-        final video = entry.value;
-        final isOdd = index.isOdd;
-        final currentLessonId = video.leccionId;
-        final isLastCompleted = index == lastCompletedIndex;
-
-        // Verifica si es necesario mostrar el encabezado
-        final showHeader = currentLessonId != previousLessonId;
-        previousLessonId = currentLessonId;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
+          return Column(
             children: [
-              if (showHeader)
-                Column(
-                  children: [
-                    _Title('Lección ${video.leccionId}'),
-                    _Subtitle(_getSubtitleForLesson(video.leccionId)),
-                  ],
-                ),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: isOdd ? 15.0 : 15.0,
-                  bottom: isOdd ? 15.0 : 15.0,
-                  left: isOdd ? MediaQuery.of(context).size.width * 0.5 : 0.0,
-                  right: isOdd ? 0.0 : MediaQuery.of(context).size.width * 0.58,
-                ),
-                child: _PercentIndicator(
-                  context.read<LeccionesProvider>().getProgresoVideo(
-                    video.videoId,
-                  ),
-                  video.imageName,
-                  isLastCompleted ? Colors.blue : Colors.blue,
-                  video.videoId,
-                  video.leccionId,
-                  videoURL: video.videoURL,
-                ),
+              // Nodo del video con posición personalizada
+              Container(
+                height: 100,
+                child: Center(child: _buildVideoNode(video, index)),
               ),
             ],
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
+  }
+
+  Widget _buildVideoNode(Video video, int index) {
+    final progress = context.read<LeccionesProvider>().getProgresoVideo(
+      video.videoId,
+    );
+    final isCompleted = progress >= 100.0;
+
+    // Lógica de disponibilidad: solo el primer video de la primera lección está disponible inicialmente
+    // Después, solo se habilita el siguiente video cuando el anterior está completado
+    final isAvailable = _isVideoAvailable(video, index);
+
+    // Tamaño dinámico del nodo
+    final nodeSize = isCompleted
+        ? 90.0
+        : isAvailable
+        ? 85.0
+        : 75.0;
+
+    return GestureDetector(
+      onTap: isAvailable
+          ? () {
+              _navigateToReproductorVideoHelper(
+                video.videoId,
+                video.leccionId,
+                video.videoURL,
+              );
+            }
+          : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: nodeSize,
+        height: nodeSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isCompleted
+              ? Colors.green
+              : isAvailable
+              ? Colors.white
+              : Colors.grey.withValues(alpha: 0.3),
+          border: Border.all(
+            color: isCompleted
+                ? Colors.green
+                : isAvailable
+                ? const Color(0xFF4FD1C7)
+                : Colors.grey,
+            width: isCompleted ? 4 : 3,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isCompleted
+                  ? Colors.green.withValues(alpha: 0.4)
+                  : isAvailable
+                  ? const Color(0xFF4FD1C7).withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.1),
+              blurRadius: isCompleted ? 12 : 8,
+              spreadRadius: isCompleted ? 2 : 1,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Imagen del video como fondo
+            if (isAvailable || isCompleted)
+              Positioned.fill(
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/lecciones_camino/${video.imageName}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _getIconForVideo(video),
+                          color: Colors.grey,
+                          size: 30,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+            // Overlay verde con checkmark para videos completados
+            if (isCompleted)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.green.withValues(alpha: 0.9),
+                        Colors.green.withValues(alpha: 0.7),
+                      ],
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.check, color: Colors.white, size: 35),
+                  ),
+                ),
+              ),
+
+            // Icono de candado para videos bloqueados
+            if (!isAvailable && !isCompleted)
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.withValues(alpha: 0.2),
+                  ),
+                  child: const Icon(Icons.lock, color: Colors.grey, size: 25),
+                ),
+              ),
+
+            // Badge de progreso para videos en progreso
+            if (isAvailable && !isCompleted && progress > 0)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '${progress.toInt()}%',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+            // Efecto de pulso para videos disponibles
+            if (isAvailable && !isCompleted)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4FD1C7).withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _isVideoAvailable(Video video, int index) {
+    if (_videos == null) return false;
+
+    // Solo el primer video de la primera lección está disponible inicialmente
+    if (video.leccionId == 1 && index == 0) {
+      return true;
+    }
+
+    // Para videos posteriores, verificar si el video anterior está completado
+    if (index > 0) {
+      final previousVideo = _videos![index - 1];
+      return context.read<LeccionesProvider>().isLeccionCompletada(
+        previousVideo.videoId,
+      );
+    }
+
+    return false;
+  }
+
+  IconData _getIconForVideo(Video video) {
+    // Asignar iconos diferentes según el tipo de contenido
+    switch (video.videoId % 4) {
+      case 0:
+        return Icons.play_circle_filled;
+      case 1:
+        return Icons.video_library;
+      case 2:
+        return Icons.school;
+      case 3:
+        return Icons.quiz;
+      default:
+        return Icons.play_circle_filled;
+    }
   }
 
   String _getSubtitleForLesson(int lessonNumber) {
@@ -271,108 +520,91 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
         return '';
     }
   }
+}
 
-  Widget _Title(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10.0),
-        child: Text(
-          title,
-          style: GoogleFonts.quicksand(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
+// Pintor personalizado para crear el camino curvo y dinámico
+class LessonPathPainter extends CustomPainter {
+  final int nodeCount;
+
+  LessonPathPainter(this.nodeCount);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.6)
+      ..strokeWidth = 4.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.1)
+      ..strokeWidth = 6.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final centerX = size.width / 2;
+    final nodeSpacing = 100.0; // Espaciado entre nodos
+
+    // Dibujar el camino curvo
+    for (int i = 0; i < nodeCount - 1; i++) {
+      final startY = (i * nodeSpacing) + 50;
+      final endY = ((i + 1) * nodeSpacing) + 50;
+
+      // Crear curva suave entre nodos
+      final controlPoint1 = Offset(
+        centerX + (i % 2 == 0 ? 20 : -20),
+        startY + 30,
+      );
+      final controlPoint2 = Offset(
+        centerX + (i % 2 == 0 ? -20 : 20),
+        endY - 30,
+      );
+
+      final path = Path();
+      path.moveTo(centerX, startY);
+      path.cubicTo(
+        controlPoint1.dx,
+        controlPoint1.dy,
+        controlPoint2.dx,
+        controlPoint2.dy,
+        centerX,
+        endY,
+      );
+
+      // Dibujar sombra primero
+      canvas.drawPath(path, shadowPaint);
+      // Dibujar línea principal
+      canvas.drawPath(path, paint);
+
+      // Agregar puntos decorativos en la curva
+      _drawDecorativeDots(canvas, path, i);
+    }
   }
 
-  Widget _Subtitle(String subtitle) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-        child: Text(
-          subtitle,
-          style: GoogleFonts.quicksand(fontSize: 16, color: Colors.white),
-        ),
-      ),
-    );
+  void _drawDecorativeDots(Canvas canvas, Path path, int segmentIndex) {
+    final dotPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.4)
+      ..style = PaintingStyle.fill;
+
+    // Calcular puntos a lo largo de la curva
+    final pathMetrics = path.computeMetrics();
+    for (final pathMetric in pathMetrics) {
+      final length = pathMetric.length;
+      final dotCount = 3;
+
+      for (int i = 1; i < dotCount; i++) {
+        final distance = (length * i) / dotCount;
+        final tangent = pathMetric.getTangentForOffset(distance);
+
+        if (tangent != null) {
+          canvas.drawCircle(tangent.position, 2.0, dotPaint);
+        }
+      }
+    }
   }
 
-  Widget _PercentIndicator(
-    double percent,
-    String imageName,
-    Color color,
-    int videoId,
-    int leccionId, {
-    required String videoURL,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        _navigateToReproductorVideoHelper(videoId, leccionId, videoURL);
-      },
-      child: Container(
-        width: 150,
-        height: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            children: [
-              // Imagen de fondo
-              Image.asset(
-                'assets/images/$imageName',
-                width: 150,
-                height: 150,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 150,
-                    height: 150,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.video_library, size: 50),
-                  );
-                },
-              ),
-              // Overlay con el indicador de progreso
-              Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
-                ),
-                child: CircularPercentIndicator(
-                  radius: 50.0,
-                  lineWidth: 8.0,
-                  percent: percent / 100,
-                  center: const Icon(
-                    Icons.play_arrow,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                  progressColor: color,
-                  backgroundColor: Colors.white.withValues(alpha: 0.3),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // Página temporal del reproductor de video

@@ -17,7 +17,7 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imgVideos'] ?? '',
+          imageName: data['imagen'] ?? '',
           title: data['title'] ?? '',
           description:
               data['title'] ?? '', // Usar el título como descripción por ahora
@@ -57,7 +57,7 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imgVideos'] ?? '',
+          imageName: data['imagen'] ?? '',
           title: data['title'] ?? '',
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),
@@ -91,7 +91,7 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imgVideos'] ?? '',
+          imageName: data['imagen'] ?? '',
           title: data['title'] ?? '',
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),
