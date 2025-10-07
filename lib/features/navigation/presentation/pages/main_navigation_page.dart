@@ -8,6 +8,7 @@ import 'dart:ui';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../tips/presentation/pages/tips_page.dart';
 import '../../../lessons/presentation/pages/lessons_page.dart';
+import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../../lactation/presentation/pages/lactation_calendar_demo.dart';
 import '../../../auth/domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
@@ -521,7 +522,13 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   }
 
   void _navigateToLecciones() {
-    Navigator.pushNamed(context, '/lecciones');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const LessonVideosPage(
+          videos: [], // Se cargarán desde el servicio
+        ),
+      ),
+    );
   }
 
   void _navigateToCalendar() {

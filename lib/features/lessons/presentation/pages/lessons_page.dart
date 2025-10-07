@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../videos/presentation/bloc/video_bloc.dart';
 import '../bloc/lesson_bloc.dart';
-import '../../../videos/presentation/widgets/video_list_widget.dart';
+import 'lesson_videos_page.dart';
 
 class LessonsPage extends StatefulWidget {
   const LessonsPage({super.key});
@@ -132,24 +130,8 @@ class _LessonsPageState extends State<LessonsPage> {
   void _showVideosForLesson(String lessonId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Videos de la Lección'),
-            backgroundColor: const Color(0xFF03A696),
-            foregroundColor: Colors.white,
-          ),
-          body: BlocProvider(
-            create: (context) => VideoBloc(
-              getAllVideosUseCase: getIt(),
-              getVideoByIdUseCase: getIt(),
-              getVideosByLessonIdUseCase: getIt(),
-              searchVideosUseCase: getIt(),
-              markVideoAsCompletedUseCase: getIt(),
-              getCompletedVideoIdsUseCase: getIt(),
-              updateVideoProgressUseCase: getIt(),
-            )..add(GetVideosByLessonIdRequested(lessonId: lessonId)),
-            child: const VideoListWidget(),
-          ),
+        builder: (context) => const LessonVideosPage(
+          videos: [], // Se cargarán desde el servicio
         ),
       ),
     );
