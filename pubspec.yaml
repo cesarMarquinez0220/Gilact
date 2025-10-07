@@ -107,33 +107,31 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
    - assets/images/estrella.png
-   - assets/images/ley1.png
-   - assets/images/ley2.png
-   - assets/images/banco1.png
-   - assets/images/banco2.png
-   - assets/images/banco3.png
-   - assets/images/cuidadomujer.png
-   - assets/images/problema1.png
-   - assets/images/problema2.png 
-   - assets/images/problema3.png 
-   - assets/images/problema4.png 
-   - assets/images/problema5.png 
-   - assets/images/mitos.png 
-   - assets/images/food3.png
-   - assets/images/health5.png 
-   - assets/images/health4.png 
-   - assets/images/health3.png  
-   - assets/images/health2.png 
-   - assets/images/health1.png 
-   - assets/images/milk1.png 
-   - assets/images/food2.png 
-   - assets/images/working.png 
-   - assets/images/food1.png 
-   - assets/images/beneficiosbebe.png  
-   - assets/images/alimenta_complementaria.png
-   - assets/images/bebemujer1.png 
-   - assets/images/bebevientre.png 
-   - assets/images/mujereshablando.png 
+   - assets/images/lecciones_camino/ley1.png
+   - assets/images/lecciones_camino/ley2.png
+   - assets/images/lecciones_camino/banco1.png
+   - assets/images/lecciones_camino/banco2.png
+   - assets/images/lecciones_camino/banco3.png
+   - assets/images/lecciones_camino/cuidadomujer.png
+   - assets/images/lecciones_camino/problema1.png
+   - assets/images/lecciones_camino/problema2.png 
+   - assets/images/lecciones_camino/problema3.png 
+   - assets/images/lecciones_camino/problema4.png 
+   - assets/images/lecciones_camino/problema5.png 
+   - assets/images/lecciones_camino/mitos.png 
+   - assets/images/lecciones_camino/food3.png
+   - assets/images/lecciones_camino/health5.png 
+   - assets/images/lecciones_camino/health4.png 
+   - assets/images/lecciones_camino/health3.png  
+   - assets/images/lecciones_camino/health2.png 
+   - assets/images/lecciones_camino/health1.png 
+   - assets/images/lecciones_camino/milk1.png 
+   - assets/images/lecciones_camino/food2.png 
+   - assets/images/lecciones_camino/working.png 
+   - assets/images/lecciones_camino/food1.png 
+   - assets/images/lecciones_camino/bebemujer1.png 
+   - assets/images/lecciones_camino/bebevientre.png 
+   - assets/images/lecciones_camino/mujereshablando.png 
    - assets/images/edicionPerfil.png 
    - assets/images/prueba.png
    - assets/images/engranaje.png
@@ -142,15 +140,7 @@ flutter:
    - assets/images/Imagen2.png
    - assets/images/splash.png
    - assets/images/doctor.png
-   - assets/images/mamabebe.png
-   - assets/images/salud.png
-   - assets/images/verification.png
-   - assets/images/icon_espionaje.png
-   - assets/images/icon_megusta.png
-   - assets/images/icon_mujernegocios.png
-   - assets/images/icon_paginaprincipal.png
-   - assets/images/icon_tips.png
-   - assets/images/mujerperfil.png
+   - assets/images/lecciones_camino/salud.png
    - assets/images/mamapost.png
    - assets/images/mamapre.png
    - assets/images/mother.png
@@ -164,9 +154,9 @@ flutter:
    - assets/images/bebe0.png
    - assets/images/bebe1.png
    - assets/images/bebe2.png
-   - assets/images/Homevideo.png
-   - assets/images/Softvideo.png
-   - assets/images/Writingvideo.png
+   - assets/images/lecciones_camino/Homevideo.png
+   - assets/images/lecciones_camino/Softvideo.png
+   - assets/images/lecciones_camino/Writingvideo.png
    - assets/mini_videos/1.png
    - assets/mini_videos/2.1.png
    - assets/mini_videos/2.2.png
