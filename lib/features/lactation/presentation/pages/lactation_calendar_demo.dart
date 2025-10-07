@@ -13,7 +13,6 @@ class _LactationCalendarDemoState extends State<LactationCalendarDemo>
     with TickerProviderStateMixin {
   int _currentView = 0; // 0: día, 1: semana, 2: mes
   DateTime _selectedDate = DateTime.now();
-  bool _isLoading = false;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -95,19 +94,21 @@ class _LactationCalendarDemoState extends State<LactationCalendarDemo>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Calendario de Lactancia',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(1, 1),
-                          blurRadius: 2,
-                        ),
-                      ],
+                  Expanded(
+                    child: Text(
+                      'Calendario de Lactancia',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   IconButton(
@@ -782,10 +783,6 @@ class _LactationCalendarDemoState extends State<LactationCalendarDemo>
         ),
       ),
     );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   String _getFormattedDate(DateTime date) {
