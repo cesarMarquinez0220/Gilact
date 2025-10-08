@@ -4,7 +4,8 @@ class Video extends Equatable {
   final int videoId;
   final int leccionId;
   final String videoURL;
-  final String imageName;
+  final String imageName; // Para miniaturas de video (imgVideos)
+  final String pathImageName; // Para imágenes del camino de lecciones (imagen)
   final String title;
   final String description;
   final Duration duration;
@@ -16,6 +17,7 @@ class Video extends Equatable {
     required this.leccionId,
     required this.videoURL,
     required this.imageName,
+    required this.pathImageName,
     required this.title,
     required this.description,
     required this.duration,
@@ -29,6 +31,7 @@ class Video extends Equatable {
     leccionId,
     videoURL,
     imageName,
+    pathImageName,
     title,
     description,
     duration,
@@ -41,6 +44,7 @@ class Video extends Equatable {
     int? leccionId,
     String? videoURL,
     String? imageName,
+    String? pathImageName,
     String? title,
     String? description,
     Duration? duration,
@@ -52,6 +56,7 @@ class Video extends Equatable {
       leccionId: leccionId ?? this.leccionId,
       videoURL: videoURL ?? this.videoURL,
       imageName: imageName ?? this.imageName,
+      pathImageName: pathImageName ?? this.pathImageName,
       title: title ?? this.title,
       description: description ?? this.description,
       duration: duration ?? this.duration,

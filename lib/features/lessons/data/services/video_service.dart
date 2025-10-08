@@ -17,7 +17,9 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imagen'] ?? '',
+          imageName: data['imgVideos'] ?? '', // Para miniaturas de video
+          pathImageName:
+              data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
           description:
               data['title'] ?? '', // Usar el título como descripción por ahora
@@ -57,7 +59,9 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imagen'] ?? '',
+          imageName: data['imgVideos'] ?? '', // Para miniaturas de video
+          pathImageName:
+              data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),
@@ -91,7 +95,9 @@ class VideoService {
           videoId: data['id'] ?? 0,
           leccionId: data['numero_leccion'] ?? 0,
           videoURL: data['url'] ?? '',
-          imageName: data['imagen'] ?? '',
+          imageName: data['imgVideos'] ?? '', // Para miniaturas de video
+          pathImageName:
+              data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),

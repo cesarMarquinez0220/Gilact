@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class LoginFormWidget extends StatelessWidget {
+class LoginFormWidget extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final bool saveCredentials;
@@ -31,6 +31,13 @@ class LoginFormWidget extends StatelessWidget {
   });
 
   @override
+  State<LoginFormWidget> createState() => _LoginFormWidgetState();
+}
+
+class _LoginFormWidgetState extends State<LoginFormWidget> {
+  bool _obscurePassword = true;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -41,10 +48,12 @@ class LoginFormWidget extends StatelessWidget {
 
           // Logo y título
           AnimatedBuilder(
-            animation: fadeAnimation ?? const AlwaysStoppedAnimation(1.0),
+            animation:
+                widget.fadeAnimation ?? const AlwaysStoppedAnimation(1.0),
             builder: (context, child) {
               return FadeTransition(
-                opacity: fadeAnimation ?? const AlwaysStoppedAnimation(1.0),
+                opacity:
+                    widget.fadeAnimation ?? const AlwaysStoppedAnimation(1.0),
                 child: Column(
                   children: [
                     Image.asset(
@@ -88,10 +97,11 @@ class LoginFormWidget extends StatelessWidget {
           const SizedBox(height: 48),
           // Formulario
           AnimatedBuilder(
-            animation: slideAnimation ?? const AlwaysStoppedAnimation(0.0),
+            animation:
+                widget.slideAnimation ?? const AlwaysStoppedAnimation(0.0),
             builder: (context, child) {
               return Transform.translate(
-                offset: Offset(0, slideAnimation?.value ?? 0),
+                offset: Offset(0, widget.slideAnimation?.value ?? 0),
                 child: Column(
                   children: [
                     // Campo de email
@@ -117,9 +127,9 @@ class LoginFormWidget extends StatelessWidget {
                         ],
                       ),
                       child: TextField(
-                        controller: emailController,
+                        controller: widget.emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !isLoading,
+                        enabled: !widget.isLoading,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -171,28 +181,42 @@ class LoginFormWidget extends StatelessWidget {
                         ],
                       ),
                       child: TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        enabled: !isLoading,
+                        controller: widget.passwordController,
+                        obscureText: _obscurePassword,
+                        enabled: !widget.isLoading,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Contraseña',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.lock_outlined,
                             color: Colors.white70,
                             size: 22,
                           ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: Colors.white70,
+                              size: 22,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 18,
                           ),
@@ -217,8 +241,10 @@ class LoginFormWidget extends StatelessWidget {
                                 ),
                               ),
                               child: Checkbox(
-                                value: saveCredentials,
-                                onChanged: isLoading ? null : onRememberChanged,
+                                value: widget.saveCredentials,
+                                onChanged: widget.isLoading
+                                    ? null
+                                    : widget.onRememberChanged,
                                 fillColor: MaterialStateProperty.all(
                                   Colors.transparent,
                                 ),
@@ -239,7 +265,9 @@ class LoginFormWidget extends StatelessWidget {
                           ],
                         ),
                         TextButton(
-                          onPressed: isLoading ? null : onRecoveryTap,
+                          onPressed: widget.isLoading
+                              ? null
+                              : widget.onRecoveryTap,
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -295,7 +323,9 @@ class LoginFormWidget extends StatelessWidget {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: isLoading ? null : onLoginPressed,
+                        onPressed: widget.isLoading
+                            ? null
+                            : widget.onLoginPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -303,7 +333,7 @@ class LoginFormWidget extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: isLoading
+                        child: widget.isLoading
                             ? const SizedBox(
                                 height: 24,
                                 width: 24,
@@ -351,7 +381,9 @@ class LoginFormWidget extends StatelessWidget {
                             ),
                           ),
                           TextButton(
-                            onPressed: isLoading ? null : onSignUpTap,
+                            onPressed: widget.isLoading
+                                ? null
+                                : widget.onSignUpTap,
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,

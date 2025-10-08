@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 import '../../domain/entities/video.dart';
 import '../../data/services/video_service.dart';
 import '../providers/lecciones_provider.dart';
+import '../providers/video_images_provider.dart';
+import '../../../videos/presentation/pages/video_player_page.dart';
+import '../../../videos/domain/entities/video.dart' as video_entity;
 
 class LessonVideosPage extends StatefulWidget {
   final List<Video> videos;
@@ -24,7 +27,17 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   @override
   void initState() {
     super.initState();
+    _initializeProviders();
     _loadVideos();
+  }
+
+  Future<void> _initializeProviders() async {
+    // Inicializar el provider de imágenes de videos
+    final videoImagesProvider = Provider.of<VideoImagesProvider>(
+      context,
+      listen: false,
+    );
+    await videoImagesProvider.initialize();
   }
 
   Future<void> _loadVideos() async {
@@ -54,11 +67,41 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       print("ID del video enviado al reproductor es: $videoId");
     }
 
+    // Obtener el nombre de imagen correcto usando el Provider
+    final videoImagesProvider = Provider.of<VideoImagesProvider>(
+      context,
+      listen: false,
+    );
+    final imageName = videoImagesProvider.getImageNameForVideo(videoId);
+
+    if (kDebugMode) {
+      print("📸 Imagen seleccionada para video $videoId: $imageName");
+    }
+
+    // Convertir Video de lessons a Video de videos
+    final video = video_entity.Video(
+      id: videoId.toString(),
+      title: 'Video $videoId',
+      description: 'Lección de lactancia materna',
+      videoUrl: videoURL,
+      imageUrl: '',
+      imageName: imageName, // Usar la imagen correcta del Provider
+      videoId: videoId,
+      order: videoId,
+      duration: const Duration(minutes: 5), // Duración por defecto
+      lessonId: duracionId,
+      isCompleted: false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation1, animation2) =>
-            VideoPlayerPage(videoId: videoId, videoUrl: videoURL),
+        pageBuilder: (context, animation1, animation2) => VideoPlayerPage(
+          video: video,
+          userId: 'current_user', // TODO: Obtener ID del usuario actual
+        ),
         transitionsBuilder: (context, animation1, animation2, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
@@ -76,10 +119,12 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     );
 
     // Verifica si se completó una lección y actualiza lastCompletedLesson
-    if (result != null && result is int) {
+    if (result != null && result is bool && result) {
       setState(() {
-        lastCompletedLesson = result;
+        lastCompletedLesson = videoId;
       });
+      // Actualizar el provider
+      context.read<LeccionesProvider>().marcarLeccionCompletada(videoId);
     }
   }
 
@@ -284,7 +329,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   }
 
   Widget _buildVideoNode(Video video, int index) {
-    final progress = context.read<LeccionesProvider>().getProgresoVideo(
+    final progress = context.watch<LeccionesProvider>().getProgresoVideo(
       video.videoId,
     );
     final isCompleted = progress >= 100.0;
@@ -349,7 +394,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
               Positioned.fill(
                 child: ClipOval(
                   child: Image.asset(
-                    'assets/images/lecciones_camino/${video.imageName}',
+                    'assets/images/lecciones_camino/${video.pathImageName}',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -400,35 +445,32 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
                 ),
               ),
 
-            // Badge de progreso para videos en progreso
+            // CircularProgressIndicator que rodea la imagen
             if (isAvailable && !isCompleted && progress > 0)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+              Positioned.fill(
+                child: Stack(
+                  children: [
+                    // CircularProgressIndicator como borde
+                    Center(
+                      child: SizedBox(
+                        width: nodeSize,
+                        height: nodeSize,
+                        child: CircularProgressIndicator(
+                          value: progress / 100.0,
+                          strokeWidth: 6,
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            const Color.fromARGB(
+                              255,
+                              190,
+                              104,
+                              244,
+                            ), // Color primario de la app
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: Text(
-                    '${progress.toInt()}%',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  ],
                 ),
               ),
 
@@ -462,7 +504,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     // Para videos posteriores, verificar si el video anterior está completado
     if (index > 0) {
       final previousVideo = _videos![index - 1];
-      return context.read<LeccionesProvider>().isLeccionCompletada(
+      return context.watch<LeccionesProvider>().isLeccionCompletada(
         previousVideo.videoId,
       );
     }
@@ -605,76 +647,4 @@ class LessonPathPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Página temporal del reproductor de video
-class VideoPlayerPage extends StatefulWidget {
-  final int videoId;
-  final String videoUrl;
-
-  const VideoPlayerPage({
-    super.key,
-    required this.videoId,
-    required this.videoUrl,
-  });
-
-  @override
-  State<VideoPlayerPage> createState() => _VideoPlayerPageState();
-}
-
-class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Video ${widget.videoId}'),
-        backgroundColor: const Color(0xffD9ACF5),
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.play_circle_outline,
-              size: 100,
-              color: Color(0xffD9ACF5),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Reproductor de Video',
-              style: GoogleFonts.quicksand(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Video ID: ${widget.videoId}',
-              style: GoogleFonts.quicksand(fontSize: 16),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                // Simular que se completó el video
-                Navigator.of(context).pop(widget.videoId);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffD9ACF5),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-              ),
-              child: Text(
-                'Marcar como Completado',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
