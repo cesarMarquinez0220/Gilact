@@ -93,22 +93,40 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+      body: Stack(
         children: [
-          _buildPerfilNuevoPage(),
-          const LessonsPage(),
-          const TipsPage(),
-          const LactationCalendarDemo(),
-          _buildProfilePage(),
+          // Gradiente de fondo que ocupa toda la pantalla
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+              ),
+            ),
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              children: [
+                _buildPerfilNuevoPage(),
+                _buildHealthPage(),
+                _buildProfilePage(),
+              ],
+            ),
+          ),
+          // Navegación flotante sobre el contenido
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildBottomNavigationBar(),
+          ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -117,40 +135,29 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     double screenHeight = MediaQuery.of(context).size.height;
 
     return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Elementos decorativos de fondo
-              _buildBackgroundElements(screenWidth, screenHeight),
+      child: Stack(
+        children: [
+          // Elementos decorativos de fondo
+          _buildBackgroundElements(screenWidth, screenHeight),
 
-              // Contenido principal usando BlocBuilder
-              BlocBuilder<
-                user_bloc.UserProfileBloc,
-                user_bloc.UserProfileState
-              >(
-                builder: (context, state) {
-                  return Column(
-                    children: [
-                      // Header modernizado
-                      _buildModernHeader(state),
+          // Contenido principal usando BlocBuilder
+          BlocBuilder<user_bloc.UserProfileBloc, user_bloc.UserProfileState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  // Header modernizado
+                  FadeInDown(
+                    duration: const Duration(milliseconds: 1000),
+                    child: _buildModernHeader(state),
+                  ),
 
-                      // Contenido principal
-                      Expanded(child: _buildPerfilNuevoContent(state)),
-                    ],
-                  );
-                },
-              ),
-            ],
+                  // Contenido principal
+                  Expanded(child: _buildPerfilNuevoContent(state)),
+                ],
+              );
+            },
           ),
-        ),
+        ],
       ),
     );
   }
@@ -158,52 +165,75 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   Widget _buildBackgroundElements(double width, double height) {
     return Stack(
       children: [
-        // Círculos decorativos estáticos
+        // Círculos decorativos con animación
         Positioned(
           top: -height * 0.1,
           right: -width * 0.1,
-          child: Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  Colors.white.withValues(alpha: 0.1),
-                  Colors.transparent,
-                ],
-              ),
-            ),
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: 1.0 + (_pulseController.value * 0.1),
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: 0.1),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
-        // Partículas estáticas
-        ...List.generate(8, (index) => _buildStaticParticle(index)),
+        // Partículas con animación sutil
+        ...List.generate(8, (index) => _buildAnimatedParticle(index)),
       ],
     );
   }
 
-  Widget _buildStaticParticle(int index) {
+  Widget _buildAnimatedParticle(int index) {
     final left = (index * 50.0) % MediaQuery.of(context).size.width;
     final top = (index * 80.0) % MediaQuery.of(context).size.height;
 
     return Positioned(
       left: left,
       top: top,
-      child: Container(
-        width: 4 + (index % 3) * 2.0,
-        height: 4 + (index % 3) * 2.0,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.3),
-              blurRadius: 4,
-              spreadRadius: 1,
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          final animationValue = _pulseController.value;
+          return Transform.translate(
+            offset: Offset(
+              (animationValue * 10 * (index % 2 == 0 ? 1 : -1)),
+              (animationValue * 5 * (index % 3 == 0 ? 1 : -1)),
             ),
-          ],
-        ),
+            child: Opacity(
+              opacity: 0.6 + (animationValue * 0.4),
+              child: Container(
+                width: 4 + (index % 3) * 2.0,
+                height: 4 + (index % 3) * 2.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -341,15 +371,19 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           const SizedBox(height: 20),
 
           // Tarjeta de Lecciones modernizada
-          _buildModernFeatureCard(
-            'Lecciones',
-            Icons.show_chart,
-            const LinearGradient(
-              colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+          FadeInUp(
+            duration: const Duration(milliseconds: 800),
+            delay: const Duration(milliseconds: 200),
+            child: _buildModernFeatureCard(
+              'Lecciones',
+              Icons.show_chart,
+              const LinearGradient(
+                colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+              ),
+              'Mira tu progreso de lecciones',
+              _navigateToLecciones,
+              isLarge: true,
             ),
-            'Mira tu progreso de lecciones',
-            _navigateToLecciones,
-            isLarge: true,
           ),
 
           const SizedBox(height: 20),
@@ -358,26 +392,34 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           Row(
             children: [
               Expanded(
-                child: _buildModernFeatureCard(
-                  'Tips',
-                  Icons.lightbulb,
-                  const LinearGradient(
-                    colors: [Color(0xFFEA26B6), Color(0xFFF06292)],
+                child: FadeInLeft(
+                  duration: const Duration(milliseconds: 800),
+                  delay: const Duration(milliseconds: 400),
+                  child: _buildModernFeatureCard(
+                    'Tips',
+                    Icons.lightbulb,
+                    const LinearGradient(
+                      colors: [Color(0xFFEA26B6), Color(0xFFF06292)],
+                    ),
+                    'Consejos y más',
+                    () => Navigator.pushNamed(context, '/tips'),
                   ),
-                  'Consejos y más',
-                  () => Navigator.pushNamed(context, '/tips'),
                 ),
               ),
               const SizedBox(width: 15),
               Expanded(
-                child: _buildModernFeatureCard(
-                  'Calendario',
-                  Icons.calendar_today,
-                  const LinearGradient(
-                    colors: [Color(0xFF16A085), Color(0xFF1ABC9C)],
+                child: FadeInRight(
+                  duration: const Duration(milliseconds: 800),
+                  delay: const Duration(milliseconds: 400),
+                  child: _buildModernFeatureCard(
+                    'Calendario',
+                    Icons.calendar_today,
+                    const LinearGradient(
+                      colors: [Color(0xFF16A085), Color(0xFF1ABC9C)],
+                    ),
+                    'Registro de lactancia',
+                    _navigateToCalendar,
                   ),
-                  'Registro de lactancia',
-                  _navigateToCalendar,
                 ),
               ),
             ],
@@ -386,14 +428,18 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           const SizedBox(height: 20),
 
           // Historial
-          _buildModernFeatureCard(
-            'Historial',
-            Icons.video_library,
-            const LinearGradient(
-              colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+          FadeInUp(
+            duration: const Duration(milliseconds: 800),
+            delay: const Duration(milliseconds: 600),
+            child: _buildModernFeatureCard(
+              'Historial',
+              Icons.video_library,
+              const LinearGradient(
+                colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+              ),
+              'Enfatiza conocimiento',
+              _navigateToHistorial,
             ),
-            'Enfatiza conocimiento',
-            _navigateToHistorial,
           ),
 
           const SizedBox(height: 20),
@@ -425,7 +471,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
         height: isLarge ? 120 : 140,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -532,11 +580,10 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   }
 
   void _navigateToCalendar() {
-    setState(() => _currentIndex = 3);
-    _pageController.animateToPage(
-      3,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const LactationCalendarDemo(),
+      ),
     );
   }
 
@@ -817,34 +864,230 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     );
   }
 
+  Widget _buildHealthPage() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header personalizado
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                    'Salud del Bebé',
+                    style: GoogleFonts.quicksand(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      // Mostrar estadísticas de salud
+                    },
+                    icon: const Icon(Icons.analytics, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+
+            // Tarjetas de funcionalidades de salud
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Seguimiento de peso
+                  _buildHealthCard(
+                    'Peso del Bebé',
+                    'Registra el peso diario',
+                    Icons.monitor_weight,
+                    const Color(0xFF4CAF50),
+                    () {
+                      // Navegar a registro de peso
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Registro de temperatura
+                  _buildHealthCard(
+                    'Temperatura',
+                    'Control de fiebre',
+                    Icons.thermostat,
+                    const Color(0xFFFF9800),
+                    () {
+                      // Navegar a registro de temperatura
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Medicamentos
+                  _buildHealthCard(
+                    'Medicamentos',
+                    'Recordatorios de medicinas',
+                    Icons.medication,
+                    const Color(0xFF2196F3),
+                    () {
+                      // Navegar a medicamentos
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Citas médicas
+                  _buildHealthCard(
+                    'Citas Médicas',
+                    'Próximas consultas',
+                    Icons.calendar_today,
+                    const Color(0xFF9C27B0),
+                    () {
+                      // Navegar a citas médicas
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Emergencias
+                  _buildHealthCard(
+                    'Emergencias',
+                    'Contactos de emergencia',
+                    Icons.emergency,
+                    const Color(0xFFF44336),
+                    () {
+                      // Mostrar contactos de emergencia
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHealthCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(icon, color: color, size: 30),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfilePage() {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        backgroundColor: const Color(0xFF03A696),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: () => _showEditProfile(context),
-            icon: const Icon(Icons.edit),
+    return SafeArea(
+      child: Column(
+        children: [
+          // Header personalizado
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Text(
+                  'Perfil',
+                  style: GoogleFonts.quicksand(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => _showEditProfile(context),
+                  icon: const Icon(Icons.edit, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          // Contenido del perfil
+          Expanded(
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is AuthAuthenticated) {
+                  return _buildProfileContent(context, state.user);
+                } else {
+                  return const Center(
+                    child: Text(
+                      'No hay usuario autenticado',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
         ],
-      ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthAuthenticated) {
-            return _buildProfileContent(context, state.user);
-          } else {
-            return const Center(child: Text('No hay usuario autenticado'));
-          }
-        },
       ),
     );
   }
 
   Widget _buildProfileContent(BuildContext context, user) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           // Avatar
@@ -982,69 +1225,208 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   Widget _buildBottomNavigationBar() {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      height: 88,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(40),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 40,
+            offset: const Offset(0, 25),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 10),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+            spreadRadius: 0,
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-            _pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF03A696),
-          unselectedItemColor: Colors.grey[400],
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+        borderRadius: BorderRadius.circular(40),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildModernNavItem(0, Icons.home_outlined, Icons.home, 'Inicio'),
+              _buildModernNavItem(
+                1,
+                Icons.favorite_outline,
+                Icons.favorite,
+                'Salud',
+              ),
+              _buildModernNavItem(
+                2,
+                Icons.person_outline,
+                Icons.person,
+                'Perfil',
+              ),
+            ],
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.normal,
-            fontSize: 12,
-          ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Inicio',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.school_outlined),
-              activeIcon: Icon(Icons.school),
-              label: 'Lecciones',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.lightbulb_outline),
-              activeIcon: Icon(Icons.lightbulb),
-              label: 'Consejos',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: 'Calendario',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Perfil',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernNavItem(
+    int index,
+    IconData inactiveIcon,
+    IconData activeIcon,
+    String label,
+  ) {
+    final isSelected = _currentIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+        width: isSelected ? 80 : 60,
+        height: 64,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          gradient: isSelected
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF03A696).withValues(alpha: 0.8),
+                    const Color(0xFF03A696).withValues(alpha: 0.6),
+                  ],
+                )
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF03A696).withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF03A696).withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                    spreadRadius: 0,
+                  ),
+                ]
+              : null,
+        ),
+        child: Stack(
+          children: [
+            // Efecto de brillo para elemento activo
+            if (isSelected)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.2),
+                        Colors.transparent,
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.3, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+
+            // Contenido del botón
+            Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) {
+                  return ScaleTransition(scale: animation, child: child);
+                },
+                child: isSelected
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            child: Icon(
+                              activeIcon,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
+                            child: Icon(
+                              inactiveIcon,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ],
         ),
