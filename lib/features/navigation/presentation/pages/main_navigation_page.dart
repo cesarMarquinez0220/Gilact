@@ -922,30 +922,6 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                   ),
                   const SizedBox(height: 16),
 
-                  // Medicamentos
-                  _buildHealthCard(
-                    'Medicamentos',
-                    'Recordatorios de medicinas',
-                    Icons.medication,
-                    const Color(0xFF2196F3),
-                    () {
-                      // Navegar a medicamentos
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Citas médicas
-                  _buildHealthCard(
-                    'Citas Médicas',
-                    'Próximas consultas',
-                    Icons.calendar_today,
-                    const Color(0xFF9C27B0),
-                    () {
-                      // Navegar a citas médicas
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
                   // Emergencias
                   _buildHealthCard(
                     'Emergencias',
