@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
+import '../widgets/lactation_record_dialog.dart';
 
 enum CalendarView { day, week, month }
 
@@ -1023,24 +1024,23 @@ class _LactationCalendarState extends State<LactationCalendar>
   void _showAddRecordDialog() {
     showDialog(
       context: context,
-      builder: (context) => _AddRecordDialog(
-        onRecordAdded: (record) {
-          _loadData();
-        },
-      ),
-    );
+      builder: (context) => const LactationRecordDialog(),
+    ).then((_) {
+      // Recargar datos después de cerrar el diálogo
+      _loadData();
+    });
   }
 
   void _editRecord(LactationRecord record) {
+    // Por ahora, mostrar el mismo diálogo de registro
+    // En el futuro se puede crear un diálogo específico para editar
     showDialog(
       context: context,
-      builder: (context) => _AddRecordDialog(
-        existingRecord: record,
-        onRecordAdded: (updatedRecord) {
-          _loadData();
-        },
-      ),
-    );
+      builder: (context) => const LactationRecordDialog(),
+    ).then((_) {
+      // Recargar datos después de cerrar el diálogo
+      _loadData();
+    });
   }
 
   void _showStats() {
@@ -1098,75 +1098,6 @@ class _LactationCalendarState extends State<LactationCalendar>
           ),
         ],
       ),
-    );
-  }
-}
-
-// Widget temporal para el diálogo de agregar registro
-class _AddRecordDialog extends StatefulWidget {
-  final LactationRecord? existingRecord;
-  final Function(LactationRecord) onRecordAdded;
-
-  const _AddRecordDialog({this.existingRecord, required this.onRecordAdded});
-
-  @override
-  State<_AddRecordDialog> createState() => _AddRecordDialogState();
-}
-
-class _AddRecordDialogState extends State<_AddRecordDialog> {
-  late LactationType _selectedType;
-  late DateTime _selectedDateTime;
-  late Duration _duration;
-  String? _notes;
-  String? _side;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.existingRecord != null) {
-      _selectedType = widget.existingRecord!.type;
-      _selectedDateTime = widget.existingRecord!.dateTime;
-      _duration = widget.existingRecord!.duration;
-      _notes = widget.existingRecord!.notes;
-      _side = widget.existingRecord!.side;
-    } else {
-      _selectedType = LactationType.breastfeeding;
-      _selectedDateTime = DateTime.now();
-      _duration = const Duration(minutes: 15);
-      _notes = null;
-      _side = null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        widget.existingRecord != null ? 'Editar Registro' : 'Nuevo Registro',
-        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Funcionalidad en desarrollo', style: GoogleFonts.quicksand()),
-          const SizedBox(height: 20),
-          Text(
-            'Próximamente podrás agregar registros de lactancia de forma rápida y fácil.',
-            style: GoogleFonts.quicksand(fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'Cerrar',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 }

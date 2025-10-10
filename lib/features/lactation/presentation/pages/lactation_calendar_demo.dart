@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+import 'lactation_record_page.dart';
 
 class LactationCalendarDemo extends StatefulWidget {
   const LactationCalendarDemo({super.key});
@@ -821,35 +822,8 @@ class _LactationCalendarDemoState extends State<LactationCalendarDemo>
   }
 
   void _showAddRecordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Nuevo Registro',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Funcionalidad en desarrollo', style: GoogleFonts.quicksand()),
-            const SizedBox(height: 20),
-            Text(
-              'Próximamente podrás agregar registros de lactancia de forma rápida y fácil.',
-              style: GoogleFonts.quicksand(fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cerrar',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const LactationRecordPage()),
     );
   }
 
