@@ -40,12 +40,22 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String name,
+    required String birthDate,
+    String? phone,
+    String? location,
+    String? idNumber,
+    String? motherName,
   }) async {
     try {
       final userModel = await _remoteDataSource.signUp(
         email: email,
         password: password,
         name: name,
+        birthDate: birthDate,
+        phone: phone,
+        location: location,
+        idNumber: idNumber,
+        motherName: motherName,
       );
       return Right(userModel);
     } on ServerException catch (e) {
@@ -92,9 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> resetPassword({
-    required String email,
-  }) async {
+  Future<Either<Failure, void>> resetPassword({required String email}) async {
     try {
       await _remoteDataSource.resetPassword(email: email);
       return const Right(null);

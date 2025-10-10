@@ -12,15 +12,18 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String name,
+    required String birthDate,
+    String? phone,
+    String? location,
+    String? idNumber,
+    String? motherName,
   });
 
   Future<Either<Failure, void>> signOut();
 
   Future<Either<Failure, User?>> getCurrentUser();
 
-  Future<Either<Failure, void>> resetPassword({
-    required String email,
-  });
+  Future<Either<Failure, void>> resetPassword({required String email});
 
   Future<Either<Failure, void>> sendEmailVerification();
 

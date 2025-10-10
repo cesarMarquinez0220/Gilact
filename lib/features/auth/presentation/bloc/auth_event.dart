@@ -11,10 +11,7 @@ class SignInRequested extends AuthEvent {
   final String email;
   final String password;
 
-  const SignInRequested({
-    required this.email,
-    required this.password,
-  });
+  const SignInRequested({required this.email, required this.password});
 
   @override
   List<Object> get props => [email, password];
@@ -24,15 +21,34 @@ class SignUpRequested extends AuthEvent {
   final String email;
   final String password;
   final String name;
+  final String birthDate;
+  final String? phone;
+  final String? location;
+  final String? idNumber;
+  final String? motherName;
 
   const SignUpRequested({
     required this.email,
     required this.password,
     required this.name,
+    required this.birthDate,
+    this.phone,
+    this.location,
+    this.idNumber,
+    this.motherName,
   });
 
   @override
-  List<Object> get props => [email, password, name];
+  List<Object?> get props => [
+    email,
+    password,
+    name,
+    birthDate,
+    phone,
+    location,
+    idNumber,
+    motherName,
+  ];
 }
 
 class SignOutRequested extends AuthEvent {
@@ -60,10 +76,7 @@ class UpdateProfileRequested extends AuthEvent {
   final String name;
   final String? photoUrl;
 
-  const UpdateProfileRequested({
-    required this.name,
-    this.photoUrl,
-  });
+  const UpdateProfileRequested({required this.name, this.photoUrl});
 
   @override
   List<Object?> get props => [name, photoUrl];

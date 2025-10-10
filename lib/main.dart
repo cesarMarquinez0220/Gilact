@@ -20,6 +20,10 @@ import 'features/navigation/presentation/pages/main_navigation_page.dart';
 import 'features/auth/presentation/pages/registration_page.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/videos/presentation/pages/user_videos_page.dart';
+import 'features/onboarding/presentation/pages/onboarding_page.dart';
+import 'features/onboarding/presentation/pages/situation_selection_page.dart';
+import 'features/onboarding/presentation/pages/prepartum_form_page.dart';
+import 'features/onboarding/presentation/pages/postpartum_form_page.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -91,6 +95,10 @@ class MyApp extends StatelessWidget {
             '/welcome': (context) => const WelcomeScreen(),
             '/home': (context) => const MainNavigationPage(),
             '/register': (context) => const RegistrationPage(),
+            '/onboarding': (context) => const OnboardingPage(),
+            '/situation': (context) => const SituationSelectionPage(),
+            '/prepartum-form': (context) => const PrepartumFormPage(),
+            '/postpartum-form': (context) => const PostpartumFormPage(),
             '/configuracion': (context) => const SettingsPage(),
             '/perfil': (context) => const MainNavigationPage(),
             '/lecciones': (context) => const LessonsPage(),

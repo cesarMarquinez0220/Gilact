@@ -33,6 +33,11 @@ class SignUpUseCase implements UseCase<User, SignUpParams> {
       email: params.email,
       password: params.password,
       name: params.name,
+      birthDate: params.birthDate,
+      phone: params.phone,
+      location: params.location,
+      idNumber: params.idNumber,
+      motherName: params.motherName,
     );
   }
 }
@@ -117,38 +122,40 @@ class SignInParams {
   final String email;
   final String password;
 
-  SignInParams({
-    required this.email,
-    required this.password,
-  });
+  SignInParams({required this.email, required this.password});
 }
 
 class SignUpParams {
   final String email;
   final String password;
   final String name;
+  final String birthDate;
+  final String? phone;
+  final String? location;
+  final String? idNumber;
+  final String? motherName;
 
   SignUpParams({
     required this.email,
     required this.password,
     required this.name,
+    required this.birthDate,
+    this.phone,
+    this.location,
+    this.idNumber,
+    this.motherName,
   });
 }
 
 class ResetPasswordParams {
   final String email;
 
-  ResetPasswordParams({
-    required this.email,
-  });
+  ResetPasswordParams({required this.email});
 }
 
 class UpdateProfileParams {
   final String name;
   final String? photoUrl;
 
-  UpdateProfileParams({
-    required this.name,
-    this.photoUrl,
-  });
+  UpdateProfileParams({required this.name, this.photoUrl});
 }

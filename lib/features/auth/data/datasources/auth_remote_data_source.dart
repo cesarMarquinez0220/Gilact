@@ -12,6 +12,11 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
     required String name,
+    required String birthDate,
+    String? phone,
+    String? location,
+    String? idNumber,
+    String? motherName,
   });
 
   Future<void> signOut();
@@ -62,6 +67,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
     required String name,
+    required String birthDate,
+    String? phone,
+    String? location,
+    String? idNumber,
+    String? motherName,
   }) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -76,7 +86,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Actualizar el perfil del usuario
       await credential.user!.updateDisplayName(name);
 
-      // Crear documento en Firestore
+      // Calcular edad automáticamente desde fecha de nacimiento
+      int? calculatedAge;
+      if (birthDate.isNotEmpty) {
+        try {
+          final birthDateTime = DateTime.parse(birthDate);
+          final now = DateTime.now();
+          calculatedAge = now.year - birthDateTime.year;
+          if (now.month < birthDateTime.month ||
+              (now.month == birthDateTime.month &&
+                  now.day < birthDateTime.day)) {
+            calculatedAge--;
+          }
+        } catch (e) {
+          // Si hay error en el cálculo, dejar edad como null
+          calculatedAge = null;
+        }
+      }
+
+      // Crear documento completo en Firestore
       final userModel = UserModel.fromFirebaseUser(
         id: credential.user!.uid,
         email: email,
@@ -85,12 +113,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         isEmailVerified: credential.user!.emailVerified,
+        birthDate: birthDate,
+        phone: phone,
+        location: location,
+        age: calculatedAge,
+        idNumber: idNumber,
+        motherName: motherName,
       );
 
       await _firestore
           .collection('Users')
           .doc(credential.user!.uid)
           .set(userModel.toDocument());
+
+      // Crear subcolecciones vacías
+      try {
+        await _createUserSubcollections(credential.user!.uid);
+        print(
+          'Subcolecciones creadas exitosamente para usuario: ${credential.user!.uid}',
+        );
+      } catch (e) {
+        print('Error creando subcolecciones: $e');
+        // No fallar el registro si las subcolecciones fallan
+      }
 
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -239,6 +284,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException(
         message: 'Error al obtener datos del usuario: ${e.toString()}',
       );
+    }
+  }
+
+  /// Crea las subcolecciones vacías para un usuario
+  Future<void> _createUserSubcollections(String userId) async {
+    try {
+      print('Iniciando creación de subcolecciones para usuario: $userId');
+
+      // Crear subcolección 'videos' con documento inicial
+      print('Creando subcolección videos...');
+      await _firestore
+          .collection('Users')
+          .doc(userId)
+          .collection('videos')
+          .doc('initial')
+          .set({
+            'createdAt': Timestamp.fromDate(DateTime.now()),
+            'type': 'initial',
+            'description': 'Colección de videos del usuario',
+          });
+      print('Subcolección videos creada');
+
+      // Crear subcolección 'situacion' con documento inicial
+      print('Creando subcolección situacion...');
+      await _firestore
+          .collection('Users')
+          .doc(userId)
+          .collection('situacion')
+          .doc('initial')
+          .set({
+            'createdAt': Timestamp.fromDate(DateTime.now()),
+            'type': 'initial',
+            'description': 'Colección de situaciones del usuario',
+          });
+      print('Subcolección situacion creada');
+
+      print('Subcolecciones creadas exitosamente con documentos iniciales.');
+    } catch (e) {
+      // Si hay error creando subcolecciones, no fallar el registro
+      print('Error detallado creando subcolecciones: $e');
+      print('Stack trace: ${StackTrace.current}');
+      rethrow; // Re-lanzar para que se capture en el try-catch del método padre
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/auth_bloc.dart';
 
@@ -16,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _isCheckingOnboarding = true;
 
   @override
   void initState() {
@@ -47,11 +49,35 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeController.forward();
   }
 
-  void _checkAuthStatus() {
+  void _checkAuthStatus() async {
+    print('🔍 SplashScreen: Iniciando verificación de estado...');
     // Verificar estado de autenticación después de 3 segundos
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
       if (mounted) {
-        context.read<AuthBloc>().add(const GetCurrentUserRequested());
+        print('🔍 SplashScreen: Verificando onboarding...');
+        // Verificar si el onboarding ya fue completado
+        final prefs = await SharedPreferences.getInstance();
+        final onboardingCompleted =
+            prefs.getBool('onboarding_completed') ?? false;
+
+        print('🔍 SplashScreen: onboarding_completed = $onboardingCompleted');
+
+        if (onboardingCompleted) {
+          print(
+            '🔍 SplashScreen: Onboarding completado, verificando autenticación...',
+          );
+          // Si el onboarding ya fue completado, verificar autenticación
+          setState(() {
+            _isCheckingOnboarding = false;
+          });
+          context.read<AuthBloc>().add(const GetCurrentUserRequested());
+        } else {
+          print(
+            '🔍 SplashScreen: Onboarding NO completado, navegando a onboarding...',
+          );
+          // Si no, ir directamente al onboarding
+          Navigator.of(context).pushReplacementNamed('/onboarding');
+        }
       }
     });
   }
@@ -68,10 +94,24 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          } else if (state is AuthUnauthenticated || state is AuthFailure) {
-            Navigator.of(context).pushReplacementNamed('/login');
+          print(
+            '🔍 SplashScreen: BlocListener recibió estado: ${state.runtimeType}',
+          );
+          // Solo escuchar el AuthBloc si no estamos verificando onboarding
+          if (!_isCheckingOnboarding) {
+            if (state is AuthAuthenticated) {
+              print('🔍 SplashScreen: Usuario autenticado, navegando a /home');
+              Navigator.of(context).pushReplacementNamed('/home');
+            } else if (state is AuthUnauthenticated || state is AuthFailure) {
+              print(
+                '🔍 SplashScreen: Usuario NO autenticado, navegando a /login',
+              );
+              Navigator.of(context).pushReplacementNamed('/login');
+            }
+          } else {
+            print(
+              '🔍 SplashScreen: Ignorando estado porque estamos verificando onboarding',
+            );
           }
         },
         child: Container(

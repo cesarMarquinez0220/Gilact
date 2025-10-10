@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/services/credentials_cache_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -106,10 +107,34 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // Iniciar partículas
     _particleController.repeat();
 
-    // Después de las animaciones, verificar situación del usuario
+    // Después de las animaciones, verificar onboarding y situación del usuario
     Future.delayed(const Duration(seconds: 3), () {
-      _checkUserSituation();
+      _checkOnboardingAndUserSituation();
     });
+  }
+
+  Future<void> _checkOnboardingAndUserSituation() async {
+    print('🔍 WelcomeScreen: Iniciando verificación de onboarding...');
+
+    // Verificar si el onboarding ya fue completado
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+
+    print('🔍 WelcomeScreen: onboarding_completed = $onboardingCompleted');
+
+    if (onboardingCompleted) {
+      print(
+        '🔍 WelcomeScreen: Onboarding completado, verificando situación del usuario...',
+      );
+      // Si el onboarding ya fue completado, verificar situación del usuario
+      await _checkUserSituation();
+    } else {
+      print(
+        '🔍 WelcomeScreen: Onboarding NO completado, navegando a onboarding...',
+      );
+      // Si no, ir directamente al onboarding
+      Navigator.of(context).pushReplacementNamed('/onboarding');
+    }
   }
 
   Future<void> _checkUserSituation() async {
