@@ -30,6 +30,12 @@ import '../../features/user/domain/usecases/user_profile_usecases.dart'
 import '../../features/lessons/domain/usecases/lesson_usecases.dart'
     as lesson_usecases;
 
+// Services
+import '../../features/onboarding/data/services/user_subcollections_service.dart';
+import '../../features/videos/data/services/dynamic_video_service.dart';
+import '../../features/videos/data/services/video_interaction_service.dart';
+import '../../features/lactation/data/services/lactation_service.dart';
+
 // BLoCs
 import '../../features/ui/presentation/bloc/ui_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -47,6 +53,20 @@ Future<void> configureDependencies() async {
 
   getIt.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
   getIt.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
+
+  // Services
+  getIt.registerLazySingleton<UserSubcollectionsService>(
+    () => UserSubcollectionsService(getIt<FirebaseFirestore>()),
+  );
+  getIt.registerLazySingleton<DynamicVideoService>(
+    () => DynamicVideoService(getIt<FirebaseFirestore>()),
+  );
+  getIt.registerLazySingleton<VideoInteractionService>(
+    () => VideoInteractionService(getIt<FirebaseFirestore>()),
+  );
+  getIt.registerLazySingleton<LactationService>(
+    () => LactationService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
+  );
 
   // Data Sources
   getIt.registerLazySingleton<UILocalDataSource>(
