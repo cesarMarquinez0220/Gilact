@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../data/datasources/onboarding_remote_data_source.dart';
+import '../../data/services/user_subcollections_service.dart';
 import '../../domain/entities/prepartum_info.dart';
 import '../../../../alerta_dialoge.dart';
 
@@ -131,27 +131,23 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
       }
 
       final userId = authState.user.id;
-      final now = DateTime.now();
+      final subcollectionsService = GetIt.instance<UserSubcollectionsService>();
 
-      // Crear la información de preparto
-      final prepartumInfo = PrepartumInfo(
-        userId: userId,
-        expectedBirthDate: _selectedDate!,
-        createdAt: now,
-        updatedAt: now,
-      );
+      // Preparar datos del formulario
+      final formData = {
+        'expectedBirthDate': _selectedDate!.toIso8601String(),
+        'formType': 'prepartum',
+        'completedAt': DateTime.now().toIso8601String(),
+      };
 
-      // Guardar en Firestore usando el data source
-      final dataSource = OnboardingRemoteDataSourceImpl(
-        FirebaseFirestore.instance,
-      );
-      await dataSource.savePrepartumInfo(prepartumInfo);
+      // Completar el proceso de onboarding (crear subcolecciones y guardar datos)
+      await subcollectionsService.completeOnboardingProcess(userId, formData);
 
       if (mounted) {
         DialogExample.showSuccessDialog(
           context,
-          '¡Información Guardada!',
-          'Tu información de preparto ha sido guardada exitosamente.',
+          '¡Onboarding Completado!',
+          'Tu información de preparto ha sido guardada exitosamente. ¡Bienvenida a Gilact!',
           () {
             Navigator.of(context).pushReplacementNamed('/home');
           },
@@ -166,7 +162,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
         DialogExample.showErrorDialog(
           context,
           'Error',
-          'No se pudo guardar la información. Inténtalo nuevamente.',
+          'Error al completar el onboarding: $e',
         );
       }
     }

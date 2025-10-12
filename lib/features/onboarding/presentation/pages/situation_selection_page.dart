@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../data/services/user_subcollections_service.dart';
 import '../widgets/situation_option_widget.dart';
 
 class SituationSelectionPage extends StatefulWidget {
@@ -69,19 +70,10 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
       }
 
       final userId = authState.user.id;
+      final subcollectionsService = GetIt.instance<UserSubcollectionsService>();
 
-      // Guardar la situación en la subcolección
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userId)
-          .collection('situacion')
-          .doc('current')
-          .set({
-            'situacion': situation,
-            'fechaSeleccion': Timestamp.fromDate(DateTime.now()),
-            'createdAt': Timestamp.fromDate(DateTime.now()),
-            'updatedAt': Timestamp.fromDate(DateTime.now()),
-          });
+      // Solo guardar la selección temporalmente (sin crear subcolecciones aún)
+      await subcollectionsService.saveTemporarySituation(userId, situation);
 
       // Navegar al formulario correspondiente
       if (mounted) {
@@ -92,6 +84,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
         }
       }
     } catch (e) {
+      print('❌ Error en _saveSituation: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

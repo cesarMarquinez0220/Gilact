@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'dart:math' as math;
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../data/datasources/onboarding_remote_data_source.dart';
+import '../../data/services/user_subcollections_service.dart';
 import '../../domain/entities/postpartum_info.dart';
 import '../../../../alerta_dialoge.dart';
 
@@ -192,32 +192,29 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       }
 
       final userId = authState.user.id;
-      final now = DateTime.now();
+      final subcollectionsService = GetIt.instance<UserSubcollectionsService>();
 
-      // Crear la información de postparto
-      final postpartumInfo = PostpartumInfo(
-        userId: userId,
-        babyName: _babyNameController.text.trim(),
-        birthDate: _selectedBirthDate!,
-        birthPlace: _birthPlaceController.text.trim(),
-        birthWeight: double.parse(_birthWeightController.text.trim()),
-        gestationalAge: _calculatedGestationalAge,
-        lastMenstruation: _selectedMenstruationDate!,
-        createdAt: now,
-        updatedAt: now,
-      );
+      // Preparar datos del formulario
+      final formData = {
+        'babyName': _babyNameController.text.trim(),
+        'birthDate': _selectedBirthDate!.toIso8601String(),
+        'birthTime': _birthTimeController.text.trim(),
+        'birthPlace': _birthPlaceController.text.trim(),
+        'birthWeight': double.parse(_birthWeightController.text.trim()),
+        'gestationalAge': _calculatedGestationalAge,
+        'lastMenstruation': _selectedMenstruationDate!.toIso8601String(),
+        'formType': 'postpartum',
+        'completedAt': DateTime.now().toIso8601String(),
+      };
 
-      // Guardar en Firestore usando el data source
-      final dataSource = OnboardingRemoteDataSourceImpl(
-        FirebaseFirestore.instance,
-      );
-      await dataSource.savePostpartumInfo(postpartumInfo);
+      // Completar el proceso de onboarding (crear subcolecciones y guardar datos)
+      await subcollectionsService.completeOnboardingProcess(userId, formData);
 
       if (mounted) {
         DialogExample.showSuccessDialog(
           context,
-          '¡Registro Exitoso!',
-          'La información de tu bebé ha sido guardada exitosamente.',
+          '¡Onboarding Completado!',
+          'La información de tu bebé ha sido guardada exitosamente. ¡Bienvenida a Gilact!',
           () {
             Navigator.of(context).pushReplacementNamed('/home');
           },
@@ -232,7 +229,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
         DialogExample.showErrorDialog(
           context,
           'Error',
-          'No se pudo guardar la información. Inténtalo nuevamente.',
+          'Error al completar el onboarding: $e',
         );
       }
     }
@@ -524,39 +521,39 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               const SizedBox(height: 12),
 
-                            // Botón de cancelar
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
+                              // Botón de cancelar
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text(
+                                    'Cancelar',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Colors.white70,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  foregroundColor: Colors.white,
-                                ),
-                                child: const Text(
-                                  'Cancelar',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.white70,
-                                  ),
-                                ),
-                              ),
-                            ),
 
                               const SizedBox(height: 16),
                             ],
