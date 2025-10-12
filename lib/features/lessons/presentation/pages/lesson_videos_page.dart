@@ -496,20 +496,16 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   bool _isVideoAvailable(Video video, int index) {
     if (_videos == null) return false;
 
-    // Solo el primer video de la primera lección está disponible inicialmente
-    if (video.leccionId == 1 && index == 0) {
+    // Solo el primer video (videoId = 1) está disponible inicialmente
+    if (video.videoId == 1) {
       return true;
     }
 
-    // Para videos posteriores, verificar si el video anterior está completado
-    if (index > 0) {
-      final previousVideo = _videos![index - 1];
-      return context.watch<LeccionesProvider>().isLeccionCompletada(
-        previousVideo.videoId,
-      );
-    }
-
-    return false;
+    // Para videos posteriores, verificar si el video anterior en secuencia está completado
+    final previousVideoId = video.videoId - 1;
+    return context.watch<LeccionesProvider>().isLeccionCompletada(
+      previousVideoId,
+    );
   }
 
   IconData _getIconForVideo(Video video) {

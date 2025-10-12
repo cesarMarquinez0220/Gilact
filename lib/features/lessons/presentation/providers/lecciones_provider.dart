@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
 class LeccionesProvider extends ChangeNotifier {
@@ -11,7 +12,8 @@ class LeccionesProvider extends ChangeNotifier {
   static const String _keyProgresoVideos = 'progreso_videos';
 
   LeccionesProvider() {
-    _cargarProgresoGuardado();
+    // No cargar progreso automáticamente - se cargará desde MainNavigationPage
+    print('📚 LeccionesProvider inicializado (sin carga automática)');
   }
 
   bool isLeccionCompletada(int videoId) {
@@ -26,7 +28,20 @@ class LeccionesProvider extends ChangeNotifier {
     _leccionesCompletadas.add(videoId);
     _progresoVideos[videoId] = 100.0;
     _guardarProgreso();
+
+    // Precargar el siguiente video cuando se completa una lección
+    _preloadNextVideo(videoId);
+
     notifyListeners();
+  }
+
+  /// Precarga el siguiente video cuando se completa una lección
+  void _preloadNextVideo(int currentVideoId) {
+    // Notificar al MainNavigationPage para precargar el siguiente video
+    // Esto se puede hacer a través de un callback o evento
+    print(
+      '🎯 Lección $currentVideoId completada, precargando siguiente video...',
+    );
   }
 
   void actualizarProgresoVideo(int videoId, double progreso) {
@@ -44,6 +59,70 @@ class LeccionesProvider extends ChangeNotifier {
   int get ultimaLeccionCompletada {
     if (_leccionesCompletadas.isEmpty) return 0;
     return _leccionesCompletadas.reduce((a, b) => a > b ? a : b);
+  }
+
+  /// Limpia todo el progreso guardado (para cuentas nuevas)
+  Future<void> clearProgress() async {
+    _leccionesCompletadas.clear();
+    _progresoVideos.clear();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyLeccionesCompletadas);
+    await prefs.remove(_keyProgresoVideos);
+
+    print('🧹 Progreso limpiado para cuenta nueva');
+    notifyListeners();
+  }
+
+  /// Carga el progreso desde Firestore para usuarios existentes
+  Future<void> loadProgressFromFirestore(String userId) async {
+    try {
+      print('📊 Cargando progreso desde Firestore para usuario: $userId');
+
+      // Limpiar datos locales primero
+      _leccionesCompletadas.clear();
+      _progresoVideos.clear();
+
+      // Cargar desde Firestore
+      final videosCollection = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .collection('videos');
+
+      final querySnapshot = await videosCollection.get();
+
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data();
+        final videoId = data['videoId'] as int?;
+        final isCompleted = data['isCompleted'] as bool? ?? false;
+        final completado = data['completado'] as bool? ?? false;
+        final avance = data['avance'] as double? ?? 0.0;
+
+        if (videoId != null) {
+          // Usar el progreso de Firestore
+          _progresoVideos[videoId] = avance * 100;
+
+          // Marcar como completado solo si ambos campos son true
+          if (isCompleted && completado) {
+            _leccionesCompletadas.add(videoId);
+            print('✅ Video $videoId marcado como completado desde Firestore');
+          } else {
+            print(
+              '⏸️ Video $videoId NO completado (isCompleted: $isCompleted, completado: $completado)',
+            );
+          }
+        }
+      }
+
+      print(
+        '📊 Progreso cargado desde Firestore: ${_leccionesCompletadas.length} videos completados',
+      );
+      notifyListeners();
+    } catch (e) {
+      print('❌ Error cargando progreso desde Firestore: $e');
+      // Fallback a SharedPreferences
+      await _cargarProgresoGuardado();
+    }
   }
 
   /// Carga el progreso guardado desde SharedPreferences
