@@ -75,8 +75,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LeccionesProvider()),
-        ChangeNotifierProvider(create: (_) => VideoImagesProvider()),
+        ChangeNotifierProvider(create: (_) => LeccionesProvider(), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) => VideoImagesProvider(),
+          lazy: false,
+        ),
       ],
       child: MultiBlocProvider(
         providers: [

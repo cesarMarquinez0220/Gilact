@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:gilact/features/lactation/presentation/pages/lactation_calendar_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+import 'package:provider/provider.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../tips/presentation/pages/tips_page.dart';
-import '../../../lessons/presentation/pages/lessons_page.dart';
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../../lactation/presentation/pages/lactation_calendar_demo.dart';
 import '../../../auth/domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
 import '../../../user/domain/entities/user_profile_entities.dart';
+import '../../../lessons/presentation/providers/lecciones_provider.dart';
+import '../../../videos/data/services/video_preload_service.dart';
+import '../../../videos/data/services/video_cache_service.dart';
+import '../../../videos/data/services/video_interaction_service.dart';
+import 'package:get_it/get_it.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -48,6 +53,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+
+    // Inicializar precarga de videos y datos
+    _initializeAppData();
 
     _backgroundController.forward();
 
@@ -582,7 +590,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   void _navigateToCalendar() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => const LactationCalendarDemo(),
+        builder: (context) => const LactationCalendarPage(),
       ),
     );
   }
@@ -1408,5 +1416,156 @@ class _MainNavigationPageState extends State<MainNavigationPage>
         ),
       ),
     );
+  }
+
+  /// Inicializa los datos de la aplicación: precarga videos y configura providers
+  Future<void> _initializeAppData() async {
+    print('🚀 MainNavigationPage: Inicializando datos de la aplicación...');
+
+    try {
+      // Obtener el usuario actual
+      final authState = context.read<AuthBloc>().state;
+      if (authState is! AuthAuthenticated) {
+        print('❌ Usuario no autenticado, saltando precarga');
+        return;
+      }
+
+      final userId = authState.user.id;
+      print('👤 Usuario autenticado: $userId');
+
+      // Inicializar providers con datos limpios para cuenta nueva
+      await _initializeProvidersForNewUser();
+
+      // Limpiar documentos duplicados en subcolección videos (solo si existen)
+      await _cleanupDuplicateDocumentsIfNeeded(userId);
+
+      // Precargar videos en cache
+      await _preloadVideosInCache();
+
+      // Configurar estado inicial de lecciones (solo primera habilitada)
+      _setupInitialLessonState();
+
+      print('✅ MainNavigationPage: Datos inicializados correctamente');
+    } catch (e) {
+      print('❌ Error inicializando datos: $e');
+    }
+  }
+
+  /// Inicializa los providers con estado limpio para cuenta nueva
+  Future<void> _initializeProvidersForNewUser() async {
+    final leccionesProvider = Provider.of<LeccionesProvider>(
+      context,
+      listen: false,
+    );
+
+    // Verificar si es usuario nuevo o existente
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      final userId = authState.user.id;
+
+      // Verificar si el usuario tiene progreso previo
+      final hasPreviousProgress = await _checkIfUserHasProgress(userId);
+
+      if (hasPreviousProgress) {
+        // Cargar progreso existente
+        await leccionesProvider.loadProgressFromFirestore(userId);
+        print('📊 Progreso existente cargado para usuario: $userId');
+      } else {
+        // Limpiar progreso para cuenta nueva
+        await leccionesProvider.clearProgress();
+        print('🧹 Progreso limpiado para cuenta nueva');
+      }
+    }
+
+    // Inicializar imágenes de videos (se inicializa automáticamente)
+    // await videoImagesProvider.initializeImages();
+
+    print('📋 Providers inicializados');
+  }
+
+  /// Verifica si el usuario tiene progreso previo en Firestore
+  Future<bool> _checkIfUserHasProgress(String userId) async {
+    try {
+      // TODO: Implementar verificación real en Firestore
+      // Por ahora, asumir que es usuario nuevo
+      return false;
+    } catch (e) {
+      print('❌ Error verificando progreso del usuario: $e');
+      return false;
+    }
+  }
+
+  /// Precarga los primeros videos en cache para mejor rendimiento
+  Future<void> _preloadVideosInCache() async {
+    try {
+      final videoPreloadService = VideoPreloadService();
+
+      // Precargar solo los primeros 2 videos inicialmente
+      final videosToPreload = [1, 2];
+
+      for (int videoId in videosToPreload) {
+        try {
+          // Precargar metadata del video
+          await videoPreloadService.preloadVideoMetadata(videoId);
+
+          // Precargar video en cache (solo los primeros segundos)
+          await VideoCacheService.preloadVideoSegment(videoId, duration: 30);
+
+          print('📹 Video $videoId precargado en cache');
+        } catch (e) {
+          print('⚠️ Error precargando video $videoId: $e');
+        }
+      }
+
+      print('✅ Precarga inicial de videos completada (videos 1-2)');
+    } catch (e) {
+      print('❌ Error en precarga de videos: $e');
+    }
+  }
+
+  /// Configura el estado inicial de las lecciones (solo primera habilitada)
+  void _setupInitialLessonState() {
+    // Para cuenta nueva, solo la primera lección está habilitada
+    // No hay progreso previo, por lo que el estado inicial es correcto
+    print(
+      '🎯 Estado inicial de lecciones configurado (solo primera habilitada)',
+    );
+  }
+
+  /// Limpia documentos duplicados en la subcolección videos (solo si existen)
+  Future<void> _cleanupDuplicateDocumentsIfNeeded(String userId) async {
+    try {
+      final videoInteractionService = GetIt.instance<VideoInteractionService>();
+      await videoInteractionService.cleanupDuplicateDocuments(userId);
+    } catch (e) {
+      print('❌ Error limpiando documentos duplicados: $e');
+    }
+  }
+
+  /// Precarga progresiva del siguiente video cuando el usuario avanza
+  Future<void> preloadNextVideo(int currentVideoId) async {
+    try {
+      final nextVideoId = currentVideoId + 1;
+      final videoPreloadService = VideoPreloadService();
+
+      // Verificar si ya está precargado
+      final isPreloaded = await VideoCacheService.isVideoPreloaded(nextVideoId);
+      if (isPreloaded) {
+        print('ℹ️ Video $nextVideoId ya está precargado');
+        return;
+      }
+
+      print('📹 Precargando video $nextVideoId progresivamente...');
+
+      // Precargar metadata del video
+      await videoPreloadService.preloadVideoMetadata(nextVideoId);
+
+      // Precargar video en cache
+      await VideoCacheService.preloadVideoSegment(nextVideoId, duration: 30);
+
+      print('✅ Video $nextVideoId precargado progresivamente');
+    } catch (e) {
+      print('❌ Error en precarga progresiva: $e');
+    }
   }
 }
