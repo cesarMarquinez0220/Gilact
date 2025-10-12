@@ -356,9 +356,9 @@ class _LactationCalendarState extends State<LactationCalendar>
     final dayRecords = _records
         .where(
           (record) =>
-              record.dateTime.year == _selectedDate.year &&
-              record.dateTime.month == _selectedDate.month &&
-              record.dateTime.day == _selectedDate.day,
+              record.fechaRegistro.year == _selectedDate.year &&
+              record.fechaRegistro.month == _selectedDate.month &&
+              record.fechaRegistro.day == _selectedDate.day,
         )
         .toList();
 
@@ -400,9 +400,9 @@ class _LactationCalendarState extends State<LactationCalendar>
               final dayRecords = _records
                   .where(
                     (record) =>
-                        record.dateTime.year == day.year &&
-                        record.dateTime.month == day.month &&
-                        record.dateTime.day == day.day,
+                        record.fechaRegistro.year == day.year &&
+                        record.fechaRegistro.month == day.month &&
+                        record.fechaRegistro.day == day.day,
                   )
                   .toList();
 
@@ -440,9 +440,9 @@ class _LactationCalendarState extends State<LactationCalendar>
               final dayRecords = _records
                   .where(
                     (record) =>
-                        record.dateTime.year == day.year &&
-                        record.dateTime.month == day.month &&
-                        record.dateTime.day == day.day,
+                        record.fechaRegistro.year == day.year &&
+                        record.fechaRegistro.month == day.month &&
+                        record.fechaRegistro.day == day.day,
                   )
                   .toList();
 
@@ -688,7 +688,7 @@ class _LactationCalendarState extends State<LactationCalendar>
                   ),
                 ),
                 child: Icon(
-                  _getTypeIcon(record.type),
+                  _getTypeIcon(record.tipo),
                   color: Colors.white,
                   size: 24,
                 ),
@@ -699,7 +699,7 @@ class _LactationCalendarState extends State<LactationCalendar>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _getTypeName(record.type),
+                      _getTypeName(record.tipo),
                       style: GoogleFonts.quicksand(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -707,15 +707,15 @@ class _LactationCalendarState extends State<LactationCalendar>
                       ),
                     ),
                     Text(
-                      '${_formatTime(record.dateTime)} • ${record.duration.inMinutes} min',
+                      '${_formatTime(record.fechaRegistro)} • ${record.duracion.inMinutes} min',
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
-                    if (record.notes != null && record.notes!.isNotEmpty)
+                    if (record.notas != null && record.notas!.isNotEmpty)
                       Text(
-                        record.notes!,
+                        record.notas!,
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           color: Colors.white.withValues(alpha: 0.7),
@@ -806,13 +806,13 @@ class _LactationCalendarState extends State<LactationCalendar>
                         child: Row(
                           children: [
                             Icon(
-                              _getTypeIcon(record.type),
+                              _getTypeIcon(record.tipo),
                               color: Colors.white.withValues(alpha: 0.8),
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${_formatTime(record.dateTime)} • ${record.duration.inMinutes} min',
+                              '${_formatTime(record.fechaRegistro)} • ${record.duracion.inMinutes} min',
                               style: GoogleFonts.quicksand(
                                 fontSize: 12,
                                 color: Colors.white.withValues(alpha: 0.8),

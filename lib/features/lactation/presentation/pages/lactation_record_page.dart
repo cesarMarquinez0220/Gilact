@@ -5,9 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart';
+import '../../domain/entities/lactation_record.dart';
 
 class LactationRecordPage extends StatefulWidget {
-  const LactationRecordPage({Key? key}) : super(key: key);
+  final DateTime? selectedDate;
+  final LactationRecord? existingRecord;
+
+  const LactationRecordPage({Key? key, this.selectedDate, this.existingRecord})
+    : super(key: key);
 
   @override
   State<LactationRecordPage> createState() => _LactationRecordPageState();
@@ -47,11 +52,25 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   }
 
   void _initializeControllers() {
-    // Inicializar con valores por defecto
-    _volumenExtraccionController.text = '0';
-    _horasSuenoController.text = '0';
-    _vecesPechoController.text = '0';
-    _vecesBiberonController.text = '0';
+    if (widget.existingRecord != null) {
+      // Cargar datos del registro existente
+      final record = widget.existingRecord!;
+      _volumenExtraccionController.text = record.volumenExtraccion.toString();
+      _horasSuenoController.text = record.horasSuenoBebe.toString();
+      _vecesPechoController.text = record.vecesPecho.toString();
+      _vecesBiberonController.text = record.vecesBiberon.toString();
+
+      // Configurar selecciones basadas en el registro existente
+      _seleccionVolumenUnidad = record.unidadVolumen;
+      _seleccionSuenoUnidad = record.unidadSueno;
+      _seleccionPecho = record.pechoDado;
+    } else {
+      // Inicializar con valores por defecto
+      _volumenExtraccionController.text = '0';
+      _horasSuenoController.text = '0';
+      _vecesPechoController.text = '0';
+      _vecesBiberonController.text = '0';
+    }
   }
 
   String _getValidationMessage(String field, int value) {
@@ -164,7 +183,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Registro de Lactancia',
+          widget.existingRecord != null
+              ? 'Editar Registro de Lactancia'
+              : 'Registro de Lactancia',
           style: GoogleFonts.quicksand(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -254,7 +275,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                               const SizedBox(height: 40),
 
                               // Botón de registro
-                              _buildRegisterButton(),
+                              _buildActionButtons(),
                               const SizedBox(height: 20),
                             ],
                           ),
@@ -328,7 +349,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Registro de Lactancia',
+                      widget.existingRecord != null
+                          ? 'Editar Registro de Lactancia'
+                          : 'Registro de Lactancia',
                       style: GoogleFonts.quicksand(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -958,45 +981,101 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     );
   }
 
-  Widget _buildRegisterButton() {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _guardarDatos,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
+        // Botón principal (Guardar/Actualizar)
+        Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _guardarDatos,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    widget.existingRecord != null
+                        ? 'Actualizar Registro'
+                        : 'Registrar Lactancia',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(1, 1),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+
+        // Botón de borrado (solo si es edición)
+        if (widget.existingRecord != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.red.withValues(alpha: 0.8),
+                  Colors.redAccent.withValues(alpha: 0.8),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
-              )
-            : Text(
-                'Registrar Lactancia',
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _eliminarRegistro,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                'Eliminar Registro',
                 style: GoogleFonts.quicksand(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1010,7 +1089,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   ],
                 ),
               ),
-      ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -1018,6 +1100,168 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     if (text.isEmpty) return 0;
     final intValue = int.tryParse(text);
     return intValue ?? 0;
+  }
+
+  Future<void> _eliminarRegistro() async {
+    if (widget.existingRecord == null) return;
+
+    // Mostrar diálogo de confirmación
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icono de advertencia
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.red.withValues(alpha: 0.2),
+                      Colors.redAccent.withValues(alpha: 0.1),
+                    ],
+                  ),
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.red,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '¿Eliminar Registro?',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este registro de lactancia?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: GoogleFonts.quicksand(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Eliminar',
+                        style: GoogleFonts.quicksand(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error de Autenticación',
+          'No hay usuario autenticado. Por favor, inicia sesión nuevamente.',
+        );
+        return;
+      }
+
+      // Eliminar el registro
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('situacion')
+          .doc('seleccion')
+          .collection('lactancia')
+          .doc(widget.existingRecord!.id)
+          .delete();
+
+      // Mostrar mensaje de éxito y cerrar pantalla
+      DialogExample.showSuccessDialog(
+        context,
+        'Registro Eliminado',
+        'El registro de lactancia ha sido eliminado correctamente.',
+        () {
+          Navigator.of(context).pop(true); // Devolver true para indicar éxito
+        },
+      );
+    } catch (e) {
+      DialogExample.showErrorDialog(
+        context,
+        'Error al Eliminar',
+        'No se pudo eliminar el registro. Por favor, inténtalo nuevamente.\n\nError: ${e.toString()}',
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _guardarDatos() async {
@@ -1045,7 +1289,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           .collection('Users')
           .doc(user.uid)
           .collection('situacion')
-          .doc('Post-Parto');
+          .doc('seleccion');
 
       final situacionSnapshot = await situacionDocRef.get();
 
@@ -1058,6 +1302,26 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         return;
       }
 
+      // Verificar que el situationType sea 'postparto'
+      final data = situacionSnapshot.data();
+      final situationType = data?['situationType'] as String?;
+
+      if (situationType != 'postparto') {
+        DialogExample.showInfoDialog(
+          context,
+          'Información Requerida',
+          'Debes completar el proceso de onboarding y seleccionar la situación "Post-Parto" para poder registrar datos de lactancia.',
+        );
+        return;
+      }
+
+      // Usar la fecha seleccionada o la fecha actual
+      final fechaRegistro = widget.selectedDate ?? DateTime.now();
+
+      // Para múltiples registros por día, usar timestamp actual para diferenciarlos
+      final timestampRegistro =
+          widget.existingRecord?.timestamp ?? DateTime.now();
+
       // Preparar datos de lactancia
       Map<String, dynamic> datosLactancia = {
         'volumen_extraccion': _parseNumber(_volumenExtraccionController.text),
@@ -1067,12 +1331,23 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         'pecho_dado': _seleccionPecho,
         'horas_sueno_bebe': _parseNumber(_horasSuenoController.text),
         'unidad_sueno': _seleccionSuenoUnidad,
-        'timestamp': Timestamp.now(),
-        'fecha_registro': DateTime.now().toIso8601String(),
+        'timestamp': Timestamp.fromDate(timestampRegistro),
+        'fecha_registro': fechaRegistro.toIso8601String(),
+        'hora_registro': timestampRegistro
+            .toIso8601String(), // Para diferenciar registros del mismo día
       };
 
-      // Guardar en la subcolección de lactancia
-      await situacionDocRef.collection('lactancia').add(datosLactancia);
+      // Guardar o actualizar en la subcolección de lactancia
+      if (widget.existingRecord != null) {
+        // Actualizar registro existente
+        await situacionDocRef
+            .collection('lactancia')
+            .doc(widget.existingRecord!.id)
+            .update(datosLactancia);
+      } else {
+        // Crear nuevo registro
+        await situacionDocRef.collection('lactancia').add(datosLactancia);
+      }
 
       // Mostrar mensaje de éxito y cerrar pantalla
       DialogExample.showSuccessDialog(
@@ -1080,7 +1355,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         'Registro Exitoso',
         'Los datos de lactancia han sido registrados correctamente.',
         () {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true); // Devolver true para indicar éxito
         },
       );
     } catch (e) {

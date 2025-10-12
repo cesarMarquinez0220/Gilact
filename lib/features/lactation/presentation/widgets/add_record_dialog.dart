@@ -5,10 +5,9 @@ import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
 
 class _AddRecordDialog extends StatefulWidget {
-  final LactationRecord? existingRecord;
   final Function(LactationRecord) onRecordAdded;
 
-  const _AddRecordDialog({this.existingRecord, required this.onRecordAdded});
+  const _AddRecordDialog({required this.onRecordAdded});
 
   @override
   State<_AddRecordDialog> createState() => _AddRecordDialogState();
@@ -59,19 +58,11 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
   }
 
   void _initializeValues() {
-    if (widget.existingRecord != null) {
-      _selectedType = widget.existingRecord!.type;
-      _selectedDateTime = widget.existingRecord!.dateTime;
-      _duration = widget.existingRecord!.duration;
-      _notes = widget.existingRecord!.notes;
-      _side = widget.existingRecord!.side;
-    } else {
-      _selectedType = LactationType.breastfeeding;
-      _selectedDateTime = DateTime.now();
-      _duration = const Duration(minutes: 15);
-      _notes = null;
-      _side = null;
-    }
+    _selectedType = LactationType.breastfeeding;
+    _selectedDateTime = DateTime.now();
+    _duration = const Duration(minutes: 15);
+    _notes = null;
+    _side = null;
   }
 
   @override
@@ -139,7 +130,7 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          widget.existingRecord != null ? 'Editar Registro' : 'Nuevo Registro',
+          'Nuevo Registro',
           style: GoogleFonts.quicksand(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -548,7 +539,7 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
                     ),
                   )
                 : Text(
-                    widget.existingRecord != null ? 'Actualizar' : 'Guardar',
+                    'Guardar',
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -712,21 +703,17 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
     try {
       final database = LactationDatabase();
       final record = LactationRecord(
-        id:
-            widget.existingRecord?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
-        dateTime: _selectedDateTime,
-        duration: _duration,
-        type: _selectedType,
-        notes: _notes,
-        side: _side,
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        fechaRegistro: _selectedDateTime,
+        duracion: _duration,
+        tipo: _selectedType,
+        notas: _notes,
+        lado: _side,
+        timestamp: DateTime.now(),
+        fechaRegistroString: _selectedDateTime.toIso8601String(),
       );
 
-      if (widget.existingRecord != null) {
-        await database.updateRecord(record);
-      } else {
-        await database.insertRecord(record);
-      }
+      await database.insertRecord(record);
 
       widget.onRecordAdded(record);
       Navigator.of(context).pop();
