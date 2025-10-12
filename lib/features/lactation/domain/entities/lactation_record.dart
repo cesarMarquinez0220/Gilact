@@ -59,16 +59,37 @@ class LactationRecord {
   }
 
   factory LactationRecord.fromMap(Map<String, dynamic> map, String id) {
+    // Determinar el tipo de lactancia basado en los datos disponibles
+    LactationType tipo = LactationType.breastfeeding; // Por defecto
+    if (map['pecho_dado'] != null && map['pecho_dado'] != 'Ninguna') {
+      tipo = LactationType.breastfeeding;
+    } else if ((map['volumen_extraccion'] ?? 0) > 0) {
+      tipo = LactationType.pumping;
+    } else if ((map['veces_biberon'] ?? 0) > 0) {
+      tipo = LactationType.bottle;
+    }
+
+    // Calcular duración estimada basada en el tipo
+    int duracionMinutos = 0;
+    if (tipo == LactationType.breastfeeding) {
+      duracionMinutos =
+          (map['veces_pecho'] ?? 0) * 15; // 15 min por sesión estimada
+    } else if (tipo == LactationType.pumping) {
+      duracionMinutos =
+          (map['volumen_extraccion'] ?? 0) ~/
+          10; // 1 min por cada 10ml estimado
+    } else if (tipo == LactationType.bottle) {
+      duracionMinutos =
+          (map['veces_biberon'] ?? 0) * 10; // 10 min por biberón estimado
+    }
+
     return LactationRecord(
       id: id,
       fechaRegistro: DateTime.parse(map['fecha_registro']),
-      duracion: Duration(minutes: map['duracion'] ?? 0),
-      tipo: LactationType.values.firstWhere(
-        (e) => e.name == map['tipo'],
-        orElse: () => LactationType.breastfeeding,
-      ),
+      duracion: Duration(minutes: duracionMinutos),
+      tipo: tipo,
       notas: map['notas'],
-      lado: map['lado'],
+      lado: map['pecho_dado'], // Usar pecho_dado como lado
       volumenExtraccion: map['volumen_extraccion'] ?? 0,
       unidadVolumen: map['unidad_volumen'] ?? 'No',
       vecesBiberon: map['veces_biberon'] ?? 0,

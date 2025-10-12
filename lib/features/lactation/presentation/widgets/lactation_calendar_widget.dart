@@ -857,7 +857,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                     Text(
-                      '${record.fechaRegistro.hour.toString().padLeft(2, '0')}:${record.fechaRegistro.minute.toString().padLeft(2, '0')} • ${record.duracion.inMinutes} min',
+                      '${record.timestamp.hour.toString().padLeft(2, '0')}:${record.timestamp.minute.toString().padLeft(2, '0')} • ${record.duracion.inMinutes} min',
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.8),
@@ -1208,7 +1208,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                                       ),
                                     ),
                                     Text(
-                                      '${record.fechaRegistro.hour.toString().padLeft(2, '0')}:${record.fechaRegistro.minute.toString().padLeft(2, '0')} • ${record.duracion.inMinutes} min',
+                                      '${record.timestamp.hour.toString().padLeft(2, '0')}:${record.timestamp.minute.toString().padLeft(2, '0')} • ${record.duracion.inMinutes} min',
                                       style: GoogleFonts.quicksand(
                                         fontSize: 12,
                                         color: Colors.grey[600],

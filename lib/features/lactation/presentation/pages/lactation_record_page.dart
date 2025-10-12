@@ -73,52 +73,6 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     }
   }
 
-  String _getValidationMessage(String field, int value) {
-    switch (field) {
-      case 'biberon':
-        if (value > 10) return '⚠️ Muchas tomas de biberón';
-        if (value == 0) return '✅ Solo lactancia materna';
-        return '✅ Registro normal';
-      case 'pecho':
-        if (value > 12) return '⚠️ Muchas tomas de pecho';
-        if (value == 0) return '⚠️ Sin lactancia materna';
-        return '✅ Registro normal';
-      case 'volumen':
-        if (value > 300) return '⚠️ Volumen muy alto';
-        if (value == 0) return 'ℹ️ Sin extracción';
-        return '✅ Volumen normal';
-      case 'sueno':
-        if (value > 20) return '⚠️ Muchas horas de sueño';
-        if (value < 8) return '⚠️ Pocas horas de sueño';
-        return '✅ Sueño adecuado';
-      default:
-        return '';
-    }
-  }
-
-  Color _getValidationColor(String field, int value) {
-    switch (field) {
-      case 'biberon':
-        if (value > 10) return Colors.orange;
-        if (value == 0) return Colors.green;
-        return Colors.white;
-      case 'pecho':
-        if (value > 12) return Colors.orange;
-        if (value == 0) return Colors.red;
-        return Colors.white;
-      case 'volumen':
-        if (value > 300) return Colors.orange;
-        if (value == 0) return Colors.blue;
-        return Colors.white;
-      case 'sueno':
-        if (value > 20) return Colors.orange;
-        if (value < 8) return Colors.red;
-        return Colors.green;
-      default:
-        return Colors.white;
-    }
-  }
-
   void _initializeAnimations() {
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -182,24 +136,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          widget.existingRecord != null
-              ? 'Editar Registro de Lactancia'
-              : 'Registro de Lactancia',
-          style: GoogleFonts.quicksand(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                offset: const Offset(1, 1),
-                blurRadius: 2,
-              ),
-            ],
-          ),
-        ),
-        centerTitle: true,
+        actions: [
+          if (widget.existingRecord != null)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: _eliminarRegistro,
+            ),
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -241,29 +184,11 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                               const SizedBox(height: 20),
 
                               // Veces que se le dio biberón
-                              _buildEnhancedNumberSelector(
-                                title: "Veces que se le dio biberón",
-                                subtitle: "Durante las últimas 24 horas",
-                                icon: Icons.child_care,
-                                controller: _vecesBiberonController,
-                                minValue: 0,
-                                maxValue: 20,
-                                suggestions: [0, 1, 2, 3, 4, 5],
-                                unit: "veces",
-                              ),
+                              _buildIntegratedBottleSelector(),
                               const SizedBox(height: 20),
 
                               // Veces que se le dio pecho
-                              _buildEnhancedNumberSelector(
-                                title: "Veces que se le dio pecho",
-                                subtitle: "Durante las últimas 24 horas",
-                                icon: Icons.nature_people,
-                                controller: _vecesPechoController,
-                                minValue: 0,
-                                maxValue: 20,
-                                suggestions: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-                                unit: "veces",
-                              ),
+                              _buildIntegratedBreastSelector(),
                               const SizedBox(height: 20),
 
                               // Horas de sueño
@@ -386,90 +311,752 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   Widget _buildVolumenExtraccionSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: _buildEnhancedNumberSelector(
-                title: "Volumen de extracción",
-                subtitle: "Cantidad extraída",
-                icon: Icons.local_drink,
-                controller: _volumenExtraccionController,
-                minValue: 0,
-                maxValue: 500,
-                step: 1,
-                suggestions: [0, 30, 60, 90, 120, 150, 200],
-                unit: _seleccionVolumenUnidad == 'ml'
-                    ? 'ml'
-                    : _seleccionVolumenUnidad == 'oz'
-                    ? 'oz'
-                    : '',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: _buildDropdownField(
-                "Unidad",
-                ["No", "ml", "oz"],
-                _seleccionVolumenUnidad,
-                (newValue) {
-                  setState(() {
-                    _seleccionVolumenUnidad = newValue!;
-                  });
-                },
-              ),
-            ),
+      children: [const SizedBox(height: 12), _buildIntegratedVolumeSelector()],
+    );
+  }
+
+  Widget _buildIntegratedVolumeSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
           ],
         ),
-      ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.1),
+                        ],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.local_drink,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Volumen de extracción",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "Cantidad extraída",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Botón de eliminar
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _volumenExtraccionController.text = '0';
+                        _seleccionVolumenUnidad = 'No';
+                      });
+                    },
+                    icon: const Icon(Icons.delete_outline, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Selector principal con dropdown integrado
+              Row(
+                children: [
+                  // Flechas de incremento/decremento
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_volumenExtraccionController.text) ??
+                              0;
+                          if (current < 500) {
+                            setState(() {
+                              _volumenExtraccionController.text = (current + 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_up,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_volumenExtraccionController.text) ??
+                              0;
+                          if (current > 0) {
+                            setState(() {
+                              _volumenExtraccionController.text = (current - 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Número central
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        _volumenExtraccionController.text.isEmpty
+                            ? '0'
+                            : _volumenExtraccionController.text,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Dropdown elegante con glassmorphism
+                  Container(
+                    width: 90,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _seleccionVolumenUnidad,
+                            isExpanded: true,
+                            dropdownColor: Colors.transparent,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            icon: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.2),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.white.withValues(alpha: 0.9),
+                                size: 16,
+                              ),
+                            ),
+                            selectedItemBuilder: (BuildContext context) {
+                              return ["No", "ml", "oz"].map<Widget>((
+                                String value,
+                              ) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    value,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              }).toList();
+                            },
+                            items: ["No", "ml", "oz"].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: _seleccionVolumenUnidad == value
+                                        ? LinearGradient(
+                                            colors: [
+                                              Colors.white.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              Colors.white.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                            ],
+                                          )
+                                        : null,
+                                    border: _seleccionVolumenUnidad == value
+                                        ? Border.all(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            width: 1,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      value,
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _seleccionVolumenUnidad = newValue!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Sugerencias rápidas
+              Text(
+                "Sugerencias rápidas:",
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [0, 30, 60, 90, 120, 150, 200].map((value) {
+                  final isSelected =
+                      int.tryParse(_volumenExtraccionController.text) == value;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _volumenExtraccionController.text = value.toString();
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        value.toString(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Estado actual
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _seleccionVolumenUnidad == 'No'
+                          ? Colors.blue
+                          : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _seleccionVolumenUnidad == 'No'
+                        ? "Sin extracción"
+                        : "Extracción registrada",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: _seleccionVolumenUnidad == 'No'
+                          ? Colors.blue
+                          : Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildHorasSuenoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: _buildEnhancedNumberSelector(
-                title: "Horas/minutos de sueño",
-                subtitle: "Tiempo total de descanso",
-                icon: Icons.timer,
-                controller: _horasSuenoController,
-                minValue: 0,
-                maxValue: 24,
-                step: 1,
-                suggestions: [0, 1, 2, 3, 4, 6, 8, 10, 12],
-                unit: _seleccionSuenoUnidad == 'Hrs'
-                    ? 'hrs'
-                    : _seleccionSuenoUnidad == 'Min'
-                    ? 'min'
-                    : '',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: _buildDropdownField(
-                "Unidad",
-                ["No", "Hrs", "Min"],
-                _seleccionSuenoUnidad,
-                (newValue) {
-                  setState(() {
-                    _seleccionSuenoUnidad = newValue!;
-                  });
-                },
-              ),
-            ),
+      children: [const SizedBox(height: 12), _buildIntegratedSleepSelector()],
+    );
+  }
+
+  Widget _buildIntegratedSleepSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
           ],
         ),
-      ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.1),
+                        ],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.timer,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Horas/minutos de sueño",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "Tiempo total de descanso",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Botón de eliminar
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _horasSuenoController.text = '0';
+                        _seleccionSuenoUnidad = 'No';
+                      });
+                    },
+                    icon: const Icon(Icons.delete_outline, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Selector principal con dropdown integrado
+              Row(
+                children: [
+                  // Flechas de incremento/decremento
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_horasSuenoController.text) ?? 0;
+                          if (current < 24) {
+                            setState(() {
+                              _horasSuenoController.text = (current + 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_up,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_horasSuenoController.text) ?? 0;
+                          if (current > 0) {
+                            setState(() {
+                              _horasSuenoController.text = (current - 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Número central
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        _horasSuenoController.text.isEmpty
+                            ? '0'
+                            : _horasSuenoController.text,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Dropdown integrado
+                  Container(
+                    width: 90,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _seleccionSuenoUnidad,
+                            isExpanded: true,
+                            dropdownColor: Colors.transparent,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            icon: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.2),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.white.withValues(alpha: 0.9),
+                                size: 16,
+                              ),
+                            ),
+                            selectedItemBuilder: (BuildContext context) {
+                              return ["No", "Hrs", "Min"].map<Widget>((
+                                String value,
+                              ) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    value,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              }).toList();
+                            },
+                            items: ["No", "Hrs", "Min"].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: _seleccionSuenoUnidad == value
+                                        ? LinearGradient(
+                                            colors: [
+                                              Colors.white.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              Colors.white.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                            ],
+                                          )
+                                        : null,
+                                    border: _seleccionSuenoUnidad == value
+                                        ? Border.all(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            width: 1,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      value,
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _seleccionSuenoUnidad = newValue!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Sugerencias rápidas
+              Text(
+                "Sugerencias rápidas:",
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [0, 1, 2, 3, 4, 6, 8, 10, 12].map((value) {
+                  final isSelected =
+                      int.tryParse(_horasSuenoController.text) == value;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _horasSuenoController.text = value.toString();
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        value.toString(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Estado actual
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _seleccionSuenoUnidad == 'No'
+                          ? Colors.blue
+                          : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _seleccionSuenoUnidad == 'No'
+                        ? "Sin registro de sueño"
+                        : "Sueño registrado",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: _seleccionSuenoUnidad == 'No'
+                          ? Colors.blue
+                          : Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -496,8 +1083,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.25),
+                Colors.white.withValues(alpha: 0.15),
+              ],
+            ),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.3),
               width: 1,
@@ -614,369 +1206,506 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     );
   }
 
-  Widget _buildEnhancedNumberSelector({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required TextEditingController controller,
-    required int minValue,
-    required int maxValue,
-    required List<int> suggestions,
-    required String unit,
-    int step = 1,
-  }) {
-    int currentValue = int.tryParse(controller.text) ?? minValue;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Título y subtítulo
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.quicksand(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      offset: const Offset(0, 1),
-                      blurRadius: 2,
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                subtitle,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Selector principal
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Colors.white.withValues(alpha: 0.15),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Column(
-                children: [
-                  // Selector principal
-                  Row(
-                    children: [
-                      // Icono
-                      Container(
-                        margin: const EdgeInsets.all(12),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                        child: Icon(
-                          icon,
-                          color: Colors.white.withValues(alpha: 0.8),
-                          size: 16,
-                        ),
-                      ),
-
-                      // Valor actual
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Column(
-                            children: [
-                              Text(
-                                currentValue.toString(),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 24,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                unit,
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 12,
-                                  color: Colors.white.withValues(alpha: 0.7),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Botones de incremento/decremento
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildNumberButton(Icons.keyboard_arrow_up, () {
-                            if (currentValue < maxValue) {
-                              currentValue += step;
-                              controller.text = currentValue.toString();
-                              setState(() {});
-                            }
-                          }, currentValue >= maxValue),
-                          _buildNumberButton(Icons.keyboard_arrow_down, () {
-                            if (currentValue > minValue) {
-                              currentValue -= step;
-                              controller.text = currentValue.toString();
-                              setState(() {});
-                            }
-                          }, currentValue <= minValue),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // Sugerencias rápidas
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Sugerencias rápidas:",
-                          style: GoogleFonts.quicksand(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: suggestions.map((value) {
-                            final isSelected = currentValue == value;
-                            return GestureDetector(
-                              onTap: () {
-                                controller.text = value.toString();
-                                setState(() {});
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: isSelected
-                                      ? Colors.white.withValues(alpha: 0.3)
-                                      : Colors.white.withValues(alpha: 0.1),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Colors.white.withValues(alpha: 0.5)
-                                        : Colors.white.withValues(alpha: 0.2),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  value.toString(),
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 12,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.white.withValues(alpha: 0.8),
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Feedback visual
-                  if (title.contains('biberón'))
-                    _buildValidationFeedback('biberon', currentValue)
-                  else if (title.contains('pecho'))
-                    _buildValidationFeedback('pecho', currentValue)
-                  else if (title.contains('extracción'))
-                    _buildValidationFeedback('volumen', currentValue)
-                  else if (title.contains('sueño'))
-                    _buildValidationFeedback('sueno', currentValue),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildValidationFeedback(String field, int value) {
-    final message = _getValidationMessage(field, value);
-    final color = _getValidationColor(field, value);
-
-    if (message.isEmpty) return const SizedBox.shrink();
-
+  Widget _buildIntegratedBottleSelector() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            message.contains('✅')
-                ? Icons.check_circle
-                : message.contains('⚠️')
-                ? Icons.warning
-                : Icons.info,
-            size: 16,
-            color: color,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: GoogleFonts.quicksand(
-                fontSize: 12,
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNumberButton(
-    IconData icon,
-    VoidCallback onPressed,
-    bool isDisabled,
-  ) {
-    return Container(
-      width: 32,
-      height: 24,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isDisabled ? null : onPressed,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isDisabled
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.2),
-            ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: isDisabled
-                  ? Colors.white.withValues(alpha: 0.3)
-                  : Colors.white.withValues(alpha: 0.8),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownField(
-    String hintText,
-    List<String> options,
-    String selectedValue,
-    Function(String?) onChanged,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withValues(alpha: 0.15),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
-      child: DropdownButtonFormField<String>(
-        value: selectedValue,
-        isExpanded: true,
-        items: options.map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.white.withValues(alpha: 0.1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.1),
+                        ],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.child_care,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Veces que se le dio biberón",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "Durante las últimas 24 horas",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Botón de eliminar
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _vecesBiberonController.text = '0';
+                      });
+                    },
+                    icon: const Icon(Icons.delete_outline, color: Colors.white),
+                  ),
+                ],
               ),
-              child: Text(
-                value,
+              const SizedBox(height: 20),
+
+              // Selector principal
+              Row(
+                children: [
+                  // Flechas de incremento/decremento
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_vecesBiberonController.text) ?? 0;
+                          if (current < 10) {
+                            setState(() {
+                              _vecesBiberonController.text = (current + 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_up,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_vecesBiberonController.text) ?? 0;
+                          if (current > 0) {
+                            setState(() {
+                              _vecesBiberonController.text = (current - 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Número central
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            _vecesBiberonController.text.isEmpty
+                                ? '0'
+                                : _vecesBiberonController.text,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'veces',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Espacio para mantener simetría
+                  const SizedBox(width: 60),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Sugerencias rápidas
+              Text(
+                "Sugerencias rápidas:",
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          );
-        }).toList(),
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: GoogleFonts.quicksand(
-            fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.7),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [0, 1, 2, 3, 4, 5].map((value) {
+                  final isSelected =
+                      int.tryParse(_vecesBiberonController.text) == value;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _vecesBiberonController.text = value.toString();
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        value.toString(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Estado actual
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: int.tryParse(_vecesBiberonController.text) == 0
+                          ? Colors.blue
+                          : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    int.tryParse(_vecesBiberonController.text) == 0
+                        ? "Solo lactancia materna"
+                        : "Biberón registrado",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: int.tryParse(_vecesBiberonController.text) == 0
+                          ? Colors.blue
+                          : Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          border: InputBorder.none,
         ),
-        dropdownColor: Colors.transparent,
-        iconEnabledColor: Colors.white.withValues(alpha: 0.8),
-        style: GoogleFonts.quicksand(fontSize: 14, color: Colors.white),
-        menuMaxHeight: 200,
-        borderRadius: BorderRadius.circular(16),
-        elevation: 8,
+      ),
+    );
+  }
+
+  Widget _buildIntegratedBreastSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.3),
+                          Colors.white.withValues(alpha: 0.1),
+                        ],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.nature_people,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Veces que se le dio pecho",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "Durante las últimas 24 horas",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Botón de eliminar
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _vecesPechoController.text = '0';
+                      });
+                    },
+                    icon: const Icon(Icons.delete_outline, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Selector principal
+              Row(
+                children: [
+                  // Flechas de incremento/decremento
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_vecesPechoController.text) ?? 0;
+                          if (current < 20) {
+                            setState(() {
+                              _vecesPechoController.text = (current + 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_up,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          final current =
+                              int.tryParse(_vecesPechoController.text) ?? 0;
+                          if (current > 0) {
+                            setState(() {
+                              _vecesPechoController.text = (current - 1)
+                                  .toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Número central
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            _vecesPechoController.text.isEmpty
+                                ? '0'
+                                : _vecesPechoController.text,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'veces',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Espacio para mantener simetría
+                  const SizedBox(width: 60),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Sugerencias rápidas
+              Text(
+                "Sugerencias rápidas:",
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [0, 1, 2, 3, 4, 5, 6, 7, 8].map((value) {
+                  final isSelected =
+                      int.tryParse(_vecesPechoController.text) == value;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _vecesPechoController.text = value.toString();
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        value.toString(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Estado actual
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: int.tryParse(_vecesPechoController.text) == 0
+                          ? Colors.red
+                          : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    int.tryParse(_vecesPechoController.text) == 0
+                        ? "Sin lactancia materna"
+                        : "Lactancia registrada",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: int.tryParse(_vecesPechoController.text) == 0
+                          ? Colors.red
+                          : Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
