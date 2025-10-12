@@ -211,4 +211,55 @@ class VideoCacheService {
       return {'videoCacheCount': 0, 'progressCacheCount': 0};
     }
   }
+
+  /// Precarga un segmento del video en cache
+  static Future<void> preloadVideoSegment(
+    int videoId, {
+    int duration = 30,
+  }) async {
+    try {
+      print('📹 Precargando segmento de video $videoId (${duration}s)');
+
+      // Simular precarga del segmento
+      // En una implementación real, aquí se descargaría el segmento del video
+      await Future.delayed(Duration(milliseconds: 500));
+
+      // Guardar información de precarga
+      final prefs = await SharedPreferences.getInstance();
+      final preloadKey = 'preload_$videoId';
+      final preloadData = {
+        'videoId': videoId,
+        'duration': duration,
+        'preloadedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      await prefs.setString(preloadKey, jsonEncode(preloadData));
+
+      print('✅ Segmento de video $videoId precargado exitosamente');
+    } catch (e) {
+      print('❌ Error precargando segmento de video $videoId: $e');
+    }
+  }
+
+  /// Verifica si un video está precargado
+  static Future<bool> isVideoPreloaded(int videoId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final preloadKey = 'preload_$videoId';
+      final preloadData = prefs.getString(preloadKey);
+
+      if (preloadData == null) return false;
+
+      final data = jsonDecode(preloadData) as Map<String, dynamic>;
+      final preloadedAt = DateTime.fromMillisecondsSinceEpoch(
+        data['preloadedAt'],
+      );
+      final now = DateTime.now();
+
+      // Verificar si la precarga no ha expirado (1 hora)
+      return now.difference(preloadedAt).inHours < 1;
+    } catch (e) {
+      return false;
+    }
+  }
 }

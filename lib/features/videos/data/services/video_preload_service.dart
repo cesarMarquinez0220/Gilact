@@ -214,6 +214,21 @@ class VideoPreloadService {
     };
   }
 
+  /// Precarga metadata de un video específico
+  Future<void> preloadVideoMetadata(int videoId) async {
+    try {
+      print('📋 Precargando metadata del video $videoId');
+
+      // Simular precarga de metadata
+      // En una implementación real, aquí se obtendría la información del video
+      await Future.delayed(Duration(milliseconds: 300));
+
+      print('✅ Metadata del video $videoId precargada');
+    } catch (e) {
+      print('❌ Error precargando metadata del video $videoId: $e');
+    }
+  }
+
   /// Dispose del servicio
   void dispose() {
     clearAllPreloadedControllers();

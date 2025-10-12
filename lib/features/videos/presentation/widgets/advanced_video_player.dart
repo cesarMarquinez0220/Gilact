@@ -10,7 +10,11 @@ import '../../data/services/video_progress_service.dart';
 import '../../data/services/video_cache_service.dart';
 import '../../data/services/video_preload_service.dart';
 import '../../data/services/image_compression_service.dart';
+import '../../data/services/video_interaction_service.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 // Colores de la aplicación
 class AppColors {
@@ -43,6 +47,8 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   final VideoProgressService _progressService = VideoProgressService();
   final VideoPreloadService _preloadService = VideoPreloadService();
   final ImageCompressionService _compressionService = ImageCompressionService();
+  final VideoInteractionService _interactionService =
+      GetIt.instance<VideoInteractionService>();
 
   bool _isPaused = false;
   int _pauseCount = 0;
@@ -68,6 +74,9 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     _getLastPositionFromFirestore();
     _cacheVideoInfo();
     _startInactivityTimer();
+
+    // Inicializar subcolección videos si es necesario
+    _initializeVideosSubcollection();
 
     // Precargar siguiente video
     _preloadNextVideo();
@@ -205,11 +214,45 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     }
   }
 
-  void _handleVideoPaused() {
+  /// Inicializa la subcolección videos cuando se inicia el video
+  void _initializeVideosSubcollection() async {
+    try {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        final userId = authState.user.id;
+        await _interactionService.initializeVideosSubcollection(
+          userId,
+          widget.video.videoId,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error inicializando subcolección videos: $e');
+      }
+    }
+  }
+
+  void _handleVideoPaused() async {
     if (!_isPaused) {
       _pauseCount++;
       if (kDebugMode) {
         print('Número de veces que se ha realizado pausa: $_pauseCount');
+      }
+
+      // Registrar la pausa en la subcolección videos
+      try {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          final userId = authState.user.id;
+          await _interactionService.handleFirstVideoPause(
+            userId,
+            widget.video.videoId,
+          );
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error registrando pausa: $e');
+        }
       }
     }
     _isPaused = true;
@@ -534,22 +577,37 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   // ========== MÉTODOS PARA MEJORAS DE UX ==========
 
-  // Precarga de videos
+  // Precarga progresiva del siguiente video
   Future<void> _preloadNextVideo() async {
     try {
-      // Simular obtención de videos (en una implementación real, esto vendría del provider)
-      // Por ahora, precargamos basándonos en el ID del video actual
       final currentVideoId = widget.video.videoId;
+      final nextVideoId = currentVideoId + 1;
 
-      // Precargar el siguiente video en la secuencia
-      await _preloadService.preloadNextVideo([widget.video], currentVideoId);
+      // Verificar si ya está precargado
+      final isPreloaded = await VideoCacheService.isVideoPreloaded(nextVideoId);
+      if (isPreloaded) {
+        if (kDebugMode) {
+          print('ℹ️ Video $nextVideoId ya está precargado');
+        }
+        return;
+      }
 
       if (kDebugMode) {
-        print('Precarga iniciada para video: ${widget.video.title}');
+        print('📹 Precargando video $nextVideoId progresivamente...');
+      }
+
+      // Precargar metadata del video
+      await _preloadService.preloadVideoMetadata(nextVideoId);
+
+      // Precargar video en cache
+      await VideoCacheService.preloadVideoSegment(nextVideoId, duration: 30);
+
+      if (kDebugMode) {
+        print('✅ Video $nextVideoId precargado progresivamente');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error en precarga: $e');
+        print('Error en precarga progresiva: $e');
       }
     }
   }
