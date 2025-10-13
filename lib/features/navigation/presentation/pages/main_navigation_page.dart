@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
-import '../../../lactation/presentation/pages/lactation_calendar_demo.dart';
 import '../../../auth/domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
 import '../../../user/domain/entities/user_profile_entities.dart';
@@ -17,6 +16,7 @@ import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../videos/data/services/video_preload_service.dart';
 import '../../../videos/data/services/video_cache_service.dart';
 import '../../../videos/data/services/video_interaction_service.dart';
+import '../../../videos/presentation/pages/user_videos_page.dart';
 import 'package:get_it/get_it.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -445,8 +445,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               const LinearGradient(
                 colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
               ),
-              'Enfatiza conocimiento',
-              _navigateToHistorial,
+              'Progreso de videos completados',
+              _navigateToUserVideos,
             ),
           ),
 
@@ -587,16 +587,18 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     );
   }
 
+  void _navigateToUserVideos() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const UserVideosPage()));
+  }
+
   void _navigateToCalendar() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => const LactationCalendarPage(),
       ),
     );
-  }
-
-  void _navigateToHistorial() {
-    Navigator.pushNamed(context, '/historial');
   }
 
   Widget _buildPostpartoProfile(UserProfile userProfile) {
