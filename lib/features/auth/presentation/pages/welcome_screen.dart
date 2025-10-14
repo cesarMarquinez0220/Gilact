@@ -116,8 +116,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _checkOnboardingAndUserSituation() async {
     print('🔍 WelcomeScreen: Iniciando verificación de onboarding...');
 
-    // Verificar si el onboarding ya fue completado
+    // Verificar si es un registro nuevo
     final prefs = await SharedPreferences.getInstance();
+    final isNewRegistration = prefs.getBool('is_new_registration') ?? false;
+
+    if (isNewRegistration) {
+      print(
+        '🔍 WelcomeScreen: Es un registro nuevo, limpiando flag y saliendo...',
+      );
+      // Limpiar el flag de registro nuevo
+      await prefs.remove('is_new_registration');
+      // No hacer nada más, el registro ya navegó al onboarding
+      return;
+    }
+
+    // Verificar si el onboarding ya fue completado
     final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
     print('🔍 WelcomeScreen: onboarding_completed = $onboardingCompleted');

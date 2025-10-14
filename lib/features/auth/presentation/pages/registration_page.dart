@@ -121,11 +121,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             );
           } else if (state is AuthAuthenticated) {
             print('🔍 RegistrationPage: Usuario registrado exitosamente');
-            _clearSavedData(); // Limpiar datos guardados después del registro exitoso
-            DialogExample.showRegistrationSuccessDialog(context, () {
-              print('🔍 RegistrationPage: Navegando a onboarding...');
-              Navigator.of(context).pushReplacementNamed('/onboarding');
-            });
+            _handleSuccessfulRegistration();
           }
         },
         child: Container(
@@ -384,6 +380,13 @@ class _RegistrationPageState extends State<RegistrationPage>
       return;
     }
 
+    // Marcar que es un registro nuevo ANTES de registrar
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_new_registration', true);
+    print(
+      '🔍 RegistrationPage: Flag is_new_registration marcado ANTES del registro',
+    );
+
     // Registrar usuario
     context.read<AuthBloc>().add(
       SignUpRequested(
@@ -605,6 +608,17 @@ class _RegistrationPageState extends State<RegistrationPage>
 
   void _backToLogin() {
     Navigator.of(context).pop();
+  }
+
+  Future<void> _handleSuccessfulRegistration() async {
+    print('🔍 RegistrationPage: Manejando registro exitoso...');
+
+    // Limpiar datos guardados después del registro exitoso
+    await _clearSavedData();
+
+    // Navegar directamente al onboarding sin mostrar diálogo de éxito
+    print('🔍 RegistrationPage: Navegando a onboarding...');
+    Navigator.of(context).pushReplacementNamed('/onboarding');
   }
 
   Future<void> _loadSavedData() async {

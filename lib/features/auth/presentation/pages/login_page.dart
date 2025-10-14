@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/connectivity_service.dart';
@@ -156,9 +157,25 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   // Guardar última vez de login
                   CredentialsCacheService.saveLastLogin();
 
-                  // Navegar a la pantalla de bienvenida con animación
-                  Future.delayed(const Duration(milliseconds: 500), () {
-                    Navigator.of(context).pushReplacementNamed('/welcome');
+                  // Verificar si es un registro nuevo
+                  SharedPreferences.getInstance().then((prefs) async {
+                    final isNewRegistration =
+                        prefs.getBool('is_new_registration') ?? false;
+
+                    if (isNewRegistration) {
+                      // Es un registro nuevo, no navegar desde aquí
+                      // El RegistrationPage ya se encarga de la navegación
+                      print(
+                        '🔍 LoginPage: Detectado registro nuevo, no navegando desde aquí',
+                      );
+                      await prefs.remove('is_new_registration');
+                    } else {
+                      // Es un login normal, navegar a welcome
+                      print('🔍 LoginPage: Login normal, navegando a welcome');
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        Navigator.of(context).pushReplacementNamed('/welcome');
+                      });
+                    }
                   });
                 } else if (state is AuthLoading) {
                   setState(() {
