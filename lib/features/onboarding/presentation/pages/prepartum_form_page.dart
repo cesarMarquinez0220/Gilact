@@ -5,7 +5,6 @@ import 'package:get_it/get_it.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
-import '../../domain/entities/prepartum_info.dart';
 import '../../../../alerta_dialoge.dart';
 
 class PrepartumFormPage extends StatefulWidget {
@@ -144,14 +143,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
       await subcollectionsService.completeOnboardingProcess(userId, formData);
 
       if (mounted) {
-        DialogExample.showSuccessDialog(
-          context,
-          '¡Onboarding Completado!',
-          'Tu información de preparto ha sido guardada exitosamente. ¡Bienvenida a Gilact!',
-          () {
-            Navigator.of(context).pushReplacementNamed('/home');
-          },
-        );
+        // Navegar automáticamente sin mostrar diálogo de éxito
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
       if (mounted) {

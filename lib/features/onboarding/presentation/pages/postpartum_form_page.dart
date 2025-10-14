@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
-import '../../domain/entities/postpartum_info.dart';
 import '../../../../alerta_dialoge.dart';
 
 class PostpartumFormPage extends StatefulWidget {
@@ -211,14 +210,8 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       await subcollectionsService.completeOnboardingProcess(userId, formData);
 
       if (mounted) {
-        DialogExample.showSuccessDialog(
-          context,
-          '¡Onboarding Completado!',
-          'La información de tu bebé ha sido guardada exitosamente. ¡Bienvenida a Gilact!',
-          () {
-            Navigator.of(context).pushReplacementNamed('/home');
-          },
-        );
+        // Navegar automáticamente sin mostrar diálogo de éxito
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
       if (mounted) {
@@ -620,6 +613,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
             inputFormatters: inputFormatters,
             validator: validator,
             enabled: !_isLoading,
+            textAlignVertical: TextAlignVertical.center,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -634,10 +628,10 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
+              contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 18,
               ),
+              // Reduce el padding interno del TextField
             ),
           ),
         ),
@@ -693,6 +687,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
             onTap: onTap,
             validator: validator,
             enabled: !_isLoading,
+            textAlignVertical: TextAlignVertical.center,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -709,7 +704,6 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 18,
               ),
             ),
           ),
@@ -766,6 +760,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
             onTap: onTap,
             validator: validator,
             enabled: !_isLoading,
+            textAlignVertical: TextAlignVertical.center,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -780,10 +775,10 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
+              contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 18,
               ),
+              // Reduce el padding interno del TextField
             ),
           ),
         ),
