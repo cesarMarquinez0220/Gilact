@@ -95,12 +95,17 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       updatedAt: DateTime.now(),
     );
 
+    // Determinar si es el último video de la lección
+    final isLastVideoInLesson = _isLastVideoInLesson(videoId, duracionId);
+
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => VideoPlayerPage(
           video: video,
           userId: 'current_user', // TODO: Obtener ID del usuario actual
+          isLastVideoInLesson:
+              isLastVideoInLesson, // Pasar flag de último video
         ),
         transitionsBuilder: (context, animation1, animation2, child) {
           const begin = Offset(1.0, 0.0);
@@ -125,6 +130,18 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       });
       // Actualizar el provider
       context.read<LeccionesProvider>().marcarLeccionCompletada(videoId);
+    } else if (result == false) {
+      // Si result es false, significa que se presionó "Reproducir siguiente"
+      // Buscar el siguiente video disponible
+      final nextVideo = _findNextVideo(videoId);
+      if (nextVideo != null) {
+        // Reproducir el siguiente video automáticamente
+        _navigateToReproductorVideoHelper(
+          nextVideo.videoId,
+          nextVideo.leccionId,
+          nextVideo.videoURL,
+        );
+      }
     }
   }
 
@@ -329,10 +346,13 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   }
 
   Widget _buildVideoNode(Video video, int index) {
+    // Usar el estado real de estaCompletado desde Firestore
+    final isCompleted = _isVideoCompletedFromFirestore(video.videoId);
+
+    // Obtener el progreso del video
     final progress = context.watch<LeccionesProvider>().getProgresoVideo(
       video.videoId,
     );
-    final isCompleted = progress >= 100.0;
 
     // Lógica de disponibilidad: solo el primer video de la primera lección está disponible inicialmente
     // Después, solo se habilita el siguiente video cuando el anterior está completado
@@ -493,6 +513,48 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     );
   }
 
+  Video? _findNextVideo(int currentVideoId) {
+    if (_videos == null) return null;
+
+    // Ordenar todos los videos por videoId
+    final sortedVideos = List<Video>.from(_videos!);
+    sortedVideos.sort((a, b) => a.videoId.compareTo(b.videoId));
+
+    // Encontrar el índice del video actual
+    final currentIndex = sortedVideos.indexWhere(
+      (v) => v.videoId == currentVideoId,
+    );
+    if (currentIndex == -1 || currentIndex >= sortedVideos.length - 1) {
+      return null; // No hay siguiente video
+    }
+
+    // Retornar el siguiente video
+    return sortedVideos[currentIndex + 1];
+  }
+
+  bool _isVideoCompletedFromFirestore(int videoId) {
+    // Por ahora usar el provider local, pero esto debería consultar Firestore directamente
+    final progress = context.watch<LeccionesProvider>().getProgresoVideo(
+      videoId,
+    );
+    return progress >= 100.0;
+  }
+
+  bool _isLastVideoInLesson(int videoId, int lessonId) {
+    if (_videos == null) return false;
+
+    // Obtener todos los videos de la misma lección
+    final lessonVideos = _videos!
+        .where((v) => v.leccionId == lessonId)
+        .toList();
+
+    // Ordenar por videoId para encontrar el último
+    lessonVideos.sort((a, b) => a.videoId.compareTo(b.videoId));
+
+    // Verificar si es el último video de la lección
+    return lessonVideos.isNotEmpty && lessonVideos.last.videoId == videoId;
+  }
+
   bool _isVideoAvailable(Video video, int index) {
     if (_videos == null) return false;
 
@@ -503,9 +565,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
 
     // Para videos posteriores, verificar si el video anterior en secuencia está completado
     final previousVideoId = video.videoId - 1;
-    return context.watch<LeccionesProvider>().isLeccionCompletada(
-      previousVideoId,
-    );
+    return _isVideoCompletedFromFirestore(previousVideoId);
   }
 
   IconData _getIconForVideo(Video video) {

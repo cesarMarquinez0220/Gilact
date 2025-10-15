@@ -32,7 +32,6 @@ import '../../features/lessons/domain/usecases/lesson_usecases.dart'
 
 // Services
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
-import '../../features/videos/data/services/dynamic_video_service.dart';
 import '../../features/videos/data/services/video_interaction_service.dart';
 import '../../features/lactation/data/services/lactation_service.dart';
 
@@ -57,9 +56,6 @@ Future<void> configureDependencies() async {
   // Services
   getIt.registerLazySingleton<UserSubcollectionsService>(
     () => UserSubcollectionsService(getIt<FirebaseFirestore>()),
-  );
-  getIt.registerLazySingleton<DynamicVideoService>(
-    () => DynamicVideoService(getIt<FirebaseFirestore>()),
   );
   getIt.registerLazySingleton<VideoInteractionService>(
     () => VideoInteractionService(getIt<FirebaseFirestore>()),

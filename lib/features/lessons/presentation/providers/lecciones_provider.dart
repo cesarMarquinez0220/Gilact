@@ -94,8 +94,8 @@ class LeccionesProvider extends ChangeNotifier {
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
         final videoId = data['videoId'] as int?;
-        final isCompleted = data['isCompleted'] as bool? ?? false;
-        final completado = data['completado'] as bool? ?? false;
+        final isCompleted = data['estaCompletado'] as bool? ?? false;
+        final completado = data['estaCompletado'] as bool? ?? false;
         final avance = data['avance'] as double? ?? 0.0;
 
         if (videoId != null) {
