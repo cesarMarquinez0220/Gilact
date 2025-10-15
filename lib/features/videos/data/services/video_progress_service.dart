@@ -27,13 +27,13 @@ class VideoProgressService {
           .doc(videoId.toString());
 
       final videoData = {
-        'pausas': pauseCount,
-        'adelantos': forwardCount,
+        'contadorPausas': pauseCount,
+        'contadorAdelantos': forwardCount,
         'ultimaPosicion': lastPosition,
         'duracion': totalDuration,
         'avance': progress,
-        'completado': isCompleted,
-        'ultimaActualizacion': FieldValue.serverTimestamp(),
+        'estaCompletado': isCompleted,
+        'fechaActualizacion': FieldValue.serverTimestamp(),
       };
 
       // Si el video está completado, incrementar contador de visualizaciones
@@ -92,7 +92,7 @@ class VideoProgressService {
   /// Verifica si el video está completado
   Future<bool> isVideoCompleted(int videoId) async {
     final progress = await getVideoProgress(videoId);
-    return progress['completado'] ?? false;
+    return progress['estaCompletado'] ?? false;
   }
 
   /// Obtiene el progreso del video como porcentaje
@@ -130,11 +130,11 @@ class VideoProgressService {
         'videoData': videoData,
         'adelantosData': adelantosData,
         'totalAdelantos': adelantosData.length,
-        'totalPausas': videoData['pausas'] ?? 0,
+        'totalPausas': videoData['contadorPausas'] ?? 0,
         'contadorVisualizaciones': videoData['contadorVisualizaciones'] ?? 0,
         'ultimaPosicion': videoData['ultimaPosicion'] ?? 0,
         'avance': videoData['avance'] ?? 0.0,
-        'completado': videoData['completado'] ?? false,
+        'estaCompletado': videoData['estaCompletado'] ?? false,
       };
     } catch (error) {
       print('Error al obtener estadísticas del video: $error');

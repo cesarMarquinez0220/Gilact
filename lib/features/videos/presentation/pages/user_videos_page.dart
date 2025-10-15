@@ -10,8 +10,8 @@ import '../../../lessons/data/services/video_service.dart';
 import '../../../lessons/domain/entities/video.dart';
 import '../pages/video_player_page.dart';
 import '../../../videos/domain/entities/video.dart' as video_entity;
-import '../../../videos/data/services/dynamic_video_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../videos/data/services/video_interaction_service.dart';
+import 'package:get_it/get_it.dart';
 
 class UserVideosPage extends StatefulWidget {
   const UserVideosPage({super.key});
@@ -23,13 +23,12 @@ class UserVideosPage extends StatefulWidget {
 class _UserVideosPageState extends State<UserVideosPage> {
   int lastCompletedLesson = 0;
   List<Video> _videos = [];
-  List<Map<String, dynamic>> _completedVideos = [];
+  List<int> _completedVideos = [];
   bool _isLoading = true;
   String? _error;
 
-  final DynamicVideoService _dynamicVideoService = DynamicVideoService(
-    FirebaseFirestore.instance,
-  );
+  final VideoInteractionService _interactionService =
+      GetIt.instance<VideoInteractionService>();
 
   @override
   void initState() {
@@ -58,7 +57,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
       final videos = await VideoService.getVideos();
 
       // Obtener progreso de videos completados
-      final completedVideos = await _dynamicVideoService.getUserWatchedVideos(
+      final completedVideos = await _interactionService.getCompletedVideos(
         user.uid,
       );
 
@@ -537,11 +536,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   bool _isVideoCompleted(int videoId) {
-    return _completedVideos.any(
-      (video) =>
-          video['videoId'] == videoId.toString() &&
-          (video['completed'] == true || video['watchTime'] > 0),
-    );
+    return _completedVideos.contains(videoId);
   }
 
   Future<void> _navigateToVideoPlayer(Video video) async {

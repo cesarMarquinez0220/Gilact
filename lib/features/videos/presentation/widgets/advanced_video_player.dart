@@ -30,12 +30,17 @@ class AdvancedVideoPlayer extends StatefulWidget {
   final Video video;
   final VoidCallback? onVideoCompleted;
   final VoidCallback? onVideoReady;
+  final bool isPreloaded; // Nuevo parámetro para indicar si está precargado
+  final bool
+  isLastVideoInLesson; // Nuevo parámetro para saber si es el último video
 
   const AdvancedVideoPlayer({
     super.key,
     required this.video,
     this.onVideoCompleted,
     this.onVideoReady,
+    this.isPreloaded = false, // Por defecto false
+    this.isLastVideoInLesson = false, // Por defecto false
   });
 
   @override
@@ -45,10 +50,10 @@ class AdvancedVideoPlayer extends StatefulWidget {
 class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   late YoutubePlayerController _controller;
   final VideoProgressService _progressService = VideoProgressService();
-  final VideoPreloadService _preloadService = VideoPreloadService();
-  final ImageCompressionService _compressionService = ImageCompressionService();
   final VideoInteractionService _interactionService =
       GetIt.instance<VideoInteractionService>();
+  final VideoPreloadService _preloadService = VideoPreloadService();
+  final ImageCompressionService _compressionService = ImageCompressionService();
 
   bool _isPaused = false;
   int _pauseCount = 0;
@@ -61,11 +66,29 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   Duration _totalDuration = Duration.zero;
 
   // Variables para mejoras de UX
-  Timer? _inactivityTimer;
   double _playbackSpeed = 1.0;
   bool _isOneHandMode = false;
   final List<double> _completedMilestones = [];
   Timer? _progressNotificationTimer;
+
+  // Variables para overlay con animación
+  bool _showVideoOverlay = true;
+  Timer? _overlayTimer;
+
+  // Variables para overlay de doble tap estilo Netflix
+  bool _showSeekOverlay = false;
+  String _seekMessage = '';
+  bool _isSeekingForward = false;
+  Timer? _seekOverlayTimer;
+
+  // Variables para auto-play del siguiente video
+  bool _showAutoPlayCountdown = false;
+  int _countdownSeconds = 5;
+  Timer? _countdownTimer;
+  bool _isLastVideoInLesson = false;
+
+  // Variable para controlar estado de reproducción
+  bool _isPlaying = false;
 
   @override
   void initState() {
@@ -73,7 +96,6 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     _initializeYoutubePlayer();
     _getLastPositionFromFirestore();
     _cacheVideoInfo();
-    _startInactivityTimer();
 
     // Inicializar subcolección videos si es necesario
     _initializeVideosSubcollection();
@@ -83,13 +105,61 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
     // Comprimir imagen del video
     _compressVideoThumbnail();
+
+    // Auto-rotar a horizontal si está precargado (experiencia tipo Netflix)
+    if (widget.isPreloaded) {
+      _autoRotateToLandscape();
+    }
+
+    // Iniciar timer para ocultar overlay después de unos segundos
+    _startOverlayTimer();
+
+    // Configurar si es el último video de la lección
+    _isLastVideoInLesson = widget.isLastVideoInLesson;
+  }
+
+  /// Inicia el timer para ocultar el overlay después de unos segundos
+  void _startOverlayTimer() {
+    _overlayTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _showVideoOverlay = false;
+        });
+      }
+    });
+  }
+
+  /// Auto-rota a horizontal para videos precargados (experiencia tipo Netflix)
+  Future<void> _autoRotateToLandscape() async {
+    try {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      if (kDebugMode) {
+        print('🔄 Auto-rotación a horizontal activada para video precargado');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error en auto-rotación: $e');
+      }
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _inactivityTimer?.cancel();
     _progressNotificationTimer?.cancel();
+    _overlayTimer?.cancel();
+    _seekOverlayTimer?.cancel();
+    _countdownTimer?.cancel();
+
+    // Restaurar orientación vertical al salir
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     super.dispose();
   }
 
@@ -98,30 +168,42 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       try {
         if (kDebugMode) {
           print(
-            'Inicializando Youtube Player para video ID: ${widget.video.videoId}',
+            'Inicializando Youtube Player para video ID: ${widget.video.videoId} (Precargado: ${widget.isPreloaded})',
           );
         }
 
-        _controller = YoutubePlayerController(
-          initialVideoId:
-              YoutubePlayer.convertUrlToId(widget.video.videoUrl) ?? '',
-          flags: const YoutubePlayerFlags(
-            autoPlay: true,
-            loop: false,
-            mute: false,
-            forceHD: false,
-            controlsVisibleAtStart: true,
-            enableCaption:
-                false, // Deshabilitar subtítulos para mejor rendimiento
-            hideControls: false,
-            showLiveFullscreenButton: false,
-            useHybridComposition: true, // Mejor rendimiento en Android
-          ),
-        );
+        // Intentar usar controlador precargado si está disponible
+        if (widget.isPreloaded) {
+          final preloadedController = _preloadService.getPreloadedController(
+            widget.video.videoId,
+          );
+          if (preloadedController != null) {
+            _controller = preloadedController;
+            if (kDebugMode) {
+              print(
+                '✅ Usando controlador precargado para video ${widget.video.videoId}',
+              );
+            }
+          } else {
+            // Si no hay controlador precargado, crear uno nuevo
+            _controller = _createNewController();
+          }
+        } else {
+          // Crear controlador nuevo para videos no precargados
+          _controller = _createNewController();
+        }
 
         _controller.addListener(() async {
           if (_controller.value.isReady) {
             _totalDuration = _controller.metadata.duration;
+
+            // Actualizar estado de reproducción
+            if (mounted) {
+              setState(() {
+                _isPlaying = _controller.value.isPlaying;
+              });
+            }
+
             if (_totalDuration.inSeconds > 0) {
               // Si la duración total del video es mayor que 0 y la duración no se ha impreso, entonces imprímela
               if (!_duracionImpresa) {
@@ -154,6 +236,25 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         }
       }
     }
+  }
+
+  /// Crea un nuevo controlador de YouTube
+  YoutubePlayerController _createNewController() {
+    return YoutubePlayerController(
+      initialVideoId: YoutubePlayer.convertUrlToId(widget.video.videoUrl) ?? '',
+      flags: YoutubePlayerFlags(
+        autoPlay: widget.isPreloaded, // Auto-play solo si está precargado
+        loop: false,
+        mute: false,
+        forceHD: false,
+        controlsVisibleAtStart: true,
+        enableCaption: false, // Deshabilitar subtítulos para mejor rendimiento
+        hideControls: false,
+        showLiveFullscreenButton: false,
+        useHybridComposition: true, // Mejor rendimiento en Android
+        startAt: 0, // Siempre empezar desde el inicio para videos ya vistos
+      ),
+    );
   }
 
   Future<void> _getLastPositionFromFirestore() async {
@@ -268,7 +369,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         print('Video terminado. Incrementando contador de visualizaciones...');
       }
 
-      // Marcar video como completado
+      // Marcar video como completado en ambos servicios
       await _progressService.saveVideoProgress(
         videoId: widget.video.videoId,
         pauseCount: _pauseCount,
@@ -278,6 +379,15 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         progress: 1.0,
         isCompleted: true,
       );
+
+      // También marcar como completado en el servicio de interacción
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        await _interactionService.markVideoAsCompleted(
+          authState.user.id,
+          widget.video.videoId,
+        );
+      }
 
       // Actualizar el provider de lecciones
       if (mounted) {
@@ -289,10 +399,64 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       // Llamar callback si existe
       widget.onVideoCompleted?.call();
 
-      // Navegar de vuelta
-      if (mounted) {
-        Navigator.of(context).pop(true);
+      // Lógica de navegación según si es el último video de la lección
+      if (_isLastVideoInLesson) {
+        // Si es el último video de la lección, retroceder después de un delay
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        // Si no es el último video, mostrar countdown para auto-play
+        _startAutoPlayCountdown();
       }
+    }
+  }
+
+  void _startAutoPlayCountdown() {
+    if (mounted) {
+      setState(() {
+        _showAutoPlayCountdown = true;
+        _countdownSeconds = 5;
+      });
+
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            _countdownSeconds--;
+          });
+
+          if (_countdownSeconds <= 0) {
+            timer.cancel();
+            _playNextVideo();
+          }
+        } else {
+          timer.cancel();
+        }
+      });
+    }
+  }
+
+  void _playNextVideo() {
+    if (mounted) {
+      // NO cambiar la orientación aquí, mantener landscape
+      // La orientación se mantendrá automáticamente
+
+      // Cerrar el reproductor actual y permitir que la página padre maneje el siguiente video
+      Navigator.of(
+        context,
+      ).pop(false); // false indica que no se completó la lección completa
+    }
+  }
+
+  void _cancelAutoPlay() {
+    _countdownTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _showAutoPlayCountdown = false;
+      });
+      Navigator.of(context).pop(false);
     }
   }
 
@@ -361,30 +525,19 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: Visibility(
-                visible: orientation != Orientation.landscape,
+                visible:
+                    orientation != Orientation.portrait &&
+                    _showVideoOverlay, // Solo mostrar cuando los controles están visibles
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () {
-                    // Al presionar hacia atrás, restaurar la orientación vertical
-                    SystemChrome.setPreferredOrientations([
-                      DeviceOrientation.portraitUp,
-                      DeviceOrientation.portraitDown,
-                    ]);
-                    _canPop = true;
-                    Navigator.pop(context);
+                    // Transición fluida al presionar atrás
+                    Navigator.of(context).pop();
                   },
                 ),
               ),
-              title: Text(
-                widget.video.title,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.info_outline, color: Colors.white),
-                  onPressed: _showVideoInfo,
-                ),
-              ],
+              title: null, // Sin título
+              actions: [], // Sin botones adicionales
             ),
             body: Stack(
               children: [
@@ -405,8 +558,8 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                     child: GestureDetector(
                       onDoubleTapDown: _handleDoubleTap,
                       onTap: () {
-                        // Resetear timer de inactividad al tocar la pantalla
-                        _resetInactivityTimer();
+                        // Mostrar overlay temporalmente al tocar
+                        _showOverlayTemporarily();
                       },
                       child: YoutubePlayer(
                         controller: _controller,
@@ -423,6 +576,61 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                     ),
                   ),
                 ),
+
+                // Overlay con título y subtítulo estilo Netflix (inferior izquierda)
+                if (_showVideoOverlay)
+                  Positioned(
+                    left: 20,
+                    bottom: 100, // Posición estilo Netflix
+                    child: AnimatedOpacity(
+                      opacity: _showVideoOverlay ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 500),
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              widget.video.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(1, 1),
+                                    blurRadius: 3,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.video.description,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(1, 1),
+                                    blurRadius: 3,
+                                  ),
+                                ],
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                 // Botón de pausa/reproducción invisible
                 Center(
                   child: InkWell(
@@ -452,7 +660,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                     ),
                   ),
                 ),
-                // Información del video en la parte inferior
+                // Información del video en la parte inferior (solo controles básicos)
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -469,94 +677,127 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                         ],
                       ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          widget.video.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.video.description,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time,
+                        const Spacer(),
+                        if (_pauseCount > 0)
+                          Text(
+                            'Pausas: $_pauseCount',
+                            style: const TextStyle(
                               color: Colors.white70,
-                              size: 16,
+                              fontSize: 12,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDuration(_totalDuration),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const Spacer(),
-                            if (_pauseCount > 0)
-                              Text(
-                                'Pausas: $_pauseCount',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                          ],
-                        ),
+                          ),
                       ],
                     ),
                   ),
                 ),
+
+                // Overlay de countdown para auto-play
+                if (_showAutoPlayCountdown)
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Siguiente video en:',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '$_countdownSeconds',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton(
+                                  onPressed: _cancelAutoPlay,
+                                  child: const Text(
+                                    'Cancelar',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                ElevatedButton(
+                                  onPressed: _playNextVideo,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF4FD1C7),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Reproducir ahora'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Overlay estilo Netflix para doble tap
+                if (_showSeekOverlay)
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isSeekingForward
+                                ? Icons.fast_forward
+                                : Icons.fast_rewind,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _seekMessage,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  void _showVideoInfo() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(widget.video.title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Duración: ${_formatDuration(_totalDuration)}'),
-              const SizedBox(height: 8),
-              Text('Lección: ${widget.video.lessonId}'),
-              const SizedBox(height: 8),
-              Text('Adelantos: $_forwardCount'),
-              const SizedBox(height: 8),
-              Text(
-                'Progreso: ${(_controller.value.position.inSeconds / _totalDuration.inSeconds * 100).toInt()}%',
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cerrar'),
-            ),
-          ],
         );
       },
     );
@@ -644,49 +885,6 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     }
   }
 
-  // Timer de inactividad
-  void _startInactivityTimer() {
-    _inactivityTimer = Timer(const Duration(minutes: 5), () {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-        _handleVideoPaused();
-        _showInactivityDialog();
-      }
-    });
-  }
-
-  void _resetInactivityTimer() {
-    _inactivityTimer?.cancel();
-    _startInactivityTimer();
-  }
-
-  void _showInactivityDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Video Pausado'),
-        content: const Text(
-          'El video se pausó automáticamente por inactividad. ¿Deseas continuar?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _controller.play();
-              _handleVideoPlay();
-              _resetInactivityTimer();
-            },
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
-    );
-  }
-
   // Gestos de control
   void _handleDoubleTap(TapDownDetails details) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -698,24 +896,57 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
           _controller.value.position - const Duration(seconds: 10);
       _controller.seekTo(newPosition);
       _forwardCount++;
-      _showSeekNotification('Retrocedido 10s');
+      _showNetflixSeekOverlay('Retroceder 10s', false);
     } else {
       // Adelantar 10 segundos
       final newPosition =
           _controller.value.position + const Duration(seconds: 10);
       _controller.seekTo(newPosition);
       _forwardCount++;
-      _showSeekNotification('Adelantado 10s');
+      _showNetflixSeekOverlay('Adelantar 10s', true);
     }
   }
 
-  void _showSeekNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(milliseconds: 500),
-        backgroundColor: AppColors.warning,
-      ),
-    );
+  void _showNetflixSeekOverlay(String message, bool isForward) {
+    if (mounted) {
+      setState(() {
+        _showSeekOverlay = true;
+        _seekMessage = message;
+        _isSeekingForward = isForward;
+      });
+
+      // Cancelar timer anterior si existe
+      _seekOverlayTimer?.cancel();
+
+      // Ocultar overlay después de 1 segundo
+      _seekOverlayTimer = Timer(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          setState(() {
+            _showSeekOverlay = false;
+          });
+        }
+      });
+    }
+  }
+
+  /// Muestra el overlay temporalmente cuando el usuario toca la pantalla
+  void _showOverlayTemporarily() {
+    if (mounted) {
+      setState(() {
+        _showVideoOverlay = true;
+      });
+
+      // Cancelar timer anterior si existe
+      _overlayTimer?.cancel();
+
+      // Reiniciar timer para ocultar después de 3 segundos
+      _overlayTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            _showVideoOverlay = false;
+          });
+        }
+      });
+    }
   }
 }

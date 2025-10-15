@@ -77,13 +77,13 @@ class VideoInteractionService {
       // Usar el videoId como ID del documento (no 'video_$videoId')
       await videosCollection.doc(videoId.toString()).set({
         'videoId': videoId,
-        'firstPauseAt': Timestamp.fromDate(DateTime.now()),
-        'pauseCount': 1,
-        'totalWatchTime': 0,
-        'lastPauseAt': Timestamp.fromDate(DateTime.now()),
-        'isCompleted': false,
-        'createdAt': Timestamp.fromDate(DateTime.now()),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        'primeraPausa': Timestamp.fromDate(DateTime.now()),
+        'contadorPausas': 1,
+        'tiempoTotalVisto': 0,
+        'ultimaPausa': Timestamp.fromDate(DateTime.now()),
+        'estaCompletado': false,
+        'fechaCreacion': Timestamp.fromDate(DateTime.now()),
+        'fechaActualizacion': Timestamp.fromDate(DateTime.now()),
       });
 
       print('✅ Primer registro de interacción creado para video $videoId');
@@ -107,12 +107,12 @@ class VideoInteractionService {
       if (doc.exists) {
         // Actualizar registro existente
         final data = doc.data()!;
-        final currentPauseCount = (data['pauseCount'] as int? ?? 0) + 1;
+        final currentPauseCount = (data['contadorPausas'] as int? ?? 0) + 1;
 
         await videoDoc.update({
-          'pauseCount': currentPauseCount,
-          'lastPauseAt': Timestamp.fromDate(DateTime.now()),
-          'updatedAt': Timestamp.fromDate(DateTime.now()),
+          'contadorPausas': currentPauseCount,
+          'ultimaPausa': Timestamp.fromDate(DateTime.now()),
+          'fechaActualizacion': Timestamp.fromDate(DateTime.now()),
         });
       } else {
         // Crear nuevo registro
@@ -126,23 +126,43 @@ class VideoInteractionService {
     }
   }
 
-  /// Marca un video como completado
+  /// Marca un video como completado con todos los campos necesarios
   Future<void> markVideoAsCompleted(String userId, int videoId) async {
     try {
       final videoDoc = _firestore
           .collection('Users')
           .doc(userId)
           .collection('videos')
-          .doc(videoId.toString()); // Usar videoId como ID del documento
+          .doc(videoId.toString());
 
-      await videoDoc.set({
+      // Obtener el documento actual para preservar campos existentes
+      final currentDoc = await videoDoc.get();
+      final currentData = currentDoc.data() ?? {};
+
+      // Preparar datos completos para el video completado
+      final now = DateTime.now();
+      final videoData = {
         'videoId': videoId,
-        'isCompleted': true,
-        'completedAt': Timestamp.fromDate(DateTime.now()),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
-      }, SetOptions(merge: true));
+        'estaCompletado': true,
+        'fechaCompletado': Timestamp.fromDate(now),
+        'fechaActualizacion': Timestamp.fromDate(now),
 
-      print('✅ Video $videoId marcado como completado');
+        // Preservar campos existentes o usar valores por defecto
+        'primeraPausa': currentData['primeraPausa'] ?? Timestamp.fromDate(now),
+        'ultimaPausa': currentData['ultimaPausa'] ?? Timestamp.fromDate(now),
+        'tiempoTotalVisto': currentData['tiempoTotalVisto'] ?? 0,
+        'fechaCreacion':
+            currentData['fechaCreacion'] ?? Timestamp.fromDate(now),
+        'contadorPausas': currentData['contadorPausas'] ?? 0,
+        'contadorAdelantos': currentData['contadorAdelantos'] ?? 0,
+        'ultimaPosicion': currentData['ultimaPosicion'] ?? 0,
+        'duracion': currentData['duracion'] ?? 0,
+        'avance': currentData['avance'] ?? 1.0,
+      };
+
+      await videoDoc.set(videoData, SetOptions(merge: true));
+
+      print('✅ Video $videoId marcado como completado con todos los campos');
     } catch (e) {
       print('❌ Error marcando video como completado: $e');
       rethrow;
@@ -179,7 +199,7 @@ class VideoInteractionService {
           .collection('Users')
           .doc(userId)
           .collection('videos')
-          .where('isCompleted', isEqualTo: true)
+          .where('estaCompletado', isEqualTo: true)
           .get();
 
       return querySnapshot.docs

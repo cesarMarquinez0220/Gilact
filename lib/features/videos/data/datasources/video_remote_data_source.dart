@@ -110,7 +110,7 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
           .doc('current_user_id');
 
       await user.collection('videos').doc(videoId).set({
-        'completado': true,
+        'estaCompletado': true,
         'completedAt': Timestamp.now(),
       });
     } catch (e) {
@@ -130,7 +130,7 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
 
       final querySnapshot = await user
           .collection('videos')
-          .where('completado', isEqualTo: true)
+          .where('estaCompletado', isEqualTo: true)
           .get();
 
       return querySnapshot.docs.map((doc) => doc.id).toList();
