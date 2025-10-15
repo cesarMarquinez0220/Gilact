@@ -138,16 +138,62 @@ class UserSubcollectionsService {
   /// Obtiene todos los datos de la situación del usuario
   Future<Map<String, dynamic>?> getUserSituationData(String userId) async {
     try {
-      final doc = await _firestore
-          .collection('Users')
-          .doc(userId)
-          .collection('situacion')
-          .doc('seleccion')
-          .get();
+      // Si userId parece ser un email, buscar por email primero
+      if (userId.contains('@')) {
+        print(
+          '🔍 UserSubcollectionsService: Buscando usuario por email: $userId',
+        );
 
-      if (doc.exists) {
-        return doc.data();
+        // Buscar el documento del usuario por email
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: userId)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print(
+            '🔍 UserSubcollectionsService: Usuario encontrado con ID: $userDocId',
+          );
+
+          // Ahora buscar la información de situación usando el ID real del usuario
+          final doc = await _firestore
+              .collection('Users')
+              .doc(userDocId)
+              .collection('situacion')
+              .doc('seleccion')
+              .get();
+
+          if (doc.exists) {
+            print(
+              '✅ UserSubcollectionsService: Documento de situación encontrado',
+            );
+            return doc.data();
+          } else {
+            print(
+              '⚠️ UserSubcollectionsService: Documento de situación no existe',
+            );
+          }
+        } else {
+          print('❌ UserSubcollectionsService: Usuario no encontrado por email');
+        }
+      } else {
+        // Si userId no es un email, usar directamente como ID
+        print('🔍 UserSubcollectionsService: Buscando usuario por ID: $userId');
+
+        final doc = await _firestore
+            .collection('Users')
+            .doc(userId)
+            .collection('situacion')
+            .doc('seleccion')
+            .get();
+
+        if (doc.exists) {
+          return doc.data();
+        }
       }
+
       return null;
     } catch (e) {
       print('❌ Error obteniendo datos de situación: $e');
