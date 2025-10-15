@@ -15,6 +15,7 @@ class UserProfile extends Equatable {
   final bool isPrePartum;
   final bool isPostPartum;
   final BabyInfo? babyInfo;
+  final Map<String, dynamic>? situationData;
 
   const UserProfile({
     required this.id,
@@ -30,6 +31,7 @@ class UserProfile extends Equatable {
     this.isPrePartum = false,
     this.isPostPartum = false,
     this.babyInfo,
+    this.situationData,
   });
 
   @override
@@ -47,6 +49,7 @@ class UserProfile extends Equatable {
     isPrePartum,
     isPostPartum,
     babyInfo,
+    situationData,
   ];
 
   UserProfile copyWith({
@@ -63,6 +66,7 @@ class UserProfile extends Equatable {
     bool? isPrePartum,
     bool? isPostPartum,
     BabyInfo? babyInfo,
+    Map<String, dynamic>? situationData,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -78,6 +82,7 @@ class UserProfile extends Equatable {
       isPrePartum: isPrePartum ?? this.isPrePartum,
       isPostPartum: isPostPartum ?? this.isPostPartum,
       babyInfo: babyInfo ?? this.babyInfo,
+      situationData: situationData ?? this.situationData,
     );
   }
 }

@@ -102,6 +102,23 @@ class DeleteUserProfileRequested extends UserProfileEvent {
   List<Object> get props => [userId];
 }
 
+class UpdateUserSituationRequested extends UserProfileEvent {
+  final String userId;
+  final bool isPrePartum;
+  final bool isPostPartum;
+  final Map<String, dynamic>? situationData;
+
+  const UpdateUserSituationRequested({
+    required this.userId,
+    required this.isPrePartum,
+    required this.isPostPartum,
+    this.situationData,
+  });
+
+  @override
+  List<Object?> get props => [userId, isPrePartum, isPostPartum, situationData];
+}
+
 class SignOutRequested extends UserProfileEvent {
   const SignOutRequested();
 

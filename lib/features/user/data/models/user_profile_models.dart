@@ -17,6 +17,7 @@ class UserProfileModel extends UserProfile {
     super.isPrePartum = false,
     super.isPostPartum = false,
     super.babyInfo,
+    super.situationData,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json, String id) {
@@ -76,6 +77,7 @@ class UserProfileModel extends UserProfile {
     bool? isPrePartum,
     bool? isPostPartum,
     BabyInfo? babyInfo,
+    Map<String, dynamic>? situationData,
   }) {
     return UserProfileModel(
       id: id ?? this.id,
@@ -91,6 +93,7 @@ class UserProfileModel extends UserProfile {
       isPrePartum: isPrePartum ?? this.isPrePartum,
       isPostPartum: isPostPartum ?? this.isPostPartum,
       babyInfo: babyInfo ?? this.babyInfo,
+      situationData: situationData ?? this.situationData,
     );
   }
 }
