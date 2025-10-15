@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/services/credentials_cache_service.dart';
+import '../../../user/presentation/bloc/user_profile_bloc.dart';
+import '../../../onboarding/data/services/user_subcollections_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -162,8 +165,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // Verificar que el email no esté vacío
     if (email.isEmpty) {
       print('❌ ERROR: Email del usuario está vacío');
-      print('🔄 Redirigiendo a prepost por defecto...');
-      _navigateToPrepost();
+      print('🔄 Redirigiendo a home por defecto...');
+      _navigateToHome();
       return;
     }
 
@@ -179,7 +182,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           .timeout(
             const Duration(seconds: 10),
             onTimeout: () {
-              print('⏰ Timeout en consulta Firestore - redirigiendo a prepost');
+              print('⏰ Timeout en consulta Firestore - redirigiendo a home');
               throw TimeoutException(
                 'Consulta a Firestore excedió el tiempo límite',
               );
@@ -192,41 +195,116 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
       if (usersSnapshot.docs.isNotEmpty) {
         DocumentSnapshot userDocument = usersSnapshot.docs.first;
-        DocumentReference userRef = userDocument.reference;
+        String userId = userDocument.id;
 
         print(
-          '👤 Usuario encontrado en Firestore, verificando subcolección "situacion"',
+          '👤 Usuario encontrado en Firestore con ID: $userId, cargando información completa...',
         );
 
-        bool situacionExists = await userRef
-            .collection('situacion')
-            .limit(1)
-            .get()
-            .then((snapshot) => snapshot.docs.isNotEmpty);
-
-        print('📁 Subcolección "situacion" existe: $situacionExists');
-
-        if (situacionExists) {
-          // El usuario ya tiene la subcolección "situacion"
-          print('🔄 Usuario ya tiene situación - redirigiendo a Perfilnuevo');
-          _navigateToPerfilNuevo();
-        } else {
-          // El usuario no tiene la subcolección "situacion", ir a prepost
-          print('🔄 Usuario no tiene situación - redirigiendo a Prepost');
-          _navigateToPrepost();
-        }
+        // Cargar información completa del usuario y situación
+        await _loadCompleteUserData(userId, email);
       } else {
         // El usuario no existe en la base de datos.
-        print('❌ Usuario no encontrado en Firestore - redirigiendo a prepost');
-        _navigateToPrepost();
+        print('❌ Usuario no encontrado en Firestore - redirigiendo a home');
+        _navigateToHome();
       }
     } catch (e) {
       print('❌ Error en _checkUserSituation: $e');
-      print('🔄 Redirigiendo a prepost por error...');
+      print('🔄 Redirigiendo a home por error...');
 
-      // En caso de error, redirigir a prepost
-      _navigateToPrepost();
+      // En caso de error, redirigir a home
+      _navigateToHome();
     }
+  }
+
+  Future<void> _loadCompleteUserData(String userId, String email) async {
+    try {
+      print('🔄 WelcomeScreen: Cargando datos completos del usuario...');
+
+      // 1. Cargar perfil básico del usuario y esperar a que se complete
+      context.read<UserProfileBloc>().add(
+        GetUserProfileRequested(userId: userId),
+      );
+
+      // Esperar a que el perfil se cargue completamente
+      await _waitForUserProfileToLoad();
+
+      // 2. Cargar información de situación usando UserSubcollectionsService
+      final userSubcollectionsService = UserSubcollectionsService(
+        FirebaseFirestore.instance,
+      );
+      final situationData = await userSubcollectionsService
+          .getUserSituationData(userId);
+
+      if (situationData != null) {
+        print(
+          '✅ WelcomeScreen: Información de situación cargada: $situationData',
+        );
+
+        // Determinar si es preparto o postparto
+        final situationType = situationData['situationType'] as String?;
+        final isPrePartum = situationType == 'preparto';
+        final isPostPartum = situationType == 'postparto';
+
+        print('🔍 WelcomeScreen: situationType = $situationType');
+        print(
+          '🔍 WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        );
+
+        // Actualizar el UserProfileBloc con la información de situación
+        context.read<UserProfileBloc>().add(
+          UpdateUserSituationRequested(
+            userId: userId,
+            isPrePartum: isPrePartum,
+            isPostPartum: isPostPartum,
+            situationData: situationData,
+          ),
+        );
+
+        // Esperar un momento para que se procese la información
+        await Future.delayed(const Duration(milliseconds: 500));
+      } else {
+        print('⚠️ WelcomeScreen: No se encontró información de situación');
+      }
+
+      // 3. Navegar a home con toda la información cargada
+      print('🚀 WelcomeScreen: Navegando a home con datos completos...');
+      _navigateToHome();
+    } catch (e) {
+      print('❌ Error cargando datos completos: $e');
+      _navigateToHome();
+    }
+  }
+
+  Future<void> _waitForUserProfileToLoad() async {
+    print(
+      '⏳ WelcomeScreen: Esperando a que se cargue el perfil del usuario...',
+    );
+
+    // Esperar hasta que el UserProfileBloc tenga un perfil cargado
+    int attempts = 0;
+    const maxAttempts = 20; // Máximo 10 segundos (20 * 500ms)
+
+    while (attempts < maxAttempts) {
+      final currentState = context.read<UserProfileBloc>().state;
+
+      if (currentState is UserProfileLoaded ||
+          currentState is UserProfileUpdated) {
+        print('✅ WelcomeScreen: Perfil del usuario cargado exitosamente');
+        return;
+      }
+
+      if (currentState is UserProfileFailure) {
+        print('❌ WelcomeScreen: Error cargando perfil del usuario');
+        return;
+      }
+
+      // Esperar 500ms antes del siguiente intento
+      await Future.delayed(const Duration(milliseconds: 500));
+      attempts++;
+    }
+
+    print('⚠️ WelcomeScreen: Timeout esperando perfil del usuario');
   }
 
   Future<String> _getUserEmail() async {
@@ -241,16 +319,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     }
   }
 
-  void _navigateToPrepost() {
-    // Navegar a la página principal con el nuevo diseño integrado
+  void _navigateToHome() {
+    // Navegar a la página principal con toda la información ya cargada
     Navigator.pushReplacementNamed(context, '/home');
-    print('🔄 Navegando a Prepost (página principal con diseño integrado)');
-  }
-
-  void _navigateToPerfilNuevo() {
-    // Navegar a la página principal con el nuevo diseño integrado
-    Navigator.pushReplacementNamed(context, '/home');
-    print('🔄 Navegando a Perfilnuevo (página principal con diseño integrado)');
+    print('🔄 Navegando a Home con datos completos cargados');
   }
 
   @override

@@ -16,7 +16,7 @@ import 'features/lessons/presentation/providers/lecciones_provider.dart';
 import 'features/lessons/presentation/providers/video_images_provider.dart';
 import 'features/tips/presentation/pages/tips_page.dart';
 import 'features/tips/presentation/bloc/tip_bloc.dart';
-import 'features/navigation/presentation/pages/main_navigation_page.dart';
+import 'features/navigation/presentation/pages/main_navigation_page_refactored.dart';
 import 'features/auth/presentation/pages/registration_page.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/videos/presentation/pages/user_videos_page.dart';
@@ -95,6 +95,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData.light(),
           home: const LoginPage(),
           routes: {
+            '/login': (context) => const LoginPage(),
             '/welcome': (context) => const WelcomeScreen(),
             '/home': (context) => const MainNavigationPage(),
             '/register': (context) => const RegistrationPage(),
