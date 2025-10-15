@@ -582,11 +582,24 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
           .collection('Users')
           .doc(user.uid)
           .collection('situacion')
-          .doc('Post-Parto');
+          .doc('seleccion');
 
       final situacionSnapshot = await situacionDocRef.get();
 
       if (!situacionSnapshot.exists) {
+        DialogExample.showInfoDialog(
+          context,
+          'Información Requerida',
+          'Debes completar el proceso de onboarding y seleccionar la situación "Post-Parto" para poder registrar datos de lactancia.',
+        );
+        return;
+      }
+
+      // Verificar que el situationType sea 'postparto'
+      final data = situacionSnapshot.data();
+      final situationType = data?['situationType'] as String?;
+
+      if (situationType != 'postparto') {
         DialogExample.showInfoDialog(
           context,
           'Información Requerida',

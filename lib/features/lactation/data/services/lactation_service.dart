@@ -201,6 +201,46 @@ class LactationService {
       final user = _auth.currentUser;
       if (user == null) return false;
 
+      // Si el usuario tiene email, buscar por email primero
+      if (user.email != null) {
+        print('🔍 LactationService: Buscando usuario por email: ${user.email}');
+
+        // Buscar el documento del usuario por email
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print('🔍 LactationService: Usuario encontrado con ID: $userDocId');
+
+          // Ahora buscar la información de situación usando el ID real del usuario
+          final docSnapshot = await _firestore
+              .collection('Users')
+              .doc(userDocId)
+              .collection('situacion')
+              .doc('seleccion')
+              .get();
+
+          if (docSnapshot.exists) {
+            final data = docSnapshot.data();
+            final situationType = data?['situationType'] as String?;
+            print(
+              '🔍 LactationService: situationType encontrado: $situationType',
+            );
+            return situationType == 'postparto';
+          } else {
+            print('⚠️ LactationService: Documento de situación no existe');
+          }
+        } else {
+          print('❌ LactationService: Usuario no encontrado por email');
+        }
+      }
+
+      // Fallback: intentar con UID directamente
+      print('🔍 LactationService: Intentando con UID: ${user.uid}');
       final docSnapshot = await _firestore
           .collection('Users')
           .doc(user.uid)
@@ -213,6 +253,7 @@ class LactationService {
         final situationType = data?['situationType'] as String?;
         return situationType == 'postparto';
       }
+
       return false;
     } catch (e) {
       print('❌ Error verificando situación Post-Parto: $e');
