@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/services/credentials_cache_service.dart';
@@ -30,6 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    print('🔍 WelcomeScreen: initState() - INICIANDO WelcomeScreen...');
     _initializeAnimations();
     _startWelcomeSequence();
   }
@@ -99,6 +101,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _startWelcomeSequence() {
+    print('🔍 _startWelcomeSequence: INICIANDO secuencia de bienvenida...');
+
     // Iniciar animación principal
     _mainController.forward();
 
@@ -110,28 +114,45 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // Iniciar partículas
     _particleController.repeat();
 
+    print(
+      '🔍 _startWelcomeSequence: Animaciones iniciadas, esperando 3 segundos...',
+    );
+
     // Después de las animaciones, verificar onboarding y situación del usuario
     Future.delayed(const Duration(seconds: 3), () {
+      print(
+        '🔍 _startWelcomeSequence: Delay completado, iniciando verificación...',
+      );
       _checkOnboardingAndUserSituation();
     });
   }
 
   Future<void> _checkOnboardingAndUserSituation() async {
-    print('🔍 WelcomeScreen: Iniciando verificación de onboarding...');
+    print(
+      '🔍 _checkOnboardingAndUserSituation: INICIANDO verificación de onboarding...',
+    );
 
     // Verificar si es un registro nuevo
     final prefs = await SharedPreferences.getInstance();
     final isNewRegistration = prefs.getBool('is_new_registration') ?? false;
 
+    print(
+      '🔍 _checkOnboardingAndUserSituation: is_new_registration = $isNewRegistration',
+    );
+
     if (isNewRegistration) {
       print(
-        '🔍 WelcomeScreen: Es un registro nuevo, limpiando flag y saliendo...',
+        '✅ _checkOnboardingAndUserSituation: Es un registro nuevo, limpiando flag y saliendo...',
       );
       // Limpiar el flag de registro nuevo
       await prefs.remove('is_new_registration');
       // No hacer nada más, el registro ya navegó al onboarding
       return;
     }
+
+    print(
+      '🔍 _checkOnboardingAndUserSituation: No es registro nuevo, verificando estado del onboarding...',
+    );
 
     // Verificar estado del onboarding desde Firestore y sincronizar con SharedPreferences
     await _checkAndSyncOnboardingStatus();
@@ -142,7 +163,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     try {
       // Obtener email del usuario
       String email = await _getUserEmail();
-      print('🔍 WelcomeScreen: Verificando onboarding para email: $email');
+      print('🔍 _checkAndSyncOnboardingStatus: Email obtenido: "$email"');
+
+      if (email.isEmpty) {
+        print(
+          '❌ ERROR _checkAndSyncOnboardingStatus: Email vacío, navegando a onboarding por defecto',
+        );
+        Navigator.of(context).pushReplacementNamed('/onboarding');
+        return;
+      }
+
+      print(
+        '🔍 _checkAndSyncOnboardingStatus: Buscando usuario en Firestore con email: "$email"',
+      );
 
       // Buscar el documento del usuario por email
       final userQuery = await FirebaseFirestore.instance
@@ -151,9 +184,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           .limit(1)
           .get();
 
+      print(
+        '🔍 _checkAndSyncOnboardingStatus: Query completada. Documentos encontrados: ${userQuery.docs.length}',
+      );
+
       if (userQuery.docs.isNotEmpty) {
         final userDocId = userQuery.docs.first.id;
-        print('🔍 WelcomeScreen: Usuario encontrado con ID: $userDocId');
+        print(
+          '✅ _checkAndSyncOnboardingStatus: Usuario encontrado con ID: $userDocId',
+        );
 
         // Verificar el estado del onboarding en Firestore
         final situacionDoc = await FirebaseFirestore.instance
@@ -163,13 +202,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             .doc('seleccion')
             .get();
 
+        print(
+          '🔍 _checkAndSyncOnboardingStatus: Documento de situación existe: ${situacionDoc.exists}',
+        );
+
         if (situacionDoc.exists) {
           final data = situacionDoc.data();
+          print('🔍 _checkAndSyncOnboardingStatus: Datos del documento: $data');
+
           final onboardingCompletedInFirestore =
               data?['onboardingCompleted'] as bool? ?? false;
 
           print(
-            '🔍 WelcomeScreen: onboardingCompleted en Firestore = $onboardingCompletedInFirestore',
+            '🔍 _checkAndSyncOnboardingStatus: onboardingCompleted en Firestore = $onboardingCompletedInFirestore',
           );
 
           // Sincronizar con SharedPreferences
@@ -179,39 +224,59 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             onboardingCompletedInFirestore,
           );
 
+          print(
+            '🔍 _checkAndSyncOnboardingStatus: SharedPreferences actualizado con onboarding_completed = $onboardingCompletedInFirestore',
+          );
+
           if (onboardingCompletedInFirestore) {
             print(
-              '🔍 WelcomeScreen: Onboarding completado, verificando situación del usuario...',
+              '✅ _checkAndSyncOnboardingStatus: Onboarding completado, verificando situación del usuario...',
             );
             await _checkUserSituation();
           } else {
             print(
-              '🔍 WelcomeScreen: Onboarding NO completado, navegando a onboarding...',
+              '⚠️ _checkAndSyncOnboardingStatus: Onboarding NO completado, navegando a onboarding...',
             );
             Navigator.of(context).pushReplacementNamed('/onboarding');
           }
         } else {
           print(
-            '🔍 WelcomeScreen: Documento de situación no existe, navegando a onboarding...',
+            '❌ _checkAndSyncOnboardingStatus: Documento de situación no existe, navegando a onboarding...',
           );
           Navigator.of(context).pushReplacementNamed('/onboarding');
         }
       } else {
         print(
-          '🔍 WelcomeScreen: Usuario no encontrado, navegando a onboarding...',
+          '❌ _checkAndSyncOnboardingStatus: Usuario no encontrado en Firestore, navegando a onboarding...',
         );
         Navigator.of(context).pushReplacementNamed('/onboarding');
       }
     } catch (e) {
-      print('❌ WelcomeScreen: Error verificando onboarding: $e');
+      print(
+        '❌ ERROR _checkAndSyncOnboardingStatus: Error verificando onboarding: $e',
+      );
+      print(
+        '🔍 _checkAndSyncOnboardingStatus: Stack trace: ${StackTrace.current}',
+      );
+
       // En caso de error, usar SharedPreferences como fallback
       final prefs = await SharedPreferences.getInstance();
       final onboardingCompleted =
           prefs.getBool('onboarding_completed') ?? false;
 
+      print(
+        '🔍 _checkAndSyncOnboardingStatus: Fallback - onboarding_completed desde SharedPreferences = $onboardingCompleted',
+      );
+
       if (onboardingCompleted) {
+        print(
+          '✅ _checkAndSyncOnboardingStatus: Fallback - Onboarding completado, verificando situación...',
+        );
         await _checkUserSituation();
       } else {
+        print(
+          '⚠️ _checkAndSyncOnboardingStatus: Fallback - Onboarding NO completado, navegando a onboarding...',
+        );
         Navigator.of(context).pushReplacementNamed('/onboarding');
       }
     }
@@ -373,12 +438,61 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<String> _getUserEmail() async {
     try {
-      // Obtener email desde SharedPreferences usando CredentialsCacheService
+      print('🔍 _getUserEmail: Iniciando obtención de email...');
+
+      // Intentar obtener desde Firebase Auth primero
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      print(
+        '🔍 _getUserEmail: Firebase Auth currentUser: ${firebaseUser?.uid}',
+      );
+      print('🔍 _getUserEmail: Firebase Auth email: "${firebaseUser?.email}"');
+
+      if (firebaseUser?.email != null && firebaseUser!.email!.isNotEmpty) {
+        print(
+          '✅ _getUserEmail: Email obtenido desde Firebase Auth: "${firebaseUser.email}"',
+        );
+        return firebaseUser.email!;
+      }
+
+      print(
+        '⚠️ _getUserEmail: Firebase Auth email vacío, intentando SharedPreferences...',
+      );
+
+      // Fallback a SharedPreferences
       String email = await CredentialsCacheService.loadCredentialsFromCache();
-      print('📧 Email obtenido desde caché: "$email"');
-      return email;
+      print('🔍 _getUserEmail: Email desde SharedPreferences: "$email"');
+
+      if (email.isEmpty) {
+        print(
+          '❌ ERROR _getUserEmail: Email vacío tanto en Firebase Auth como en SharedPreferences',
+        );
+        print(
+          '🔍 _getUserEmail: Verificando SharedPreferences directamente...',
+        );
+
+        // Verificación adicional de SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final cachedEmail = prefs.getString('cached_email');
+        final saveCredentials = prefs.getBool('save_credentials');
+        print('🔍 _getUserEmail: cached_email directo: "$cachedEmail"');
+        print('🔍 _getUserEmail: save_credentials: $saveCredentials');
+
+        if (cachedEmail != null && cachedEmail.isNotEmpty) {
+          print(
+            '✅ _getUserEmail: Email encontrado en SharedPreferences directo: "$cachedEmail"',
+          );
+          return cachedEmail;
+        }
+      } else {
+        print(
+          '✅ _getUserEmail: Email obtenido desde SharedPreferences: "$email"',
+        );
+        return email;
+      }
+
+      return '';
     } catch (e) {
-      print('❌ Error obteniendo email del usuario: $e');
+      print('❌ ERROR _getUserEmail: Error obteniendo email del usuario: $e');
       return '';
     }
   }

@@ -8,10 +8,23 @@ class CredentialsCacheService {
   // Cargar credenciales desde caché
   static Future<String> loadCredentialsFromCache() async {
     try {
+      print('🔍 CredentialsCacheService: Cargando credenciales desde caché...');
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_emailKey) ?? '';
+      final email = prefs.getString(_emailKey) ?? '';
+      final saveCredentials = prefs.getBool(_saveCredentialsKey) ?? false;
+
+      print('🔍 CredentialsCacheService: Email desde caché: "$email"');
+      print('🔍 CredentialsCacheService: save_credentials: $saveCredentials');
+
+      if (email.isEmpty) {
+        print('⚠️ CredentialsCacheService: Email vacío en caché');
+      } else {
+        print('✅ CredentialsCacheService: Email encontrado en caché: "$email"');
+      }
+
+      return email;
     } catch (e) {
-      print('Error cargando credenciales: $e');
+      print('❌ ERROR CredentialsCacheService: Error cargando credenciales: $e');
       return '';
     }
   }
@@ -22,16 +35,24 @@ class CredentialsCacheService {
     bool saveCredentials,
   ) async {
     try {
+      print('🔍 CredentialsCacheService: Guardando credenciales en caché...');
+      print('🔍 CredentialsCacheService: Email a guardar: "$email"');
+      print('🔍 CredentialsCacheService: saveCredentials: $saveCredentials');
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       if (saveCredentials) {
         await prefs.setString(_emailKey, email);
         await prefs.setBool(_saveCredentialsKey, true);
+        print('✅ CredentialsCacheService: Credenciales guardadas exitosamente');
       } else {
         await prefs.remove(_emailKey);
         await prefs.setBool(_saveCredentialsKey, false);
+        print('🔍 CredentialsCacheService: Credenciales removidas del caché');
       }
     } catch (e) {
-      print('Error guardando credenciales: $e');
+      print(
+        '❌ ERROR CredentialsCacheService: Error guardando credenciales: $e',
+      );
     }
   }
 

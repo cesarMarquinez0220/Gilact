@@ -148,9 +148,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
                   // Guardar credenciales si está marcado
                   if (_saveCredentials) {
+                    print('🔍 LoginPage: Guardando credenciales en caché...');
+                    print(
+                      '🔍 LoginPage: Email a guardar: "${_emailController.text.trim()}"',
+                    );
                     CredentialsCacheService.saveCredentialsInCache(
                       _emailController.text.trim(),
                       true,
+                    );
+                  } else {
+                    print(
+                      '🔍 LoginPage: No se guardarán credenciales (_saveCredentials = false)',
                     );
                   }
 
