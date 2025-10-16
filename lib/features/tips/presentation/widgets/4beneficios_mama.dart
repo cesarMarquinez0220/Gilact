@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/truly_adaptive_card.dart';
 import 'package:animate_do/animate_do.dart';
 
 class BeneficiosMamaInfo extends StatelessWidget {
@@ -26,33 +27,23 @@ class BeneficiosMamaInfo extends StatelessWidget {
           style: TipTypography.headingXL,
         ),
       ),
-      body: const [
-        _Paragraph('- Disminuye el sangrado postparto.'),
-        _Paragraph('- Ayuda a que el útero vuelva a su estado normal.'),
-        _Paragraph('- Protege contra el cáncer de ovario, mama y útero.'),
-        _Paragraph(
-          '- Recupera rápidamente la figura eliminando reservas de grasa.',
+      body: [
+        FadeInDown(
+          duration: const Duration(milliseconds: 1200),
+          delay: const Duration(milliseconds: 500),
+          child: AdaptiveListContent(
+            items: const [
+              'Disminuye el sangrado postparto.',
+              'Ayuda a que el útero vuelva a su estado normal.',
+              'Protege contra el cáncer de ovario, mama y útero.',
+              'Recupera rápidamente la figura eliminando reservas de grasa.',
+              'Disminuye el riesgo de depresión posparto.',
+            ],
+            itemStyle: TipTypography.paragraph,
+            bullet: '-',
+          ),
         ),
-        _Paragraph('- Disminuye el riesgo de depresión posparto.'),
       ],
-    );
-  }
-}
-
-class _Paragraph extends StatelessWidget {
-  final String text;
-  const _Paragraph(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeInDown(
-      duration: const Duration(milliseconds: 1200),
-      delay: const Duration(milliseconds: 500),
-      child: Text(
-        text,
-        style: TipTypography.paragraph,
-        textAlign: TextAlign.start,
-      ),
     );
   }
 }

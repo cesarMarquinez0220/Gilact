@@ -3,6 +3,7 @@ import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
 import 'package:animate_do/animate_do.dart';
+import 'common/truly_adaptive_card.dart';
 
 class PosturaAgarreInfo extends StatelessWidget {
   const PosturaAgarreInfo({super.key});
@@ -24,27 +25,30 @@ class PosturaAgarreInfo extends StatelessWidget {
           style: TipTypography.headingLarge,
         ),
       ),
-      body: const[
-        SizedBox(height: 10),
-        Text(
-          '- Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.',
+      body: [
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text:
+              '- Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        Text(
-          '- La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.',
+        const CompactTextContent(
+          text:
+              '- La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
-        Text(
-          'El Agarre Apropiado es Importante:',
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text: 'El Agarre Apropiado es Importante:',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
-        Text(
-          '- La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón).',
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text:
+              '- La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón).',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),

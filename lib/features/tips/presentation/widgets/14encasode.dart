@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
 import 'package:animate_do/animate_do.dart';
+import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
@@ -30,58 +31,58 @@ class ProblemasLactanciaInfo extends StatelessWidget {
         ),
       ),
       body: [
-        const SizedBox(height: 10),
-        const Text(
-          'Congestión Mamaria:',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: 'Congestión Mamaria:',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- No suspendas la lactancia; hazte masajes circulares en toda la mama.',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- No suspendas la lactancia; hazte masajes circulares en toda la mama.',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- Amamanta con frecuencia para evitar los abcesos mamarios.',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- Amamanta con frecuencia para evitar los abcesos mamarios.',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 10),
-        const Text(
-          'Fisuras y Erosiones del Pezón:',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: 'Fisuras y Erosiones del Pezón:',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- Verifica si el niño tiene sapito (Moniliasis oral en el bebé o la madre).',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- Verifica si el niño tiene sapito (Moniliasis oral en el bebé o la madre).',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- Acude al médico para diagnóstico y tratamiento.',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- Acude al médico para diagnóstico y tratamiento.',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 10),
-        const Text(
-          'Baja Producción de Leche:',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: 'Baja Producción de Leche:',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- Toma más agua.',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- Toma más agua.',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '- Descansa y trata de relajarte.',
-          style: TipTypography.paragraph,
+        const SizedBox(height: 6),
+        const CompactTextContent(
+            text: '- Descansa y trata de relajarte.',
+            style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
       ],

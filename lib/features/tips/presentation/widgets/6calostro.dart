@@ -5,20 +5,18 @@ import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
 import 'package:animate_do/animate_do.dart';
+import 'common/truly_adaptive_card.dart';
 
 class CalostroInfo extends StatelessWidget {
   const CalostroInfo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TipCard(
+    return TrulyAdaptiveCard(
       image: FadeInRight(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: Transform.scale(
-          scale: 1.8,
-          child: Image.asset(TipAssets.calostro),
-        ),
+        child: Image.asset(TipAssets.calostro),
       ),
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
@@ -29,32 +27,35 @@ class CalostroInfo extends StatelessWidget {
           style: TipTypography.headingXL,
         ),
       ),
-      body: const [
-        SizedBox(height: 10),
-        Text(
-          'El calostro es la primera leche que produce la madre. Aquí tienes información clave:',
+      body: [
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text:
+              'El calostro es la primera leche que produce la madre. Aquí tienes información clave:',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        SizedBox(height: 10),
-        Text(
-          '- Es de color amarillento y contiene alto valor nutritivo.',
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text: '- Es de color amarillento y contiene alto valor nutritivo.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
-          '- Satisface al lactante porque tiene los nutrientes que necesita el bebé.',
+        const CompactTextContent(
+          text:
+              '- Satisface al lactante porque tiene los nutrientes que necesita el bebé.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        Text(
-          '- Contiene defensas que protegen al bebé contra enfermedades.',
+        const CompactTextContent(
+          text: '- Contiene defensas que protegen al bebé contra enfermedades.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        SizedBox(height: 10),
-        Text(
-          'Es el único alimento que el bebé necesita en los primeros seis meses.',
+        const SizedBox(height: 8),
+        const CompactTextContent(
+          text:
+              'Es el único alimento que el bebé necesita en los primeros seis meses.',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/truly_adaptive_card.dart';
 import 'package:animate_do/animate_do.dart';
 
 class BeneficiosBebeInfo extends StatelessWidget {
@@ -24,41 +25,33 @@ class BeneficiosBebeInfo extends StatelessWidget {
           style: TipTypography.headingLarge,
         ),
       ),
-      body: const [
-        SizedBox(height: 8),
-        _P(
-          'Durante los primeros 6 meses de vida:',
-        ),
-        SizedBox(height: 10),
-        _P('- Mayor coeficiente intelectual y mejor rendimiento escolar.'),
-        SizedBox(height: 10),
-        _P(
-          '- Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.',
-        ),
-        SizedBox(height: 10),
-        _P('- Niños(as) más cariñosos(as).'),
-        SizedBox(height: 10),
-        _P(
-          '- Menos caries dentales y mejor desarrollo de musculatura facial y cuello.',
+      body: [
+        FadeInDown(
+          duration: const Duration(milliseconds: 1200),
+          delay: const Duration(milliseconds: 500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AdaptiveTextContent(
+                text: 'Durante los primeros 6 meses de vida:',
+                style: TipTypography.paragraph,
+                textAlign: TextAlign.start,
+              ),
+              const SizedBox(height: 12),
+              AdaptiveListContent(
+                items: const [
+                  'Mayor coeficiente intelectual y mejor rendimiento escolar.',
+                  'Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.',
+                  'Niños(as) más cariñosos(as).',
+                  'Menos caries dentales y mejor desarrollo de musculatura facial y cuello.',
+                ],
+                itemStyle: TipTypography.paragraph,
+                bullet: '-',
+              ),
+            ],
+          ),
         ),
       ],
-    );
-  }
-}
-
-class _P extends StatelessWidget {
-  final String t;
-  const _P(this.t);
-  @override
-  Widget build(BuildContext context) {
-    return FadeInDown(
-      duration: const Duration(milliseconds: 1200),
-      delay: const Duration(milliseconds: 500),
-      child: Text(
-        t,
-        textAlign: TextAlign.start,
-        style: TipTypography.paragraph,
-      ),
     );
   }
 }
