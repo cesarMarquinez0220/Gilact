@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../videos/data/services/video_preload_service.dart';
@@ -180,11 +181,39 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   /// Verifica si el usuario tiene progreso previo en Firestore
   Future<bool> _checkIfUserHasProgress(String userId) async {
     try {
-      // TODO: Implementar verificación real en Firestore
-      // Por ahora, asumir que es usuario nuevo
-      return false;
+      print('🔍 Verificando progreso previo para usuario: $userId');
+
+      // Consultar la subcolección de videos del usuario
+      final videosCollection = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .collection('videos');
+
+      final querySnapshot = await videosCollection.get();
+
+      // Si hay documentos en la subcolección videos, el usuario tiene progreso
+      final hasProgress = querySnapshot.docs.isNotEmpty;
+
+      if (hasProgress) {
+        print(
+          '✅ Usuario tiene progreso previo: ${querySnapshot.docs.length} videos encontrados',
+        );
+
+        // Mostrar detalles del progreso encontrado
+        for (final doc in querySnapshot.docs) {
+          final data = doc.data();
+          final videoId = data['videoId'];
+          final estaCompletado = data['estaCompletado'] ?? false;
+          print('📹 Video $videoId - Completado: $estaCompletado');
+        }
+      } else {
+        print('🆕 Usuario nuevo sin progreso previo');
+      }
+
+      return hasProgress;
     } catch (e) {
       print('❌ Error verificando progreso del usuario: $e');
+      // En caso de error, asumir que es usuario nuevo para evitar problemas
       return false;
     }
   }

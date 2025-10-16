@@ -354,6 +354,13 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       video.videoId,
     );
 
+    // Log para debugging del progreso
+    if (progress > 0) {
+      print(
+        '📊 Video ${video.videoId}: Progreso ${progress.toStringAsFixed(1)}%',
+      );
+    }
+
     // Lógica de disponibilidad: solo el primer video de la primera lección está disponible inicialmente
     // Después, solo se habilita el siguiente video cuando el anterior está completado
     final isAvailable = _isVideoAvailable(video, index);
@@ -466,7 +473,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
               ),
 
             // CircularProgressIndicator que rodea la imagen
-            if (isAvailable && !isCompleted && progress > 0)
+            if (isAvailable && !isCompleted)
               Positioned.fill(
                 child: Stack(
                   children: [
@@ -476,16 +483,15 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
                         width: nodeSize,
                         height: nodeSize,
                         child: CircularProgressIndicator(
-                          value: progress / 100.0,
+                          value:
+                              progress /
+                              100.0, // El progreso ya viene como porcentaje del provider
                           strokeWidth: 6,
                           backgroundColor: Colors.transparent,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            const Color.fromARGB(
-                              255,
-                              190,
-                              104,
-                              244,
-                            ), // Color primario de la app
+                            const Color(
+                              0xFFFF9800,
+                            ), // Verde vibrante para mejor visibilidad
                           ),
                         ),
                       ),

@@ -93,24 +93,26 @@ class LeccionesProvider extends ChangeNotifier {
 
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
-        final videoId = data['videoId'] as int?;
-        final isCompleted = data['estaCompletado'] as bool? ?? false;
-        final completado = data['estaCompletado'] as bool? ?? false;
+        // Usar el ID del documento como videoId, o el campo videoId si existe
+        final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
+        final estaCompletado = data['estaCompletado'] as bool? ?? false;
         final avance = data['avance'] as double? ?? 0.0;
 
         if (videoId != null) {
           // Usar el progreso de Firestore
           _progresoVideos[videoId] = avance * 100;
 
-          // Marcar como completado solo si ambos campos son true
-          if (isCompleted && completado) {
+          // Marcar como completado si está completado en Firestore
+          if (estaCompletado) {
             _leccionesCompletadas.add(videoId);
             print('✅ Video $videoId marcado como completado desde Firestore');
           } else {
             print(
-              '⏸️ Video $videoId NO completado (isCompleted: $isCompleted, completado: $completado)',
+              '⏸️ Video $videoId NO completado (estaCompletado: $estaCompletado, avance: ${(avance * 100).toStringAsFixed(1)}%)',
             );
           }
+        } else {
+          print('❌ Error: No se pudo obtener videoId del documento ${doc.id}');
         }
       }
 
