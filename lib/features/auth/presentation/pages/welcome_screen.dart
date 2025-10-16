@@ -349,14 +349,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _loadCompleteUserData(String userId, String email) async {
     try {
       print('🔄 WelcomeScreen: Cargando datos completos del usuario...');
+      print(
+        '🔍 WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
+      );
 
       // 1. Cargar perfil básico del usuario y esperar a que se complete
+      print('🔍 WelcomeScreen: Enviando GetUserProfileRequested...');
       context.read<UserProfileBloc>().add(
         GetUserProfileRequested(userId: userId),
       );
 
       // Esperar a que el perfil se cargue completamente
       await _waitForUserProfileToLoad();
+
+      print(
+        '🔍 WelcomeScreen: Estado del UserProfileBloc después de cargar perfil: ${context.read<UserProfileBloc>().state.runtimeType}',
+      );
 
       // 2. Cargar información de situación usando UserSubcollectionsService
       final userSubcollectionsService = UserSubcollectionsService(
@@ -381,6 +389,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         );
 
         // Actualizar el UserProfileBloc con la información de situación
+        print('🔍 WelcomeScreen: Enviando UpdateUserSituationRequested...');
+        print('🔍 WelcomeScreen: userId = $userId');
+        print(
+          '🔍 WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        );
+
         context.read<UserProfileBloc>().add(
           UpdateUserSituationRequested(
             userId: userId,
@@ -390,8 +404,28 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
         );
 
+        print('🔍 WelcomeScreen: UpdateUserSituationRequested enviado');
+
         // Esperar un momento para que se procese la información
         await Future.delayed(const Duration(milliseconds: 500));
+
+        // Verificar el estado después de la actualización
+        final currentState = context.read<UserProfileBloc>().state;
+        print(
+          '🔍 WelcomeScreen: Estado del UserProfileBloc después de actualización: ${currentState.runtimeType}',
+        );
+
+        if (currentState is UserProfileUpdated) {
+          print('✅ WelcomeScreen: Situación actualizada exitosamente');
+        } else if (currentState is UserProfileFailure) {
+          print(
+            '❌ WelcomeScreen: Error actualizando situación: ${currentState.message}',
+          );
+        } else {
+          print(
+            '⚠️ WelcomeScreen: Estado inesperado después de actualización: $currentState',
+          );
+        }
       } else {
         print('⚠️ WelcomeScreen: No se encontró información de situación');
       }
@@ -416,15 +450,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     while (attempts < maxAttempts) {
       final currentState = context.read<UserProfileBloc>().state;
+      print(
+        '🔍 WelcomeScreen: Intento $attempts - Estado actual: ${currentState.runtimeType}',
+      );
 
       if (currentState is UserProfileLoaded ||
           currentState is UserProfileUpdated) {
         print('✅ WelcomeScreen: Perfil del usuario cargado exitosamente');
+        print('🔍 WelcomeScreen: Estado final: $currentState');
         return;
       }
 
       if (currentState is UserProfileFailure) {
-        print('❌ WelcomeScreen: Error cargando perfil del usuario');
+        print(
+          '❌ WelcomeScreen: Error cargando perfil del usuario: ${currentState.message}',
+        );
         return;
       }
 
@@ -433,7 +473,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       attempts++;
     }
 
-    print('⚠️ WelcomeScreen: Timeout esperando perfil del usuario');
+    print(
+      '⚠️ WelcomeScreen: Timeout esperando perfil del usuario después de $maxAttempts intentos',
+    );
   }
 
   Future<String> _getUserEmail() async {
