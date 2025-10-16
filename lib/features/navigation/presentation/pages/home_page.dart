@@ -25,6 +25,20 @@ class HomePage extends StatelessWidget {
           // Contenido principal usando BlocBuilder
           BlocBuilder<UserProfileBloc, UserProfileState>(
             builder: (context, state) {
+              print('🏠 HomePage: Estado recibido: ${state.runtimeType}');
+              if (state is UserProfileLoaded) {
+                print(
+                  '🏠 HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
+                );
+              } else if (state is UserProfileUpdated) {
+                print(
+                  '🏠 HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
+                );
+              } else if (state is UserProfileFailure) {
+                print('🏠 HomePage: UserProfileFailure - ${state.message}');
+              } else {
+                print('🏠 HomePage: Estado inesperado: $state');
+              }
               return _buildHomeContent(context, state);
             },
           ),
@@ -114,6 +128,12 @@ class HomePage extends StatelessWidget {
     UserProfileState state,
   ) {
     final isPostPartum = NavigationService.getUserPostPartumStatus(state);
+    print(
+      '🏠 HomePage: _buildHomeContentSections - isPostPartum: $isPostPartum',
+    );
+    print(
+      '🏠 HomePage: _buildHomeContentSections - state: ${state.runtimeType}',
+    );
 
     return Column(
       children: [
@@ -198,19 +218,53 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 15),
 
         // Secciones específicas según el estado
-        if (state is UserProfileLoaded) ...[
-          // Solo mostrar PostpartoProfileWidget para usuarios postparto
-          // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
-          if (state.profile.isPostPartum)
-            PostpartoProfileWidget(userProfile: state.profile),
-        ] else if (state is UserProfileUpdated) ...[
-          // Solo mostrar PostpartoProfileWidget para usuarios postparto
-          // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
-          if (state.profile.isPostPartum)
-            PostpartoProfileWidget(userProfile: state.profile),
-        ],
+        _buildPostPartumSection(state),
       ],
     );
+  }
+
+  /// Construye la sección de postparto con logs detallados
+  Widget _buildPostPartumSection(UserProfileState state) {
+    if (state is UserProfileLoaded) {
+      print(
+        '🏠 HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
+      );
+      // Solo mostrar PostpartoProfileWidget para usuarios postparto
+      // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
+      if (state.profile.isPostPartum) {
+        print(
+          '🏠 HomePage: Mostrando PostpartoProfileWidget para UserProfileLoaded',
+        );
+        return PostpartoProfileWidget(userProfile: state.profile);
+      } else {
+        print(
+          '🏠 HomePage: NO mostrando PostpartoProfileWidget para UserProfileLoaded (no es postparto)',
+        );
+        return const SizedBox.shrink();
+      }
+    } else if (state is UserProfileUpdated) {
+      print(
+        '🏠 HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
+      );
+      // Solo mostrar PostpartoProfileWidget para usuarios postparto
+      // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
+      if (state.profile.isPostPartum) {
+        print(
+          '🏠 HomePage: Mostrando PostpartoProfileWidget para UserProfileUpdated',
+        );
+        return PostpartoProfileWidget(userProfile: state.profile);
+      } else {
+        print(
+          '🏠 HomePage: NO mostrando PostpartoProfileWidget para UserProfileUpdated (no es postparto)',
+        );
+        return const SizedBox.shrink();
+      }
+    } else {
+      print(
+        '🏠 HomePage: Estado no reconocido para mostrar PostpartoProfileWidget: ${state.runtimeType}',
+      );
+      return const SizedBox.shrink();
+    }
   }
 
   /// Extrae la fecha esperada de nacimiento desde los datos del usuario
