@@ -93,10 +93,37 @@ class LeccionesProvider extends ChangeNotifier {
 
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
+        print(
+          '🔍 LeccionesProvider: Procesando documento ${doc.id} con datos: $data',
+        );
+
         // Usar el ID del documento como videoId, o el campo videoId si existe
         final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
         final estaCompletado = data['estaCompletado'] as bool? ?? false;
-        final avance = data['avance'] as double? ?? 0.0;
+
+        print(
+          '🔍 LeccionesProvider: videoId = $videoId, estaCompletado = $estaCompletado',
+        );
+
+        // Manejar avance que puede ser int o double
+        dynamic avanceRaw = data['avance'];
+        double avance = 0.0;
+        if (avanceRaw != null) {
+          print(
+            '🔍 LeccionesProvider: avanceRaw = $avanceRaw (tipo: ${avanceRaw.runtimeType})',
+          );
+          if (avanceRaw is int) {
+            avance = avanceRaw.toDouble();
+            print(
+              '🔍 LeccionesProvider: avance convertido de int a double: $avance',
+            );
+          } else if (avanceRaw is double) {
+            avance = avanceRaw;
+            print('🔍 LeccionesProvider: avance ya es double: $avance');
+          }
+        } else {
+          print('🔍 LeccionesProvider: avanceRaw es null, usando 0.0');
+        }
 
         if (videoId != null) {
           // Usar el progreso de Firestore
