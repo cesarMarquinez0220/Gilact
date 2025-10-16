@@ -353,6 +353,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         '🔍 WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
       );
 
+      // 0. Reinicializar el UserProfileBloc para el nuevo usuario
+      print(
+        '🔄 WelcomeScreen: Reinicializando UserProfileBloc para nuevo usuario...',
+      );
+      context.read<UserProfileBloc>().add(SignOutRequested());
+
+      // Esperar un momento para que se procese el reinicio
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      print(
+        '🔍 WelcomeScreen: Estado del UserProfileBloc después de reinicio: ${context.read<UserProfileBloc>().state.runtimeType}',
+      );
+
       // 1. Cargar perfil básico del usuario y esperar a que se complete
       print('🔍 WelcomeScreen: Enviando GetUserProfileRequested...');
       context.read<UserProfileBloc>().add(
