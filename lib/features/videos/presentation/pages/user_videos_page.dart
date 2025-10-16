@@ -74,6 +74,12 @@ class _UserVideosPageState extends State<UserVideosPage> {
         lastCompletedLesson = ultimaLeccion;
         _isLoading = false;
       });
+
+      // Log para debugging
+      print('📊 Historial cargado:');
+      print('📹 Total videos: ${_videos.length}');
+      print('✅ Videos completados: $_completedVideos');
+      print('🎯 Última lección completada: $lastCompletedLesson');
     } catch (e) {
       setState(() {
         _error = 'Error al cargar videos: $e';
@@ -332,7 +338,8 @@ class _UserVideosPageState extends State<UserVideosPage> {
         itemBuilder: (context, index) {
           final video = _videos[index];
           final isCompleted = _isVideoCompleted(video.videoId);
-          final isUnlocked = video.videoId <= lastCompletedLesson + 1;
+          // Solo desbloquear videos que están completados (estaCompletado: true)
+          final isUnlocked = isCompleted;
 
           return _buildVideoCard(video, isCompleted, isUnlocked);
         },
@@ -536,7 +543,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   bool _isVideoCompleted(int videoId) {
-    return _completedVideos.contains(videoId);
+    final isCompleted = _completedVideos.contains(videoId);
+    if (isCompleted) {
+      print('✅ Video $videoId está completado');
+    }
+    return isCompleted;
   }
 
   Future<void> _navigateToVideoPlayer(Video video) async {
@@ -571,6 +582,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           pageBuilder: (context, animation1, animation2) => VideoPlayerPage(
             video: videoEntity,
             userId: FirebaseAuth.instance.currentUser?.uid ?? 'current_user',
+            isFromHistory: true, // Indicar que viene del historial
           ),
           transitionsBuilder: (context, animation1, animation2, child) {
             const begin = Offset(1.0, 0.0);

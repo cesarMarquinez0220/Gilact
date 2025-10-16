@@ -33,6 +33,7 @@ class AdvancedVideoPlayer extends StatefulWidget {
   final bool isPreloaded; // Nuevo parámetro para indicar si está precargado
   final bool
   isLastVideoInLesson; // Nuevo parámetro para saber si es el último video
+  final bool isFromHistory; // Parámetro para indicar si viene del historial
 
   const AdvancedVideoPlayer({
     super.key,
@@ -41,6 +42,7 @@ class AdvancedVideoPlayer extends StatefulWidget {
     this.onVideoReady,
     this.isPreloaded = false, // Por defecto false
     this.isLastVideoInLesson = false, // Por defecto false
+    this.isFromHistory = false, // Por defecto false
   });
 
   @override
@@ -89,6 +91,8 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   // Variable para controlar estado de reproducción
   bool _isPlaying = false;
+  bool _wasAlreadyCompleted =
+      false; // Nueva variable para trackear estado original
 
   @override
   void initState() {
@@ -260,6 +264,18 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   Future<void> _getLastPositionFromFirestore() async {
     if (mounted) {
       try {
+        // Si viene del historial, verificar si ya estaba completado
+        if (widget.isFromHistory) {
+          final wasCompleted = await _progressService.isVideoCompleted(
+            widget.video.videoId,
+          );
+          _wasAlreadyCompleted = wasCompleted;
+          if (kDebugMode) {
+            print('📚 Video desde historial: estaba completado: $wasCompleted');
+          }
+          return;
+        }
+
         // Primero intentar obtener desde caché
         final cachedProgress = await VideoCacheService.getCachedVideoProgress(
           widget.video.videoId,
@@ -408,17 +424,25 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
           Navigator.of(context).pop(true);
         }
       } else {
-        // Si no es el último video, mostrar countdown para auto-play
-        _startAutoPlayCountdown();
+        // Si viene del historial, salir directamente sin mostrar diálogo
+        if (widget.isFromHistory) {
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (mounted) {
+            Navigator.of(context).pop(false);
+          }
+        } else {
+          // Si no es el último video, mostrar diálogo de opciones
+          _showVideoCompletedDialog();
+        }
       }
     }
   }
 
-  void _startAutoPlayCountdown() {
+  void _showVideoCompletedDialog() {
     if (mounted) {
       setState(() {
         _showAutoPlayCountdown = true;
-        _countdownSeconds = 5;
+        _countdownSeconds = 10; // Dar más tiempo para decidir
       });
 
       _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -450,6 +474,18 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     }
   }
 
+  void _restartVideo() {
+    _countdownTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _showAutoPlayCountdown = false;
+      });
+      // Reiniciar el video desde el inicio
+      _controller.seekTo(Duration.zero);
+      _controller.play();
+    }
+  }
+
   void _cancelAutoPlay() {
     _countdownTimer?.cancel();
     if (mounted) {
@@ -458,6 +494,17 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       });
       Navigator.of(context).pop(false);
     }
+  }
+
+  /// Determina el valor correcto de isCompleted basado en el contexto
+  bool _getIsCompletedValue(double progress) {
+    // Si viene del historial y ya estaba completado, preservar el estado
+    if (widget.isFromHistory && _wasAlreadyCompleted) {
+      return true; // Mantener como completado
+    }
+
+    // Para videos desde lecciones o videos no completados, comportamiento normal
+    return progress >= 1.0;
   }
 
   Future<void> _saveVideoProgress() async {
@@ -487,7 +534,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
             lastPosition: currentPosition.inSeconds,
             totalDuration: _totalDuration.inSeconds,
             progress: clampedProgress,
-            isCompleted: false,
+            isCompleted: _getIsCompletedValue(clampedProgress),
           );
 
           // Actualizar el provider de lecciones
@@ -712,10 +759,19 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
+                              '¡Video completado!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
                               'Siguiente video en:',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -728,25 +784,66 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
                             Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                TextButton(
-                                  onPressed: _cancelAutoPlay,
+                                // Botón para reiniciar video
+                                ElevatedButton(
+                                  onPressed: _restartVideo,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
                                   child: const Text(
-                                    'Cancelar',
-                                    style: TextStyle(color: Colors.white70),
+                                    'Ver de nuevo',
+                                    style: TextStyle(fontSize: 14),
                                   ),
                                 ),
-                                const SizedBox(width: 16),
+                                // Botón para cancelar
+                                ElevatedButton(
+                                  onPressed: _cancelAutoPlay,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey[600],
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Cancelar',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                // Botón para reproducir siguiente
                                 ElevatedButton(
                                   onPressed: _playNextVideo,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF4FD1C7),
                                     foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
-                                  child: const Text('Reproducir ahora'),
+                                  child: const Text(
+                                    'Siguiente',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
                                 ),
                               ],
                             ),

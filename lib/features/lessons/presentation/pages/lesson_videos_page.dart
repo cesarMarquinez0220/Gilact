@@ -539,11 +539,15 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   }
 
   bool _isVideoCompletedFromFirestore(int videoId) {
-    // Por ahora usar el provider local, pero esto debería consultar Firestore directamente
-    final progress = context.watch<LeccionesProvider>().getProgresoVideo(
-      videoId,
-    );
-    return progress >= 100.0;
+    // Verificar tanto el progreso como el estado completado en el provider
+    final leccionesProvider = context.watch<LeccionesProvider>();
+    final progress = leccionesProvider.getProgresoVideo(videoId);
+    final isCompleted = leccionesProvider.isLeccionCompletada(videoId);
+
+    // Un video está completado si:
+    // 1. Tiene progreso >= 100% O
+    // 2. Está marcado como completado en Firestore (estaCompletado: true)
+    return progress >= 100.0 || isCompleted;
   }
 
   bool _isLastVideoInLesson(int videoId, int lessonId) {
