@@ -64,13 +64,23 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     setState(() => _isLoading = true);
 
     try {
-      // Verificar si el usuario tiene situación Post-Parto
+      // Verificar si el usuario tiene situación Post-Parto (ahora usa caché)
+      print('🔍 LactationCalendarWidget: Verificando situación postparto...');
       final hasPostpartum = await _lactationService.hasPostpartumSituation();
+      print('🔍 LactationCalendarWidget: hasPostpartum = $hasPostpartum');
+
       if (!hasPostpartum) {
+        print(
+          '⚠️ LactationCalendarWidget: Usuario no tiene situación postparto, mostrando diálogo',
+        );
         setState(() => _isLoading = false);
         _showPostpartumRequiredDialog();
         return;
       }
+
+      print(
+        '✅ LactationCalendarWidget: Usuario tiene situación postparto, cargando datos...',
+      );
 
       List<LactationRecord> records;
       switch (_currentView) {

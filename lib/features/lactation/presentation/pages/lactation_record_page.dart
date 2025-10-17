@@ -1993,6 +1993,58 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     }
   }
 
+  /// Obtiene el ID del documento del usuario en Firestore
+  Future<String?> _getUserDocumentId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return null;
+
+      // Si el usuario tiene email, buscar por email primero
+      if (user.email != null) {
+        print(
+          '🔍 LactationRecordPage: Buscando usuario por email: ${user.email}',
+        );
+
+        // Buscar el documento del usuario por email
+        final userQuery = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print(
+            '🔍 LactationRecordPage: Usuario encontrado con ID: $userDocId',
+          );
+          return userDocId;
+        } else {
+          print('❌ LactationRecordPage: Usuario no encontrado por email');
+        }
+      }
+
+      // Fallback: intentar con UID directamente
+      print('🔍 LactationRecordPage: Intentando con UID: ${user.uid}');
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        print(
+          '🔍 LactationRecordPage: Usuario encontrado con UID directo: ${user.uid}',
+        );
+        return user.uid;
+      }
+
+      print('❌ LactationRecordPage: No se encontró usuario en Firestore');
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo ID del usuario: $e');
+      return null;
+    }
+  }
+
   Future<void> _guardarDatos() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -2014,9 +2066,19 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       }
 
       // Verificar si el usuario tiene situación Post-Parto
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error de Usuario',
+          'No se pudo encontrar la información del usuario. Por favor, inicia sesión nuevamente.',
+        );
+        return;
+      }
+
       final situacionDocRef = FirebaseFirestore.instance
           .collection('Users')
-          .doc(user.uid)
+          .doc(userDocId)
           .collection('situacion')
           .doc('seleccion');
 

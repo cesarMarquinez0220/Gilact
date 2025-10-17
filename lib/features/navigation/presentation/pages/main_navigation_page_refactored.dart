@@ -7,6 +7,7 @@ import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../videos/data/services/video_preload_service.dart';
 import '../../../videos/data/services/video_cache_service.dart';
 import '../../../videos/data/services/video_interaction_service.dart';
+import '../../../lactation/data/services/lactation_service.dart';
 import 'package:get_it/get_it.dart';
 
 // Páginas refactorizadas
@@ -139,6 +140,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
       // Precargar videos en cache
       await _preloadVideosInCache();
+
+      // Inicializar caché del LactationService para reducir consultas a Firebase
+      await _initializeLactationServiceCache();
 
       // Configurar estado inicial de lecciones (solo primera habilitada)
       _setupInitialLessonState();
@@ -289,6 +293,20 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       print('✅ Video $nextVideoId precargado progresivamente');
     } catch (e) {
       print('❌ Error en precarga progresiva: $e');
+    }
+  }
+
+  /// Inicializa el caché del LactationService para reducir consultas a Firebase
+  Future<void> _initializeLactationServiceCache() async {
+    try {
+      print(
+        '🔍 MainNavigationPage: Inicializando caché del LactationService...',
+      );
+      final lactationService = GetIt.instance<LactationService>();
+      await lactationService.initializeUserCache();
+      print('✅ MainNavigationPage: Caché del LactationService inicializado');
+    } catch (e) {
+      print('❌ Error inicializando caché del LactationService: $e');
     }
   }
 }
