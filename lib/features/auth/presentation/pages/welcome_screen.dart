@@ -353,11 +353,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         '🔍 WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
       );
 
-      // 0. Reinicializar el UserProfileBloc para el nuevo usuario
+      // 0. Reinicializar el UserProfileBloc para el nuevo usuario (sin desconectar)
       print(
         '🔄 WelcomeScreen: Reinicializando UserProfileBloc para nuevo usuario...',
       );
-      context.read<UserProfileBloc>().add(SignOutRequested());
+      context.read<UserProfileBloc>().add(ResetUserProfileRequested());
 
       // Esperar un momento para que se procese el reinicio
       await Future.delayed(const Duration(milliseconds: 100));

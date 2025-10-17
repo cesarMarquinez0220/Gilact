@@ -27,6 +27,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<UpdateUserProfileRequested>(_onUpdateUserProfileRequested);
     on<UpdateUserSituationRequested>(_onUpdateUserSituationRequested);
     on<SignOutRequested>(_onSignOutRequested);
+    on<ResetUserProfileRequested>(_onResetUserProfileRequested);
   }
 
   Future<void> _onGetUserProfileRequested(
@@ -175,6 +176,16 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       (failure) => emit(UserProfileFailure(failure.message)),
       (_) => emit(UserProfileSignedOut()),
     );
+  }
+
+  Future<void> _onResetUserProfileRequested(
+    ResetUserProfileRequested event,
+    Emitter<UserProfileState> emit,
+  ) async {
+    // Solo resetea el estado sin desconectar al usuario
+    print('🔄 UserProfileBloc: Reseteando estado del perfil...');
+    emit(UserProfileInitial());
+    print('✅ UserProfileBloc: Estado del perfil reseteado');
   }
 
   /// Extrae la información del bebé de los datos de situación

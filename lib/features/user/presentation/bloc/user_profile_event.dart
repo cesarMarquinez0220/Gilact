@@ -125,3 +125,10 @@ class SignOutRequested extends UserProfileEvent {
   @override
   List<Object> get props => [];
 }
+
+class ResetUserProfileRequested extends UserProfileEvent {
+  const ResetUserProfileRequested();
+
+  @override
+  List<Object> get props => [];
+}
