@@ -68,7 +68,7 @@ Future<void> configureDependencies() async {
   );
 
   // Providers
-  getIt.registerLazySingleton<LactationProvider>(
+  getIt.registerFactory<LactationProvider>(
     () => LactationProvider(getIt<LactationService>()),
   );
 

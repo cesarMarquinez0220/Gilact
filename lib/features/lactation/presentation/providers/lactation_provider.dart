@@ -176,4 +176,11 @@ class LactationProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
+
+  @override
+  void dispose() {
+    // Limpiar el estado antes de eliminar el provider
+    clearState();
+    super.dispose();
+  }
 }
