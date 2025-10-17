@@ -6,7 +6,6 @@ import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../widgets/modern_header.dart';
 import '../widgets/home_feature_card.dart';
 import '../widgets/countdown_card.dart';
-import '../widgets/postparto_lactation_dashboard.dart';
 import '../widgets/postparto_profile_widget.dart';
 import '../../domain/services/navigation_service.dart';
 import '../../domain/services/app_color_service.dart';
@@ -102,14 +101,6 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildHomeContent(BuildContext context, UserProfileState state) {
-    // Si el usuario es postparto, mostrar el dashboard específico de lactancia
-    final isPostPartum = NavigationService.getUserPostPartumStatus(state);
-
-    if (isPostPartum) {
-      return const PostpartoLactationDashboard();
-    }
-
-    // Para usuarios preparto, mostrar el contenido original
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -146,22 +137,27 @@ class HomePage extends StatelessWidget {
 
     return Column(
       children: [
-        // Tarjeta de Lecciones
+        // Contenido específico según el tipo de usuario
+        if (isPostPartum) ...[
+          // Dashboard de lactancia para usuarios postparto
+          _buildLactationDashboard(context, state),
+          const SizedBox(height: 15),
+        ] else ...[
+          // Contador de cuenta regresiva para usuarios preparto
+          _buildCountdownSection(context, state),
+          const SizedBox(height: 15),
+        ],
+
+        // Tarjeta de Lecciones (arriba de Tips e Historial)
         HomeFeatureCard(
           title: 'Lecciones',
-          icon: Icons.show_chart,
+          icon: Icons.school,
           description: 'Mira tu progreso de lecciones',
           onTap: () => NavigationService.navigateToLessons(context),
           color: AppColorService.getFeatureColor('Lecciones'),
         ),
 
         const SizedBox(height: 15),
-
-        // Contador de cuenta regresiva - Solo para usuarios preparto
-        if (!isPostPartum) ...[
-          _buildCountdownSection(context, state),
-          const SizedBox(height: 15),
-        ],
 
         // Grid de funcionalidades basado en el estado del usuario
         _buildFeatureGrid(context, isPostPartum),
@@ -176,7 +172,7 @@ class HomePage extends StatelessWidget {
 
   Widget _buildFeatureGrid(BuildContext context, bool isPostPartum) {
     if (isPostPartum) {
-      // Para postparto: Tips y Calendario en fila
+      // Para postparto: Tips e Historial en fila
       return Row(
         children: [
           Expanded(
@@ -191,11 +187,11 @@ class HomePage extends StatelessWidget {
           const SizedBox(width: 15),
           Expanded(
             child: HomeFeatureCard(
-              title: 'Calendario',
-              icon: Icons.calendar_today,
-              description: 'Registro de lactancia',
-              onTap: () => NavigationService.navigateToCalendar(context),
-              color: AppColorService.getFeatureColor('Calendario'),
+              title: 'Historial',
+              icon: Icons.video_library,
+              description: 'Progreso de videos completados',
+              onTap: () => NavigationService.navigateToUserVideos(context),
+              color: AppColorService.getFeatureColor('Historial'),
             ),
           ),
         ],
@@ -215,17 +211,6 @@ class HomePage extends StatelessWidget {
   Widget _buildProfileSections(BuildContext context, UserProfileState state) {
     return Column(
       children: [
-        // Historial siempre visible
-        HomeFeatureCard(
-          title: 'Historial',
-          icon: Icons.video_library,
-          description: 'Progreso de videos completados',
-          onTap: () => NavigationService.navigateToUserVideos(context),
-          color: AppColorService.getFeatureColor('Historial'),
-        ),
-
-        const SizedBox(height: 15),
-
         // Secciones específicas según el estado
         _buildPostPartumSection(state),
       ],
@@ -364,5 +349,289 @@ class HomePage extends StatelessWidget {
         ),
       );
     }
+  }
+
+  /// Dashboard específico para usuarios postparto enfocado en lactancia
+  Widget _buildLactationDashboard(
+    BuildContext context,
+    UserProfileState state,
+  ) {
+    return Column(
+      children: [
+        // Calendario horizontal con countdown integrado
+        FadeInUp(
+          duration: const Duration(milliseconds: 800),
+          child: _buildIntegratedCalendarAndCountdown(context),
+        ),
+
+        
+
+        const SizedBox(height: 20),
+
+        // Resumen del día actual (más compacto)
+        FadeInUp(
+          duration: const Duration(milliseconds: 1400),
+          child: _buildCompactTodaySummary(context),
+        ),
+      ],
+    );
+  }
+
+  /// Calendario horizontal con countdown integrado en un solo contenedor
+  Widget _buildIntegratedCalendarAndCountdown(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Calendario horizontal
+          _buildHorizontalCalendar(context),
+
+          const SizedBox(height: 24),
+
+          // Divider sutil
+          Container(height: 1, color: Colors.grey[200]),
+
+          const SizedBox(height: 20),
+
+          // Countdown integrado
+          _buildIntegratedCountdown(context),
+          const SizedBox(height: 30),
+
+        // Botón de registro de lactancia
+        FadeInUp(
+          duration: const Duration(milliseconds: 1200),
+          child: _buildRegisterLactationButton(context),
+        ),
+        ],
+      ),
+    );
+  }
+
+  /// Calendario horizontal consistente con el diseño de la app
+  Widget _buildHorizontalCalendar(BuildContext context) {
+    final now = DateTime.now();
+    final todayWeekday = now.weekday; // Lunes=1, Domingo=7
+    final weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+
+    // Obtener los días de la semana actual
+    final startOfWeek = now.subtract(Duration(days: todayWeekday % 7));
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(7, (index) {
+        final date = startOfWeek.add(Duration(days: index));
+        final isToday = date.day == now.day && date.month == now.month;
+        // Simular días marcados (puedes conectarlo con datos reales)
+        final isMarked = date.day == 12 || date.day == 13;
+
+        return Expanded(
+          child: Column(
+            children: [
+              // Día de la semana con estilo consistente
+              Text(
+                isToday ? 'HOY' : weekDays[date.weekday % 7],
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isToday
+                      ? const Color(0xFF03A696) // Color primario de la app
+                      : const Color(0xFF7F8C8D), // Color secundario consistente
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Fecha con diseño consistente
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: isToday
+                      ? const Color(0xFF03A696) // Color primario para hoy
+                      : isMarked
+                      ? const Color(0xFF03A696).withValues(
+                          alpha: 0.1,
+                        ) // Sutil para días marcados
+                      : Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: isToday
+                      ? null
+                      : isMarked
+                      ? Border.all(
+                          color: const Color(0xFF03A696).withValues(alpha: 0.3),
+                          width: 1,
+                        )
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    '${date.day}',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isToday
+                          ? Colors.white
+                          : const Color(
+                              0xFF2C3E50,
+                            ), // Color de texto consistente
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Indicador de actividad consistente
+              if (isMarked)
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF03A696),
+                    shape: BoxShape.circle,
+                  ),
+                )
+              else
+                const SizedBox(height: 6),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  /// Countdown integrado más compacto
+  Widget _buildIntegratedCountdown(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Próxima toma en',
+          style: GoogleFonts.quicksand(
+            fontSize: 16,
+            color: const Color(0xFF7F8C8D),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '42m',
+          style: GoogleFonts.quicksand(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF03A696),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF03A696).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 16,
+                color: const Color(0xFF03A696),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Buen progreso. 1h 15m hoy',
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  color: const Color(0xFF03A696),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Botón de registro de lactancia estilo píldora
+  Widget _buildRegisterLactationButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        NavigationService.navigateToCalendar(context);
+      },
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: Text(
+        'Registrar Lactancia',
+        style: GoogleFonts.quicksand(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE91E63), // Rosa como en la imagen
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: const StadiumBorder(), // Forma de píldora
+        elevation: 5,
+        shadowColor: const Color(0xFFE91E63).withValues(alpha: 0.4),
+      ),
+    );
+  }
+
+  /// Resumen compacto del día actual
+  Widget _buildCompactTodaySummary(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildCompactSummaryItem('5', 'Tomas', Icons.restaurant),
+          _buildCompactSummaryItem('2h 30m', 'Total', Icons.access_time),
+          _buildCompactSummaryItem('1h 15m', 'Última', Icons.schedule),
+        ],
+      ),
+    );
+  }
+
+  /// Item compacto del resumen
+  Widget _buildCompactSummaryItem(String value, String label, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: const Color(0xFF03A696), size: 20),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: GoogleFonts.quicksand(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF2C3E50),
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.quicksand(fontSize: 10, color: Colors.grey[600]),
+        ),
+      ],
+    );
   }
 }

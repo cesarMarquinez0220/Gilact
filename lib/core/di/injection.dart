@@ -34,7 +34,6 @@ import '../../features/lessons/domain/usecases/lesson_usecases.dart'
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
 import '../../features/videos/data/services/video_interaction_service.dart';
 import '../../features/lactation/data/services/lactation_service.dart';
-import '../../features/lactation/data/services/lactation_notification_service.dart';
 
 // BLoCs
 import '../../features/ui/presentation/bloc/ui_bloc.dart';
@@ -63,9 +62,6 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<LactationService>(
     () => LactationService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
-  );
-  getIt.registerLazySingleton<LactationNotificationService>(
-    () => LactationNotificationService(),
   );
 
   // Data Sources
