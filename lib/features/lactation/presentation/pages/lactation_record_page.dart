@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart';
 import '../../domain/entities/lactation_record.dart';
+import '../../data/services/lactation_service.dart';
 
 class LactationRecordPage extends StatefulWidget {
   final DateTime? selectedDate;
@@ -35,6 +36,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
   bool _isLoading = false;
 
+  // Servicio de lactancia
+  late LactationService _lactationService;
+
   // Controladores de animación
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -49,6 +53,14 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     super.initState();
     _initializeAnimations();
     _initializeControllers();
+    _initializeServices();
+  }
+
+  void _initializeServices() {
+    _lactationService = LactationService(
+      FirebaseFirestore.instance,
+      FirebaseAuth.instance,
+    );
   }
 
   void _initializeControllers() {
@@ -1834,6 +1846,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   Future<void> _eliminarRegistro() async {
     if (widget.existingRecord == null) return;
 
+    print(
+      '🔍 LactationRecordPage: Iniciando eliminación del registro: ${widget.existingRecord!.id}',
+    );
+
     // Mostrar diálogo de confirmación
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1944,32 +1960,26 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      print('🔍 LactationRecordPage: Eliminación cancelada por el usuario');
+      return;
+    }
+
+    print('🔍 LactationRecordPage: Usuario confirmó la eliminación');
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        DialogExample.showErrorDialog(
-          context,
-          'Error de Autenticación',
-          'No hay usuario autenticado. Por favor, inicia sesión nuevamente.',
-        );
-        return;
-      }
+      print(
+        '🔍 LactationRecordPage: Iniciando eliminación con LactationService',
+      );
 
-      // Eliminar el registro
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .collection('situacion')
-          .doc('seleccion')
-          .collection('lactancia')
-          .doc(widget.existingRecord!.id)
-          .delete();
+      // Usar LactationService en lugar de Firestore directo
+      await _lactationService.deleteRecord(widget.existingRecord!.id);
+
+      print('🔍 LactationRecordPage: Registro eliminado exitosamente');
 
       // Mostrar mensaje de éxito y cerrar pantalla
       DialogExample.showSuccessDialog(
@@ -1981,6 +1991,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         },
       );
     } catch (e) {
+      print('❌ LactationRecordPage: Error eliminando registro: $e');
       DialogExample.showErrorDialog(
         context,
         'Error al Eliminar',

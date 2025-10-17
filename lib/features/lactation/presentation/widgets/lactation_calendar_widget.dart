@@ -1376,9 +1376,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.of(context).pop();
-                              _deleteRecord(record);
+                              await _deleteRecord(record);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
@@ -1411,12 +1411,17 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
   Future<void> _deleteRecord(LactationRecord record) async {
     try {
+      print(
+        '🔍 LactationCalendarWidget: Iniciando eliminación del registro: ${record.id}',
+      );
       setState(() => _isLoading = true);
 
       await _lactationService.deleteRecord(record.id);
+      print('🔍 LactationCalendarWidget: Registro eliminado exitosamente');
 
       // Recargar datos
       await _loadData();
+      print('🔍 LactationCalendarWidget: Datos recargados');
 
       // Mostrar mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1444,6 +1449,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         ),
       );
     } catch (e) {
+      print('❌ LactationCalendarWidget: Error eliminando registro: $e');
       DialogExample.showErrorDialog(
         context,
         'Error al Eliminar',

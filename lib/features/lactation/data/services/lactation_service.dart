@@ -71,17 +71,24 @@ class LactationService {
 
   /// Obtiene la referencia a la subcolección de lactancia del usuario
   Future<CollectionReference> get _lactationCollection async {
+    print('🔍 LactationService: Obteniendo colección de lactancia...');
     final userDocId = await _getUserDocumentId();
+    print('🔍 LactationService: UserDocId obtenido: $userDocId');
+
     if (userDocId == null) {
+      print('❌ LactationService: Usuario no encontrado en Firestore');
       throw Exception('Usuario no encontrado en Firestore');
     }
 
-    return _firestore
+    final collection = _firestore
         .collection('Users')
         .doc(userDocId)
         .collection('situacion')
         .doc('seleccion')
         .collection('lactancia');
+
+    print('🔍 LactationService: Colección de lactancia creada correctamente');
+    return collection;
   }
 
   /// Guarda un nuevo registro de lactancia
@@ -112,7 +119,19 @@ class LactationService {
   /// Elimina un registro
   Future<void> deleteRecord(String recordId) async {
     try {
+      print(
+        '🔍 LactationService: Iniciando eliminación del registro: $recordId',
+      );
       final collection = await _lactationCollection;
+      print('🔍 LactationService: Colección obtenida correctamente');
+
+      // Verificar que el documento existe antes de eliminarlo
+      final docSnapshot = await collection.doc(recordId).get();
+      if (!docSnapshot.exists) {
+        print('❌ LactationService: El documento no existe: $recordId');
+        throw Exception('El registro no existe');
+      }
+
       await collection.doc(recordId).delete();
       print('✅ Registro de lactancia eliminado: $recordId');
     } catch (e) {
