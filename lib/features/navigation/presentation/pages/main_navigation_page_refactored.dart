@@ -11,7 +11,7 @@ import '../../../lactation/data/services/lactation_service.dart';
 import 'package:get_it/get_it.dart';
 
 // Páginas refactorizadas
-import 'home_page.dart';
+import 'home_page_wrapper.dart';
 import 'health_page.dart';
 import 'profile_page.dart';
 
@@ -88,7 +88,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                   _currentIndex = index;
                 });
               },
-              children: const [HomePage(), HealthPage(), ProfilePage()],
+              children: const [HomePageWrapper(), HealthPage(), ProfilePage()],
             ),
           ),
           // Navegación flotante sobre el contenido

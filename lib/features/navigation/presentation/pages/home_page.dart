@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
+import '../../../lactation/domain/entities/lactation_record.dart';
+import '../../../lactation/presentation/providers/lactation_provider.dart';
 import '../widgets/modern_header.dart';
 import '../widgets/home_feature_card.dart';
 import '../widgets/countdown_card.dart';
@@ -11,8 +14,88 @@ import '../../domain/services/navigation_service.dart';
 import '../../domain/services/app_color_service.dart';
 
 /// Página principal de inicio con diseño consistente y arquitectura limpia
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Cargar datos iniciales usando el Provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LactationProvider>().loadTodayData();
+    });
+  }
+
+  /// Maneja el estado cuando no hay registros
+  Widget _buildEmptyState(LactationProvider lactationProvider) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.child_care, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            '¡Bienvenida!',
+            style: GoogleFonts.quicksand(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF2C3E50),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Comienza registrando tu primera sesión de lactancia para ver tu progreso aquí.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.quicksand(
+              fontSize: 14,
+              color: Colors.grey[600],
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              NavigationService.navigateToCalendar(context);
+              // Refrescar datos después de registrar lactancia
+              lactationProvider.refreshTodayData();
+            },
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: Text(
+              'Primera Lactancia',
+              style: GoogleFonts.quicksand(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF03A696),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,29 +439,125 @@ class HomePage extends StatelessWidget {
     BuildContext context,
     UserProfileState state,
   ) {
-    return Column(
-      children: [
-        // Calendario horizontal con countdown integrado
-        FadeInUp(
-          duration: const Duration(milliseconds: 800),
-          child: _buildIntegratedCalendarAndCountdown(context),
-        ),
+    return Consumer<LactationProvider>(
+      builder: (context, lactationProvider, child) {
+        // Si está cargando, mostrar loading
+        if (lactationProvider.isLoading) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(color: Color(0xFF03A696)),
+            ),
+          );
+        }
 
-        
+        // Si hay error, mostrar error
+        if (lactationProvider.errorMessage != null) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red[400], size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Error cargando datos',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  lactationProvider.errorMessage!,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => lactationProvider.refreshTodayData(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF03A696),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Reintentar',
+                    style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
 
-        const SizedBox(height: 20),
+        // Si no hay registros, mostrar estado vacío
+        if (lactationProvider.todayRecords.isEmpty) {
+          return Column(
+            children: [
+              _buildEmptyState(lactationProvider),
+              const SizedBox(height: 20),
+            ],
+          );
+        }
 
-        // Resumen del día actual (más compacto)
-        FadeInUp(
-          duration: const Duration(milliseconds: 1400),
-          child: _buildCompactTodaySummary(context),
-        ),
-      ],
+        // Si hay registros, mostrar dashboard normal
+        return Column(
+          children: [
+            // Calendario horizontal con countdown integrado
+            FadeInUp(
+              duration: const Duration(milliseconds: 800),
+              child: _buildIntegratedCalendarAndCountdown(
+                context,
+                lactationProvider,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Resumen del día actual (más compacto)
+            FadeInUp(
+              duration: const Duration(milliseconds: 1400),
+              child: _buildCompactTodaySummary(context, lactationProvider),
+            ),
+          ],
+        );
+      },
     );
   }
 
   /// Calendario horizontal con countdown integrado en un solo contenedor
-  Widget _buildIntegratedCalendarAndCountdown(BuildContext context) {
+  Widget _buildIntegratedCalendarAndCountdown(
+    BuildContext context,
+    LactationProvider lactationProvider,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -405,14 +584,14 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Countdown integrado
-          _buildIntegratedCountdown(context),
+          _buildIntegratedCountdown(context, lactationProvider),
           const SizedBox(height: 30),
 
-        // Botón de registro de lactancia
-        FadeInUp(
-          duration: const Duration(milliseconds: 1200),
-          child: _buildRegisterLactationButton(context),
-        ),
+          // Botón de registro de lactancia
+          FadeInUp(
+            duration: const Duration(milliseconds: 1200),
+            child: _buildRegisterLactationButton(context, lactationProvider),
+          ),
         ],
       ),
     );
@@ -511,7 +690,10 @@ class HomePage extends StatelessWidget {
   }
 
   /// Countdown integrado más compacto
-  Widget _buildIntegratedCountdown(BuildContext context) {
+  Widget _buildIntegratedCountdown(
+    BuildContext context,
+    LactationProvider lactationProvider,
+  ) {
     return Column(
       children: [
         Text(
@@ -524,7 +706,9 @@ class HomePage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '42m',
+          lactationProvider.isLoading
+              ? '...'
+              : lactationProvider.getNextFeedTime(),
           style: GoogleFonts.quicksand(
             fontSize: 36,
             fontWeight: FontWeight.bold,
@@ -548,7 +732,9 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'Buen progreso. 1h 15m hoy',
+                lactationProvider.isLoading
+                    ? 'Cargando...'
+                    : '${lactationProvider.getFeedStatus()}. ${lactationProvider.getDurationInfo()}',
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
                   color: const Color(0xFF03A696),
@@ -563,10 +749,16 @@ class HomePage extends StatelessWidget {
   }
 
   /// Botón de registro de lactancia estilo píldora
-  Widget _buildRegisterLactationButton(BuildContext context) {
+  Widget _buildRegisterLactationButton(
+    BuildContext context,
+    LactationProvider lactationProvider,
+  ) {
     return ElevatedButton.icon(
       onPressed: () {
+        // Navegar al calendario y refrescar datos al regresar
         NavigationService.navigateToCalendar(context);
+        // Refrescar datos después de registrar lactancia
+        lactationProvider.refreshTodayData();
       },
       icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
@@ -588,7 +780,95 @@ class HomePage extends StatelessWidget {
   }
 
   /// Resumen compacto del día actual
-  Widget _buildCompactTodaySummary(BuildContext context) {
+  Widget _buildCompactTodaySummary(
+    BuildContext context,
+    LactationProvider lactationProvider,
+  ) {
+    if (lactationProvider.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: Color(0xFF03A696)),
+        ),
+      );
+    }
+
+    if (lactationProvider.errorMessage != null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[400], size: 24),
+            const SizedBox(height: 8),
+            Text(
+              'Error cargando datos',
+              style: GoogleFonts.quicksand(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[600],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              lactationProvider.errorMessage!,
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () => lactationProvider.refreshTodayData(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF03A696),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Reintentar',
+                style: GoogleFonts.quicksand(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final stats =
+        lactationProvider.todayStats ??
+        LactationStats(
+          totalFeeds: 0,
+          totalDuration: Duration.zero,
+          averageDuration: Duration.zero,
+          feedsToday: 0,
+          durationToday: Duration.zero,
+        );
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -605,9 +885,27 @@ class HomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildCompactSummaryItem('5', 'Tomas', Icons.restaurant),
-          _buildCompactSummaryItem('2h 30m', 'Total', Icons.access_time),
-          _buildCompactSummaryItem('1h 15m', 'Última', Icons.schedule),
+          _buildCompactSummaryItem(
+            '${stats.feedsToday}',
+            'Tomas',
+            Icons.restaurant,
+          ),
+          _buildCompactSummaryItem(
+            stats.durationToday.inHours > 0
+                ? '${stats.durationToday.inHours}h ${stats.durationToday.inMinutes.remainder(60)}m'
+                : '${stats.durationToday.inMinutes}m',
+            'Total',
+            Icons.access_time,
+          ),
+          _buildCompactSummaryItem(
+            lactationProvider.todayRecords.isNotEmpty
+                ? lactationProvider.formatLastFeedTime(
+                    lactationProvider.todayRecords.last.fechaRegistro,
+                  )
+                : 'N/A',
+            'Última',
+            Icons.schedule,
+          ),
         ],
       ),
     );
