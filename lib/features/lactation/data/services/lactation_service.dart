@@ -121,6 +121,54 @@ class LactationService {
     }
   }
 
+  /// Obtiene registros de lactancia para un rango de fechas
+  Future<List<LactationRecord>> getRecordsForDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        print(
+          '❌ LactationService: userDocId es null en getRecordsForDateRange',
+        );
+        return [];
+      }
+
+      print(
+        '🔍 LactationService: Obteniendo registros desde ${startDate.toIso8601String()} hasta ${endDate.toIso8601String()}',
+      );
+
+      final collection = await _lactationCollection;
+      final querySnapshot = await collection
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      final records = querySnapshot.docs
+          .map(
+            (doc) => LactationRecord.fromMap(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+            ),
+          )
+          .toList();
+
+      print(
+        '✅ LactationService: Obtenidos ${records.length} registros para el rango de fechas',
+      );
+
+      return records;
+    } catch (e) {
+      print('❌ Error obteniendo registros por rango de fechas: $e');
+      return [];
+    }
+  }
+
   /// Obtiene todos los registros de una fecha específica
   Future<List<LactationRecord>> getRecordsForDate(DateTime date) async {
     try {
@@ -438,18 +486,21 @@ class LactationService {
         '🔍 LactationService: Verificando situación directa para: $userDocId',
       );
 
+      // Buscar en la ruta correcta: Users/{userId}/situacion/seleccion/lactancia/
       final docSnapshot = await _firestore
           .collection('Users')
           .doc(userDocId)
           .collection('situacion')
           .doc('seleccion')
+          .collection('lactancia')
+          .doc('lactancia') // El documento que contiene la info del usuario
           .get();
 
       if (docSnapshot.exists) {
         final data = docSnapshot.data();
-        final situationType = data?['situationType'] as String?;
-        print('🔍 LactationService: situationType encontrado: $situationType');
-        return situationType == 'postparto';
+        final formType = data?['formType'] as String?;
+        print('🔍 LactationService: formType encontrado: $formType');
+        return formType == 'postpartum';
       } else {
         print('⚠️ LactationService: Documento de situación no existe');
         return false;

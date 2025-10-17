@@ -6,6 +6,7 @@ import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../widgets/modern_header.dart';
 import '../widgets/home_feature_card.dart';
 import '../widgets/countdown_card.dart';
+import '../widgets/postparto_lactation_dashboard.dart';
 import '../widgets/postparto_profile_widget.dart';
 import '../../domain/services/navigation_service.dart';
 import '../../domain/services/app_color_service.dart';
@@ -101,6 +102,14 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildHomeContent(BuildContext context, UserProfileState state) {
+    // Si el usuario es postparto, mostrar el dashboard específico de lactancia
+    final isPostPartum = NavigationService.getUserPostPartumStatus(state);
+
+    if (isPostPartum) {
+      return const PostpartoLactationDashboard();
+    }
+
+    // Para usuarios preparto, mostrar el contenido original
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
