@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../../videos/presentation/pages/user_videos_page.dart';
-import '../../../lactation/presentation/pages/lactation_calendar_page.dart';
+import '../../../lactation/presentation/pages/lactation_record_page.dart';
+import '../../../lactation/presentation/pages/lactation_flow_page.dart';
 
 /// Servicio para manejar la lógica de navegación y estado del usuario
 class NavigationService {
@@ -44,11 +45,50 @@ class NavigationService {
     ).push(MaterialPageRoute(builder: (context) => const UserVideosPage()));
   }
 
-  /// Navega al calendario de lactancia
+  /// Navega al nuevo flujo de lactancia inteligente
   static void navigateToCalendar(BuildContext context) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<bool>(
+            builder: (context) => const LactationFlowPage(),
+          ),
+        )
+        .then((result) {
+          // Si el usuario completó el registro exitosamente, refrescar datos
+          if (result == true) {
+            // Aquí podrías agregar lógica para refrescar datos si es necesario
+            print('✅ Registro de lactancia completado exitosamente');
+          }
+        });
+  }
+
+  /// Navega al nuevo flujo de lactancia inteligente con fecha específica
+  static void navigateToLactationFlow(
+    BuildContext context, {
+    DateTime? selectedDate,
+  }) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<bool>(
+            builder: (context) => LactationFlowPage(selectedDate: selectedDate),
+          ),
+        )
+        .then((result) {
+          if (result == true) {
+            print('✅ Registro de lactancia completado exitosamente');
+          }
+        });
+  }
+
+  /// Navega al registro tradicional de lactancia (para casos especiales)
+  static void navigateToTraditionalRecord(
+    BuildContext context, {
+    DateTime? selectedDate,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => const LactationCalendarPage(),
+        builder: (context) =>
+            LactationRecordPage(selectedDate: selectedDate ?? DateTime.now()),
       ),
     );
   }

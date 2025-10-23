@@ -31,18 +31,29 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
   @override
   Future<UserProfile> getUserProfile(String username) async {
     try {
-      final querySnapshot = await firestore
-          .collection('Users')
-          .where('usuario', isEqualTo: username)
-          .limit(1)
-          .get();
+      QuerySnapshot querySnapshot;
+
+      // Si el parámetro parece ser un ID de documento (contiene caracteres especiales de Firestore)
+      if (username.length > 20 && username.contains(RegExp(r'[A-Za-z0-9]'))) {
+        querySnapshot = await firestore
+            .collection('Users')
+            .where(FieldPath.documentId, isEqualTo: username)
+            .limit(1)
+            .get();
+      } else {
+        querySnapshot = await firestore
+            .collection('Users')
+            .where('usuario', isEqualTo: username)
+            .limit(1)
+            .get();
+      }
 
       if (querySnapshot.docs.isEmpty) {
         throw Exception('Usuario no encontrado');
       }
 
       final doc = querySnapshot.docs.first;
-      final data = doc.data();
+      final data = doc.data() as Map<String, dynamic>;
 
       return UserProfile(
         id: doc.id,

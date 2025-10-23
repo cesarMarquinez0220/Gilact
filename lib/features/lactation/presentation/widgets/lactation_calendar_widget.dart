@@ -12,7 +12,9 @@ import '../../../../alerta_dialoge.dart';
 enum CalendarView { day, week, month }
 
 class LactationCalendarWidget extends StatefulWidget {
-  const LactationCalendarWidget({super.key});
+  final List<LactationRecord>? preloadedRecords;
+
+  const LactationCalendarWidget({super.key, this.preloadedRecords});
 
   @override
   State<LactationCalendarWidget> createState() =>
@@ -21,11 +23,16 @@ class LactationCalendarWidget extends StatefulWidget {
 
 class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     with TickerProviderStateMixin {
-  CalendarView _currentView = CalendarView.month;
+  CalendarView _currentView = CalendarView.day;
   DateTime _selectedDate = DateTime.now();
   List<LactationRecord> _records = [];
+  List<LactationRecord> _monthRecords = []; // Datos del mes precargados
   LactationStats? _stats;
   bool _isLoading = true;
+  bool _isFullScreenCalendar =
+      false; // Nueva variable para controlar pantalla completa
+  bool _monthDataLoaded =
+      false; // Flag para saber si los datos del mes están cargados
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -37,7 +44,48 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     super.initState();
     _initAnimations();
     _initServices();
-    _loadData();
+
+    // Si hay datos precargados, usarlos directamente
+    if (widget.preloadedRecords != null) {
+      _usePreloadedData();
+    } else {
+      _loadData();
+    }
+  }
+
+  void _usePreloadedData() {
+    setState(() {
+      _records = widget.preloadedRecords!;
+      _monthRecords = widget.preloadedRecords!;
+      _monthDataLoaded = true;
+      _isLoading = false;
+    });
+
+    // Calcular estadísticas del día actual
+    _calculateDayStats();
+
+    _fadeController.forward();
+  }
+
+  Future<void> _calculateDayStats() async {
+    try {
+      final dayRecords = _records
+          .where(
+            (record) =>
+                record.fechaRegistro.year == _selectedDate.year &&
+                record.fechaRegistro.month == _selectedDate.month &&
+                record.fechaRegistro.day == _selectedDate.day,
+          )
+          .toList();
+
+      final stats = await _getDayStats(_selectedDate, dayRecords);
+
+      setState(() {
+        _stats = stats;
+      });
+    } catch (e) {
+      print('Error calculando estadísticas: $e');
+    }
   }
 
   void _initAnimations() {
@@ -83,28 +131,37 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       );
 
       List<LactationRecord> records;
+      LactationStats? stats;
+
       switch (_currentView) {
         case CalendarView.day:
           records = await _lactationService.getRecordsForDate(_selectedDate);
+          // Cargar estadísticas específicas del día seleccionado
+          stats = await _getDayStats(_selectedDate, records);
           break;
         case CalendarView.week:
           final startOfWeek = _selectedDate.subtract(
             Duration(days: _selectedDate.weekday - 1),
           );
           records = await _lactationService.getRecordsForWeek(startOfWeek);
+          stats = await _lactationService.getStats();
           break;
         case CalendarView.month:
           records = await _lactationService.getRecordsForMonth(_selectedDate);
+          stats = await _lactationService.getStats();
           break;
       }
-
-      final stats = await _lactationService.getStats();
 
       setState(() {
         _records = records;
         _stats = stats;
         _isLoading = false;
       });
+
+      // Precargar datos del mes en background cuando estamos en vista de día
+      if (_currentView == CalendarView.day && !_monthDataLoaded) {
+        _preloadMonthData();
+      }
 
       _fadeController.forward();
     } catch (e) {
@@ -123,6 +180,85 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       context,
       'Información Requerida',
       'Debes completar el proceso de onboarding y seleccionar la situación "Post-Parto" para poder registrar datos de lactancia.',
+    );
+  }
+
+  void _toggleMonthView() {
+    setState(() {
+      if (_currentView == CalendarView.day) {
+        _currentView = CalendarView.month;
+        _isFullScreenCalendar =
+            true; // Activar pantalla completa para calendario
+        // Usar datos precargados si están disponibles
+        if (_monthDataLoaded) {
+          _records = _monthRecords;
+        }
+      } else {
+        _currentView = CalendarView.day;
+        _isFullScreenCalendar = false; // Desactivar pantalla completa
+      }
+    });
+
+    // Solo cargar datos si no están precargados
+    if (_currentView == CalendarView.month && !_monthDataLoaded) {
+      _loadData();
+    }
+  }
+
+  Future<void> _preloadMonthData() async {
+    try {
+      print('🔄 Precargando datos del mes en background...');
+      final monthRecords = await _lactationService.getRecordsForMonth(
+        _selectedDate,
+      );
+      _monthRecords = monthRecords;
+      _monthDataLoaded = true;
+      print('✅ Datos del mes precargados exitosamente');
+    } catch (e) {
+      print('❌ Error precargando datos del mes: $e');
+    }
+  }
+
+  void _switchToDayView(DateTime day) {
+    // Solo recargar datos si cambiamos a un día diferente
+    final needsReload =
+        _selectedDate.day != day.day ||
+        _selectedDate.month != day.month ||
+        _selectedDate.year != day.year;
+
+    setState(() {
+      _selectedDate = day;
+      _currentView = CalendarView.day;
+      _isFullScreenCalendar = false;
+    });
+
+    // Solo recargar datos si es necesario (cuando cambiamos a un día diferente)
+    if (needsReload) {
+      _loadData();
+    }
+  }
+
+  Future<LactationStats> _getDayStats(
+    DateTime day,
+    List<LactationRecord> dayRecords,
+  ) async {
+    // Calcular estadísticas específicas del día
+    int feedsToday = dayRecords.length;
+
+    Duration durationToday = Duration.zero;
+    for (final record in dayRecords) {
+      durationToday += record.duracion;
+    }
+
+    // Obtener estadísticas generales para el total
+    final generalStats = await _lactationService.getStats();
+
+    return LactationStats(
+      totalFeeds: generalStats.totalFeeds,
+      totalDuration: generalStats.totalDuration,
+      averageDuration: generalStats.averageDuration,
+      feedsToday: feedsToday,
+      durationToday: durationToday,
     );
   }
 
@@ -145,16 +281,92 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildViewSelector(),
-              Expanded(child: _buildCalendarContent()),
-              _buildQuickAddButton(),
-            ],
-          ),
+          child: _isFullScreenCalendar
+              ? _buildFullScreenCalendar()
+              : Column(
+                  children: [
+                    _buildHeader(),
+                    // Selector de vistas eliminado - ahora solo vista de día por defecto
+                    Expanded(child: _buildCalendarContent()),
+                    _buildQuickAddButton(),
+                  ],
+                ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFullScreenCalendar() {
+    return Column(
+      children: [
+        // Header simplificado para pantalla completa
+        Container(
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.25),
+                Colors.white.withValues(alpha: 0.15),
+              ],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Calendario de Lactancia',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      // Icono para volver a vista de día
+                      IconButton(
+                        onPressed: _toggleMonthView,
+                        icon: const Icon(Icons.list, color: Colors.white),
+                        tooltip: 'Ver lista de registros',
+                      ),
+                      // Icono de refresh
+                      IconButton(
+                        onPressed: _loadData,
+                        icon: const Icon(Icons.refresh, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Calendario que ocupa toda la pantalla
+        Expanded(child: _buildCalendarContent()),
+      ],
     );
   }
 
@@ -190,7 +402,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   ),
                   Expanded(
                     child: Text(
-                      'Calendario de Lactancia',
+                      'Registros de Lactancia',
                       style: GoogleFonts.quicksand(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -205,9 +417,14 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: _loadData,
-                    icon: const Icon(Icons.refresh, color: Colors.white),
+                  Row(
+                    children: [
+                      // Icono de refresh
+                      IconButton(
+                        onPressed: _loadData,
+                        icon: const Icon(Icons.refresh, color: Colors.white),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -225,7 +442,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatItem(
-          'Hoy',
+          _currentView == CalendarView.day ? 'Este día' : 'Hoy',
           '${_stats?.feedsToday ?? 0}',
           'sesiones',
           Icons.child_care,
@@ -275,86 +492,86 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     );
   }
 
-  Widget _buildViewSelector() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.25),
-            Colors.white.withValues(alpha: 0.15),
-          ],
-        ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Row(
-            children: [
-              _buildViewButton('Día', CalendarView.day, Icons.today),
-              _buildViewButton('Semana', CalendarView.week, Icons.view_week),
-              _buildViewButton('Mes', CalendarView.month, Icons.calendar_month),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildViewSelector() { // Método comentado - selector de vistas eliminado
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 20),
+  //     padding: const EdgeInsets.all(4),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(25),
+  //       gradient: LinearGradient(
+  //         colors: [
+  //           Colors.white.withValues(alpha: 0.25),
+  //           Colors.white.withValues(alpha: 0.15),
+  //         ],
+  //       ),
+  //       border: Border.all(
+  //         color: Colors.white.withValues(alpha: 0.3),
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: ClipRRect(
+  //       borderRadius: BorderRadius.circular(25),
+  //       child: BackdropFilter(
+  //         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+  //         child: Row(
+  //           children: [
+  //             _buildViewButton('Día', CalendarView.day, Icons.today),
+  //             _buildViewButton('Semana', CalendarView.week, Icons.view_week),
+  //             _buildViewButton('Mes', CalendarView.month, Icons.calendar_month),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildViewButton(String label, CalendarView view, IconData icon) {
-    final isSelected = _currentView == view;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() => _currentView = view);
-          _loadData();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [
-                      Colors.white.withValues(alpha: 0.3),
-                      Colors.white.withValues(alpha: 0.2),
-                    ],
-                  )
-                : null,
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.7),
-                size: 20,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildViewButton(String label, CalendarView view, IconData icon) { // Método comentado - selector de vistas eliminado
+  //   final isSelected = _currentView == view;
+  //   return Expanded(
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         setState(() => _currentView = view);
+  //         _loadData();
+  //       },
+  //       child: Container(
+  //         padding: const EdgeInsets.symmetric(vertical: 12),
+  //         decoration: BoxDecoration(
+  //           borderRadius: BorderRadius.circular(20),
+  //           gradient: isSelected
+  //               ? LinearGradient(
+  //                   colors: [
+  //                     Colors.white.withValues(alpha: 0.3),
+  //                     Colors.white.withValues(alpha: 0.2),
+  //                   ],
+  //                 )
+  //               : null,
+  //         ),
+  //         child: Column(
+  //           children: [
+  //             Icon(
+  //               icon,
+  //               color: isSelected
+  //                   ? Colors.white
+  //                   : Colors.white.withValues(alpha: 0.7),
+  //               size: 20,
+  //             ),
+  //             const SizedBox(height: 4),
+  //             Text(
+  //               label,
+  //               style: GoogleFonts.quicksand(
+  //                 fontSize: 12,
+  //                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  //                 color: isSelected
+  //                     ? Colors.white
+  //                     : Colors.white.withValues(alpha: 0.7),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCalendarContent() {
     if (_isLoading) {
@@ -639,6 +856,19 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                 },
                 icon: const Icon(Icons.chevron_right, color: Colors.white),
               ),
+              // Icono para cambiar a vista de mes
+              IconButton(
+                onPressed: _toggleMonthView,
+                icon: Icon(
+                  _currentView == CalendarView.month
+                      ? Icons.list
+                      : Icons.calendar_month,
+                  color: Colors.white,
+                ),
+                tooltip: _currentView == CalendarView.month
+                    ? 'Ver lista de registros'
+                    : 'Ver calendario mensual',
+              ),
             ],
           ),
         ),
@@ -722,12 +952,18 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   ) {
     return GestureDetector(
       onTap: () {
-        if (dayRecords.isEmpty) {
-          // Si no hay registros, agregar nuevo registro
-          _navigateToRecordPageForDay(day);
+        if (_isFullScreenCalendar) {
+          // Si estamos en modo pantalla completa, cambiar a vista de día
+          _switchToDayView(day);
         } else {
-          // Si hay registros, mostrar lista de registros del día
-          _showDayRecordsList(day, dayRecords);
+          // Lógica original para cuando no está en pantalla completa
+          if (dayRecords.isEmpty) {
+            // Si no hay registros, agregar nuevo registro
+            _navigateToRecordPageForDay(day);
+          } else {
+            // Si hay registros, mostrar lista de registros del día
+            _showDayRecordsList(day, dayRecords);
+          }
         }
       },
       child: Container(

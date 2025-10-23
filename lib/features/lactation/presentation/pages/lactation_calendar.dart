@@ -118,7 +118,7 @@ class _LactationCalendarState extends State<LactationCalendar>
           child: Column(
             children: [
               _buildHeader(),
-              _buildViewSelector(),
+              // Selector de vistas eliminado - ahora solo vista de día por defecto
               Expanded(child: _buildCalendarContent()),
               _buildQuickAddButton(),
             ],
@@ -155,7 +155,7 @@ class _LactationCalendarState extends State<LactationCalendar>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Calendario de Lactancia',
+                    'Registros de Lactancia',
                     style: GoogleFonts.quicksand(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -169,9 +169,27 @@ class _LactationCalendarState extends State<LactationCalendar>
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: _showStats,
-                    icon: const Icon(Icons.analytics, color: Colors.white),
+                  Row(
+                    children: [
+                      // Icono para cambiar a vista de mes
+                      IconButton(
+                        onPressed: _toggleMonthView,
+                        icon: Icon(
+                          _currentView == CalendarView.month
+                              ? Icons.list
+                              : Icons.calendar_month,
+                          color: Colors.white,
+                        ),
+                        tooltip: _currentView == CalendarView.month
+                            ? 'Ver lista de registros'
+                            : 'Ver calendario mensual',
+                      ),
+                      // Icono de estadísticas
+                      IconButton(
+                        onPressed: _showStats,
+                        icon: const Icon(Icons.analytics, color: Colors.white),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -239,86 +257,86 @@ class _LactationCalendarState extends State<LactationCalendar>
     );
   }
 
-  Widget _buildViewSelector() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.25),
-            Colors.white.withValues(alpha: 0.15),
-          ],
-        ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Row(
-            children: [
-              _buildViewButton('Día', CalendarView.day, Icons.today),
-              _buildViewButton('Semana', CalendarView.week, Icons.view_week),
-              _buildViewButton('Mes', CalendarView.month, Icons.calendar_month),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildViewSelector() { // Método comentado - selector de vistas eliminado
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 20),
+  //     padding: const EdgeInsets.all(4),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(25),
+  //       gradient: LinearGradient(
+  //         colors: [
+  //           Colors.white.withValues(alpha: 0.25),
+  //           Colors.white.withValues(alpha: 0.15),
+  //         ],
+  //       ),
+  //       border: Border.all(
+  //         color: Colors.white.withValues(alpha: 0.3),
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: ClipRRect(
+  //       borderRadius: BorderRadius.circular(25),
+  //       child: BackdropFilter(
+  //         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+  //         child: Row(
+  //           children: [
+  //             _buildViewButton('Día', CalendarView.day, Icons.today),
+  //             _buildViewButton('Semana', CalendarView.week, Icons.view_week),
+  //             _buildViewButton('Mes', CalendarView.month, Icons.calendar_month),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildViewButton(String label, CalendarView view, IconData icon) {
-    final isSelected = _currentView == view;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() => _currentView = view);
-          _loadData();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [
-                      Colors.white.withValues(alpha: 0.3),
-                      Colors.white.withValues(alpha: 0.2),
-                    ],
-                  )
-                : null,
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.7),
-                size: 20,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildViewButton(String label, CalendarView view, IconData icon) { // Método comentado - selector de vistas eliminado
+  //   final isSelected = _currentView == view;
+  //   return Expanded(
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         setState(() => _currentView = view);
+  //         _loadData();
+  //       },
+  //       child: Container(
+  //         padding: const EdgeInsets.symmetric(vertical: 12),
+  //         decoration: BoxDecoration(
+  //           borderRadius: BorderRadius.circular(20),
+  //           gradient: isSelected
+  //               ? LinearGradient(
+  //                   colors: [
+  //                     Colors.white.withValues(alpha: 0.3),
+  //                     Colors.white.withValues(alpha: 0.2),
+  //                   ],
+  //                 )
+  //               : null,
+  //         ),
+  //         child: Column(
+  //           children: [
+  //             Icon(
+  //               icon,
+  //               color: isSelected
+  //                   ? Colors.white
+  //                   : Colors.white.withValues(alpha: 0.7),
+  //               size: 20,
+  //             ),
+  //             const SizedBox(height: 4),
+  //             Text(
+  //               label,
+  //               style: GoogleFonts.quicksand(
+  //                 fontSize: 12,
+  //                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  //                 color: isSelected
+  //                     ? Colors.white
+  //                     : Colors.white.withValues(alpha: 0.7),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCalendarContent() {
     if (_isLoading) {
@@ -1041,6 +1059,17 @@ class _LactationCalendarState extends State<LactationCalendar>
       // Recargar datos después de cerrar el diálogo
       _loadData();
     });
+  }
+
+  void _toggleMonthView() {
+    setState(() {
+      if (_currentView == CalendarView.day) {
+        _currentView = CalendarView.month;
+      } else {
+        _currentView = CalendarView.day;
+      }
+    });
+    _loadData();
   }
 
   void _showStats() {

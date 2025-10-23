@@ -34,9 +34,11 @@ import '../../features/lessons/domain/usecases/lesson_usecases.dart'
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
 import '../../features/videos/data/services/video_interaction_service.dart';
 import '../../features/lactation/data/services/lactation_service.dart';
+import '../../features/lactation/data/services/lactation_flow_service.dart';
 
 // Providers
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
+import '../../features/lactation/presentation/providers/lactation_flow_provider.dart';
 
 // BLoCs
 import '../../features/ui/presentation/bloc/ui_bloc.dart';
@@ -66,10 +68,17 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<LactationService>(
     () => LactationService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
   );
+  getIt.registerLazySingleton<LactationFlowService>(
+    () =>
+        LactationFlowService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
+  );
 
   // Providers
   getIt.registerFactory<LactationProvider>(
     () => LactationProvider(getIt<LactationService>()),
+  );
+  getIt.registerFactory<LactationFlowProvider>(
+    () => LactationFlowProvider(getIt<LactationFlowService>()),
   );
 
   // Data Sources

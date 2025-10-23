@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../lactation/domain/entities/lactation_record.dart';
 import '../../../lactation/presentation/providers/lactation_provider.dart';
+import '../../../lactation/presentation/widgets/smart_lactation_button.dart';
 import '../widgets/modern_header.dart';
 import '../widgets/home_feature_card.dart';
 import '../widgets/countdown_card.dart';
@@ -69,28 +70,14 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              NavigationService.navigateToCalendar(context);
+          SmartLactationButton(
+            onSuccess: () {
               // Refrescar datos después de registrar lactancia
               lactationProvider.refreshTodayData();
             },
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: Text(
-              'Primera Lactancia',
-              style: GoogleFonts.quicksand(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF03A696),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+            onCancel: () {
+              // Opcional: manejar cancelación
+            },
           ),
         ],
       ),
@@ -587,10 +574,15 @@ class _HomePageState extends State<HomePage> {
           _buildIntegratedCountdown(context, lactationProvider),
           const SizedBox(height: 30),
 
-          // Botón de registro de lactancia
+          // Botón inteligente de registro de lactancia
           FadeInUp(
             duration: const Duration(milliseconds: 1200),
-            child: _buildRegisterLactationButton(context, lactationProvider),
+            child: SmartLactationButton(
+              onSuccess: () {
+                // Refrescar datos después de registrar lactancia
+                lactationProvider.refreshTodayData();
+              },
+            ),
           ),
         ],
       ),
@@ -745,37 +737,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
-    );
-  }
-
-  /// Botón de registro de lactancia estilo píldora
-  Widget _buildRegisterLactationButton(
-    BuildContext context,
-    LactationProvider lactationProvider,
-  ) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        // Navegar al calendario y refrescar datos al regresar
-        NavigationService.navigateToCalendar(context);
-        // Refrescar datos después de registrar lactancia
-        lactationProvider.refreshTodayData();
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: Text(
-        'Registrar Lactancia',
-        style: GoogleFonts.quicksand(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFE91E63), // Rosa como en la imagen
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        shape: const StadiumBorder(), // Forma de píldora
-        elevation: 5,
-        shadowColor: const Color(0xFFE91E63).withValues(alpha: 0.4),
-      ),
     );
   }
 
