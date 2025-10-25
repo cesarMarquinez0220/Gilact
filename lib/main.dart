@@ -24,6 +24,10 @@ import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/onboarding/presentation/pages/situation_selection_page.dart';
 import 'features/onboarding/presentation/pages/prepartum_form_page.dart';
 import 'features/onboarding/presentation/pages/postpartum_form_page.dart';
+import 'features/lactation/data/services/sleep_notification_service.dart';
+import 'features/lactation/data/services/notification_handler.dart';
+import 'features/lactation/presentation/pages/sleep_record_page.dart';
+import 'features/lactation/presentation/pages/sleep_notification_settings_page.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -58,6 +62,12 @@ void main() async {
   // Configurar inyección de dependencias
   await configureDependencies();
 
+  // Inicializar servicios de notificaciones
+  await _initializeNotificationServices();
+
+  // Inicializar el manejador de notificaciones
+  NotificationHandler.initialize(navigatorKey);
+
   runApp(const MyApp());
 }
 
@@ -66,6 +76,25 @@ Future<void> updateLastOpened() async {
   DateTime now = DateTime.now();
   await prefs.setString('last_opened', now.toString());
 }
+
+/// Inicializar servicios de notificaciones
+Future<void> _initializeNotificationServices() async {
+  try {
+    final notificationService = getIt<SleepNotificationService>();
+    await notificationService.initialize();
+
+    if (kDebugMode) {
+      print('✅ Servicios de notificación inicializados correctamente');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('❌ Error al inicializar servicios de notificación: $e');
+    }
+  }
+}
+
+/// Clave global de navegación para el manejo de notificaciones
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -93,6 +122,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
+          navigatorKey: navigatorKey,
           home: const LoginPage(),
           routes: {
             '/login': (context) => const LoginPage(),
@@ -111,6 +141,9 @@ class MyApp extends StatelessWidget {
             '/edicion': (context) => const MainNavigationPage(),
             '/tips': (context) => const TipsPage(),
             '/Onboar_Info': (context) => const MainNavigationPage(),
+            '/sleep_record': (context) => const SleepRecordPage(),
+            '/sleep_notification_settings': (context) =>
+                const SleepNotificationSettingsPage(),
           },
         ),
       ),

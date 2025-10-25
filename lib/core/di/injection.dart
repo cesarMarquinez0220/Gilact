@@ -35,6 +35,8 @@ import '../../features/onboarding/data/services/user_subcollections_service.dart
 import '../../features/videos/data/services/video_interaction_service.dart';
 import '../../features/lactation/data/services/lactation_service.dart';
 import '../../features/lactation/data/services/lactation_flow_service.dart';
+import '../../features/lactation/data/services/sleep_notification_service.dart';
+import '../../features/lactation/data/services/notification_handler.dart';
 
 // Providers
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
@@ -71,6 +73,9 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<LactationFlowService>(
     () =>
         LactationFlowService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
+  );
+  getIt.registerLazySingleton<SleepNotificationService>(
+    () => SleepNotificationService(),
   );
 
   // Providers
