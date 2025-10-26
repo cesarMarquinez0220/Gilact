@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
 import '../../domain/services/lactation_decision_tree.dart';
@@ -18,11 +19,16 @@ class LactationFlowPage extends StatefulWidget {
   State<LactationFlowPage> createState() => _LactationFlowPageState();
 }
 
-class _LactationFlowPageState extends State<LactationFlowPage> {
+class _LactationFlowPageState extends State<LactationFlowPage>
+    with TickerProviderStateMixin {
   LactationStep _currentStep = LactationStep.initial;
   Map<String, dynamic> _data = {};
   List<String> _history = [];
   late LactationService _lactationService;
+
+  // Controlador de animación de fondo únicamente
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
@@ -39,6 +45,29 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
       FirebaseFirestore.instance,
       FirebaseAuth.instance,
     );
+
+    // Inicializar animaciones
+    _initializeAnimations();
+  }
+
+  void _initializeAnimations() {
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
+    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    // Iniciar animación de fondo
+    _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,26 +79,39 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF667eea), // Azul púrpura (consistente con header)
-              Color(0xFF764ba2), // Púrpura
-              Color(0xFFf093fb), // Rosa claro
+              Color(0xFF2C5F5D), // Azul teal oscuro (secundario)
+              Color(0xFF1A365D), // Azul marino oscuro (primario)
+              Color(0xFF4FD1C7), // Verde azulado medio vibrante (primario)
             ],
-            stops: [0.0, 0.6, 1.0],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildStepContent(),
-                ),
+        child: Stack(
+          children: [
+            // Fondo animado con partículas
+            _buildAnimatedBackground(),
+
+            // Contenido principal
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(
+                        context,
+                      ).copyWith(overscroll: false),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _buildStepContent(),
+                      ),
+                    ),
+                  ),
+                  _buildActionButtons(),
+                ],
               ),
-              _buildActionButtons(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -79,79 +121,55 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF667eea), // Azul púrpura
-            Color(0xFF764ba2), // Púrpura
-            Color(0xFFf093fb), // Rosa claro
-          ],
-          stops: [0.0, 0.6, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF667eea).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
+      child: Column(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.2),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  width: 1,
-                ),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Registro de Lactancia',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
+          // Header con botón de volver
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.2),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios,
                     color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        offset: const Offset(1, 1),
-                        blurRadius: 3,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Registro de Lactancia',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            offset: const Offset(1, 1),
+                            blurRadius: 3,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Registra tu sesión de lactancia',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.95),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -186,24 +204,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            '¿Qué tipo de alimentación?',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                '¿Qué tipo de alimentación?',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -224,24 +264,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            '¿Qué lado del pecho?',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                '¿Qué lado del pecho?',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -278,24 +340,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            '¿Cuánto tiempo duró la lactancia?',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                '¿Cuánto tiempo duró la lactancia?',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -332,24 +416,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            '¿Cuánto volumen tomó?',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                '¿Cuánto volumen tomó?',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -366,24 +472,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            'Ingresa la duración manualmente',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                'Ingresa la duración manualmente',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -502,24 +630,46 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Text(
-            'Ingresa el volumen manualmente',
-            style: GoogleFonts.quicksand(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Text(
+                'Ingresa el volumen manualmente',
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(1, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 20),
@@ -741,43 +891,55 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
     );
   }
 
-  Widget _buildActionButtons() {
+Widget _buildActionButtons() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: Row(
         children: [
           if (_currentStep != LactationStep.initial) ...[
+            // --- BOTÓN "ATRÁS" MODIFICADO ---
             Expanded(
-              child: GestureDetector(
-                onTap: _goBack,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+              child: Container(
+                // 1. Copiamos la decoración del botón "Cancelar"
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
                   ),
+                ),
+                child: TextButton(
+                  onPressed: _goBack,
+                  // 2. Copiamos el estilo del "TextButton" de "Cancelar"
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    foregroundColor: Colors.white, // Para el efecto "splash"
+                  ),
+                  // 3. El child ahora es un Row para incluir el ícono
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.arrow_back_ios,
-                        color: const Color(0xFF2C3E50),
-                        size: 18,
+                        color: Colors.white70, // 4. Ajustamos color y tamaño
+                        size: 15,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Atrás',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2C3E50),
+                        // 5. Copiamos el estilo de texto de "Cancelar"
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white70,
                         ),
                       ),
                     ],
@@ -786,40 +948,37 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
               ),
             ),
           ] else ...[
+            // --- BOTÓN "CANCELAR" (NUESTRO MODELO) ---
             Expanded(
-              child: GestureDetector(
-                onTap: _goBack,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.close,
-                        color: const Color(0xFF2C3E50),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Cancelar',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2C3E50),
-                        ),
-                      ),
-                    ],
+                ),
+                child: TextButton(
+                  onPressed: _goBack,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.white70,
+                    ),
                   ),
                 ),
               ),
@@ -829,86 +988,141 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
       ),
     );
   }
-
   Widget _buildOptionCard(LactationOption option) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: const EdgeInsets.only(bottom: 16),
       child: GestureDetector(
         onTap: () => _selectOption(option),
         child: Container(
-          height: 110,
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              // Icono en la esquina superior derecha
-              Positioned(
-                top: 15,
-                right: 15,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Color(option.color).withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(option.color).withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    option.icon,
-                    style: const TextStyle(fontSize: 22),
-                  ),
-                ),
-              ),
-
-              // Contenido principal
-              Positioned(
-                bottom: 15,
-                left: 15,
-                right: 15,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      option.title,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF2C3E50),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Row(
+                children: [
+                  // Icono simplificado estilo preparto/postparto
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        width: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      option.description,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF7F8C8D),
+                    child: Center(
+                      child: Icon(
+                        _getIconForOption(option),
+                        color: Colors.white,
+                        size: 30,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Información
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          option.title,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                offset: const Offset(1, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          option.description,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.85),
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Flecha de indicador
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    size: 20,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  IconData _getIconForOption(LactationOption option) {
+    // Mapear la opción a un icono Material blanco
+    switch (option.id) {
+      case 'pecho':
+        return Icons.child_care_outlined;
+      case 'biberon':
+        return Icons.local_drink_outlined;
+      case 'mixto':
+        return Icons.swap_horiz;
+      case 'izquierdo':
+        return Icons.keyboard_arrow_left;
+      case 'derecho':
+        return Icons.keyboard_arrow_right;
+      case 'ambos':
+        return Icons.sync_alt;
+      case '5min':
+      case '10min':
+      case '15min':
+      case '20min':
+        return Icons.timer_outlined;
+      case '30ml':
+      case '60ml':
+      case '120ml':
+      case '180ml':
+        return Icons.water_drop_outlined;
+      case 'otro':
+        return Icons.edit_outlined;
+      default:
+        return Icons.check_circle_outline;
+    }
   }
 
   void _selectOption(LactationOption option) {
@@ -1294,4 +1508,172 @@ class _LactationFlowPageState extends State<LactationFlowPage> {
 
     print('📋 Historial de pasos: $_history');
   }
+
+  Widget _buildAnimatedBackground() {
+    return Stack(
+      children: [
+        // Círculos decorativos animados más grandes y suaves
+        Positioned(
+          top: -80,
+          right: -80,
+          child: AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _pulseAnimation.value,
+                child: Container(
+                  width: 250,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(
+                          0xFF2C5F5D,
+                        ).withOpacity(0.15), // Azul teal oscuro
+                        const Color(
+                          0xFF2C5F5D,
+                        ).withOpacity(0.05), // Azul teal oscuro
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        Positioned(
+          bottom: -120,
+          left: -120,
+          child: AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _pulseAnimation.value * 0.7,
+                child: Container(
+                  width: 350,
+                  height: 350,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(
+                          0xFF4FD1C7,
+                        ).withOpacity(0.1), // Verde azulado medio
+                        const Color(
+                          0xFF4FD1C7,
+                        ).withOpacity(0.03), // Verde azulado medio
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        // Elementos decorativos adicionales
+        Positioned(
+          top: 150,
+          right: 40,
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFFE2E8F0).withOpacity(0.08),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 200,
+          right: 60,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFFB794F6).withOpacity(0.06),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Patrón de puntos decorativos
+        Positioned(
+          top: 120,
+          right: 30,
+          child: Container(
+            width: 80,
+            height: 80,
+            child: CustomPaint(painter: DotsPainter()),
+          ),
+        ),
+        // Líneas decorativas sutiles
+        Positioned(
+          top: 300,
+          left: 20,
+          child: Container(
+            width: 2,
+            height: 100,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  const Color(0xFF4FD1C7).withOpacity(0.1),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class DotsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFE2E8F0).withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+
+    // Crear un patrón de puntos elegante
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        final x = i * 20.0;
+        final y = j * 20.0;
+        final radius = (i + j) % 2 == 0 ? 2.5 : 1.5;
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+
+    // Agregar puntos más pequeños para mayor detalle
+    final smallPaint = Paint()
+      ..color = const Color(0xFF4FD1C7).withOpacity(0.2)
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        final x = i * 25.0 + 10.0;
+        final y = j * 25.0 + 10.0;
+        canvas.drawCircle(Offset(x, y), 1.0, smallPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
