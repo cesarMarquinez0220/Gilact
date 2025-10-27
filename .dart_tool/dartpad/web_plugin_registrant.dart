@@ -11,6 +11,7 @@ import 'package:connectivity_plus/src/connectivity_plus_web.dart';
 import 'package:firebase_analytics_web/firebase_analytics_web.dart';
 import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
+import 'package:firebase_messaging_web/firebase_messaging_web.dart';
 import 'package:firebase_performance_web/firebase_performance_web.dart';
 import 'package:flutter_inappwebview_web/web/main.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
@@ -27,6 +28,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebaseAnalyticsWeb.registerWith(registrar);
   FirebaseAuthWeb.registerWith(registrar);
   FirebaseCoreWeb.registerWith(registrar);
+  FirebaseMessagingWeb.registerWith(registrar);
   FirebasePerformanceWeb.registerWith(registrar);
   InAppWebViewFlutterPlugin.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);

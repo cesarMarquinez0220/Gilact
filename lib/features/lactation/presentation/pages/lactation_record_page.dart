@@ -67,7 +67,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _flowData['alimentacion'] = 'pecho';
       } else if (record.vecesBiberon > 0) {
         _flowData['alimentacion'] = 'biberon';
-      } else {
+    } else {
         // Fallback basado en el tipo de lactancia
         _flowData['alimentacion'] = record.tipo == LactationType.bottle
             ? 'biberon'
@@ -143,7 +143,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     _pulseAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    _pulseController.repeat(reverse: true);
+      _pulseController.repeat(reverse: true);
   }
 
   @override
@@ -210,25 +210,25 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 behavior: ScrollConfiguration.of(
                   context,
                 ).copyWith(overscroll: false),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Form(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
                     // Keep Form if validation is needed on manual inputs
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
+                  key: _formKey,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 20),
                         // Header Section (moved _buildHeader here for clarity)
-                        _buildHeader(),
-                        const SizedBox(height: 30),
+                              _buildHeader(),
+                              const SizedBox(height: 30),
                         // Accordion Form Content
                         _buildAccordionForm(), // This now contains the main UI logic
-                        const SizedBox(height: 40),
+                              const SizedBox(height: 40),
                         // Action Buttons (Simplified)
                         _buildSaveAndCancelButtons(), // Use simplified buttons
-                        const SizedBox(height: 20),
-                      ],
-                    ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
                   ),
                 ),
               ),
@@ -242,8 +242,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   // Modify _buildAccordionForm structure:
   Widget _buildAccordionForm() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
         _buildSectionTitle('¿Cómo alimentaste a tu bebé esta vez?'),
         const SizedBox(height: 16),
         // --- Feeding Options ---
@@ -285,7 +285,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           // Breastfeeding Details (if applicable)
           if (_showBreastSideOptions) ...[
             _buildAccordionContent(
-              children: [
+            children: [
                 _buildBreastSideOptions(),
                 const SizedBox(height: 16),
                 _buildBreastDurationOptions(),
@@ -297,7 +297,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           // Bottle Details (if applicable)
           if (_showBottleVolumeOptions) ...[
             _buildAccordionContent(
-              children: [
+                      children: [
                 _buildBottleVolumeOptions(),
                 const SizedBox(height: 16),
               ],
@@ -316,7 +316,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
   // Allow deselecting by clicking again
   void _toggleAccordionSection(String type) {
-    setState(() {
+                            setState(() {
       // If clicking the same type again, deselect it
       if (_flowData['alimentacion'] == type) {
         _flowData.remove('alimentacion');
@@ -352,10 +352,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.quicksand(
+                        style: GoogleFonts.quicksand(
         fontSize: 20, // Slightly smaller for section titles
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
         shadows: [
           Shadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -376,19 +376,19 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     required VoidCallback onTap,
   }) {
     // ... Same implementation as before ...
-    return GestureDetector(
+                  return GestureDetector(
       onTap: onTap,
-      child: Container(
+                    child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: isSelected
+                      decoration: BoxDecoration(
+                        color: isSelected
               ? Colors.white.withValues(alpha: 0.25)
-              : Colors.white.withValues(alpha: 0.15),
+                            : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
+                        border: Border.all(
+                          color: isSelected
                 ? Colors.white.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.3),
+                              : Colors.white.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: [
@@ -399,11 +399,11 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 offset: const Offset(0, 5),
               ),
           ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Row(
@@ -437,9 +437,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                                 color: Colors.black.withValues(alpha: 0.3),
                                 offset: const Offset(0, 1),
                                 blurRadius: 2,
-                              ),
-                            ],
                           ),
+                            ],
+                        ),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -525,9 +525,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               value: 'ambos',
               groupValue: _flowData['breastSide'],
               icon: Icons.sync_alt,
-            ),
-          ],
-        ),
+                        ),
+                      ],
+                    ),
         // Removed manual input card - not standard for side selection
       ],
     );
@@ -543,9 +543,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     String? unitType, // 'duration', 'sleep', o 'volume'
   }) {
     final isSelected = groupValue == value;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
           if (isUnitSelector) {
             if (label == 'ml' || label == 'oz') {
               // Unidades de volumen
@@ -563,42 +563,42 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             // Assuming it's for breastSide
             _flowData['breastSide'] = value;
           }
-        });
-      },
-      child: Container(
+                      });
+                    },
+                    child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.3)
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.3),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1.5,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
+                children: [
             if (icon != null) ...[
-              Icon(
+                  Icon(
                 icon,
                 color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
-                size: 16,
-              ),
+                    size: 16,
+                  ),
               const SizedBox(width: 8),
             ],
-            Text(
+                  Text(
               label,
-              style: GoogleFonts.quicksand(
+                    style: GoogleFonts.quicksand(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
-              ),
-            ),
-          ],
+                    ),
+                  ),
+                ],
         ),
       ),
     );
@@ -610,10 +610,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('¿Cuánto tiempo duró?'),
-        const SizedBox(height: 8),
-        Row(
+                  const SizedBox(height: 8),
+                  Row(
           // Unit Selector
-          children: [
+                    children: [
             _buildChoiceChip(
               label: 'min',
               value: 'min',
@@ -628,9 +628,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               groupValue: _durationUnit,
               isUnitSelector: true,
               unitType: 'duration',
-            ),
-          ],
-        ),
+                      ),
+                    ],
+                  ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -667,30 +667,30 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         : [1, 2, 3, 4, 5, 6];
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
         _buildSectionTitle('¿Cuánta leche tomó?'),
         const SizedBox(height: 8),
-        Row(
+              Row(
           // Unit Selector
-          children: [
+                children: [
             _buildChoiceChip(
               label: 'ml',
               value: 'ml',
               groupValue: _volumeUnit,
               isUnitSelector: true,
               unitType: 'volume',
-            ),
-            const SizedBox(width: 12),
+                  ),
+                  const SizedBox(width: 12),
             _buildChoiceChip(
               label: 'oz',
               value: 'oz',
               groupValue: _volumeUnit,
               isUnitSelector: true,
               unitType: 'volume',
-            ),
-          ],
-        ),
+                        ),
+                      ],
+                    ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -733,7 +733,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         const SizedBox(height: 8),
         Row(
           // Unit Selector
-          children: [
+                children: [
             _buildChoiceChip(
               label: 'min',
               value: 'min',
@@ -748,9 +748,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               groupValue: _sleepUnit,
               isUnitSelector: true,
               unitType: 'sleep',
-            ),
-          ],
-        ),
+                      ),
+                    ],
+                  ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -788,37 +788,37 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     final String combinedValue = value + unit;
     final bool isSelected = groupValue == combinedValue;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
           _flowData[dataKey] = combinedValue;
 
           // Optionally clear the manual input when a chip is selected
           if (dataKey == 'duration') _manualBreastDurationController.clear();
           if (dataKey == 'volume') _manualBottleVolumeController.clear();
           if (dataKey == 'sleep') _manualSleepTimeController.clear();
-        });
-      },
-      child: Container(
+                      });
+                    },
+                    child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.15),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Text(
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
           value + " " + unit, // Display value and unit
-          style: GoogleFonts.quicksand(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
           ),
         ),
       ),
@@ -855,21 +855,21 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Row(
-            children: [
-              Container(
+                children: [
+                  Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
                   Icons.edit_outlined,
                   color: Colors.white70,
                   size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
                 child: TextField(
                   controller: controller,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -878,13 +878,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                   ],
-                  style: GoogleFonts.quicksand(
+                          style: GoogleFonts.quicksand(
                     color: Colors.white,
-                    fontSize: 14,
+                            fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                   onChanged: (text) {
-                    setState(() {
+                      setState(() {
                       if (text.isNotEmpty) {
                         _flowData[dataKey] = text + unit;
                       } else {
@@ -896,7 +896,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                     hintText: hintText,
                     hintStyle: GoogleFonts.quicksand(
                       color: Colors.white70,
-                      fontSize: 14,
+                              fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
                     border: InputBorder.none,
@@ -906,12 +906,12 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                     ),
                     suffixText: unit,
                     suffixStyle: GoogleFonts.quicksand(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
+                          fontWeight: FontWeight.bold,
                       fontSize: 14,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -973,19 +973,19 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                       color: Colors.white,
                       letterSpacing: 0.5,
                     ),
+                    ),
                   ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
         // Cancel Button
         SizedBox(
           // Use SizedBox to allow full width
-          width: double.infinity,
+            width: double.infinity,
           child: TextButton(
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
+                shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               foregroundColor: Colors.white70, // Text color
@@ -1003,10 +1003,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
                 decorationColor: Colors.white70,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

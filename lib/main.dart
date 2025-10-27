@@ -26,7 +26,9 @@ import 'features/onboarding/presentation/pages/prepartum_form_page.dart';
 import 'features/onboarding/presentation/pages/postpartum_form_page.dart';
 import 'features/lactation/data/services/sleep_notification_service.dart';
 import 'features/lactation/data/services/notification_handler.dart';
+import 'features/lactation/data/services/push_notification_service.dart';
 import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -64,6 +66,12 @@ void main() async {
   // Inicializar servicios de notificaciones
   await _initializeNotificationServices();
 
+  // Registrar handler para mensajes en background
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Inicializar servicio de notificaciones push
+  await _initializePushNotificationService();
+
   // Inicializar el manejador de notificaciones
   NotificationHandler.initialize(navigatorKey);
 
@@ -92,6 +100,22 @@ Future<void> _initializeNotificationServices() async {
   } catch (e) {
     if (kDebugMode) {
       print('❌ Error al inicializar servicios de notificación: $e');
+    }
+  }
+}
+
+/// Inicializar servicio de notificaciones push
+Future<void> _initializePushNotificationService() async {
+  try {
+    final pushService = PushNotificationService();
+    await pushService.initialize();
+
+    if (kDebugMode) {
+      print('✅ Servicio de notificaciones push inicializado');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('❌ Error al inicializar servicio de push: $e');
     }
   }
 }
