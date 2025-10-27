@@ -66,11 +66,24 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
       // Precargar datos del mes para el calendario
       final monthRecords = await _lactationService.getRecordsForMonth(today);
 
+      print(
+        '📦 [DEBUG] SmartLactationButton: dayRecords = ${dayRecords.length}',
+      );
+      print(
+        '📦 [DEBUG] SmartLactationButton: monthRecords = ${monthRecords.length}',
+      );
+
       setState(() {
-        _preloadedRecords = [...dayRecords, ...monthRecords];
+        // Evitar duplicados: usar monthRecords que ya incluye los registros del día
+        // porque getRecordsForMonth incluye todo el mes
+        _preloadedRecords = monthRecords;
         _isDataPreloaded = true;
         _isPreloading = false;
       });
+
+      print(
+        '📦 [DEBUG] SmartLactationButton: _preloadedRecords final = ${_preloadedRecords.length}',
+      );
 
       print('✅ SmartLactationButton: Datos precargados exitosamente');
     } catch (e) {

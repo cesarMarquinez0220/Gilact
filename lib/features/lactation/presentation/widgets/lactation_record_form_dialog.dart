@@ -163,28 +163,33 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
                 children: [
                   _buildHeader(),
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            _buildDateTimeSection(),
-                            const SizedBox(height: 20),
-                            _buildTipoLactanciaSection(),
-                            const SizedBox(height: 20),
-                            _buildDuracionSection(),
-                            const SizedBox(height: 20),
-                            _buildVolumenExtraccionSection(),
-                            const SizedBox(height: 20),
-                            _buildVecesPechoSection(),
-                            const SizedBox(height: 20),
-                            _buildVecesBiberonSection(),
-                            const SizedBox(height: 20),
-                            _buildHorasSuenoSection(),
-                            const SizedBox(height: 20),
-                            _buildNotasSection(),
-                          ],
+                    
+                    child: ScrollConfiguration( // <-- 1. Envuelve con esto
+ behavior: ScrollConfiguration.of(context).copyWith(
+overscroll: false, ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              _buildDateTimeSection(),
+                              const SizedBox(height: 20),
+                              _buildTipoLactanciaSection(),
+                              const SizedBox(height: 20),
+                              _buildDuracionSection(),
+                              const SizedBox(height: 20),
+                              _buildVolumenExtraccionSection(),
+                              const SizedBox(height: 20),
+                              _buildVecesPechoSection(),
+                              const SizedBox(height: 20),
+                              _buildVecesBiberonSection(),
+                              const SizedBox(height: 20),
+                              _buildHorasSuenoSection(),
+                              const SizedBox(height: 20),
+                              _buildNotasSection(),
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -54,8 +54,30 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   }
 
   void _usePreloadedData() {
+    print(
+      '📦 [DEBUG] _usePreloadedData(): ${widget.preloadedRecords!.length} registros precargados',
+    );
+
     setState(() {
-      _records = widget.preloadedRecords!;
+      // Si hay datos precargados, pueden ser del mes completo
+      // Filtrar por el día seleccionado para vista de día
+      if (_currentView == CalendarView.day) {
+        _records = widget.preloadedRecords!
+            .where(
+              (record) =>
+                  record.fechaRegistro.year == _selectedDate.year &&
+                  record.fechaRegistro.month == _selectedDate.month &&
+                  record.fechaRegistro.day == _selectedDate.day,
+            )
+            .toList();
+        print('📊 [DEBUG] Filtrados para el día: ${_records.length} registros');
+      } else {
+        _records = widget.preloadedRecords!;
+        print(
+          '📊 [DEBUG] Usando todos los registros precargados: ${_records.length}',
+        );
+      }
+
       _monthRecords = widget.preloadedRecords!;
       _monthDataLoaded = true;
       _isLoading = false;
@@ -135,7 +157,16 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
       switch (_currentView) {
         case CalendarView.day:
+          print('📅 [DEBUG] Vista DÍA - Fecha seleccionada: $_selectedDate');
           records = await _lactationService.getRecordsForDate(_selectedDate);
+          print(
+            '📊 [DEBUG] Registros cargados de Firestore: ${records.length}',
+          );
+          for (var record in records) {
+            print(
+              '   - ID: ${record.id}, Fecha: ${record.fechaRegistro}, Tipo: ${record.tipo}',
+            );
+          }
           // Cargar estadísticas específicas del día seleccionado
           stats = await _getDayStats(_selectedDate, records);
           break;
@@ -152,11 +183,13 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           break;
       }
 
+      print('💾 [DEBUG] Asignando ${records.length} registros a _records');
       setState(() {
         _records = records;
         _stats = stats;
         _isLoading = false;
       });
+      print('✅ [DEBUG] _records actualizado con ${_records.length} elementos');
 
       // Precargar datos del mes en background cuando estamos en vista de día
       if (_currentView == CalendarView.day && !_monthDataLoaded) {
@@ -603,14 +636,23 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   }
 
   Widget _buildDayView() {
-    final dayRecords = _records
-        .where(
-          (record) =>
-              record.fechaRegistro.year == _selectedDate.year &&
-              record.fechaRegistro.month == _selectedDate.month &&
-              record.fechaRegistro.day == _selectedDate.day,
-        )
-        .toList();
+    // NO filtrar aquí porque _lactationService.getRecordsForDate ya filtra por fecha
+    // usar _records directamente
+    final dayRecords = _records;
+
+    print('🏗️ [DEBUG] _buildDayView():');
+    print('   - Total de registros en _records: ${_records.length}');
+    print('   - dayRecords.length: ${dayRecords.length}');
+    print('   - Fecha seleccionada: $_selectedDate');
+
+    if (dayRecords.isNotEmpty) {
+      print(
+        '   - Primer registro: ID=${dayRecords.first.id}, Fecha=${dayRecords.first.fechaRegistro}',
+      );
+      print(
+        '   - Último registro: ID=${dayRecords.last.id}, Fecha=${dayRecords.last.fechaRegistro}',
+      );
+    }
 
     return Column(
       children: [
@@ -618,13 +660,22 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         Expanded(
           child: dayRecords.isEmpty
               ? _buildEmptyState(title: 'No hay registros para este día')
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: dayRecords.length,
-                  itemBuilder: (context, index) {
-                    final record = dayRecords[index];
-                    return _buildRecordCard(record);
-                  },
+              : ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    overscroll: false, // Esto desactiva el resplandor
+                  ),
+                  child: ListView.builder(
+                    // Tu ListView original va aquí DENTRO
+                    padding: const EdgeInsets.all(16),
+                    itemCount: dayRecords.length,
+                    itemBuilder: (context, index) {
+                      final record = dayRecords[index];
+                      print(
+                        '🎴 [DEBUG] Construyendo card #${index + 1}/${dayRecords.length} - ID: ${record.id}, Fecha: ${record.fechaRegistro}',
+                      );
+                      return _buildRecordCard(record);
+                    },
+                  ),
                 ),
         ),
       ],
@@ -996,51 +1047,63 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           borderRadius: BorderRadius.circular(8),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${day.day}',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                    color: isCurrentMonth
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.5),
-                  ),
-                ),
-                if (isCurrentMonth && dayRecords.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 2),
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                  ),
-                // Indicador de número de registros
-                if (isCurrentMonth && dayRecords.length > 1)
-                  Container(
-                    margin: const EdgeInsets.only(top: 1),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            child: SizedBox(
+              height: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
                     child: Text(
-                      '${dayRecords.length}',
+                      '${day.day}',
                       style: GoogleFonts.quicksand(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: isToday
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isCurrentMonth
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.5),
                       ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-              ],
+                  if (isCurrentMonth && dayRecords.length == 1) // <-- Cambiado a == 1
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.8), // Usar withOpacity
+            ),
+          ),
+
+        // Indicador de MÚLTIPLES registros (Número)
+        if (isCurrentMonth && dayRecords.length > 1) // <-- Se mantiene > 1
+          Container(
+            margin: const EdgeInsets.only(top: 2), // Ajustar margen si es necesario
+            padding: const EdgeInsets.symmetric(
+              horizontal: 4,
+              vertical: 1,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3), // Usar withOpacity
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${dayRecords.length}',
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+                ],
+              ),
             ),
           ),
         ),

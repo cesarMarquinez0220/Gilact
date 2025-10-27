@@ -165,7 +165,6 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         ],
                       ),
                     ),
-                  
                   ],
                 ),
               ),
@@ -891,7 +890,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     );
   }
 
-Widget _buildActionButtons() {
+  Widget _buildActionButtons() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: Row(
@@ -988,6 +987,7 @@ Widget _buildActionButtons() {
       ),
     );
   }
+
   Widget _buildOptionCard(LactationOption option) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1462,6 +1462,9 @@ Widget _buildActionButtons() {
       unidadSueno: 'No',
       timestamp: now,
       fechaRegistroString: recordDate.toIso8601String(),
+      // NUEVO: Identificar como registro rápido
+      tipoRegistro: 'rapido',
+      incluyeSueno: false,
     );
   }
 

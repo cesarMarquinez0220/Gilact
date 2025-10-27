@@ -21,6 +21,10 @@ class LactationRecord {
   final DateTime timestamp;
   final String fechaRegistroString; // Para consultas por fecha
 
+  // NUEVO: Identificador de tipo de registro
+  final String tipoRegistro; // 'rapido' | 'completo'
+  final bool incluyeSueno; // true si tiene datos de sueño
+
   LactationRecord({
     required this.id,
     required this.fechaRegistro,
@@ -37,11 +41,13 @@ class LactationRecord {
     this.unidadSueno = 'No',
     required this.timestamp,
     required this.fechaRegistroString,
+    this.tipoRegistro = 'completo', // Por defecto
+    this.incluyeSueno = false, // Por defecto
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      // NO incluir 'id' - Firestore usa el document ID como identificador
       'fecha_registro': fechaRegistroString,
       'duracion': duracion.inMinutes,
       'tipo': tipo.name,
@@ -55,6 +61,9 @@ class LactationRecord {
       'horas_sueno_bebe': horasSuenoBebe,
       'unidad_sueno': unidadSueno,
       'timestamp': timestamp,
+      // NUEVO: Identificadores de tipo
+      'tipo_registro': tipoRegistro,
+      'incluye_sueno': incluyeSueno,
     };
   }
 
@@ -100,6 +109,9 @@ class LactationRecord {
       timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       fechaRegistroString:
           map['fecha_registro'] ?? DateTime.now().toIso8601String(),
+      // NUEVO: Leer identificadores
+      tipoRegistro: map['tipo_registro'] ?? 'completo',
+      incluyeSueno: map['incluye_sueno'] ?? false,
     );
   }
 
@@ -119,6 +131,8 @@ class LactationRecord {
     String? unidadSueno,
     DateTime? timestamp,
     String? fechaRegistroString,
+    String? tipoRegistro,
+    bool? incluyeSueno,
   }) {
     return LactationRecord(
       id: id ?? this.id,
@@ -136,6 +150,8 @@ class LactationRecord {
       unidadSueno: unidadSueno ?? this.unidadSueno,
       timestamp: timestamp ?? this.timestamp,
       fechaRegistroString: fechaRegistroString ?? this.fechaRegistroString,
+      tipoRegistro: tipoRegistro ?? this.tipoRegistro,
+      incluyeSueno: incluyeSueno ?? this.incluyeSueno,
     );
   }
 }

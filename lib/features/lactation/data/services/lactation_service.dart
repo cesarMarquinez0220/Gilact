@@ -134,7 +134,7 @@ class LactationService {
             isGreaterThanOrEqualTo: startOfDay.toIso8601String(),
           )
           .where('fecha_registro', isLessThan: endOfDay.toIso8601String())
-          .orderBy('fecha_registro', descending: false)
+          .orderBy('fecha_registro', descending: true) // Más reciente primero
           .get();
 
       return querySnapshot.docs
@@ -163,7 +163,7 @@ class LactationService {
             isGreaterThanOrEqualTo: startOfWeek.toIso8601String(),
           )
           .where('fecha_registro', isLessThan: endOfWeek.toIso8601String())
-          .orderBy('fecha_registro', descending: false)
+          .orderBy('fecha_registro', descending: true) // Más reciente primero
           .get();
 
       return querySnapshot.docs
@@ -193,7 +193,7 @@ class LactationService {
             isGreaterThanOrEqualTo: startOfMonth.toIso8601String(),
           )
           .where('fecha_registro', isLessThan: endOfMonth.toIso8601String())
-          .orderBy('fecha_registro', descending: false)
+          .orderBy('fecha_registro', descending: true) // Más reciente primero
           .get();
 
       return querySnapshot.docs
