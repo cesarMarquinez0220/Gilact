@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get_it/get_it.dart';
+import '../../../chatbot/presentation/pages/chatbot_page.dart';
+import '../../../chatbot/presentation/bloc/chatbot_bloc.dart';
 
 /// Página de salud del bebé con diseño consistente
 class HealthPage extends StatelessWidget {
@@ -66,7 +70,25 @@ class HealthPage extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 16),
-
+                  // ChatBot
+                  _buildHealthCard(
+                    'ChatBot',
+                    'Chat con el chatbot',
+                    Icons.chat,
+                    const Color(0xFF03A696),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => GetIt.instance<ChatbotBloc>(),
+                            child: const ChatbotPage(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   // Emergencias
                   _buildHealthCard(
                     'Emergencias',

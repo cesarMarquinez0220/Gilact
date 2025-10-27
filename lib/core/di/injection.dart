@@ -9,6 +9,7 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/videos/data/datasources/video_remote_data_source.dart';
 import '../../features/tips/data/datasources/tip_remote_data_source.dart';
 import '../../features/user/data/datasources/user_profile_remote_data_source.dart';
+import '../../features/chatbot/data/datasources/chatbot_remote_data_source.dart';
 
 // Repositories
 import '../../features/ui/data/repositories/ui_repository_impl.dart';
@@ -17,6 +18,7 @@ import '../../features/videos/data/repositories/video_repository_impl.dart';
 import '../../features/tips/data/repositories/tip_repository_impl.dart';
 import '../../features/user/data/repositories/user_profile_repository_impl.dart';
 import '../../features/lessons/data/repositories/lesson_repository_impl.dart';
+import '../../features/chatbot/data/repositories/chatbot_repository_impl.dart';
 
 // Use Cases - Solo los básicos necesarios
 import '../../features/ui/domain/usecases/ui_usecases.dart' as ui_usecases;
@@ -29,6 +31,8 @@ import '../../features/user/domain/usecases/user_profile_usecases.dart'
     as user_usecases;
 import '../../features/lessons/domain/usecases/lesson_usecases.dart'
     as lesson_usecases;
+import '../../features/chatbot/domain/usecases/chatbot_usecases.dart'
+    as chatbot_usecases;
 
 // Services
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
@@ -49,6 +53,7 @@ import '../../features/videos/presentation/bloc/video_bloc.dart';
 import '../../features/tips/presentation/bloc/tip_bloc.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
 import '../../features/lessons/presentation/bloc/lesson_bloc.dart';
+import '../../features/chatbot/presentation/bloc/chatbot_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -108,6 +113,9 @@ Future<void> configureDependencies() async {
       firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
+  getIt.registerLazySingleton<ChatbotRemoteDataSource>(
+    () => ChatbotRemoteDataSourceImpl(getIt<FirebaseFirestore>()),
+  );
 
   // Repositories
   getIt.registerLazySingleton<UIRepositoryImpl>(
@@ -127,6 +135,9 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<LessonRepositoryImpl>(
     () => LessonRepositoryImpl(),
+  );
+  getIt.registerLazySingleton<ChatbotRepositoryImpl>(
+    () => ChatbotRepositoryImpl(getIt<ChatbotRemoteDataSource>()),
   );
 
   // Use Cases - UI
@@ -279,6 +290,11 @@ Future<void> configureDependencies() async {
         lesson_usecases.GetUserStatisticsUseCase(getIt<LessonRepositoryImpl>()),
   );
 
+  // Use Cases - Chatbot
+  getIt.registerLazySingleton(
+    () => chatbot_usecases.SendMessageUseCase(getIt<ChatbotRepositoryImpl>()),
+  );
+
   // BLoCs - Solo los básicos necesarios para que funcione la app
   getIt.registerFactory(
     () => UIBloc(
@@ -362,6 +378,12 @@ Future<void> configureDependencies() async {
       getUserProgressUseCase: getIt<lesson_usecases.GetUserProgressUseCase>(),
       getUserStatisticsUseCase:
           getIt<lesson_usecases.GetUserStatisticsUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => ChatbotBloc(
+      sendMessageUseCase: getIt<chatbot_usecases.SendMessageUseCase>(),
     ),
   );
 }
