@@ -585,30 +585,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const SizedBox(height: 20),
-
-          // Botón temporal para configuración de notificaciones de sueño
-          FadeInUp(
-            duration: const Duration(milliseconds: 1400),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/sleep_notification_settings');
-              },
-              icon: const Icon(Icons.notifications_active),
-              label: const Text('Configurar Notificaciones de Sueño'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF03A696),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
