@@ -3,7 +3,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'notification_handler.dart';
+import 'lactation_service.dart';
 
 /// Servicio para manejar notificaciones de recordatorio de sueño
 class SleepNotificationService {
@@ -342,5 +345,162 @@ class SleepNotificationService {
     if (hours.isNotEmpty) {
       await scheduleSleepReminders(reminderHours: hours, babyName: babyName);
     }
+  }
+
+  /// Programar notificación diaria a las 8 AM para registro de sueño
+  /// Solo se programa si el usuario es postparto
+  Future<void> scheduleDailySleepNotification() async {
+    await initialize();
+
+    // Verificar si el usuario es postparto antes de programar
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print(
+          '⚠️ SleepNotificationService: Usuario no autenticado, no se programará notificación',
+        );
+        return;
+      }
+
+      // Verificar situación postparto usando LactationService
+      final lactationService = LactationService(
+        FirebaseFirestore.instance,
+        FirebaseAuth.instance,
+      );
+
+      final isPostpartum = await lactationService.hasPostpartumSituation();
+
+      if (!isPostpartum) {
+        print(
+          '⚠️ SleepNotificationService: Usuario no es postparto, no se programará notificación',
+        );
+        return;
+      }
+
+      print(
+        '✅ SleepNotificationService: Usuario es postparto, programando notificación',
+      );
+    } catch (e) {
+      print('⚠️ SleepNotificationService: Error verificando situación: $e');
+      return;
+    }
+
+    // 🔔 Verificar permisos de notificación
+    final bool? granted = await _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
+
+    if (granted != true) {
+      print(
+        '❌ SleepNotificationService: Permisos de notificación NO concedidos',
+      );
+      print('⚠️ No se programará la notificación sin permisos');
+      return;
+    } else {
+      print('✅ SleepNotificationService: Permisos de notificación concedidos');
+    }
+
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'daily_sleep_reminder',
+          'Registro de Sueño Diario',
+          channelDescription:
+              'Notificación diaria para registrar las horas de sueño del bebé',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          color: const Color(0xFF03A696),
+          ledColor: const Color(0xFF03A696),
+          ledOnMs: 1000,
+          ledOffMs: 500,
+        );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final now = tz.TZDateTime.now(tz.local);
+
+    // Programar para las 8 AM todos los días
+    final horaDeseada = 8; // 8 AM
+    final minutosDeseados = 0; // en punto
+
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      horaDeseada,
+      minutosDeseados,
+    );
+
+    // Si la hora ya pasó hoy, programar para mañana
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    print(
+      '🔔 SleepNotificationService: Programando notificación diaria a las 8:00 AM',
+    );
+
+    // 🧪 PRUEBA: Mantener notificación inmediata de prueba
+    print('🧪 Enviando notificación INMEDIATA de prueba...');
+    await _notifications.show(
+      888, // ID de prueba
+      '🌙 Registro de Sueño Diario',
+      '¿Cuántas horas durmió el bebé anoche?',
+      details,
+      payload: 'daily_sleep_registration',
+    );
+    print('✅ Notificación inmediata enviada (presiona para ir al formulario)');
+
+    // Programar la notificación diaria de las 8 AM
+    await _notifications.zonedSchedule(
+      889, // ID diferente para no sobrescribir la inmediata
+      '🌙 Registro de Sueño Diario',
+      '¿Cuántas horas durmió el bebé anoche?',
+      scheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexact,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: 'daily_sleep_registration',
+    );
+    print('✅ Notificación diaria programada para las 8:00 AM');
+
+    // ✅ Verificar notificaciones pendientes después de programar
+    final pendingNotifications = await _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.pendingNotificationRequests();
+
+    print(
+      '📋 Total de notificaciones pendientes: ${pendingNotifications?.length ?? 0}',
+    );
+    pendingNotifications?.forEach((notification) {
+      print('  📱 ID: ${notification.id}, Título: "${notification.title}"');
+      if (notification.body != null) {
+        print('     💬 Cuerpo: "${notification.body}"');
+      }
+    });
+  }
+
+  /// Cancelar la notificación diaria de las 8 AM
+  Future<void> cancelDailySleepNotification() async {
+    await _notifications.cancel(888);
+    print(
+      '🔔 SleepNotificationService: Notificación diaria de las 8 AM cancelada',
+    );
   }
 }

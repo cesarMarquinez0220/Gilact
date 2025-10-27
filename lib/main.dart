@@ -26,8 +26,7 @@ import 'features/onboarding/presentation/pages/prepartum_form_page.dart';
 import 'features/onboarding/presentation/pages/postpartum_form_page.dart';
 import 'features/lactation/data/services/sleep_notification_service.dart';
 import 'features/lactation/data/services/notification_handler.dart';
-import 'features/lactation/presentation/pages/sleep_record_page.dart';
-import 'features/lactation/presentation/pages/sleep_notification_settings_page.dart';
+import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -82,6 +81,10 @@ Future<void> _initializeNotificationServices() async {
   try {
     final notificationService = getIt<SleepNotificationService>();
     await notificationService.initialize();
+
+    // NO programar automáticamente aquí porque el usuario aún no está autenticado
+    // La notificación se programará después de que el usuario inicie sesión
+    // y se verifique que es postparto (en WelcomeScreen o similar)
 
     if (kDebugMode) {
       print('✅ Servicios de notificación inicializados correctamente');
@@ -141,9 +144,7 @@ class MyApp extends StatelessWidget {
             '/edicion': (context) => const MainNavigationPage(),
             '/tips': (context) => const TipsPage(),
             '/Onboar_Info': (context) => const MainNavigationPage(),
-            '/sleep_record': (context) => const SleepRecordPage(),
-            '/sleep_notification_settings': (context) =>
-                const SleepNotificationSettingsPage(),
+            '/daily-sleep-form': (context) => const DailySleepFormPage(),
           },
         ),
       ),

@@ -27,20 +27,39 @@ class NotificationHandler {
 
     final context = _navigatorKey!.currentState!.context;
 
-    // Determinar el tipo de notificación basado en el ID
+    // Determinar el tipo de notificación basado en el ID y payload
     switch (response.id) {
-      case 999: // Notificación de prueba
-        _handleTestNotification(context);
+      case 888: // Notificación inmediata de prueba
+        _handleDailySleepNotification(context);
+        break;
+      case 889: // Notificación diaria programada de las 8 AM
+        _handleDailySleepNotification(context);
+        break;
+      case 999: // Notificación de prueba - también navegar al formulario
+        _handleDailySleepNotification(context);
         break;
       default:
         // IDs 0-23 son recordatorios de sueño (horas del día)
         if (response.id != null && response.id! >= 0 && response.id! <= 23) {
           _handleSleepReminder(context, response.id!);
         } else {
-          _handleGenericNotification(context);
+          // Cualquier notificación relacionada con sueño navega al formulario
+          _handleDailySleepNotification(context);
         }
         break;
     }
+  }
+
+  /// Manejar notificación diaria de las 8 AM para registro de sueño
+  static void _handleDailySleepNotification(BuildContext context) {
+    print(
+      '🔔 NotificationHandler: Manejando notificación diaria de sueño a las 8 AM',
+    );
+
+    // Navegar al formulario de registro de sueño diario
+    Navigator.of(
+      context,
+    ).pushNamed('/daily-sleep-form', arguments: {'from_notification': true});
   }
 
   /// Manejar recordatorio de sueño
@@ -53,52 +72,6 @@ class NotificationHandler {
     Navigator.of(context).pushNamed(
       '/sleep_record',
       arguments: {'from_notification': true, 'reminder_hour': hour},
-    );
-  }
-
-  /// Manejar notificación de prueba
-  static void _handleTestNotification(BuildContext context) {
-    print('🔔 NotificationHandler: Manejando notificación de prueba');
-
-    // Mostrar diálogo de prueba
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notificación de Prueba'),
-        content: const Text(
-          'Esta es una notificación de prueba para el sistema de recordatorios de sueño.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Navegar al formulario de sueño
-              Navigator.of(context).pushNamed(
-                '/sleep_record',
-                arguments: {'from_notification': true},
-              );
-            },
-            child: const Text('Registrar Sueño'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Manejar notificación genérica
-  static void _handleGenericNotification(BuildContext context) {
-    print('🔔 NotificationHandler: Manejando notificación genérica');
-
-    // Mostrar mensaje genérico
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notificación recibida'),
-        duration: Duration(seconds: 2),
-      ),
     );
   }
 

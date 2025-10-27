@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import '../../domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
+import '../../../lactation/data/services/sleep_notification_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -443,7 +445,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         print('⚠️ WelcomeScreen: No se encontró información de situación');
       }
 
-      // 3. Navegar a home con toda la información cargada
+      // 3. Programar notificación diaria de sueño si es postparto
+      if (situationData != null &&
+          situationData['situationType'] == 'postparto') {
+        print(
+          '🌙 WelcomeScreen: Usuario es postparto, programando notificación diaria',
+        );
+        await _scheduleSleepNotification();
+      } else {
+        print(
+          '⚠️ WelcomeScreen: Usuario no es postparto, no se programará notificación',
+        );
+      }
+
+      // 4. Navegar a home con toda la información cargada
       print('🚀 WelcomeScreen: Navegando a home con datos completos...');
       _navigateToHome();
     } catch (e) {
@@ -549,6 +564,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     } catch (e) {
       print('❌ ERROR _getUserEmail: Error obteniendo email del usuario: $e');
       return '';
+    }
+  }
+
+  /// Programar notificación diaria de sueño a las 8 AM
+  Future<void> _scheduleSleepNotification() async {
+    try {
+      final notificationService = GetIt.instance<SleepNotificationService>();
+      await notificationService.scheduleDailySleepNotification();
+      print('✅ WelcomeScreen: Notificación diaria programada exitosamente');
+    } catch (e) {
+      print('❌ WelcomeScreen: Error programando notificación: $e');
     }
   }
 
