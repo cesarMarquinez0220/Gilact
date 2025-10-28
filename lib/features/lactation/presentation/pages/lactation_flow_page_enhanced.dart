@@ -517,17 +517,32 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
           child: Column(
             children: [
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'Duración en minutos',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -539,55 +554,85 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     );
                   }
                 },
+                decoration: InputDecoration(
+                  hintText: 'Duración en minutos',
+                  hintStyle: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.timer_outlined,
+                    color: Colors.white70,
+                    size: 22,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  if (_data['duration'] != null) {
-                    print(
-                      '💾 LactationFlowPage: Botón guardar duración presionado',
-                    );
-                    final isMixed =
-                        _data['type']?.toString().toLowerCase() == 'mixto';
-                    if (isMixed) {
-                      print(
-                        '🔄 LactationFlowPage: Lactancia mixta, avanzando a volumen',
-                      );
-                      setState(() {
-                        _currentStep = LactationStep.bottleVolume;
-                      });
-                    } else {
-                      print(
-                        '💾 LactationFlowPage: Lactancia materna completa, guardando',
-                      );
-                      _saveRecord();
-                    }
-                  } else {
-                    print('⚠️ LactationFlowPage: Duración no ingresada');
-                  }
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF667eea),
-                        Color(0xFF764ba2),
-                        Color(0xFFf093fb),
-                      ],
-                      stops: [0.0, 0.6, 1.0],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF667eea).withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
+              Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF1A365D), // Azul marino oscuro (primario)
+                      Color(
+                        0xFF4FD1C7,
+                      ), // Verde azulado medio vibrante (primario)
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_data['duration'] != null) {
+                      print(
+                        '💾 LactationFlowPage: Botón guardar duración presionado',
+                      );
+                      final isMixed =
+                          _data['type']?.toString().toLowerCase() == 'mixto';
+                      if (isMixed) {
+                        print(
+                          '🔄 LactationFlowPage: Lactancia mixta, avanzando a volumen',
+                        );
+                        setState(() {
+                          _currentStep = LactationStep.bottleVolume;
+                        });
+                      } else {
+                        print(
+                          '💾 LactationFlowPage: Lactancia materna completa, guardando',
+                        );
+                        _saveRecord();
+                      }
+                    } else {
+                      print('⚠️ LactationFlowPage: Duración no ingresada');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -605,9 +650,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                             ? 'Continuar'
                             : 'Guardar',
                         style: GoogleFonts.quicksand(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
@@ -675,17 +721,32 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
           child: Column(
             children: [
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'Volumen en ml',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -698,53 +759,84 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     );
                   }
                 },
+                decoration: InputDecoration(
+                  hintText: 'Volumen en ml',
+                  hintStyle: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.water_drop_outlined,
+                    color: Colors.white70,
+                    size: 22,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  if (_data['volume'] != null) {
-                    print(
-                      '💾 LactationFlowPage: Botón guardar volumen presionado',
-                    );
-                    _saveRecord();
-                  } else {
-                    print('⚠️ LactationFlowPage: Volumen no ingresado');
-                  }
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF667eea),
-                        Color(0xFF764ba2),
-                        Color(0xFFf093fb),
-                      ],
-                      stops: [0.0, 0.6, 1.0],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF667eea).withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
+              Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF1A365D), // Azul marino oscuro (primario)
+                      Color(
+                        0xFF4FD1C7,
+                      ), // Verde azulado medio vibrante (primario)
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_data['volume'] != null) {
+                      print(
+                        '💾 LactationFlowPage: Botón guardar volumen presionado',
+                      );
+                      _saveRecord();
+                    } else {
+                      print('⚠️ LactationFlowPage: Volumen no ingresado');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.save, color: Colors.white, size: 20),
+                      const Icon(Icons.save, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Guardar',
                         style: GoogleFonts.quicksand(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
