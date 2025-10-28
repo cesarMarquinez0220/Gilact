@@ -10,12 +10,14 @@ class LactationProvider extends ChangeNotifier {
 
   // Estado de lactancia
   List<LactationRecord> _todayRecords = [];
+  List<LactationRecord> _weekRecords = [];
   LactationStats? _todayStats;
   bool _isLoading = true;
   String? _errorMessage;
 
   // Getters
   List<LactationRecord> get todayRecords => _todayRecords;
+  List<LactationRecord> get weekRecords => _weekRecords;
   LactationStats? get todayStats => _todayStats;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -44,6 +46,31 @@ class LactationProvider extends ChangeNotifier {
   /// Refresca los datos del día actual
   Future<void> refreshTodayData() async {
     await loadTodayData();
+  }
+
+  /// Carga los registros de la semana actual
+  Future<void> loadWeekData() async {
+    try {
+      final now = DateTime.now();
+      final todayWeekday = now.weekday;
+      final startOfWeek = now.subtract(Duration(days: todayWeekday % 7));
+
+      final records = await _lactationService.getRecordsForWeek(startOfWeek);
+      _weekRecords = records;
+      notifyListeners();
+    } catch (e) {
+      print('❌ Error cargando datos de la semana: $e');
+    }
+  }
+
+  /// Verifica si un día específico tiene registros
+  bool hasRecordsForDate(DateTime date) {
+    return _weekRecords.any((record) {
+      final recordDate = record.fechaRegistro;
+      return recordDate.year == date.year &&
+          recordDate.month == date.month &&
+          recordDate.day == date.day;
+    });
   }
 
   /// Agrega un nuevo registro y actualiza el estado
@@ -171,6 +198,7 @@ class LactationProvider extends ChangeNotifier {
   /// Limpia el estado
   void clearState() {
     _todayRecords.clear();
+    _weekRecords.clear();
     _todayStats = null;
     _isLoading = true;
     _errorMessage = null;

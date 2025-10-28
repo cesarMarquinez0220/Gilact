@@ -28,7 +28,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // Cargar datos iniciales usando el Provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LactationProvider>().loadTodayData();
+      final provider = context.read<LactationProvider>();
+      provider.loadTodayData();
+      provider.loadWeekData();
     });
   }
 
@@ -74,6 +76,7 @@ class _HomePageState extends State<HomePage> {
             onSuccess: () {
               // Refrescar datos después de registrar lactancia
               lactationProvider.refreshTodayData();
+              lactationProvider.loadWeekData();
             },
             onCancel: () {
               // Opcional: manejar cancelación
@@ -561,7 +564,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           // Calendario horizontal
-          _buildHorizontalCalendar(context),
+          _buildHorizontalCalendar(context, lactationProvider),
 
           const SizedBox(height: 24),
 
@@ -581,17 +584,20 @@ class _HomePageState extends State<HomePage> {
               onSuccess: () {
                 // Refrescar datos después de registrar lactancia
                 lactationProvider.refreshTodayData();
+                lactationProvider.loadWeekData();
               },
             ),
           ),
-
         ],
       ),
     );
   }
 
   /// Calendario horizontal consistente con el diseño de la app
-  Widget _buildHorizontalCalendar(BuildContext context) {
+  Widget _buildHorizontalCalendar(
+    BuildContext context,
+    LactationProvider lactationProvider,
+  ) {
     final now = DateTime.now();
     final todayWeekday = now.weekday; // Lunes=1, Domingo=7
     final weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -604,8 +610,8 @@ class _HomePageState extends State<HomePage> {
       children: List.generate(7, (index) {
         final date = startOfWeek.add(Duration(days: index));
         final isToday = date.day == now.day && date.month == now.month;
-        // Simular días marcados (puedes conectarlo con datos reales)
-        final isMarked = date.day == 12 || date.day == 13;
+        // Verificar si el día tiene registros según la base de datos
+        final isMarked = lactationProvider.hasRecordsForDate(date);
 
         return Expanded(
           child: Column(
