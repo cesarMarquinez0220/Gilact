@@ -7,6 +7,7 @@ import '../../../../main.dart';
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../presentation/pages/lactation_flow_page_enhanced.dart';
 import '../../presentation/pages/lactation_record_page.dart';
+import '../../presentation/pages/daily_sleep_form_page.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 
 /// Servicio para manejar notificaciones push desde Firestore
@@ -75,6 +76,9 @@ class PushNotificationService {
                 break;
               case 'lactation_complete':
                 _navigateToLactationComplete();
+                break;
+              case 'daily_sleep_registration':
+                _navigateToDailySleep();
                 break;
               default:
                 print('⚠️ PushNotificationService: Tipo desconocido: $type');
@@ -194,6 +198,9 @@ class PushNotificationService {
         break;
       case 'lactation_complete':
         _navigateToLactationComplete();
+        break;
+      case 'daily_sleep_registration':
+        _navigateToDailySleep();
         break;
       default:
         print('⚠️ PushNotificationService: Tipo de notificación desconocido');
@@ -337,6 +344,41 @@ class PushNotificationService {
 
     print(
       '✅ PushNotificationService: Navegación a registro completo completada',
+    );
+  }
+
+  void _navigateToDailySleep() {
+    print('😴 PushNotificationService: Navegando a registro de sueño...');
+
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      print('❌ PushNotificationService: Context no disponible para navegación');
+      return;
+    }
+
+    // Verificar autenticación antes de navegar
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      print(
+        '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      );
+      _showLoginRequiredDialog(
+        context,
+        message: 'Por favor, inicia sesión para acceder a esta funcionalidad.',
+      );
+      return;
+    }
+
+    print(
+      '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
+    );
+
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const DailySleepFormPage()));
+
+    print(
+      '✅ PushNotificationService: Navegación a registro de sueño completada',
     );
   }
 
