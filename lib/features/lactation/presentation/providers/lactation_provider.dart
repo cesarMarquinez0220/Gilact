@@ -52,11 +52,38 @@ class LactationProvider extends ChangeNotifier {
   Future<void> loadWeekData() async {
     try {
       final now = DateTime.now();
-      final todayWeekday = now.weekday;
-      final startOfWeek = now.subtract(Duration(days: todayWeekday % 7));
+      final todayWeekday = now.weekday; // Lunes=1, Domingo=7
 
-      final records = await _lactationService.getRecordsForWeek(startOfWeek);
+      // Calcular el inicio de la semana (Domingo)
+      // Si hoy es domingo (7), no restar nada
+      // Si hoy es lunes (1), restar 1 día
+      // Si hoy es martes (2), restar 2 días
+      // etc.
+      final daysToSubtract =
+          todayWeekday % 7; // 0 para domingo, 1-6 para otros días
+      final startOfWeek = now.subtract(Duration(days: daysToSubtract));
+
+      // Normalizar a medianoche del domingo
+      final startOfWeekMidnight = DateTime(
+        startOfWeek.year,
+        startOfWeek.month,
+        startOfWeek.day,
+      );
+
+      print(
+        '📅 Cargando datos de la semana desde: $startOfWeekMidnight (weekday: ${startOfWeekMidnight.weekday})',
+      );
+
+      final records = await _lactationService.getRecordsForWeek(
+        startOfWeekMidnight,
+      );
       _weekRecords = records;
+
+      print('📊 Registros cargados: ${records.length}');
+      for (final record in records) {
+        print('  - ${record.fechaRegistro}');
+      }
+
       notifyListeners();
     } catch (e) {
       print('❌ Error cargando datos de la semana: $e');
@@ -65,12 +92,33 @@ class LactationProvider extends ChangeNotifier {
 
   /// Verifica si un día específico tiene registros
   bool hasRecordsForDate(DateTime date) {
-    return _weekRecords.any((record) {
-      final recordDate = record.fechaRegistro;
-      return recordDate.year == date.year &&
-          recordDate.month == date.month &&
-          recordDate.day == date.day;
-    });
+    // Normalizar la fecha a medianoche para comparación precisa
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+
+    // Buscar registros para esta fecha
+    final matchingRecords = _weekRecords.where((record) {
+      // Normalizar también la fecha del registro
+      final recordDate = DateTime(
+        record.fechaRegistro.year,
+        record.fechaRegistro.month,
+        record.fechaRegistro.day,
+      );
+
+      return recordDate.isAtSameMomentAs(normalizedDate);
+    }).toList();
+
+    // Debug: mostrar info para domingo (día 0 del índice del calendario)
+    if (date.weekday == 7) {
+      // Domingo
+      print(
+        '🔍 Domingo ${date.day}/${date.month}: ${matchingRecords.length} registros',
+      );
+      for (final record in matchingRecords) {
+        print('   - Registro: ${record.fechaRegistro}');
+      }
+    }
+
+    return matchingRecords.isNotEmpty;
   }
 
   /// Agrega un nuevo registro y actualiza el estado

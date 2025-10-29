@@ -604,6 +604,9 @@ class _HomePageState extends State<HomePage> {
 
     // Obtener los días de la semana actual
     final startOfWeek = now.subtract(Duration(days: todayWeekday % 7));
+    print(
+      '📅 Inicio de semana (DOMINGO): ${startOfWeek.day}/${startOfWeek.month}/${startOfWeek.year}',
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -612,6 +615,13 @@ class _HomePageState extends State<HomePage> {
         final isToday = date.day == now.day && date.month == now.month;
         // Verificar si el día tiene registros según la base de datos
         final isMarked = lactationProvider.hasRecordsForDate(date);
+
+        // Debug solo para domingo y lunes para verificar el bug
+        if (index == 0 || index == 1) {
+          print(
+            '📆 ${index == 0 ? "DOMINGO" : "LUNES"}: ${date.day}/${date.month} - Marcado: $isMarked',
+          );
+        }
 
         return Expanded(
           child: Column(

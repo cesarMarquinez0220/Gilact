@@ -154,13 +154,19 @@ class LactationService {
   /// Obtiene todos los registros de una semana
   Future<List<LactationRecord>> getRecordsForWeek(DateTime startOfWeek) async {
     try {
-      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+      // Normalizar el inicio de la semana a medianoche
+      final startOfWeekMidnight = DateTime(
+        startOfWeek.year,
+        startOfWeek.month,
+        startOfWeek.day,
+      );
+      final endOfWeek = startOfWeekMidnight.add(const Duration(days: 7));
 
       final collection = await _lactationCollection;
       final querySnapshot = await collection
           .where(
             'fecha_registro',
-            isGreaterThanOrEqualTo: startOfWeek.toIso8601String(),
+            isGreaterThanOrEqualTo: startOfWeekMidnight.toIso8601String(),
           )
           .where('fecha_registro', isLessThan: endOfWeek.toIso8601String())
           .orderBy('fecha_registro', descending: true) // Más reciente primero
