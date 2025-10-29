@@ -19,15 +19,30 @@ class ModernBottomNavigationBar extends StatelessWidget {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final systemNavigationHeight = bottomPadding > 0 ? bottomPadding : 0;
 
+    // Calcular tamaños responsive
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360;
+    final isShortScreen = screenHeight < 700;
+
+    // Ajustar altura según tamaño de pantalla
+    final barHeight = isSmallScreen ? 80.0 : (isShortScreen ? 84.0 : 88.0);
+    final horizontalMargin = isSmallScreen ? 12.0 : 16.0;
+
     // Calcular el margen inferior dinámico
     final dynamicBottomMargin = systemNavigationHeight > 0
         ? systemNavigationHeight +
-              16.0 // Espacio adicional si hay navegación nativa
-        : 32.0; // Margen normal para dispositivos sin navegación nativa
+              (isSmallScreen ? 12.0 : 16.0) // Espacio adicional según tamaño
+        : (isSmallScreen ? 24.0 : 32.0); // Margen normal según tamaño
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 0, 16, dynamicBottomMargin),
-      height: 88,
+      margin: EdgeInsets.fromLTRB(
+        horizontalMargin,
+        0,
+        horizontalMargin,
+        dynamicBottomMargin,
+      ),
+      height: barHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(40),
         gradient: LinearGradient(
@@ -70,18 +85,34 @@ class ModernBottomNavigationBar extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 16,
+              vertical: isSmallScreen ? 10 : 12,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildNavItem(0, Icons.home_outlined, Icons.home, 'Inicio'),
                 _buildNavItem(
+                  context,
+                  0,
+                  Icons.home_outlined,
+                  Icons.home,
+                  'Inicio',
+                ),
+                _buildNavItem(
+                  context,
                   1,
                   Icons.favorite_outline,
                   Icons.favorite,
                   'Salud',
                 ),
-                _buildNavItem(2, Icons.person_outline, Icons.person, 'Perfil'),
+                _buildNavItem(
+                  context,
+                  2,
+                  Icons.person_outline,
+                  Icons.person,
+                  'Perfil',
+                ),
               ],
             ),
           ),
@@ -91,6 +122,7 @@ class ModernBottomNavigationBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(
+    BuildContext context,
     int index,
     IconData inactiveIcon,
     IconData activeIcon,
@@ -98,133 +130,67 @@ class ModernBottomNavigationBar extends StatelessWidget {
   ) {
     final isSelected = currentIndex == index;
 
+    // Calcular tamaños responsive basados en el ancho de pantalla
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Ajustar tamaños según el tamaño de pantalla
+    final iconSize = isSelected
+        ? (isSmallScreen ? 22.0 : 24.0)
+        : (isSmallScreen ? 20.0 : 22.0);
+    final fontSize = isSelected
+        ? (isSmallScreen ? 10.0 : 11.0)
+        : (isSmallScreen ? 9.0 : 10.0);
+    final horizontalPadding = isSelected
+        ? (isSmallScreen ? 14.0 : 18.0)
+        : (isSmallScreen ? 10.0 : 12.0);
+    final verticalPadding = isSelected
+        ? (isSmallScreen ? 8.0 : 10.0)
+        : (isSmallScreen ? 6.0 : 8.0);
+
     return GestureDetector(
       onTap: () => onTap(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
-        width: isSelected ? 80 : 60,
-        height: 64,
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          gradient: isSelected
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    const Color(0xFF03A696).withValues(alpha: 0.8),
-                    const Color(0xFF03A696).withValues(alpha: 0.6),
-                  ],
-                )
-              : null,
+          color: isSelected ? const Color(0xFF03A696) : Colors.transparent,
+          borderRadius: BorderRadius.circular(28),
           boxShadow: isSelected
               ? [
                   BoxShadow(
                     color: const Color(0xFF03A696).withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                    spreadRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: const Color(0xFF03A696).withValues(alpha: 0.1),
-                    blurRadius: 10,
+                    blurRadius: 12,
                     offset: const Offset(0, 4),
                     spreadRadius: 0,
                   ),
                 ]
               : null,
         ),
-        child: Stack(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Efecto de brillo para elemento activo
-            if (isSelected)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.2),
-                        Colors.transparent,
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.3, 1.0],
-                    ),
-                  ),
-                ),
+            Icon(
+              isSelected ? activeIcon : inactiveIcon,
+              color: isSelected ? Colors.white : const Color(0xFF7F8C8D),
+              size: iconSize,
+            ),
+            SizedBox(height: isSelected ? (isSmallScreen ? 2 : 3) : 0),
+            Text(
+              label,
+              style: GoogleFonts.quicksand(
+                fontSize: fontSize,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xFF7F8C8D),
+                letterSpacing: 0.2,
               ),
-
-            // Contenido del botón
-            Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(scale: animation, child: child);
-                },
-                child: isSelected
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.2),
-                            ),
-                            child: Icon(
-                              activeIcon,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            label,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(
-                                0xFF2C3E50,
-                              ), // Texto oscuro para mejor contraste
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                            child: Icon(
-                              inactiveIcon,
-                              color: const Color(
-                                0xFF7F8C8D,
-                              ), // Icono gris para elementos no seleccionados
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            label,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(
-                                0xFF7F8C8D,
-                              ), // Texto gris para elementos no seleccionados
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

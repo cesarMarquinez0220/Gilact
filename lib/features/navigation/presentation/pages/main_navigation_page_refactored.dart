@@ -99,14 +99,29 @@ class _MainNavigationPageState extends State<MainNavigationPage>
             child: ModernBottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-                _pageController.animateToPage(
-                  index,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOutCubic,
-                );
+                // Solo actualizar si es diferente del índice actual
+                if (index == _currentIndex) return;
+
+                // Si el salto es de más de 1 página, hacer jumpToPage para evitar pasar por páginas intermedias
+                final distance = (index - _currentIndex).abs();
+                if (distance > 1) {
+                  _pageController.jumpToPage(index);
+                  // Actualizar índice después del jump
+                  Future.microtask(() {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  });
+                } else {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOutCubic,
+                  );
+                }
               },
             ),
           ),
