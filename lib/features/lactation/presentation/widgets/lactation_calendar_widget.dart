@@ -377,21 +377,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                   ),
-                  Row(
-                    children: [
-                      // Icono para volver a vista de día
-                      IconButton(
-                        onPressed: _toggleMonthView,
-                        icon: const Icon(Icons.list, color: Colors.white),
-                        tooltip: 'Ver lista de registros',
-                      ),
-                      // Icono de refresh
-                      IconButton(
-                        onPressed: _loadData,
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
             ),
@@ -450,15 +436,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                   ),
-                  Row(
-                    children: [
-                      // Icono de refresh
-                      IconButton(
-                        onPressed: _loadData,
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
               const SizedBox(height: 10),
