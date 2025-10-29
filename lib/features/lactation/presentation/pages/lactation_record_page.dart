@@ -67,7 +67,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _flowData['alimentacion'] = 'pecho';
       } else if (record.vecesBiberon > 0) {
         _flowData['alimentacion'] = 'biberon';
-    } else {
+      } else {
         // Fallback basado en el tipo de lactancia
         _flowData['alimentacion'] = record.tipo == LactationType.bottle
             ? 'biberon'
@@ -143,7 +143,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     _pulseAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-      _pulseController.repeat(reverse: true);
+    _pulseController.repeat(reverse: true);
   }
 
   @override
@@ -210,25 +210,25 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 behavior: ScrollConfiguration.of(
                   context,
                 ).copyWith(overscroll: false),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Form(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Form(
                     // Keep Form if validation is needed on manual inputs
-                  key: _formKey,
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 20),
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
                         // Header Section (moved _buildHeader here for clarity)
-                              _buildHeader(),
-                              const SizedBox(height: 30),
+                        _buildHeader(),
+                        const SizedBox(height: 30),
                         // Accordion Form Content
                         _buildAccordionForm(), // This now contains the main UI logic
-                              const SizedBox(height: 40),
+                        const SizedBox(height: 40),
                         // Action Buttons (Simplified)
                         _buildSaveAndCancelButtons(), // Use simplified buttons
-                              const SizedBox(height: 20),
-                            ],
-                          ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -239,84 +239,283 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     );
   }
 
-  // Modify _buildAccordionForm structure:
+  // NEW: Linear Progressive Disclosure Form
   Widget _buildAccordionForm() {
+    final hasSelection = _flowData.containsKey('alimentacion');
+    final selectedType = _flowData['alimentacion'] as String?;
+
     return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         _buildSectionTitle('¿Cómo alimentaste a tu bebé esta vez?'),
         const SizedBox(height: 16),
-        // --- Feeding Options ---
-        _buildAccordionOption(
-          title: 'Pecho',
-          description: 'Lactancia directamente del pecho.',
-          icon: Icons
-              .accessibility_new, // Cambia el icono si tienes uno más adecuado
-          isSelected: _flowData['alimentacion'] == 'pecho',
-          onTap: () => _toggleAccordionSection('pecho'),
-        ),
-        _buildAccordionOption(
-          title: 'Biberón',
-          description: 'Leche materna extraída o fórmula.',
-          icon: Icons
-              .baby_changing_station, // Cambia el icono si tienes uno más adecuado
-          isSelected: _flowData['alimentacion'] == 'biberon',
-          onTap: () => _toggleAccordionSection('biberon'),
-        ),
-        _buildAccordionOption(
-          title: 'Mixto',
-          description: 'Combinación de pecho y biberón.',
-          icon:
-              Icons.all_inclusive, // Cambia el icono si tienes uno más adecuado
-          isSelected: _flowData['alimentacion'] == 'mixto',
-          onTap: () => _toggleAccordionSection('mixto'),
-        ),
 
-        // --- Conditionally Revealed Content ---
-        if (_flowData.containsKey('alimentacion')) ...[
-          // Only show if a type is selected
-          const SizedBox(height: 24),
-          Divider(
-            color: Colors.white.withOpacity(0.2),
-            thickness: 1,
-          ), // Visual separator
-          const SizedBox(height: 24),
+        // --- Show all options OR only the selected one ---
+        if (!hasSelection)
+        // Initial state: Show all three options
+        ...[
+          _buildFeedingTypeOption(
+            title: 'Pecho',
+            description: 'Lactancia directamente del pecho.',
+            icon: Icons.accessibility_new,
+            value: 'pecho',
+          ),
+          const SizedBox(height: 12),
+          _buildFeedingTypeOption(
+            title: 'Biberón',
+            description: 'Leche materna extraída o fórmula.',
+            icon: Icons.baby_changing_station,
+            value: 'biberon',
+          ),
+          const SizedBox(height: 12),
+          _buildFeedingTypeOption(
+            title: 'Mixto',
+            description: 'Combinación de pecho y biberón.',
+            icon: Icons.all_inclusive,
+            value: 'mixto',
+          ),
+        ] else
+        // Selected state: Show only selected type and its details
+        ...[
+          // Show selected option as header
+          _buildSelectedFeedingHeader(selectedType!),
+          const SizedBox(height: 16),
 
-          // Breastfeeding Details (if applicable)
-          if (_showBreastSideOptions) ...[
-            _buildAccordionContent(
-            children: [
-                _buildBreastSideOptions(),
-                const SizedBox(height: 16),
-                _buildBreastDurationOptions(),
-                const SizedBox(height: 16),
-              ],
-            ),
+          // Progressive disclosure: Show relevant details based on selection
+          if (selectedType == 'pecho' || selectedType == 'mixto') ...[
+            _buildBreastSideOptions(),
+            const SizedBox(height: 20),
+            _buildBreastDurationOptions(),
+            const SizedBox(height: 20),
           ],
 
-          // Bottle Details (if applicable)
-          if (_showBottleVolumeOptions) ...[
-            _buildAccordionContent(
-                      children: [
-                _buildBottleVolumeOptions(),
-                const SizedBox(height: 16),
-              ],
-            ),
+          if (selectedType == 'biberon' || selectedType == 'mixto') ...[
+            _buildBottleVolumeOptions(),
+            const SizedBox(height: 20),
           ],
 
-          // Sleep Section (always shown after feeding type selection)
-          const SizedBox(height: 24),
-          Divider(color: Colors.white.withOpacity(0.2), thickness: 1),
-          const SizedBox(height: 24),
+          // Show sleep section right after the feeding details
           _buildSleepTimeSection(),
         ],
       ],
     );
   }
 
+  // NEW: Simple feeding type option (for initial selection)
+  Widget _buildFeedingTypeOption({
+    required String title,
+    required String description,
+    required IconData icon,
+    required String value,
+  }) {
+    return GestureDetector(
+      onTap: () => _toggleAccordionSection(value),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 30),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // NEW: Selected feeding type as header (with option to change)
+  Widget _buildSelectedFeedingHeader(String selectedType) {
+    String title = '';
+    String description = '';
+    IconData icon;
+
+    switch (selectedType) {
+      case 'pecho':
+        title = 'Pecho';
+        description = 'Lactancia directamente del pecho.';
+        icon = Icons.accessibility_new;
+        break;
+      case 'biberon':
+        title = 'Biberón';
+        description = 'Leche materna extraída o fórmula.';
+        icon = Icons.baby_changing_station;
+        break;
+      case 'mixto':
+        title = 'Mixto';
+        description = 'Combinación de pecho y biberón.';
+        icon = Icons.all_inclusive;
+        break;
+      default:
+        title = 'Seleccionar tipo';
+        description = 'Elige el tipo de alimentación.';
+        icon = Icons.help_outline;
+    }
+
+    return GestureDetector(
+      onTap: () => _toggleAccordionSection(selectedType),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.4),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF667eea).withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(icon, color: Colors.white, size: 30),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Cambiar',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to update flow data from controllers
+  void _updateFlowDataFromControllers() {
+    // Actualizar datos de duración si existe
+    if (_manualBreastDurationController.text.isNotEmpty) {
+      _flowData['duration'] = _manualBreastDurationController.text;
+    }
+    // Actualizar datos de volumen si existe
+    if (_manualBottleVolumeController.text.isNotEmpty) {
+      _flowData['volume'] = _manualBottleVolumeController.text;
+    }
+    // Actualizar datos de sueño si existe
+    if (_manualSleepTimeController.text.isNotEmpty) {
+      _flowData['sleep'] = _manualSleepTimeController.text;
+    }
+  }
+
   // Allow deselecting by clicking again
   void _toggleAccordionSection(String type) {
-                            setState(() {
+    setState(() {
       // If clicking the same type again, deselect it
       if (_flowData['alimentacion'] == type) {
         _flowData.remove('alimentacion');
@@ -352,10 +551,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-                        style: GoogleFonts.quicksand(
+      style: GoogleFonts.quicksand(
         fontSize: 20, // Slightly smaller for section titles
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
         shadows: [
           Shadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -363,134 +562,6 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             blurRadius: 2,
           ),
         ],
-      ),
-    );
-  }
-
-  // (Minor style tweaks or parameter adjustments might be needed based on final design)
-  Widget _buildAccordionOption({
-    required String title,
-    required String description,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    // ... Same implementation as before ...
-                  return GestureDetector(
-      onTap: onTap,
-                    child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: isSelected
-              ? Colors.white.withValues(alpha: 0.25)
-                            : Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected
-                ? Colors.white.withValues(alpha: 0.5)
-                              : Colors.white.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1.5,
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: Colors.white.withValues(alpha: 0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-          ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 30),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: GoogleFonts.quicksand(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                offset: const Offset(0, 1),
-                                blurRadius: 2,
-                          ),
-                            ],
-                        ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          description,
-                          style: GoogleFonts.quicksand(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    // Show expand/collapse icon based on isSelected and content visibility
-                    isSelected &&
-                            ((title == 'Pecho' && _showBreastSideOptions) ||
-                                (title == 'Biberón' &&
-                                    _showBottleVolumeOptions) ||
-                                (title == 'Mixto' &&
-                                    (_showBreastSideOptions ||
-                                        _showBottleVolumeOptions)))
-                        ? Icons
-                              .keyboard_arrow_down // Indicate collapsible content is shown
-                        : Icons
-                              .arrow_forward_ios, // Indicate can expand or is collapsed
-                    color: Colors.white.withValues(alpha: 0.7),
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAccordionContent({required List<Widget> children}) {
-    // Added subtle padding and maybe a divider
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 24.0,
-        right: 8.0,
-        top: 8.0,
-        bottom: 16.0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
       ),
     );
   }
@@ -506,28 +577,36 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         const SizedBox(height: 12),
         Row(
           // Use Row for better layout
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildChoiceChip(
-              label: 'Izquierdo',
-              value: 'izquierdo',
-              groupValue: _flowData['breastSide'],
-              icon: Icons.keyboard_arrow_left,
+            Expanded(
+              child: _buildChoiceChip(
+                label: 'Izquierdo',
+                value: 'izquierdo',
+                groupValue: _flowData['breastSide'],
+                icon: Icons.keyboard_arrow_left,
+              ),
             ),
-            _buildChoiceChip(
-              label: 'Derecho',
-              value: 'derecho',
-              groupValue: _flowData['breastSide'],
-              icon: Icons.keyboard_arrow_right,
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildChoiceChip(
+                label: 'Derecho',
+                value: 'derecho',
+                groupValue: _flowData['breastSide'],
+                icon: Icons.keyboard_arrow_right,
+              ),
             ),
-            _buildChoiceChip(
-              label: 'Ambos',
-              value: 'ambos',
-              groupValue: _flowData['breastSide'],
-              icon: Icons.sync_alt,
-                        ),
-                      ],
-                    ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildChoiceChip(
+                label: 'Ambos',
+                value: 'ambos',
+                groupValue: _flowData['breastSide'],
+                icon: Icons.sync_alt,
+              ),
+            ),
+          ],
+        ),
         // Removed manual input card - not standard for side selection
       ],
     );
@@ -543,62 +622,124 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     String? unitType, // 'duration', 'sleep', o 'volume'
   }) {
     final isSelected = groupValue == value;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
           if (isUnitSelector) {
-            if (label == 'ml' || label == 'oz') {
-              // Unidades de volumen
-              _volumeUnit = value;
-            } else if (label == 'min' || label == 'hr') {
-              // Diferenciar entre duración y sueño
-              if (unitType == 'sleep') {
-                _sleepUnit = value;
-              } else {
-                // Por defecto es para duración
-                _durationUnit = value;
+            // Manejar cambio de unidades y conversión
+            final String newValue = value;
+            String oldUnit = '';
+            String newUnit = '';
+            TextEditingController? controller;
+
+            // Identificar qué unidad estamos cambiando
+            if (unitType == 'volume') {
+              oldUnit = _volumeUnit;
+              newUnit = newValue;
+              controller = _manualBottleVolumeController;
+            } else if (unitType == 'duration') {
+              oldUnit = _durationUnit;
+              newUnit = newValue;
+              controller = _manualBreastDurationController;
+            } else if (unitType == 'sleep') {
+              oldUnit = _sleepUnit;
+              newUnit = newValue;
+              controller = _manualSleepTimeController;
+            }
+
+            // Si la unidad no cambió, no hacer nada
+            if (oldUnit == newUnit) return;
+
+            // Convertir el valor si existe
+            if (controller != null && controller.text.isNotEmpty) {
+              final double? currentValue = double.tryParse(controller.text);
+              if (currentValue != null && currentValue > 0) {
+                double convertedValue = currentValue;
+
+                // Conversión de unidades
+                if (unitType == 'volume') {
+                  if (oldUnit == 'ml' && newUnit == 'oz') {
+                    convertedValue = currentValue / 29.5735;
+                  } else if (oldUnit == 'oz' && newUnit == 'ml') {
+                    convertedValue = currentValue * 29.5735;
+                  }
+                } else if (unitType == 'duration' || unitType == 'sleep') {
+                  if (oldUnit == 'hr' && newUnit == 'min') {
+                    convertedValue = currentValue * 60;
+                  } else if (oldUnit == 'min' && newUnit == 'hr') {
+                    convertedValue = currentValue / 60;
+                  }
+                }
+
+                // Actualizar el controlador y los datos
+                controller.text = convertedValue.toStringAsFixed(
+                  unitType == 'volume' ? 1 : 0,
+                );
+                _updateFlowDataFromControllers();
               }
+
+              // Actualizar la unidad
+              if (unitType == 'volume')
+                _volumeUnit = newUnit;
+              else if (unitType == 'duration')
+                _durationUnit = newUnit;
+              else if (unitType == 'sleep')
+                _sleepUnit = newUnit;
+            } else {
+              // Si no hay valor, solo actualizar la unidad
+              if (unitType == 'volume')
+                _volumeUnit = newUnit;
+              else if (unitType == 'duration')
+                _durationUnit = newUnit;
+              else if (unitType == 'sleep')
+                _sleepUnit = newUnit;
             }
           } else {
-            // Assuming it's for breastSide
+            // No es selector de unidad, solo actualizar el valor
             _flowData['breastSide'] = value;
           }
-                      });
-                    },
-                    child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withValues(alpha: 0.3)
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.white.withValues(alpha: 0.6)
-                              : Colors.white.withValues(alpha: 0.3),
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1.5,
           ),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-                children: [
+          children: [
             if (icon != null) ...[
-                  Icon(
+              Icon(
                 icon,
                 color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
-                    size: 16,
-                  ),
-              const SizedBox(width: 8),
+                size: 16,
+              ),
+              const SizedBox(width: 6),
             ],
-                  Text(
-              label,
-                    style: GoogleFonts.quicksand(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
-                    ),
-                  ),
-                ],
+            Flexible(
+              child: Text(
+                label,
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -610,10 +751,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('¿Cuánto tiempo duró?'),
-                  const SizedBox(height: 8),
-                  Row(
+        const SizedBox(height: 8),
+        Row(
           // Unit Selector
-                    children: [
+          children: [
             _buildChoiceChip(
               label: 'min',
               value: 'min',
@@ -628,9 +769,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               groupValue: _durationUnit,
               isUnitSelector: true,
               unitType: 'duration',
-                      ),
-                    ],
-                  ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -667,30 +808,30 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         : [1, 2, 3, 4, 5, 6];
 
     return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         _buildSectionTitle('¿Cuánta leche tomó?'),
         const SizedBox(height: 8),
-              Row(
+        Row(
           // Unit Selector
-                children: [
+          children: [
             _buildChoiceChip(
               label: 'ml',
               value: 'ml',
               groupValue: _volumeUnit,
               isUnitSelector: true,
               unitType: 'volume',
-                  ),
-                  const SizedBox(width: 12),
+            ),
+            const SizedBox(width: 12),
             _buildChoiceChip(
               label: 'oz',
               value: 'oz',
               groupValue: _volumeUnit,
               isUnitSelector: true,
               unitType: 'volume',
-                        ),
-                      ],
-                    ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -733,7 +874,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         const SizedBox(height: 8),
         Row(
           // Unit Selector
-                children: [
+          children: [
             _buildChoiceChip(
               label: 'min',
               value: 'min',
@@ -748,9 +889,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               groupValue: _sleepUnit,
               isUnitSelector: true,
               unitType: 'sleep',
-                      ),
-                    ],
-                  ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         // Quick selection chips
         Wrap(
@@ -788,37 +929,37 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     final String combinedValue = value + unit;
     final bool isSelected = groupValue == combinedValue;
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
           _flowData[dataKey] = combinedValue;
 
           // Optionally clear the manual input when a chip is selected
           if (dataKey == 'duration') _manualBreastDurationController.clear();
           if (dataKey == 'volume') _manualBottleVolumeController.clear();
           if (dataKey == 'sleep') _manualSleepTimeController.clear();
-                      });
-                    },
-                    child: Container(
+        });
+      },
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withValues(alpha: 0.3)
-                            : Colors.white.withValues(alpha: 0.15),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.white.withValues(alpha: 0.6)
-                              : Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Text(
           value + " " + unit, // Display value and unit
-                        style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+          style: GoogleFonts.quicksand(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -855,21 +996,21 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Row(
-                children: [
-                  Container(
+            children: [
+              Container(
                 padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
                   Icons.edit_outlined,
                   color: Colors.white70,
                   size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
                 child: TextField(
                   controller: controller,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -878,13 +1019,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                   ],
-                          style: GoogleFonts.quicksand(
+                  style: GoogleFonts.quicksand(
                     color: Colors.white,
-                            fontSize: 14,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                   onChanged: (text) {
-                      setState(() {
+                    setState(() {
                       if (text.isNotEmpty) {
                         _flowData[dataKey] = text + unit;
                       } else {
@@ -896,7 +1037,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                     hintText: hintText,
                     hintStyle: GoogleFonts.quicksand(
                       color: Colors.white70,
-                              fontSize: 14,
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
                     border: InputBorder.none,
@@ -906,12 +1047,12 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                     ),
                     suffixText: unit,
                     suffixStyle: GoogleFonts.quicksand(
-                  color: Colors.white.withValues(alpha: 0.9),
-                          fontWeight: FontWeight.bold,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.bold,
                       fontSize: 14,
-                        ),
-                      ),
                     ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -937,8 +1078,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 8,
+                color: const Color(0xFF667eea).withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -973,19 +1119,19 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                       color: Colors.white,
                       letterSpacing: 0.5,
                     ),
-                    ),
                   ),
           ),
-          const SizedBox(height: 12),
+        ),
+        const SizedBox(height: 12),
         // Cancel Button
         SizedBox(
           // Use SizedBox to allow full width
-            width: double.infinity,
+          width: double.infinity,
           child: TextButton(
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               foregroundColor: Colors.white70, // Text color
@@ -1003,10 +1149,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
                 decorationColor: Colors.white70,
-                ),
               ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -1320,10 +1466,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF89D4CF), // Soft teal
-            Color(0xFF6E8EFB), // Light violet-blue
-          ],
+          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
