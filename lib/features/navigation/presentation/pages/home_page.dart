@@ -581,10 +581,12 @@ class _HomePageState extends State<HomePage> {
           FadeInUp(
             duration: const Duration(milliseconds: 1200),
             child: SmartLactationButton(
-              onSuccess: () {
+              onSuccess: () async {
+                print('🔄 onSuccess: Refrescando datos...');
                 // Refrescar datos después de registrar lactancia
-                lactationProvider.refreshTodayData();
-                lactationProvider.loadWeekData();
+                await lactationProvider.refreshTodayData();
+                await lactationProvider.loadWeekData();
+                print('🔄 onSuccess: Datos refrescados');
               },
             ),
           ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/services/lactation_service.dart';
 import '../../domain/entities/lactation_record.dart';
@@ -5,8 +6,12 @@ import '../../domain/entities/lactation_record.dart';
 /// Provider para manejar el estado de lactancia de manera reactiva
 class LactationProvider extends ChangeNotifier {
   final LactationService _lactationService;
+  Timer? _timer;
 
-  LactationProvider(this._lactationService);
+  LactationProvider(this._lactationService) {
+    // Iniciar el temporizador automático
+    _startAutoRefreshTimer();
+  }
 
   // Estado de lactancia
   List<LactationRecord> _todayRecords = [];
@@ -25,6 +30,7 @@ class LactationProvider extends ChangeNotifier {
   /// Carga los datos del día actual
   Future<void> loadTodayData() async {
     try {
+      print('📥 loadTodayData: Iniciando carga...');
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
@@ -32,14 +38,21 @@ class LactationProvider extends ChangeNotifier {
       final today = DateTime.now();
       final records = await _lactationService.getRecordsForDate(today);
 
+      print('📥 loadTodayData: Registros encontrados: ${records.length}');
+      for (final record in records) {
+        print('   - ${record.fechaRegistro}');
+      }
+
       _todayRecords = records;
       _todayStats = _calculateTodayStats(records);
       _isLoading = false;
       notifyListeners();
+      print('📥 loadTodayData: Datos cargados y notificados');
     } catch (e) {
       _errorMessage = 'Error cargando datos: $e';
       _isLoading = false;
       notifyListeners();
+      print('❌ loadTodayData: Error: $e');
     }
   }
 
@@ -124,12 +137,17 @@ class LactationProvider extends ChangeNotifier {
   /// Agrega un nuevo registro y actualiza el estado
   Future<void> addRecord(LactationRecord record) async {
     try {
+      print('💾 addRecord: Guardando registro...');
+      print('   Fecha: ${record.fechaRegistro}');
       await _lactationService.saveRecord(record);
+      print('💾 addRecord: Registro guardado exitosamente');
       // Recargar datos después de agregar
       await loadTodayData();
+      print('💾 addRecord: Datos recargados');
     } catch (e) {
       _errorMessage = 'Error guardando registro: $e';
       notifyListeners();
+      print('❌ addRecord: Error guardando: $e');
     }
   }
 
@@ -179,22 +197,35 @@ class LactationProvider extends ChangeNotifier {
 
   /// Obtiene el tiempo hasta la próxima toma
   String getNextFeedTime() {
+    print('⏰ getNextFeedTime: _todayRecords.length = ${_todayRecords.length}');
+
     if (_todayRecords.isEmpty) {
+      print('⏰ getNextFeedTime: No hay registros hoy - retornando "Ahora"');
       return 'Ahora';
     }
 
-    final lastFeed = _todayRecords.last;
+    // Los registros vienen ordenados por fecha descendente (más reciente primero)
+    // Por lo tanto, el PRIMER elemento es el más reciente
+    final lastFeed = _todayRecords.first;
     final now = DateTime.now();
     final suggestedInterval = const Duration(hours: 2, minutes: 30);
     final nextFeedTime = lastFeed.fechaRegistro.add(suggestedInterval);
 
+    print('⏰ Toma más reciente: ${lastFeed.fechaRegistro}');
+    print('⏰ Hora actual: $now');
+    print('⏰ Próxima toma sugerida: $nextFeedTime');
+    print('⏰ ¿Ya pasó?: ${now.isAfter(nextFeedTime)}');
+
     if (now.isAfter(nextFeedTime)) {
+      print('⏰ Ya pasó el tiempo - retornando "Ahora"');
       return 'Ahora';
     }
 
     final timeUntilNext = nextFeedTime.difference(now);
     final hours = timeUntilNext.inHours;
     final minutes = timeUntilNext.inMinutes.remainder(60);
+
+    print('⏰ Tiempo restante: ${hours}h ${minutes}m');
 
     if (hours > 0) {
       return '${hours}h ${minutes}m';
@@ -253,8 +284,21 @@ class LactationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Inicia el timer automático que actualiza el temporizador cada minuto
+  void _startAutoRefreshTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      print('⏱️ Timer: Actualizando temporizador...');
+      // Notificar a los listeners para que el widget se reconstruya
+      // y el temporizador se actualice automáticamente
+      notifyListeners();
+    });
+  }
+
   @override
   void dispose() {
+    // Cancelar el timer antes de eliminar el provider
+    _timer?.cancel();
     // Limpiar el estado antes de eliminar el provider
     clearState();
     super.dispose();
