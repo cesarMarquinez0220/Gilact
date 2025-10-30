@@ -57,7 +57,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 child: Column(
                   children: [
                     Image.asset(
-                      'assets/images/logo-completo.png',
+                      'assets/images/logo-completo2.png',
                       height: 140,
                       width: 140,
                     ),
