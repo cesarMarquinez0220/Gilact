@@ -686,7 +686,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ),
               child: Center(
                 child: Image.asset(
-                  'assets/images/logo-completo.png',
+                  'assets/images/logo-completo2.png',
                   width: 140,
                   height: 140,
                   fit: BoxFit.contain,
