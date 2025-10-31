@@ -9,6 +9,7 @@ import '../../presentation/pages/lactation_flow_page_enhanced.dart';
 import '../../presentation/pages/lactation_record_page.dart';
 import '../../presentation/pages/daily_sleep_form_page.dart';
 import '../../../auth/presentation/pages/login_page.dart';
+import '../../../../core/services/pending_notification_service.dart';
 
 /// Servicio para manejar notificaciones push desde Firestore
 class PushNotificationService {
@@ -170,14 +171,52 @@ class PushNotificationService {
     // Cuando la app está en BACKGROUND y se toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('🔔 PushNotificationService: Mensaje abierto desde background');
-      _handleMessage(message);
+
+      // Verificar si el usuario está autenticado
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        // Usuario no autenticado: guardar notificación pendiente
+        final data = message.data;
+        final type = data['type'] as String?;
+        if (type != null) {
+          print(
+            '💾 PushNotificationService: Guardando notificación pendiente (background): $type',
+          );
+          PendingNotificationService.savePendingNotification(
+            type: type,
+            data: data,
+          );
+        }
+      } else {
+        // Usuario autenticado: manejar directamente
+        _handleMessage(message);
+      }
     });
 
     // Verificar si la app se abrió desde una notificación
     _messaging.getInitialMessage().then((message) {
       if (message != null) {
         print('🔔 PushNotificationService: App abierta desde notificación');
-        _handleMessage(message);
+
+        // Verificar si el usuario está autenticado
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser == null) {
+          // Usuario no autenticado: guardar notificación pendiente
+          final data = message.data;
+          final type = data['type'] as String?;
+          if (type != null) {
+            print(
+              '💾 PushNotificationService: Guardando notificación pendiente: $type',
+            );
+            PendingNotificationService.savePendingNotification(
+              type: type,
+              data: data,
+            );
+          }
+        } else {
+          // Usuario autenticado: manejar directamente
+          _handleMessage(message);
+        }
       }
     });
   }
@@ -222,6 +261,11 @@ class PushNotificationService {
       print(
         '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
+      // Guardar notificación pendiente para reanudar después del login
+      PendingNotificationService.savePendingNotification(
+        type: 'lesson',
+        data: const {},
+      );
       _showLoginRequiredDialog(
         context,
         message: 'Por favor, inicia sesión para acceder a las lecciones.',
@@ -235,7 +279,10 @@ class PushNotificationService {
 
     // Pasar lista vacía de videos porque se cargan en initState del LessonVideosPage
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => LessonVideosPage(videos: const [])),
+      MaterialPageRoute(
+        builder: (_) =>
+            LessonVideosPage(videos: const [], fromNotification: true),
+      ),
     );
 
     print('✅ PushNotificationService: Navegación a lecciones completada');
@@ -292,6 +339,11 @@ class PushNotificationService {
       print(
         '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
+      // Guardar notificación pendiente para reanudar después del login
+      PendingNotificationService.savePendingNotification(
+        type: 'lactation_quick',
+        data: const {},
+      );
       _showLoginRequiredDialog(
         context,
         message: 'Por favor, inicia sesión para acceder a las lecciones.',
@@ -326,6 +378,11 @@ class PushNotificationService {
     if (currentUser == null) {
       print(
         '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      );
+      // Guardar notificación pendiente para reanudar después del login
+      PendingNotificationService.savePendingNotification(
+        type: 'lactation_complete',
+        data: const {},
       );
       _showLoginRequiredDialog(
         context,
@@ -362,6 +419,11 @@ class PushNotificationService {
       print(
         '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
+      // Guardar notificación pendiente para reanudar después del login
+      PendingNotificationService.savePendingNotification(
+        type: 'daily_sleep_registration',
+        data: const {},
+      );
       _showLoginRequiredDialog(
         context,
         message: 'Por favor, inicia sesión para acceder a esta funcionalidad.',
@@ -373,9 +435,11 @@ class PushNotificationService {
       '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
     );
 
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const DailySleepFormPage()));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const DailySleepFormPage(cameFromNotification: true),
+      ),
+    );
 
     print(
       '✅ PushNotificationService: Navegación a registro de sueño completada',
@@ -399,6 +463,68 @@ class PushNotificationService {
       print('✅ PushNotificationService: Desuscrito del tema: $topic');
     } catch (e) {
       print('❌ PushNotificationService: Error desuscribiendo del tema: $e');
+    }
+  }
+
+  /// Manejar notificación pendiente después del login
+  /// Este método debe ser llamado después de que el usuario inicia sesión
+  static Future<void> handlePendingNotification(BuildContext? context) async {
+    print('🔍 PushNotificationService: Verificando notificación pendiente...');
+
+    final pendingNotification =
+        await PendingNotificationService.getPendingNotification();
+    if (pendingNotification == null) {
+      print('ℹ️ PushNotificationService: No hay notificación pendiente');
+      return;
+    }
+
+    final type = pendingNotification['type'] as String?;
+    if (type == null) {
+      print(
+        '⚠️ PushNotificationService: Tipo de notificación pendiente no válido',
+      );
+      await PendingNotificationService.clearPendingNotification();
+      return;
+    }
+
+    print(
+      '✅ PushNotificationService: Notificación pendiente encontrada: $type',
+    );
+
+    // Limpiar la notificación pendiente
+    await PendingNotificationService.clearPendingNotification();
+
+    // Navegar según el tipo de notificación
+    if (context == null) {
+      final navigatorContext = navigatorKey.currentContext;
+      if (navigatorContext == null) {
+        print('❌ PushNotificationService: Context no disponible para navegar');
+        return;
+      }
+      context = navigatorContext;
+    }
+
+    // Esperar un poco para asegurar que la navegación esté lista
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final service = PushNotificationService();
+    switch (type) {
+      case 'lesson':
+        service._navigateToLessons();
+        break;
+      case 'lactation_quick':
+        service._navigateToLactationQuick();
+        break;
+      case 'lactation_complete':
+        service._navigateToLactationComplete();
+        break;
+      case 'daily_sleep_registration':
+        service._navigateToDailySleep();
+        break;
+      default:
+        print(
+          '⚠️ PushNotificationService: Tipo de notificación pendiente desconocido: $type',
+        );
     }
   }
 

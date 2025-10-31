@@ -174,6 +174,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent(BuildContext context, UserProfileState state) {
+    // Mostrar skeleton mientras el perfil está inicializando/cargando para evitar parpadeos de UI
+    if (state is UserProfileInitial || state is UserProfileLoading) {
+      return _buildHomeSkeleton(context);
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -191,6 +196,57 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 20),
           _buildHomeContentSections(context, state),
           const SizedBox(height: 100), // Espacio para el bottom bar
+        ],
+      ),
+    );
+  }
+
+  /// Skeleton sencillo para cubrir el contenido de Home mientras carga el perfil
+  Widget _buildHomeSkeleton(BuildContext context) {
+    Widget skeletonCard({double height = 120}) {
+      return Container(
+        width: double.infinity,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          // Header placeholder
+          skeletonCard(height: 90),
+          const SizedBox(height: 20),
+          // Tarjeta principal (countdown o dashboard)
+          skeletonCard(height: 220),
+          const SizedBox(height: 15),
+          // Card Lecciones
+          skeletonCard(height: 88),
+          const SizedBox(height: 15),
+          // Grid/segunda fila
+          skeletonCard(height: 88),
+          const SizedBox(height: 20),
+          // Sección de perfil
+          skeletonCard(height: 120),
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -357,6 +413,74 @@ class _HomePageState extends State<HomePage> {
 
   /// Construye la sección del contador con manejo de casos
   Widget _buildCountdownSection(BuildContext context, UserProfileState state) {
+    // Evitar "flash" del mensaje de Información Pendiente:
+    // Si el perfil ya está cargado pero aún no tenemos situación (postparto/preparto),
+    // mostramos un placeholder en lugar del mensaje final hasta que llegue la situación.
+    if (state is UserProfileLoaded || state is UserProfileUpdated) {
+      final dynamic profile = (state as dynamic).profile;
+      final situationData = profile.situationData;
+      final situationUnknown =
+          situationData == null ||
+          (situationData is Map && situationData.isEmpty);
+      if (situationUnknown) {
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              // Placeholder gris simple (coincide con el diseño general)
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                height: 18,
+                width: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 12,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                height: 40,
+                width: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
     final expectedBirthDate = _getExpectedBirthDate(state);
 
     if (expectedBirthDate != null) {

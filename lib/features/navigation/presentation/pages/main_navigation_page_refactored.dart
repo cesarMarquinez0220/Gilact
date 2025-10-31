@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../videos/data/services/video_preload_service.dart';
 import '../../../videos/data/services/video_cache_service.dart';
 import '../../../videos/data/services/video_interaction_service.dart';
 import '../../../lactation/data/services/lactation_service.dart';
+import '../../../onboarding/data/services/user_subcollections_service.dart';
+import '../../../auth/domain/services/credentials_cache_service.dart';
 import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Páginas refactorizadas
 import 'home_page_wrapper.dart';
@@ -137,15 +142,78 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     print('🚀 MainNavigationPage: Inicializando datos de la aplicación...');
 
     try {
-      // Obtener el usuario actual
-      final authState = context.read<AuthBloc>().state;
-      if (authState is! AuthAuthenticated) {
-        print('❌ Usuario no autenticado, saltando precarga');
+      // Obtener el usuario actual - usar FirebaseAuth directamente para evitar problemas con AuthBloc
+      final currentUser = FirebaseAuth.instance.currentUser;
+      String? userId;
+
+      if (currentUser == null) {
+        // Si no hay usuario en FirebaseAuth, verificar AuthBloc como fallback
+        final authState = context.read<AuthBloc>().state;
+        if (authState is! AuthAuthenticated) {
+          print('❌ Usuario no autenticado, saltando precarga');
+          return;
+        }
+        userId = authState.user.id;
+        print('👤 Usuario autenticado desde AuthBloc: $userId');
+      } else {
+        // Intentar primero con UID de FirebaseAuth
+        final uid = currentUser.uid;
+        print(
+          '🔍 MainNavigationPage: Verificando si existe documento con UID: $uid',
+        );
+
+        // Verificar si el documento con este UID existe
+        final docExists = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(uid)
+            .get();
+
+        if (docExists.exists) {
+          userId = uid;
+          print('✅ MainNavigationPage: Usuario encontrado con UID: $userId');
+        } else {
+          // Si no existe con UID, buscar por email (como lo hace LactationService)
+          final email =
+              currentUser.email ??
+              await CredentialsCacheService.loadCredentialsFromCache();
+
+          if (email.isNotEmpty) {
+            print(
+              '🔄 MainNavigationPage: UID no coincide, buscando por email...',
+            );
+            userId = await _findUserByEmail(email);
+            if (userId != null) {
+              print(
+                '✅ MainNavigationPage: Usuario encontrado por email: $userId',
+              );
+            } else {
+              print('❌ MainNavigationPage: Usuario no encontrado por email');
+              return;
+            }
+          } else {
+            print('❌ MainNavigationPage: No hay email disponible');
+            return;
+          }
+        }
+
+        // Asegurar que AuthBloc esté sincronizado
+        final authState = context.read<AuthBloc>().state;
+        if (authState is! AuthAuthenticated) {
+          print(
+            '🔄 MainNavigationPage: Sincronizando AuthBloc con FirebaseAuth...',
+          );
+          context.read<AuthBloc>().add(const GetCurrentUserRequested());
+        }
+      }
+
+      // Validación defensiva: userId debería estar asignado aquí
+      if (userId == null) {
+        print('❌ MainNavigationPage: Error crítico - userId es null');
         return;
       }
 
-      final userId = authState.user.id;
-      print('👤 Usuario autenticado: $userId');
+      // Cargar perfil del usuario si no está cargado (importante cuando se navega desde notificación)
+      await _ensureUserProfileLoaded(userId);
 
       // Inicializar providers con datos limpios para cuenta nueva
       await _initializeProvidersForNewUser();
@@ -165,6 +233,128 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       print('✅ MainNavigationPage: Datos inicializados correctamente');
     } catch (e) {
       print('❌ Error inicializando datos: $e');
+    }
+  }
+
+  /// Busca el userId del usuario por email (como lo hace LactationService)
+  Future<String?> _findUserByEmail(String email) async {
+    try {
+      print('🔍 MainNavigationPage: Buscando usuario por email: $email');
+
+      final userQuery = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get()
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw TimeoutException('Timeout buscando usuario por email');
+            },
+          );
+
+      if (userQuery.docs.isEmpty) {
+        print('❌ MainNavigationPage: Usuario no encontrado por email');
+        return null;
+      }
+
+      final userId = userQuery.docs.first.id;
+      print('✅ MainNavigationPage: Usuario encontrado con ID: $userId');
+      return userId;
+    } catch (e) {
+      print('❌ MainNavigationPage: Error buscando usuario por email: $e');
+      return null;
+    }
+  }
+
+  /// Asegura que el perfil del usuario esté cargado (importante cuando se navega desde notificación)
+  Future<void> _ensureUserProfileLoaded(String userId) async {
+    try {
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final currentState = userProfileBloc.state;
+
+      // Si el perfil ya está cargado, no hacer nada
+      if (currentState is UserProfileLoaded ||
+          currentState is UserProfileUpdated) {
+        print('✅ MainNavigationPage: Perfil del usuario ya está cargado');
+        return;
+      }
+
+      // Si está en estado inicial, cargar el perfil
+      print('🔄 MainNavigationPage: Cargando perfil del usuario...');
+      userProfileBloc.add(GetUserProfileRequested(userId: userId));
+
+      // Esperar a que se cargue el perfil (máximo 5 segundos)
+      int attempts = 0;
+      const maxAttempts = 10;
+      while (attempts < maxAttempts) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final state = userProfileBloc.state;
+        if (state is UserProfileLoaded || state is UserProfileUpdated) {
+          print(
+            '✅ MainNavigationPage: Perfil del usuario cargado exitosamente',
+          );
+
+          // Cargar situación del usuario si no está cargada
+          await _ensureUserSituationLoaded(userId);
+          return;
+        }
+        if (state is UserProfileFailure) {
+          print(
+            '⚠️ MainNavigationPage: Error cargando perfil: ${state.message}',
+          );
+          return;
+        }
+        attempts++;
+      }
+      print('⚠️ MainNavigationPage: Timeout cargando perfil del usuario');
+    } catch (e) {
+      print('❌ MainNavigationPage: Error cargando perfil del usuario: $e');
+    }
+  }
+
+  /// Asegura que la situación del usuario esté cargada
+  Future<void> _ensureUserSituationLoaded(String userId) async {
+    try {
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final currentState = userProfileBloc.state;
+
+      // Si ya tiene situación cargada, no hacer nada
+      if (currentState is UserProfileLoaded ||
+          currentState is UserProfileUpdated) {
+        final profile = (currentState as dynamic).profile;
+        if (profile.situationData != null && profile.situationData.isNotEmpty) {
+          print('✅ MainNavigationPage: Situación del usuario ya está cargada');
+          return;
+        }
+      }
+
+      print('🔄 MainNavigationPage: Cargando situación del usuario...');
+      final userSubcollectionsService = UserSubcollectionsService(
+        FirebaseFirestore.instance,
+      );
+      final situationData = await userSubcollectionsService
+          .getUserSituationData(userId);
+
+      if (situationData != null) {
+        final situationType = situationData['situationType'] as String?;
+        final isPrePartum = situationType == 'preparto';
+        final isPostPartum = situationType == 'postparto';
+
+        userProfileBloc.add(
+          UpdateUserSituationRequested(
+            userId: userId,
+            isPrePartum: isPrePartum,
+            isPostPartum: isPostPartum,
+            situationData: situationData,
+          ),
+        );
+        print(
+          '✅ MainNavigationPage: Situación del usuario cargada exitosamente',
+        );
+      }
+    } catch (e) {
+      print('❌ MainNavigationPage: Error cargando situación del usuario: $e');
     }
   }
 

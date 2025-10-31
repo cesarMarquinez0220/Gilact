@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../core/services/app_initialization_service.dart' as app_init;
 import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
@@ -1434,16 +1435,48 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       await _lactationService.saveRecord(record);
 
       print('✅ LactationFlowPage: Registro guardado exitosamente en Firestore');
-      Navigator.of(context).pop(true);
+
+      // Guardar el contexto antes de navegar para mostrar mensaje después
+      final currentContext = context;
+
+      // Navegar a Home y refrescar datos de lactancia de forma rápida
+      if (mounted) {
+        // Navegar a Home directamente (más rápido)
+        Navigator.of(
+          currentContext,
+        ).pushNamedAndRemoveUntil('/home', (route) => false);
+
+        // Refrescar datos de lactancia usando el context global después de la navegación
+        await Future.delayed(const Duration(milliseconds: 150));
+        await app_init.AppInitializationService.refreshLactationDataOnly();
+
+        // Mostrar mensaje de éxito usando navigatorKey (evita error de widget desmontado)
+        await Future.delayed(const Duration(milliseconds: 100));
+        final homeContext =
+            app_init.AppInitializationService.navigationKey.currentContext;
+        if (homeContext != null) {
+          ScaffoldMessenger.of(homeContext).showSnackBar(
+            const SnackBar(
+              content: Text('Registro de lactancia guardado exitosamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
     } catch (e) {
       print('❌ LactationFlowPage: Error guardando en Firestore: $e');
-      // Mostrar error al usuario
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al guardar el registro: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // Mostrar error al usuario usando navigatorKey si está disponible
+      if (mounted) {
+        final errorContext =
+            app_init.AppInitializationService.navigationKey.currentContext ??
+            context;
+        ScaffoldMessenger.of(errorContext).showSnackBar(
+          SnackBar(
+            content: Text('Error al guardar el registro: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

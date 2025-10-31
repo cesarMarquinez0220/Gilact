@@ -7,7 +7,8 @@ import 'dart:ui';
 import '../../../../alerta_dialoge.dart';
 import '../../../../main.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
-import '../../../../core/utils/app_logger.dart';
+import '../../../../core/services/app_initialization_service.dart';
+// Eliminado import de app_logger inexistente
 
 /// Página de registro diario de sueño del bebé (llamada desde notificación 8 AM)
 class DailySleepFormPage extends StatefulWidget {
@@ -159,72 +160,43 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       await sleepCollection.add(sleepData);
 
       if (mounted) {
-        // Si viene desde notificación, aseguramos volver a Home
-        if (widget.cameFromNotification) {
-          Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil('/home', (route) => false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Registro de sueño guardado exitosamente'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Forzar recarga del perfil al volver a Home
-          Future.delayed(const Duration(milliseconds: 150), () {
-            final newContext = navigatorKey.currentContext;
-            final user = FirebaseAuth.instance.currentUser;
-            if (newContext != null && user != null) {
-              AppLogger.info(
-                '🧠 Forzando carga de perfil para userId=${user.uid} tras guardar (viene de notificación)',
-                'DailySleep',
-              );
-              newContext.read<UserProfileBloc>().add(
-                GetUserProfileRequested(userId: user.uid),
-              );
-            }
-          });
-        } else {
-          // Comportamiento normal: volver a la pantalla anterior si existe
-          final canPop = Navigator.of(context).canPop();
-          if (canPop) {
-            Navigator.of(context).pop(true);
-            // Mostrar mensaje de éxito usando el context después del pop
-            Future.delayed(const Duration(milliseconds: 100), () {
-              final newContext = navigatorKey.currentContext;
-              if (newContext != null) {
-                ScaffoldMessenger.of(newContext).showSnackBar(
-                  const SnackBar(
-                    content: Text('Registro de sueño guardado exitosamente'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            });
-          } else {
-            Navigator.of(
-              context,
-            ).pushNamedAndRemoveUntil('/home', (route) => false);
-            ScaffoldMessenger.of(context).showSnackBar(
+        // Navegación y refresco igual que en flujos de lactancia
+        void showSuccessSnack() {
+          final homeCtx = navigatorKey.currentContext;
+          if (homeCtx != null) {
+            ScaffoldMessenger.of(homeCtx).showSnackBar(
               const SnackBar(
                 content: Text('Registro de sueño guardado exitosamente'),
                 backgroundColor: Colors.green,
               ),
             );
-            // Forzar recarga del perfil al volver a Home
-            Future.delayed(const Duration(milliseconds: 150), () {
-              final newContext = navigatorKey.currentContext;
-              final user = FirebaseAuth.instance.currentUser;
-              if (newContext != null && user != null) {
-                AppLogger.info(
-                  '🧠 Forzando carga de perfil para userId=${user.uid} tras guardar (fallback sin pila)',
-                  'DailySleep',
-                );
-                newContext.read<UserProfileBloc>().add(
-                  GetUserProfileRequested(userId: user.uid),
-                );
-              }
-            });
+          }
+        }
+
+        if (widget.cameFromNotification) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/home', (route) => false);
+          await Future.delayed(const Duration(milliseconds: 150));
+          await AppInitializationService.refreshLactationDataOnly();
+          await Future.delayed(const Duration(milliseconds: 100));
+          showSuccessSnack();
+        } else {
+          final canPop = Navigator.of(context).canPop();
+          if (canPop) {
+            Navigator.of(context).pop(true);
+            await Future.delayed(const Duration(milliseconds: 150));
+            await AppInitializationService.refreshLactationDataOnly();
+            await Future.delayed(const Duration(milliseconds: 100));
+            showSuccessSnack();
+          } else {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/home', (route) => false);
+            await Future.delayed(const Duration(milliseconds: 150));
+            await AppInitializationService.refreshLactationDataOnly();
+            await Future.delayed(const Duration(milliseconds: 100));
+            showSuccessSnack();
           }
         }
       }

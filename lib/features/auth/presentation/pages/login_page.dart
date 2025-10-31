@@ -10,6 +10,7 @@ import '../../domain/services/credentials_cache_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/login_background_widget.dart';
 import '../widgets/login_form_widget.dart';
+import '../../../lactation/data/services/push_notification_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -178,10 +179,24 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       );
                       await prefs.remove('is_new_registration');
                     } else {
-                      // Es un login normal, navegar a welcome
-                      print('🔍 LoginPage: Login normal, navegando a welcome');
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        Navigator.of(context).pushReplacementNamed('/welcome');
+                      // Es un login normal, verificar notificación pendiente primero
+                      print(
+                        '🔍 LoginPage: Login normal, verificando notificación pendiente...',
+                      );
+
+                      // Verificar si hay notificación pendiente
+                      await PushNotificationService.handlePendingNotification(
+                        context,
+                      );
+
+                      // Si no había notificación pendiente o ya fue manejada, navegar a welcome
+                      Future.delayed(const Duration(milliseconds: 800), () {
+                        if (Navigator.of(context).canPop() == false) {
+                          // Solo navegar si no hay una navegación pendiente de la notificación
+                          Navigator.of(
+                            context,
+                          ).pushReplacementNamed('/welcome');
+                        }
                       });
                     }
                   });

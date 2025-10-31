@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/services/app_initialization_service.dart' as app_init;
 
 import '../../domain/entities/video.dart';
 import '../../data/services/video_service.dart';
@@ -13,8 +14,9 @@ import '../../../videos/domain/entities/video.dart' as video_entity;
 
 class LessonVideosPage extends StatefulWidget {
   final List<Video> videos;
+  final bool fromNotification;
 
-  const LessonVideosPage({super.key, required this.videos});
+  const LessonVideosPage({super.key, required this.videos, this.fromNotification = false});
 
   @override
   State<LessonVideosPage> createState() => _LessonVideosPageState();
@@ -153,7 +155,15 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     );
     avancesProvider.imprimirAvancesMap();
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        if (widget.fromNotification) {
+          await app_init.AppInitializationService.refreshAndGoHome(context);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -188,7 +198,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
             ],
           ),
         ),
-      ),
+      ),)
     );
   }
 

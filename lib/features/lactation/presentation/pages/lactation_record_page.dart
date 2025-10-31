@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart'; // Assuming this provides DialogExample
+import '../../../../core/services/app_initialization_service.dart' as app_init;
 import '../../domain/entities/lactation_record.dart'; // Assuming this defines LactationRecord
 
 class LactationRecordPage extends StatefulWidget {
@@ -701,17 +702,15 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.1),
+              ? Colors.white.withOpacity(0.6)
+              : Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1.5,
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            width: 1,
           ),
         ),
         child: Row(
@@ -732,7 +731,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -904,6 +903,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   unit: _sleepUnit,
                   groupValue: _flowData['sleep'],
                   dataKey: 'sleep',
+                  horizontalPadding: 22,
                 ),
               )
               .toList(),
@@ -925,6 +925,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     required String unit,
     String? groupValue,
     required String dataKey,
+    double? horizontalPadding,
   }) {
     final String combinedValue = value + unit;
     final bool isSelected = groupValue == combinedValue;
@@ -941,16 +942,17 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding ?? 16,
+          vertical: 12,
+        ),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(16),
+              ? Colors.white.withOpacity(0.6) // Más notorio manteniendo blanco
+              : Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.3),
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -1317,14 +1319,17 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         await lactationCollectionRef.add(datosLactancia);
       }
 
-      DialogExample.showSuccessDialog(
-        context,
-        'Registro Exitoso',
-        'Datos guardados.',
-        () {
-          Navigator.of(context).pop(true);
-        },
-      );
+      // Navegar a Home y refrescar datos de lactancia de forma rápida
+      if (mounted) {
+        // Navegar a Home directamente (más rápido)
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/home', (route) => false);
+
+        // Refrescar datos de lactancia usando el context global después de la navegación
+        await Future.delayed(const Duration(milliseconds: 100));
+        await app_init.AppInitializationService.refreshLactationDataOnly();
+      }
     } catch (e) {
       /* ... Error handling ... */
       DialogExample.showErrorDialog(
