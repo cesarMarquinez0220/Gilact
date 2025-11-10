@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/biometric_auth_service.dart';
 import '../../domain/services/auth_validation_service.dart';
 import '../../domain/services/credentials_cache_service.dart';
 import '../bloc/auth_bloc.dart';
@@ -36,12 +37,82 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   bool _isLoading = false;
   String? _emailError;
   String? _passwordError;
+  bool _showBiometricButton = false;
+  final BiometricAuthService _biometricAuthService = BiometricAuthService();
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
     _loadCachedCredentials();
+    _checkBiometricAvailability();
+  }
+
+  /// Habilita la autenticación biométrica si está disponible
+  Future<void> _enableBiometricIfAvailable() async {
+    try {
+      final isBiometricAvailable = await _biometricAuthService
+          .isBiometricAvailable();
+      if (isBiometricAvailable) {
+        await _biometricAuthService.setBiometricEnabled(true);
+        if (mounted) {
+          setState(() {
+            _showBiometricButton = true;
+          });
+        }
+        if (kDebugMode) {
+          print('✅ LoginPage: Autenticación biométrica habilitada automáticamente');
+        }
+      } else {
+        if (kDebugMode) {
+          print('⚠️ LoginPage: Autenticación biométrica no disponible en este dispositivo');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ LoginPage: Error habilitando autenticación biométrica: $e');
+      }
+    }
+  }
+
+  /// Verifica si la autenticación biométrica está disponible y habilitada
+  Future<void> _checkBiometricAvailability() async {
+    try {
+      final isAvailable = await _biometricAuthService.isBiometricAvailable();
+      final isEnabled = await _biometricAuthService.isBiometricEnabled();
+      final hasCredentials = await _biometricAuthService.hasStoredCredentials();
+
+      // Mostrar el botón si:
+      // 1. El dispositivo soporta biométrica Y
+      // 2. Hay credenciales guardadas
+      // (No requerimos que esté habilitada, porque el usuario puede habilitarla al usarla)
+      final shouldShow = isAvailable && hasCredentials;
+
+      if (mounted) {
+        setState(() {
+          _showBiometricButton = shouldShow;
+        });
+      }
+
+      if (kDebugMode) {
+        print(
+          '🔐 LoginPage: Autenticación biométrica disponible: $isAvailable',
+        );
+        print('🔐 LoginPage: Autenticación biométrica habilitada: $isEnabled');
+        print('🔐 LoginPage: Credenciales guardadas: $hasCredentials');
+        print('🔐 LoginPage: Mostrar botón biométrico: $shouldShow');
+        
+        // Información adicional para depuración
+        if (isAvailable) {
+          final availableTypes = await _biometricAuthService.getAvailableBiometrics();
+          print('🔐 LoginPage: Tipos biométricos disponibles: $availableTypes');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ LoginPage: Error verificando autenticación biométrica: $e');
+      }
+    }
   }
 
   void _initializeAnimations() {
@@ -157,6 +228,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       _emailController.text.trim(),
                       true,
                     );
+
+                    // Habilitar autenticación biométrica si está disponible (async sin await)
+                    _enableBiometricIfAvailable();
                   } else {
                     print(
                       '🔍 LoginPage: No se guardarán credenciales (_saveCredentials = false)',
@@ -227,6 +301,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         });
                       },
                       onLoginPressed: _signIn,
+                      onBiometricPressed: _signInWithBiometrics,
+                      showBiometricButton: _showBiometricButton,
                     ),
                   ),
                 ),
@@ -270,6 +346,59 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   void _signUp() {
     Navigator.of(context).pushNamed('/register');
+  }
+
+  /// Inicia sesión usando autenticación biométrica
+  Future<void> _signInWithBiometrics() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Autenticar con biométrica
+      final credentials = await _biometricAuthService
+          .authenticateWithBiometrics();
+
+      if (credentials == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final email = credentials['email'] ?? '';
+      if (email.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se encontraron credenciales guardadas'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      // Cargar email en el campo
+      _emailController.text = email;
+
+      // Usar el AuthBloc para manejar el login biométrico
+      // El bloc verificará la sesión offline y autenticará al usuario
+      context.read<AuthBloc>().add(BiometricSignInRequested(email: email));
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error en autenticación biométrica: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _resetPassword() {

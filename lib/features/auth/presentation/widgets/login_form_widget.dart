@@ -10,9 +10,11 @@ class LoginFormWidget extends StatefulWidget {
   final VoidCallback onSignUpTap;
   final ValueChanged<bool?> onRememberChanged;
   final VoidCallback onLoginPressed;
+  final VoidCallback? onBiometricPressed;
   final bool isLoading;
   final String? emailError;
   final String? passwordError;
+  final bool showBiometricButton;
 
   const LoginFormWidget({
     super.key,
@@ -25,9 +27,11 @@ class LoginFormWidget extends StatefulWidget {
     required this.onSignUpTap,
     required this.onRememberChanged,
     required this.onLoginPressed,
+    this.onBiometricPressed,
     this.isLoading = false,
     this.emailError,
     this.passwordError,
+    this.showBiometricButton = false,
   });
 
   @override
@@ -158,70 +162,123 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
                     const SizedBox(height: 20),
 
-                    // Campo de contraseña
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: widget.passwordController,
-                        obscureText: _obscurePassword,
-                        enabled: !widget.isLoading,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Contraseña',
-                          hintStyle: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.lock_outlined,
-                            color: Colors.white70,
-                            size: 22,
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.white70,
-                              size: 22,
+                    // Campo de contraseña con botón biométrico al lado
+                    Row(
+                      children: [
+                        // Campo de contraseña
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, -2),
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 18,
+                            child: TextField(
+                              controller: widget.passwordController,
+                              obscureText: _obscurePassword,
+                              enabled: !widget.isLoading,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Contraseña',
+                                hintStyle: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.lock_outlined,
+                                  color: Colors.white70,
+                                  size: 22,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: Colors.white70,
+                                    size: 22,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 18,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        // Botón de autenticación biométrica (si está disponible)
+                        if (widget.showBiometricButton &&
+                            widget.onBiometricPressed != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12.0),
+                            child: Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, -2),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: widget.isLoading
+                                      ? null
+                                      : widget.onBiometricPressed,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.fingerprint,
+                                      color: Colors.white70,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
 
                     const SizedBox(height: 16),

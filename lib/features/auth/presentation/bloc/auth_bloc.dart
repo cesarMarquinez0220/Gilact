@@ -53,6 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<DeleteAccountRequested>(_onDeleteAccountRequested);
     on<CheckOfflineSessionRequested>(_onCheckOfflineSessionRequested);
     on<SyncOfflineSessionRequested>(_onSyncOfflineSessionRequested);
+    on<BiometricSignInRequested>(_onBiometricSignInRequested);
   }
 
   Future<void> _onSignInRequested(
@@ -348,6 +349,69 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (e) {
       print('❌ Error sincronizando sesión: $e');
+    }
+  }
+
+  /// Autenticar usando biométrica (huella dactilar/Face ID)
+  Future<void> _onBiometricSignInRequested(
+    BiometricSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      // Verificar que hay una sesión offline válida
+      final hasSession = await _offlineSessionService.hasValidSession();
+      if (!hasSession) {
+        emit(AuthFailure(
+          'Sesión expirada. Por favor, inicia sesión con tu contraseña',
+        ));
+        return;
+      }
+
+      // Obtener usuario de sesión offline
+      final offlineUser = await _offlineSessionService.getOfflineUser();
+      if (offlineUser == null) {
+        emit(AuthFailure('No se pudo obtener información del usuario'));
+        return;
+      }
+
+      // Verificar que el email coincide
+      if (offlineUser.email != event.email) {
+        emit(AuthFailure('El email no coincide con la sesión guardada'));
+        return;
+      }
+
+      // Verificar conectividad
+      final isConnected = await _connectivityService.isConnected();
+
+      if (isConnected) {
+        // Si hay conexión, intentar sincronizar con Firebase
+        final result = await _getCurrentUserUseCase();
+        result.fold(
+          (failure) {
+            // Si falla Firebase, usar sesión offline
+            print('⚠️ No se pudo sincronizar con Firebase, usando sesión offline');
+            emit(AuthAuthenticated(offlineUser));
+          },
+          (firebaseUser) {
+            if (firebaseUser != null) {
+              // Usuario encontrado en Firebase, extender sesión
+              _offlineSessionService.extendSession();
+              emit(AuthAuthenticated(firebaseUser));
+            } else {
+              // Usuario no encontrado en Firebase, usar sesión offline
+              emit(AuthAuthenticated(offlineUser));
+            }
+          },
+        );
+      } else {
+        // Sin conexión, usar sesión offline
+        emit(AuthAuthenticated(offlineUser));
+      }
+    } catch (e) {
+      print('❌ Error en autenticación biométrica: $e');
+      emit(AuthFailure('Error en autenticación biométrica: ${e.toString()}'));
     }
   }
 }

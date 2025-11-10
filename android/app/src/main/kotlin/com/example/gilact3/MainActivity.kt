@@ -3,12 +3,12 @@ package com.example.gilact
 import android.os.Build
 import android.view.WindowManager
 import android.view.View
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "screen_recording_prevention"
     private val EVENT_CHANNEL = "screen_recording_prevention_events"
     private var isSecureFlagEnabled = false

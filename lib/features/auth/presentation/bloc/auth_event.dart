@@ -93,3 +93,12 @@ class CheckOfflineSessionRequested extends AuthEvent {
 class SyncOfflineSessionRequested extends AuthEvent {
   const SyncOfflineSessionRequested();
 }
+
+class BiometricSignInRequested extends AuthEvent {
+  final String email;
+
+  const BiometricSignInRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}

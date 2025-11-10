@@ -165,10 +165,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
       // Log para debugging
       if (kDebugMode) {
-        print('📊 Historial cargado:');
-        print('📹 Total videos: ${_videos.length}');
-        print('✅ Videos completados: $_completedVideos');
-        print('🎯 Última lección completada: $lastCompletedLesson');
+      print('📊 Historial cargado:');
+      print('📹 Total videos: ${_videos.length}');
+      print('✅ Videos completados: $_completedVideos');
+      print('🎯 Última lección completada: $lastCompletedLesson');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -223,14 +223,14 @@ class _UserVideosPageState extends State<UserVideosPage> {
           }
         },
         child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: Colors.transparent,
-          appBar: _buildAppBar(),
-          body: _isLoading
-              ? _buildLoadingState()
-              : _error != null
-              ? _buildErrorState()
-              : _buildContent(),
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
+      appBar: _buildAppBar(),
+      body: _isLoading
+          ? _buildLoadingState()
+          : _error != null
+          ? _buildErrorState()
+          : _buildContent(),
         ),
       ),
     );
@@ -745,23 +745,23 @@ class _UserVideosPageState extends State<UserVideosPage> {
             const SizedBox(width: 8),
             // Botón de reproducir
             Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4FD1C7).withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4FD1C7).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
               child: const Icon(
                 Icons.play_arrow,
                 color: Colors.white,
@@ -865,10 +865,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
       // Obtener el nombre de imagen correcto usando el Provider
       String imageName;
       try {
-        final videoImagesProvider = Provider.of<VideoImagesProvider>(
-          context,
-          listen: false,
-        );
+      final videoImagesProvider = Provider.of<VideoImagesProvider>(
+        context,
+        listen: false,
+      );
         imageName = videoImagesProvider.getImageNameForVideo(video.videoId);
       } catch (e) {
         // Si no hay provider (modo offline), usar el imageName del video
