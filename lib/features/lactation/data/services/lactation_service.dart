@@ -463,6 +463,12 @@ class LactationService {
   }
 
   /// Obtiene el ID del documento del usuario en Firestore (usa caché)
+  /// Público para permitir acceso desde servicios externos
+  Future<String?> getUserDocumentId() async {
+    return _getUserDocumentId();
+  }
+  
+  /// Método privado que implementa la lógica
   Future<String?> _getUserDocumentId() async {
     // Verificar caché primero
     if (_isCacheValid && _cachedUserDocId != null) {
