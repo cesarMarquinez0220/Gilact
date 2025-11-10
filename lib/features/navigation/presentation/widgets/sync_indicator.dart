@@ -89,8 +89,20 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       return const SizedBox.shrink();
     }
 
+    // Calcular la posición: debajo del OfflineBadge si está offline
+    // OfflineBadge está en: MediaQuery.padding.top + 8
+    // Altura aproximada del OfflineBadge: ~30px (padding 6*2 + icon 16 + texto)
+    // Espacio entre badges: 8px
+    final topPadding = MediaQuery.of(context).padding.top;
+    final offlineBadgeTop = topPadding + 8;
+    final offlineBadgeHeight = 30.0; // Altura aproximada del badge offline
+    final spacing = 8.0; // Espacio entre badges
+    final syncIndicatorTop = !_isConnected
+        ? offlineBadgeTop + offlineBadgeHeight + spacing
+        : topPadding + 8; // Si está online, usar la posición original
+
     return Positioned(
-      top: 16,
+      top: syncIndicatorTop,
       right: 16,
       child: GestureDetector(
         onTap: () {

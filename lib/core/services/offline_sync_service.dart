@@ -7,6 +7,7 @@ import 'sync_queue_service.dart';
 import 'conflict_resolution_service.dart';
 import '../../features/lactation/data/datasources/lactation_database.dart';
 import '../../features/lactation/data/datasources/sleep_offline_local_data_source.dart';
+import '../../features/lactation/data/datasources/baby_weight_offline_local_data_source.dart';
 
 /// Servicio centralizado para sincronización automática de datos offline
 class OfflineSyncService {
@@ -21,6 +22,8 @@ class OfflineSyncService {
   final LactationDatabase _lactationDatabase = LactationDatabase();
   final SleepOfflineLocalDataSource _sleepOfflineDataSource =
       SleepOfflineLocalDataSource();
+  final BabyWeightOfflineLocalDataSource _babyWeightOfflineDataSource =
+      BabyWeightOfflineLocalDataSource();
   final ConflictResolutionService _conflictResolver =
       ConflictResolutionService();
 
@@ -187,6 +190,13 @@ class OfflineSyncService {
             );
             success = result['success'] as bool;
             documentId = result['documentId'] as String?;
+          } else if (operation.collectionPath == 'peso') {
+            final result = await _syncWeightRecord(
+              operation,
+              resolvedData: dataToSync,
+            );
+            success = result['success'] as bool;
+            documentId = result['documentId'] as String?;
           }
 
           if (success && documentId != null) {
@@ -205,6 +215,11 @@ class OfflineSyncService {
               );
             } else if (operation.collectionPath == 'sueno_diario') {
               await _sleepOfflineDataSource.markAsSynced(
+                operation.localId,
+                documentId,
+              );
+            } else if (operation.collectionPath == 'peso') {
+              await _babyWeightOfflineDataSource.markAsSynced(
                 operation.localId,
                 documentId,
               );
@@ -385,6 +400,61 @@ class OfflineSyncService {
       if (kDebugMode) {
         print(
           '❌ OfflineSyncService: Error sincronizando registro de sueño: $e',
+        );
+      }
+      return {'success': false, 'documentId': null, 'error': e.toString()};
+    }
+  }
+
+  /// Sincroniza un registro de peso del bebé
+  Future<Map<String, dynamic>> _syncWeightRecord(
+    SyncOperation operation, {
+    Map<String, dynamic>? resolvedData,
+  }) async {
+    try {
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        throw Exception('Usuario no encontrado');
+      }
+
+      final collection = _firestore
+          .collection('Users')
+          .doc(userDocId)
+          .collection('situacion')
+          .doc('seleccion')
+          .collection('peso');
+
+      String? documentId;
+      final dataToUse = resolvedData ?? operation.data;
+
+      // Convertir datos serializados de vuelta a formato Firestore
+      final firestoreData = _convertToFirestoreFormat(dataToUse);
+
+      if (operation.operationType == SyncOperationType.create) {
+        final docRef = await collection.add(firestoreData);
+        documentId = docRef.id;
+        return {'success': true, 'documentId': documentId};
+      } else if (operation.operationType == SyncOperationType.update) {
+        if (operation.documentId != null) {
+          await collection.doc(operation.documentId).update(firestoreData);
+          return {'success': true, 'documentId': operation.documentId};
+        } else {
+          throw Exception('documentId requerido para actualización');
+        }
+      } else if (operation.operationType == SyncOperationType.delete) {
+        if (operation.documentId != null) {
+          await collection.doc(operation.documentId).delete();
+          return {'success': true, 'documentId': operation.documentId};
+        } else {
+          throw Exception('documentId requerido para eliminación');
+        }
+      }
+
+      return {'success': false, 'documentId': null};
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          '❌ OfflineSyncService: Error sincronizando registro de peso: $e',
         );
       }
       return {'success': false, 'documentId': null, 'error': e.toString()};

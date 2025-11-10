@@ -28,6 +28,7 @@ import 'features/lactation/data/services/sleep_notification_service.dart';
 import 'features/lactation/data/services/notification_handler.dart';
 import 'features/lactation/data/services/push_notification_service.dart';
 import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
+import 'features/lactation/presentation/pages/baby_weight_form_page.dart';
 import 'core/services/offline_sync_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -266,6 +267,7 @@ class MyApp extends StatelessWidget {
             '/tips': (context) => const TipsPage(),
             '/Onboar_Info': (context) => const MainNavigationPage(),
             '/daily-sleep-form': (context) => const DailySleepFormPage(),
+            '/baby-weight-form': (context) => const BabyWeightFormPage(),
           },
         ),
       ),

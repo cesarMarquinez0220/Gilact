@@ -52,7 +52,7 @@ class HealthPage extends StatelessWidget {
                     Icons.monitor_weight,
                     const Color(0xFF4CAF50),
                     () {
-                      _showDevelopmentMessage(context, 'Registro de Peso');
+                      Navigator.of(context).pushNamed('/baby-weight-form');
                     },
                   ),
                   const SizedBox(height: 16),
