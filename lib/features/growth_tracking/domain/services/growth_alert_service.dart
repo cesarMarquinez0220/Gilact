@@ -92,7 +92,7 @@ class GrowthAlertService {
       alertMessage =
           'El peso del bebé está por debajo del percentil 15 y la ingesta de leche '
           'registrada está por debajo de lo esperado. Te recomendamos consultar '
-          'con tu pediatra o asesora de lactancia certificada (IBCLC).';
+          'con tu pediatra o nutricionista.';
     }
 
     return GrowthTrendAnalysis(

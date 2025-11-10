@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../data/services/lactation_service.dart';
-import '../../domain/entities/lactation_record.dart';
+import '../../../lactation/data/services/lactation_service.dart';
+import '../../../lactation/domain/entities/lactation_record.dart';
 import '../../../../core/services/connectivity_service.dart';
-import '../../data/datasources/baby_weight_offline_local_data_source.dart';
-import '../../domain/entities/baby_weight_record.dart';
-import '../../data/datasources/lactation_database.dart';
+import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
+import '../../../lactation/domain/entities/baby_weight_record.dart';
+import '../../../lactation/data/datasources/lactation_database.dart';
 
 /// Datos de alimentación diaria
 class DailyFeedingData {

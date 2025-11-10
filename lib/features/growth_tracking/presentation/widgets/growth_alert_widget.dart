@@ -111,7 +111,7 @@ class GrowthAlertWidget extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Esta información es solo orientativa. Siempre consulta con tu pediatra o asesora de lactancia certificada (IBCLC) para cualquier preocupación sobre el crecimiento o alimentación de tu bebé.',
+                              'Esta información es solo orientativa. Siempre consulta con tu pediatra o nutricionista para cualquier preocupación sobre el crecimiento o alimentación de tu bebé.',
                               style: GoogleFonts.quicksand(
                                 fontSize: 10,
                                 color: Colors.white70,

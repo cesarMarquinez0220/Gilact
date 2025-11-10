@@ -5,9 +5,9 @@ import '../entities/weight_trend_data.dart';
 import 'who_percentiles_service.dart';
 import 'feeding_analysis_service.dart';
 import 'growth_alert_service.dart';
-import '../../data/datasources/baby_weight_offline_local_data_source.dart';
-import '../../data/services/lactation_service.dart';
-import '../../domain/entities/baby_weight_record.dart';
+import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
+import '../../../lactation/data/services/lactation_service.dart';
+import '../../../lactation/domain/entities/baby_weight_record.dart';
 import '../../../../core/services/connectivity_service.dart';
 
 /// Servicio principal para obtener datos de tendencia de peso

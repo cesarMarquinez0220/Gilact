@@ -5,11 +5,11 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../user/domain/entities/user_profile_entities.dart';
-import '../../../lactation/domain/services/weight_trend_service.dart';
-import '../../../lactation/domain/entities/weight_trend_data.dart';
-import '../../../lactation/presentation/widgets/baby_weight_trend_chart.dart';
-import '../../../lactation/presentation/widgets/feeding_volume_chart.dart';
-import '../../../lactation/presentation/widgets/growth_alert_widget.dart';
+import '../../../growth_tracking/domain/services/weight_trend_service.dart';
+import '../../../growth_tracking/domain/entities/weight_trend_data.dart';
+import '../../../growth_tracking/presentation/widgets/baby_weight_trend_chart.dart';
+import '../../../growth_tracking/presentation/widgets/feeding_volume_chart.dart';
+import '../../../growth_tracking/presentation/widgets/growth_alert_widget.dart';
 
 /// Widget simplificado para mostrar solo datos del bebé para usuarios postparto
 class PostpartoProfileWidget extends StatefulWidget {
