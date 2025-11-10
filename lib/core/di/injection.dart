@@ -41,6 +41,15 @@ import '../../features/lactation/data/services/lactation_service.dart';
 import '../../features/lactation/data/services/lactation_flow_service.dart';
 import '../../features/lactation/data/services/sleep_notification_service.dart';
 import '../../features/lactation/data/services/notification_handler.dart';
+import '../../features/auth/data/services/offline_session_service.dart';
+import '../../core/services/connectivity_service.dart';
+import '../../core/services/sync_queue_service.dart';
+import '../../core/services/offline_sync_service.dart';
+import '../../core/services/conflict_resolution_service.dart';
+import '../../features/videos/data/services/video_encryption_service.dart';
+import '../../features/videos/data/services/video_download_service.dart';
+import '../../features/videos/data/datasources/video_offline_local_data_source.dart';
+import '../../features/user/data/datasources/user_profile_offline_local_data_source.dart';
 
 // Providers
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
@@ -50,6 +59,7 @@ import '../../features/lactation/presentation/providers/lactation_flow_provider.
 import '../../features/ui/presentation/bloc/ui_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/videos/presentation/bloc/video_bloc.dart';
+import '../../features/videos/presentation/bloc/video_download_bloc.dart';
 import '../../features/tips/presentation/bloc/tip_bloc.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
 import '../../features/lessons/presentation/bloc/lesson_bloc.dart';
@@ -81,6 +91,33 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<SleepNotificationService>(
     () => SleepNotificationService(),
+  );
+  getIt.registerLazySingleton<OfflineSessionService>(
+    () => OfflineSessionService(),
+  );
+  getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
+
+  // Video offline services
+  getIt.registerLazySingleton<VideoEncryptionService>(
+    () => VideoEncryptionService(),
+  );
+  getIt.registerLazySingleton<VideoDownloadService>(
+    () => VideoDownloadService(),
+  );
+  getIt.registerLazySingleton<VideoOfflineLocalDataSource>(
+    () => VideoOfflineLocalDataSource(),
+  );
+
+  // Offline sync services
+  getIt.registerLazySingleton<SyncQueueService>(() => SyncQueueService());
+  getIt.registerLazySingleton<OfflineSyncService>(() => OfflineSyncService());
+  getIt.registerLazySingleton<ConflictResolutionService>(
+    () => ConflictResolutionService(),
+  );
+
+  // User profile offline
+  getIt.registerLazySingleton<UserProfileOfflineLocalDataSource>(
+    () => UserProfileOfflineLocalDataSource(),
   );
 
   // Providers
@@ -324,6 +361,8 @@ Future<void> configureDependencies() async {
           getIt<auth_usecases.SendEmailVerificationUseCase>(),
       updateProfileUseCase: getIt<auth_usecases.UpdateProfileUseCase>(),
       deleteAccountUseCase: getIt<auth_usecases.DeleteAccountUseCase>(),
+      offlineSessionService: getIt<OfflineSessionService>(),
+      connectivityService: getIt<ConnectivityService>(),
     ),
   );
 
@@ -340,6 +379,13 @@ Future<void> configureDependencies() async {
           getIt<video_usecases.GetCompletedVideoIdsUseCase>(),
       updateVideoProgressUseCase:
           getIt<video_usecases.UpdateVideoProgressUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => VideoDownloadBloc(
+      downloadService: getIt<VideoDownloadService>(),
+      localDataSource: getIt<VideoOfflineLocalDataSource>(),
     ),
   );
 

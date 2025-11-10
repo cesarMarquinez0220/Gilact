@@ -1,11 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/lactation_record.dart';
+import '../../data/datasources/lactation_database.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/sync_queue_service.dart';
 
 /// Servicio unificado para manejar todos los registros de lactancia en Firestore
+/// Implementa patrón offline-first: siempre guarda localmente primero
 class LactationService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final LactationDatabase _localDatabase = LactationDatabase();
+  final ConnectivityService _connectivityService = ConnectivityService();
+  final SyncQueueService _syncQueueService = SyncQueueService();
 
   // Cache para evitar consultas repetidas
   String? _cachedUserDocId;
@@ -84,27 +92,160 @@ class LactationService {
         .collection('lactancia');
   }
 
-  /// Guarda un nuevo registro de lactancia
+  /// Guarda un nuevo registro de lactancia (offline-first)
+  /// SIEMPRE guarda localmente primero, luego sincroniza con Firestore si hay conexión
   Future<String> saveRecord(LactationRecord record) async {
     try {
-      final collection = await _lactationCollection;
-      final docRef = await collection.add(record.toMap());
-      print('✅ Registro de lactancia guardado: ${docRef.id}');
-      return docRef.id;
+      // PASO 1: SIEMPRE guardar localmente primero
+      await _localDatabase.insertRecord(record);
+      if (kDebugMode) {
+        print('✅ Registro de lactancia guardado localmente: ${record.id}');
+      }
+
+      // PASO 2: Si hay conexión, intentar guardar en Firestore inmediatamente
+      final isConnected = await _connectivityService.isConnected();
+      if (isConnected) {
+        try {
+          final collection = await _lactationCollection;
+          final docRef = await collection.add(record.toMap());
+
+          // Marcar como sincronizado
+          await _localDatabase.markAsSynced(record.id, docRef.id);
+
+          if (kDebugMode) {
+            print(
+              '✅ Registro de lactancia sincronizado con Firestore: ${docRef.id}',
+            );
+          }
+
+          return docRef.id;
+        } catch (e) {
+          // Si falla Firestore, el registro queda local para sincronizar después
+          if (kDebugMode) {
+            print(
+              '⚠️ Error guardando en Firestore, quedará pendiente de sincronización: $e',
+            );
+          }
+
+          // Agregar a cola de sincronización
+          await _addToSyncQueue(record, SyncOperationType.create);
+
+          return record.id; // Retornar ID local
+        }
+      } else {
+        // Sin conexión: agregar a cola de sincronización
+        if (kDebugMode) {
+          print(
+            '📴 Sin conexión: Registro guardado localmente, se sincronizará cuando haya conexión',
+          );
+        }
+
+        await _addToSyncQueue(record, SyncOperationType.create);
+
+        return record.id; // Retornar ID local
+      }
     } catch (e) {
-      print('❌ Error guardando registro de lactancia: $e');
+      if (kDebugMode) {
+        print('❌ Error guardando registro de lactancia: $e');
+      }
       rethrow;
     }
   }
 
-  /// Actualiza un registro existente
+  /// Agrega un registro a la cola de sincronización
+  Future<void> _addToSyncQueue(
+    LactationRecord record,
+    SyncOperationType operationType,
+  ) async {
+    try {
+      // Convertir el mapa a formato serializable (DateTime -> String/Int)
+      final dataMap = record.toMap();
+      final serializableData = Map<String, dynamic>.from(dataMap);
+
+      // Convertir DateTime a formato serializable
+      if (serializableData['timestamp'] is DateTime) {
+        serializableData['timestamp'] =
+            (serializableData['timestamp'] as DateTime).toIso8601String();
+      }
+
+      // Convertir bool a int para compatibilidad
+      if (serializableData['incluye_sueno'] is bool) {
+        serializableData['incluye_sueno'] =
+            (serializableData['incluye_sueno'] as bool) ? 1 : 0;
+      }
+
+      final operation = SyncOperation(
+        id: '${record.id}_${DateTime.now().millisecondsSinceEpoch}',
+        operationType: operationType,
+        collectionPath: 'lactancia',
+        localId: record.id,
+        data: serializableData,
+        createdAt: DateTime.now(),
+      );
+
+      await _syncQueueService.addOperation(operation);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ SyncQueueService: Error agregando operación: $e');
+        print('! Error agregando a cola de sincronización: $e');
+      }
+    }
+  }
+
+  /// Actualiza un registro existente (offline-first)
   Future<void> updateRecord(String recordId, LactationRecord record) async {
     try {
-      final collection = await _lactationCollection;
-      await collection.doc(recordId).update(record.toMap());
-      print('✅ Registro de lactancia actualizado: $recordId');
+      // PASO 1: Actualizar localmente primero
+      await _localDatabase.updateRecord(record);
+      if (kDebugMode) {
+        print('✅ Registro de lactancia actualizado localmente: $recordId');
+      }
+
+      // PASO 2: Si hay conexión, intentar actualizar en Firestore inmediatamente
+      final isConnected = await _connectivityService.isConnected();
+      if (isConnected) {
+        try {
+          final collection = await _lactationCollection;
+          await collection.doc(recordId).update(record.toMap());
+
+          // Marcar como sincronizado si tiene firestore_id
+          final pendingRecords = await _localDatabase.getPendingSyncRecords();
+          final localRecord = pendingRecords.firstWhere(
+            (r) => r.id == record.id,
+            orElse: () => record,
+          );
+          if (localRecord.id == record.id) {
+            // Si el registro tiene firestore_id, marcarlo como sincronizado
+            await _localDatabase.markAsSynced(record.id, recordId);
+          }
+
+          if (kDebugMode) {
+            print(
+              '✅ Registro de lactancia actualizado en Firestore: $recordId',
+            );
+          }
+        } catch (e) {
+          // Si falla Firestore, agregar a cola de sincronización
+          if (kDebugMode) {
+            print(
+              '⚠️ Error actualizando en Firestore, quedará pendiente de sincronización: $e',
+            );
+          }
+          await _addToSyncQueue(record, SyncOperationType.update);
+        }
+      } else {
+        // Sin conexión: agregar a cola de sincronización
+        if (kDebugMode) {
+          print(
+            '📴 Sin conexión: Registro actualizado localmente, se sincronizará cuando haya conexión',
+          );
+        }
+        await _addToSyncQueue(record, SyncOperationType.update);
+      }
     } catch (e) {
-      print('❌ Error actualizando registro de lactancia: $e');
+      if (kDebugMode) {
+        print('❌ Error actualizando registro de lactancia: $e');
+      }
       rethrow;
     }
   }
@@ -121,33 +262,86 @@ class LactationService {
     }
   }
 
-  /// Obtiene todos los registros de una fecha específica
+  /// Obtiene todos los registros de una fecha específica (offline-first)
+  /// Combina registros locales y remotos
   Future<List<LactationRecord>> getRecordsForDate(DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
+      // SIEMPRE obtener registros locales primero
+      final localRecords = await _localDatabase.getRecordsForDate(date);
 
-      final collection = await _lactationCollection;
-      final querySnapshot = await collection
-          .where(
-            'fecha_registro',
-            isGreaterThanOrEqualTo: startOfDay.toIso8601String(),
-          )
-          .where('fecha_registro', isLessThan: endOfDay.toIso8601String())
-          .orderBy('fecha_registro', descending: true) // Más reciente primero
-          .get();
+      final isConnected = await _connectivityService.isConnected();
+      if (isConnected) {
+        try {
+          // Si hay conexión, obtener también de Firestore
+          final startOfDay = DateTime(date.year, date.month, date.day);
+          final endOfDay = startOfDay.add(const Duration(days: 1));
 
-      return querySnapshot.docs
-          .map(
-            (doc) => LactationRecord.fromMap(
-              doc.data() as Map<String, dynamic>,
-              doc.id,
-            ),
-          )
-          .toList();
+          final collection = await _lactationCollection;
+          final querySnapshot = await collection
+              .where(
+                'fecha_registro',
+                isGreaterThanOrEqualTo: startOfDay.toIso8601String(),
+              )
+              .where('fecha_registro', isLessThan: endOfDay.toIso8601String())
+              .orderBy('fecha_registro', descending: true)
+              .get();
+
+          final firestoreRecords = querySnapshot.docs
+              .map(
+                (doc) => LactationRecord.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList();
+
+          // Combinar registros: priorizar Firestore, agregar locales no sincronizados
+          final Map<String, LactationRecord> combinedRecords = {};
+
+          // Agregar registros de Firestore
+          for (final record in firestoreRecords) {
+            combinedRecords[record.id] = record;
+          }
+
+          // Agregar registros locales que no están en Firestore
+          for (final localRecord in localRecords) {
+            // Solo agregar si no está sincronizado o no existe en Firestore
+            if (!combinedRecords.containsKey(localRecord.id)) {
+              combinedRecords[localRecord.id] = localRecord;
+            }
+          }
+
+          return combinedRecords.values.toList()
+            ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        } catch (e) {
+          if (kDebugMode) {
+            print(
+              '⚠️ Error obteniendo registros de Firestore, usando solo locales: $e',
+            );
+          }
+          // Si falla Firestore, retornar solo registros locales
+          return localRecords;
+        }
+      } else {
+        // Sin conexión: retornar solo registros locales
+        if (kDebugMode) {
+          print('📴 Sin conexión: Retornando solo registros locales');
+        }
+        return localRecords;
+      }
     } catch (e) {
-      print('❌ Error obteniendo registros para fecha: $e');
-      return [];
+      if (kDebugMode) {
+        print('❌ Error obteniendo registros para fecha: $e');
+      }
+      // En caso de error, intentar retornar registros locales
+      try {
+        return await _localDatabase.getRecordsForDate(date);
+      } catch (e2) {
+        if (kDebugMode) {
+          print('❌ Error obteniendo registros locales: $e2');
+        }
+        return [];
+      }
     }
   }
 

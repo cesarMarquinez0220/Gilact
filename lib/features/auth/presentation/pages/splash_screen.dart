@@ -66,11 +66,11 @@ class _SplashScreenState extends State<SplashScreen>
           print(
             '🔍 SplashScreen: Onboarding completado, verificando autenticación...',
           );
-          // Si el onboarding ya fue completado, verificar autenticación
+          // Si el onboarding ya fue completado, verificar autenticación (offline primero)
           setState(() {
             _isCheckingOnboarding = false;
           });
-          context.read<AuthBloc>().add(const GetCurrentUserRequested());
+          context.read<AuthBloc>().add(const CheckOfflineSessionRequested());
         } else {
           print(
             '🔍 SplashScreen: Onboarding NO completado, navegando a onboarding...',

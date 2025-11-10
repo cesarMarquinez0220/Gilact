@@ -1,10 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/user_profile_entities.dart';
 import '../../domain/usecases/user_profile_usecases.dart';
+import '../../data/datasources/user_profile_offline_local_data_source.dart';
+import '../../../../core/services/connectivity_service.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';
@@ -14,6 +17,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final GetUserProfileUseCase _getUserProfileUseCase;
   final UpdateUserProfileUseCase _updateUserProfileUseCase;
   final SignOutUseCase _signOutUseCase;
+  final UserProfileOfflineLocalDataSource _offlineDataSource =
+      UserProfileOfflineLocalDataSource();
+  final ConnectivityService _connectivityService = ConnectivityService();
 
   UserProfileBloc({
     required GetUserProfileUseCase getUserProfileUseCase,
@@ -30,18 +36,113 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<ResetUserProfileRequested>(_onResetUserProfileRequested);
   }
 
+  /// Obtiene el perfil de usuario (offline-first)
+  /// Si hay conexión: obtiene de Firestore y actualiza cache
+  /// Si no hay conexión: sirve desde cache
   Future<void> _onGetUserProfileRequested(
     GetUserProfileRequested event,
     Emitter<UserProfileState> emit,
   ) async {
     emit(UserProfileLoading());
 
-    final result = await _getUserProfileUseCase(event.userId);
+    try {
+      final isConnected = await _connectivityService.isConnected();
 
-    result.fold(
-      (failure) => emit(UserProfileFailure(failure.message)),
-      (profile) => emit(UserProfileLoaded(profile)),
-    );
+      if (isConnected) {
+        if (kDebugMode) {
+          print(
+            '🌐 UserProfileBloc: Con conexión, obteniendo perfil de Firestore...',
+          );
+        }
+
+        // Si hay conexión, obtener de Firestore y actualizar cache
+        final result = await _getUserProfileUseCase(event.userId);
+
+        // Manejar Left (failure) o Right (success) por separado para poder usar await
+        if (result.isLeft()) {
+          if (kDebugMode) {
+            print(
+              '⚠️ UserProfileBloc: Error obteniendo de Firestore, intentando desde cache',
+            );
+          }
+          // Si falla Firestore, intentar desde cache
+          await _loadFromCache(event.userId, emit);
+        } else {
+          // Éxito: obtener el perfil del Right
+          final profile = result.fold((failure) => null, (profile) => profile);
+          if (profile != null) {
+            if (kDebugMode) {
+              print(
+                '✅ UserProfileBloc: Perfil obtenido de Firestore, actualizando cache',
+              );
+            }
+            // Cachear perfil actualizado
+            try {
+              await _offlineDataSource.cacheUserProfile(profile);
+            } catch (e) {
+              if (kDebugMode) {
+                print('⚠️ UserProfileBloc: Error cacheando perfil: $e');
+              }
+              // Continuar aunque falle el cache
+            }
+            emit(UserProfileLoaded(profile));
+          } else {
+            if (kDebugMode) {
+              print(
+                '⚠️ UserProfileBloc: Perfil null de Firestore, intentando desde cache',
+              );
+            }
+            // Fallback: intentar desde cache
+            await _loadFromCache(event.userId, emit);
+          }
+        }
+      } else {
+        // Sin conexión: cargar desde cache
+        if (kDebugMode) {
+          print('📴 UserProfileBloc: Sin conexión, cargando desde cache');
+        }
+        await _loadFromCache(event.userId, emit);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ UserProfileBloc: Error obteniendo perfil: $e');
+      }
+      // Intentar desde cache como fallback
+      await _loadFromCache(event.userId, emit);
+    }
+  }
+
+  /// Carga el perfil desde cache
+  Future<void> _loadFromCache(
+    String userId,
+    Emitter<UserProfileState> emit,
+  ) async {
+    try {
+      final cachedProfile = await _offlineDataSource.getCachedUserProfile(
+        userId: userId,
+      );
+
+      if (cachedProfile != null) {
+        if (kDebugMode) {
+          print('✅ UserProfileBloc: Perfil cargado desde cache');
+        }
+        emit(UserProfileLoaded(cachedProfile));
+      } else {
+        if (kDebugMode) {
+          print('⚠️ UserProfileBloc: No hay perfil en cache');
+        }
+        emit(
+          UserProfileFailure(
+            'No hay conexión y no hay datos en cache. Por favor, conecta a internet para cargar tu perfil.',
+          ),
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ UserProfileBloc: Error cargando desde cache: $e');
+      }
+      emit(UserProfileFailure('Error cargando perfil: $e'));
+    }
   }
 
   Future<void> _onUpdateUserProfileRequested(
@@ -66,10 +167,13 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
     final result = await _updateUserProfileUseCase(userProfile);
 
-    result.fold(
-      (failure) => emit(UserProfileFailure(failure.message)),
-      (profile) => emit(UserProfileUpdated(profile)),
-    );
+    result.fold((failure) => emit(UserProfileFailure(failure.message)), (
+      profile,
+    ) {
+      // Cachear perfil actualizado
+      _offlineDataSource.cacheUserProfile(profile);
+      emit(UserProfileUpdated(profile));
+    });
   }
 
   Future<void> _onUpdateUserSituationRequested(
@@ -148,6 +252,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
           babyInfo: babyInfo,
           situationData: event.situationData,
         );
+
+        // Cachear perfil actualizado
+        _offlineDataSource.cacheUserProfile(updatedProfile);
 
         emit(UserProfileUpdated(updatedProfile));
         print(

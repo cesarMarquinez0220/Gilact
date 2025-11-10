@@ -7,6 +7,71 @@ class VideoProgressService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Caché para el ID del documento del usuario
+  String? _cachedUserDocId;
+
+  /// Obtiene el ID del documento del usuario en Firestore
+  /// SIEMPRE busca por email primero para obtener el ID correcto del documento
+  /// Solo usa UID como último recurso si no encuentra nada por email
+  Future<String?> _getUserDocumentId() async {
+    // Si tenemos caché, usarlo
+    if (_cachedUserDocId != null) {
+      return _cachedUserDocId;
+    }
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        print('❌ VideoProgressService: Usuario no autenticado');
+        return null;
+      }
+
+      // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
+      if (user.email != null) {
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          _cachedUserDocId = userQuery.docs.first.id;
+          print(
+            '✅ VideoProgressService: Usuario encontrado por email, ID del documento: $_cachedUserDocId',
+          );
+          return _cachedUserDocId;
+        } else {
+          print(
+            '⚠️ VideoProgressService: No se encontró usuario por email: ${user.email}',
+          );
+        }
+      } else {
+        print('⚠️ VideoProgressService: Usuario no tiene email');
+      }
+
+      // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
+      // (Esto puede crear documentos en el lugar incorrecto, pero es un fallback)
+      final docSnapshot = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        print(
+          '⚠️ VideoProgressService: Usando UID como fallback (no recomendado): ${user.uid}',
+        );
+        _cachedUserDocId = user.uid;
+        return user.uid;
+      }
+
+      print('❌ VideoProgressService: No se encontró usuario en Firestore');
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo ID del usuario: $e');
+      return null;
+    }
+  }
+
   /// Guarda información detallada del video en Firestore
   Future<void> saveVideoProgress({
     required int videoId,
@@ -21,12 +86,27 @@ class VideoProgressService {
       final user = _auth.currentUser;
       if (user == null) return;
 
-      final userDocRef = _firestore.collection('Users').doc(user.uid);
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        print(
+          '❌ VideoProgressService: No se pudo obtener el ID del documento del usuario',
+        );
+        return;
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
       final videoDocRef = userDocRef
           .collection('videos')
           .doc(videoId.toString());
 
+      print(
+        '📊 VideoProgressService: Guardando progreso en /Users/$userDocId/videos/$videoId',
+      );
+
       final videoData = {
+        'videoId':
+            videoId, // Asegurar que el videoId esté presente para identificarlo
         'contadorPausas': pauseCount,
         'contadorAdelantos': forwardCount,
         'ultimaPosicion': lastPosition,
@@ -67,7 +147,13 @@ class VideoProgressService {
       final user = _auth.currentUser;
       if (user == null) return {};
 
-      final userDocRef = _firestore.collection('Users').doc(user.uid);
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        return {};
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
       final videoDoc = await userDocRef
           .collection('videos')
           .doc(videoId.toString())
@@ -107,7 +193,13 @@ class VideoProgressService {
       final user = _auth.currentUser;
       if (user == null) return {};
 
-      final userDocRef = _firestore.collection('Users').doc(user.uid);
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        return {};
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
 
       // Obtener información del video
       final videoDoc = await userDocRef

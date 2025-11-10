@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/entities/video.dart';
 import '../widgets/advanced_video_player.dart';
@@ -27,6 +29,9 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   bool _isVideoPreloaded = false;
   bool _shouldAutoRotate = false;
+  final GlobalKey _playerKey = GlobalKey();
+  bool _isNavigatingToNext =
+      false; // Flag para saber si estamos navegando al siguiente video
 
   @override
   void initState() {
@@ -73,11 +78,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     // Ir directo al reproductor con auto-rotación
     if (mounted) {
       // Auto-rotar a horizontal para experiencia tipo Netflix
-      if (_shouldAutoRotate) {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
+      // Asegurarse de que siempre esté en landscape al inicializar
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      if (kDebugMode) {
+        print('🔄 Orientación landscape establecida en initState');
       }
     }
   }
@@ -90,11 +97,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
-    // Restaurar orientación vertical al salir
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    // Solo restaurar orientación vertical si NO estamos navegando al siguiente video
+    // Si estamos navegando al siguiente, mantener landscape
+    if (!_isNavigatingToNext) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
     super.dispose();
   }
 
@@ -102,6 +112,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget build(BuildContext context) {
     // Siempre mostrar directamente el reproductor sin pantalla de carga
     return AdvancedVideoPlayer(
+      key: _playerKey,
       video: widget.video,
       onVideoCompleted: () {
         _showCompletionDialog();
@@ -114,7 +125,191 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   void _showCompletionDialog() {
-    // Ya no mostramos el diálogo de completado
-    // El comportamiento de auto-play se maneja en AdvancedVideoPlayer
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (!didPop) {
+              Navigator.of(context).pop(true); // Pop "true" (volver)
+            }
+          },
+          child: AlertDialog(
+            backgroundColor: const Color(0xFF1F1F1F),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            title: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '¡Video Completado!',
+                    style: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // --- CONTENIDO MODIFICADO ---
+            content: Column(
+              mainAxisSize: MainAxisSize.min, // Para que la columna se ajuste
+              children: [
+                Text(
+                  'Has completado "${widget.video.title}". ¿Qué deseas hacer?',
+                  textAlign: TextAlign.center, // Centrado se ve mejor
+                  style: GoogleFonts.quicksand(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+                const SizedBox(height: 24), // Espacio antes del botón
+                // --- NUEVO BOTÓN CENTRAL ---
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.replay, size: 20),
+                  label: Text(
+                    'Volver a ver',
+                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    // Usamos 'null' para indicar "replay"
+                    Navigator.of(context).pop(null);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF4FD1C7), // Color de acento
+                    side: const BorderSide(
+                      color: Color(0xFF4FD1C7), // Borde del color de acento
+                      width: 1.5,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // ---------------------------------
+
+            // --- ACCIONES SIMPLIFICADAS ---
+            actions: [
+              // Acción secundaria: Volver (Siempre visible)
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true); // Volver
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white.withOpacity(
+                    0.7,
+                  ), // Menos énfasis
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(
+                  // Cambia el texto según el contexto
+                  widget.isFromHistory ? 'Volver' : 'Volver a lecciones',
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+
+              // Acción principal: Siguiente (Solo si aplica)
+              if (!widget.isFromHistory && !widget.isLastVideoInLesson)
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                  label: Text(
+                    'Reproducir siguiente',
+                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // Reproducir siguiente
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4FD1C7),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    ).then((result) async {
+      // Manejar el resultado del diálogo
+      // 'result' puede ser:
+      // true: Volver a lecciones / Volver
+      // false: Reproducir siguiente
+      // null: Volver a ver (reiniciar video)
+
+      if (!mounted) return;
+
+      if (result == true) {
+        // Volver a la pantalla anterior (lecciones o historial)
+        // Restaurar orientación a portrait antes de volver
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } else if (result == false) {
+        // Reproducir siguiente video: mantener landscape y retornar false
+        // para que lesson_videos_page lo maneje
+        _isNavigatingToNext = true; // Marcar que estamos navegando al siguiente
+
+        // Asegurar que la orientación landscape se mantenga
+        // Hacer esto ANTES de hacer pop para evitar cualquier cambio
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+
+        // Pequeño delay para asegurar que la orientación se establezca antes del pop
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        if (mounted) {
+          Navigator.of(context).pop(false);
+        }
+      } else if (result == null) {
+        // Reiniciar el video actual
+        _replayVideo();
+      }
+    });
+  }
+
+  /// Reinicia el video actual desde el principio
+  void _replayVideo() {
+    try {
+      // Usar el método estático de AdvancedVideoPlayer para reiniciar
+      AdvancedVideoPlayer.replayVideo(_playerKey);
+      if (kDebugMode) {
+        print('🔄 Video reiniciado desde el principio');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error reiniciando video: $e');
+      }
+    }
   }
 }

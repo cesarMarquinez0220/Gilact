@@ -10,6 +10,7 @@ import '../../presentation/pages/lactation_record_page.dart';
 import '../../presentation/pages/daily_sleep_form_page.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../../core/services/pending_notification_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 
 /// Servicio para manejar notificaciones push desde Firestore
 class PushNotificationService {
@@ -22,31 +23,50 @@ class PushNotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final ConnectivityService _connectivityService = ConnectivityService();
   bool _isLocalNotificationsInitialized = false;
 
   /// Inicializar el servicio de notificaciones push
   Future<void> initialize() async {
-    print('🔔 PushNotificationService: Inicializando...');
+    try {
+      print('🔔 PushNotificationService: Inicializando...');
 
-    // Solicitar permisos
-    await _requestPermission();
+      // Solicitar permisos
+      await _requestPermission();
 
-    // Obtener token del dispositivo
-    await _saveTokenToFirestore();
+      // Obtener token del dispositivo (solo si hay conexión)
+      final isConnected = await _connectivityService.isConnected();
+      if (isConnected) {
+        await _saveTokenToFirestore();
+      } else {
+        print(
+          '📴 PushNotificationService: Sin conexión, token se guardará cuando haya conexión',
+        );
+      }
 
-    // Escuchar cambios en el token
-    _messaging.onTokenRefresh.listen((newToken) {
-      print('🔔 PushNotificationService: Token actualizado: $newToken');
-      _saveTokenToFirestore();
-    });
+      // Escuchar cambios en el token
+      _messaging.onTokenRefresh.listen((newToken) async {
+        print('🔔 PushNotificationService: Token actualizado: $newToken');
+        // Verificar conectividad antes de guardar
+        final connected = await _connectivityService.isConnected();
+        if (connected) {
+          await _saveTokenToFirestore();
+        }
+      });
 
-    // Configurar handlers para diferentes estados de la app
-    _setupMessageHandlers();
+      // Configurar handlers para diferentes estados de la app
+      _setupMessageHandlers();
 
-    // Configurar listener para toques en notificaciones locales
-    _setupLocalNotificationHandlers();
+      // Configurar listener para toques en notificaciones locales
+      _setupLocalNotificationHandlers();
 
-    print('✅ PushNotificationService: Inicializado correctamente');
+      print('✅ PushNotificationService: Inicializado correctamente');
+    } catch (e) {
+      // No bloquear el inicio de la app si falla la inicialización
+      print(
+        '⚠️ PushNotificationService: Error en inicialización (no crítico): $e',
+      );
+    }
   }
 
   /// Configurar handlers para notificaciones locales
@@ -114,11 +134,77 @@ class PushNotificationService {
     }
   }
 
+  /// Obtiene el ID del documento del usuario en Firestore
+  /// Usa la misma lógica que VideoProgressService y VideoInteractionService
+  Future<String?> _getUserDocumentId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('❌ PushNotificationService: Usuario no autenticado');
+        return null;
+      }
+
+      // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
+      if (user.email != null) {
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print(
+            '✅ PushNotificationService: Usuario encontrado por email, ID del documento: $userDocId',
+          );
+          return userDocId;
+        } else {
+          print(
+            '⚠️ PushNotificationService: No se encontró usuario por email: ${user.email}',
+          );
+        }
+      } else {
+        print('⚠️ PushNotificationService: Usuario no tiene email');
+      }
+
+      // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
+      final docSnapshot = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        print(
+          '⚠️ PushNotificationService: Usando UID como fallback (no recomendado): ${user.uid}',
+        );
+        return user.uid;
+      }
+
+      print('❌ PushNotificationService: No se encontró usuario en Firestore');
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo ID del usuario: $e');
+      return null;
+    }
+  }
+
   /// Guardar el token FCM en Firestore
   Future<void> _saveTokenToFirestore() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) {
-      print('⚠️ PushNotificationService: No hay usuario autenticado');
+    // Verificar conectividad primero
+    final isConnected = await _connectivityService.isConnected();
+    if (!isConnected) {
+      print(
+        '📴 PushNotificationService: Sin conexión, no se puede guardar token',
+      );
+      return;
+    }
+
+    // Obtener el ID correcto del documento del usuario en Firestore
+    final userDocId = await _getUserDocumentId();
+    if (userDocId == null) {
+      print(
+        '❌ PushNotificationService: No se pudo obtener el ID del documento del usuario',
+      );
       return;
     }
 
@@ -129,12 +215,16 @@ class PushNotificationService {
         return;
       }
 
-      print('🔔 PushNotificationService: Guardando token en Firestore...');
+      print(
+        '🔔 PushNotificationService: Guardando token en Firestore para usuario: $userDocId',
+      );
 
-      // Guardar el token en la colección del usuario
+      // Guardar el token en la colección del usuario usando el ID correcto del documento
       await _firestore
           .collection('Users')
-          .doc(userId)
+          .doc(
+            userDocId,
+          ) // Usar el ID correcto del documento, no el UID de Firebase Auth
           .collection('device_tokens')
           .doc(token)
           .set({
@@ -144,7 +234,9 @@ class PushNotificationService {
             'updated_at': FieldValue.serverTimestamp(),
           });
 
-      print('✅ PushNotificationService: Token guardado: $token');
+      print(
+        '✅ PushNotificationService: Token guardado en /Users/$userDocId/device_tokens/$token',
+      );
     } catch (e) {
       print('❌ PushNotificationService: Error guardando token: $e');
     }

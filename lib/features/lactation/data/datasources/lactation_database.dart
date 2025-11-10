@@ -19,7 +19,7 @@ class LactationDatabase {
     String path = join(await getDatabasesPath(), 'lactation.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 4, // Incrementado para agregar tipo_registro e incluye_sueno
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -41,25 +41,213 @@ class LactationDatabase {
         pecho_dado TEXT DEFAULT 'Ninguna',
         horas_sueno_bebe INTEGER DEFAULT 0,
         unidad_sueno TEXT DEFAULT 'No',
-        timestamp INTEGER NOT NULL
+        timestamp INTEGER NOT NULL,
+        tipo_registro TEXT DEFAULT 'completo',
+        incluye_sueno INTEGER DEFAULT 0,
+        firestore_id TEXT,
+        sync_status TEXT DEFAULT 'PENDING',
+        last_sync_at INTEGER,
+        created_at_local INTEGER NOT NULL
       )
     ''');
+
+    // Índices para mejorar búsquedas
+    await db.execute(
+      'CREATE INDEX idx_sync_status ON lactation_records(sync_status)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_firestore_id ON lactation_records(firestore_id)',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Migrar de la versión 1 a la 2
-      await db.execute('DROP TABLE IF EXISTS lactation_records');
-      await _onCreate(db, newVersion);
+    print(
+      '🔄 LactationDatabase: Iniciando migración de versión $oldVersion a $newVersion',
+    );
+
+    if (oldVersion < 3) {
+      // Agregar campos de sincronización
+      print('📦 LactationDatabase: Agregando campos de sincronización (v3)');
+      try {
+        await db.execute(
+          'ALTER TABLE lactation_records ADD COLUMN firestore_id TEXT',
+        );
+        await db.execute(
+          'ALTER TABLE lactation_records ADD COLUMN sync_status TEXT DEFAULT \'PENDING\'',
+        );
+        await db.execute(
+          'ALTER TABLE lactation_records ADD COLUMN last_sync_at INTEGER',
+        );
+        await db.execute(
+          'ALTER TABLE lactation_records ADD COLUMN created_at_local INTEGER DEFAULT ${DateTime.now().millisecondsSinceEpoch}',
+        );
+
+        // Crear índices
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_sync_status ON lactation_records(sync_status)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_firestore_id ON lactation_records(firestore_id)',
+        );
+
+        // Actualizar registros existentes: marcar como PENDING si no tienen firestore_id
+        await db.execute('''
+          UPDATE lactation_records 
+          SET sync_status = 'PENDING', created_at_local = ${DateTime.now().millisecondsSinceEpoch}
+          WHERE firestore_id IS NULL
+        ''');
+        print(
+          '✅ LactationDatabase: Campos de sincronización agregados correctamente',
+        );
+      } catch (e) {
+        print('⚠️ Error en migración de LactationDatabase (v3): $e');
+        // Si falla, recrear la tabla
+        await db.execute('DROP TABLE IF EXISTS lactation_records');
+        await _onCreate(db, newVersion);
+      }
     }
+
+    if (oldVersion < 4) {
+      // Agregar campos tipo_registro e incluye_sueno
+      print(
+        '📦 LactationDatabase: Agregando tipo_registro e incluye_sueno (v4)',
+      );
+      try {
+        // Verificar si las columnas ya existen antes de agregarlas
+        final tableInfo = await db.rawQuery(
+          'PRAGMA table_info(lactation_records)',
+        );
+        final columnNames = tableInfo
+            .map((row) => row['name'] as String)
+            .toList();
+
+        if (!columnNames.contains('tipo_registro')) {
+          await db.execute(
+            'ALTER TABLE lactation_records ADD COLUMN tipo_registro TEXT DEFAULT \'completo\'',
+          );
+          print('✅ LactationDatabase: Columna tipo_registro agregada');
+        } else {
+          print('ℹ️ LactationDatabase: Columna tipo_registro ya existe');
+        }
+
+        if (!columnNames.contains('incluye_sueno')) {
+          await db.execute(
+            'ALTER TABLE lactation_records ADD COLUMN incluye_sueno INTEGER DEFAULT 0',
+          );
+          print('✅ LactationDatabase: Columna incluye_sueno agregada');
+        } else {
+          print('ℹ️ LactationDatabase: Columna incluye_sueno ya existe');
+        }
+
+        // Actualizar registros existentes sin tipo_registro
+        await db.execute('''
+          UPDATE lactation_records 
+          SET tipo_registro = 'completo', incluye_sueno = 0
+          WHERE tipo_registro IS NULL OR incluye_sueno IS NULL
+        ''');
+
+        print('✅ LactationDatabase: Migración a v4 completada correctamente');
+      } catch (e) {
+        print('⚠️ Error agregando tipo_registro e incluye_sueno: $e');
+        // Si falla, intentar recrear la tabla
+        try {
+          await db.execute('DROP TABLE IF EXISTS lactation_records');
+          await _onCreate(db, newVersion);
+          print('✅ LactationDatabase: Tabla recreada con nuevo esquema');
+        } catch (recreateError) {
+          print('❌ Error recreando tabla: $recreateError');
+          rethrow;
+        }
+      }
+    }
+
+    print(
+      '✅ LactationDatabase: Migración completada de v$oldVersion a v$newVersion',
+    );
   }
 
   Future<void> insertRecord(LactationRecord record) async {
     final db = await database;
+    final map = record.toMap();
+
+    // Convertir tipos incompatibles con SQLite
+    // DateTime -> int (millisecondsSinceEpoch)
+    if (map['timestamp'] is DateTime) {
+      map['timestamp'] = (map['timestamp'] as DateTime).millisecondsSinceEpoch;
+    }
+
+    // bool -> int (0 o 1)
+    if (map['incluye_sueno'] is bool) {
+      map['incluye_sueno'] = (map['incluye_sueno'] as bool) ? 1 : 0;
+    }
+
+    // Agregar campos de sincronización
+    map['created_at_local'] = DateTime.now().millisecondsSinceEpoch;
+    map['sync_status'] = 'PENDING';
+    map['firestore_id'] = null;
+    map['last_sync_at'] = null;
+
+    // Agregar el ID del registro
+    map['id'] = record.id;
+
     await db.insert(
       'lactation_records',
-      record.toMap(),
+      map,
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Marca un registro como sincronizado
+  Future<void> markAsSynced(String localId, String firestoreId) async {
+    final db = await database;
+    await db.update(
+      'lactation_records',
+      {
+        'firestore_id': firestoreId,
+        'sync_status': 'SYNCED',
+        'last_sync_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
+  }
+
+  /// Obtiene todos los registros pendientes de sincronización
+  Future<List<LactationRecord>> getPendingSyncRecords() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'lactation_records',
+      where: 'sync_status = ?',
+      whereArgs: ['PENDING'],
+      orderBy: 'created_at_local ASC',
+    );
+
+    return List.generate(
+      maps.length,
+      (i) => LactationRecord.fromMap(maps[i], maps[i]['id']),
+    );
+  }
+
+  /// Actualiza el estado de sincronización de un registro
+  Future<void> updateSyncStatus(
+    String localId,
+    String status, {
+    String? firestoreId,
+  }) async {
+    final db = await database;
+    final updateData = {
+      'sync_status': status,
+      'last_sync_at': DateTime.now().millisecondsSinceEpoch,
+    };
+    if (firestoreId != null) {
+      updateData['firestore_id'] = firestoreId;
+    }
+
+    await db.update(
+      'lactation_records',
+      updateData,
+      where: 'id = ?',
+      whereArgs: [localId],
     );
   }
 
@@ -127,9 +315,22 @@ class LactationDatabase {
 
   Future<void> updateRecord(LactationRecord record) async {
     final db = await database;
+    final map = record.toMap();
+
+    // Convertir tipos incompatibles con SQLite
+    // DateTime -> int (millisecondsSinceEpoch)
+    if (map['timestamp'] is DateTime) {
+      map['timestamp'] = (map['timestamp'] as DateTime).millisecondsSinceEpoch;
+    }
+
+    // bool -> int (0 o 1)
+    if (map['incluye_sueno'] is bool) {
+      map['incluye_sueno'] = (map['incluye_sueno'] as bool) ? 1 : 0;
+    }
+
     await db.update(
       'lactation_records',
-      record.toMap(),
+      map,
       where: 'id = ?',
       whereArgs: [record.id],
     );

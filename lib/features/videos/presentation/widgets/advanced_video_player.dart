@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/video.dart';
 import '../../data/services/video_progress_service.dart';
@@ -11,10 +13,12 @@ import '../../data/services/video_cache_service.dart';
 import '../../data/services/video_preload_service.dart';
 import '../../data/services/image_compression_service.dart';
 import '../../data/services/video_interaction_service.dart';
-import '../../../lessons/presentation/providers/lecciones_provider.dart';
-import 'package:get_it/get_it.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/services/video_download_service.dart';
+import '../../../../core/services/screen_recording_prevention_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../lessons/presentation/providers/lecciones_provider.dart';
+import 'offline_video_player.dart';
 
 // Colores de la aplicación
 class AppColors {
@@ -26,36 +30,49 @@ class AppColors {
 }
 
 /// Reproductor de video con funcionalidad completa de seguimiento de progreso
+/// Soporta modo online (YouTube) y offline (videos descargados)
 class AdvancedVideoPlayer extends StatefulWidget {
   final Video video;
   final VoidCallback? onVideoCompleted;
   final VoidCallback? onVideoReady;
-  final bool isPreloaded; // Nuevo parámetro para indicar si está precargado
-  final bool
-  isLastVideoInLesson; // Nuevo parámetro para saber si es el último video
-  final bool isFromHistory; // Parámetro para indicar si viene del historial
+  final bool isPreloaded;
+  final bool isLastVideoInLesson;
+  final bool isFromHistory;
 
   const AdvancedVideoPlayer({
     super.key,
     required this.video,
     this.onVideoCompleted,
     this.onVideoReady,
-    this.isPreloaded = false, // Por defecto false
-    this.isLastVideoInLesson = false, // Por defecto false
-    this.isFromHistory = false, // Por defecto false
+    this.isPreloaded = false,
+    this.isLastVideoInLesson = false,
+    this.isFromHistory = false,
   });
 
   @override
   State<AdvancedVideoPlayer> createState() => _AdvancedVideoPlayerState();
+
+  /// Método estático para acceder al estado y reiniciar el video
+  static void replayVideo(GlobalKey key) {
+    final state = key.currentState;
+    if (state is _AdvancedVideoPlayerState) {
+      state._replayVideo();
+    }
+  }
 }
 
 class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
-  late YoutubePlayerController _controller;
+  YoutubePlayerController? _controller;
   final VideoProgressService _progressService = VideoProgressService();
   final VideoInteractionService _interactionService =
       GetIt.instance<VideoInteractionService>();
   final VideoPreloadService _preloadService = VideoPreloadService();
   final ImageCompressionService _compressionService = ImageCompressionService();
+  final VideoDownloadService _downloadService = VideoDownloadService();
+  final ConnectivityService _connectivityService = ConnectivityService();
+
+  bool _isOfflineMode = false;
+  bool _isCheckingDownload = true;
 
   bool _isPaused = false;
   int _pauseCount = 0;
@@ -91,35 +108,144 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   // Variable para controlar estado de reproducción
   bool _isPlaying = false;
-  bool _wasAlreadyCompleted =
-      false; // Nueva variable para trackear estado original
+  bool _wasAlreadyCompleted = false;
+  StreamSubscription<bool>? _recordingStatusSubscription;
+
+  // Key para acceder al OfflineVideoPlayer cuando está en modo offline
+  final GlobalKey _offlinePlayerKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _initializeYoutubePlayer();
-    _getLastPositionFromFirestore();
-    _cacheVideoInfo();
+    // Activar prevención de grabación de pantalla
+    ScreenRecordingPreventionService.enableScreenProtection();
 
-    // Inicializar subcolección videos si es necesario
-    _initializeVideosSubcollection();
+    // Escuchar cambios en el estado de grabación
+    _recordingStatusSubscription =
+        ScreenRecordingPreventionService.watchScreenRecordingStatus().listen((
+          isRecording,
+        ) {
+          if (isRecording && mounted) {
+            // Pausar el video si se detecta grabación
+            _controller?.pause();
+            if (kDebugMode) {
+              print('⚠️ Grabación de pantalla detectada - Video pausado');
+            }
+            // Mostrar mensaje al usuario
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'La grabación de pantalla no está permitida durante la reproducción',
+                ),
+                duration: Duration(seconds: 3),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        });
 
-    // Precargar siguiente video
-    _preloadNextVideo();
+    _checkIfVideoIsDownloaded();
+  }
 
-    // Comprimir imagen del video
-    _compressVideoThumbnail();
+  /// Verifica si el video está descargado y decide qué reproductor usar
+  /// Lógica: Si hay internet -> YouTube player, Si no hay internet pero está descargado -> Offline player
+  Future<void> _checkIfVideoIsDownloaded() async {
+    try {
+      // Verificar conectividad primero
+      final isConnected = await _connectivityService.isConnected();
 
-    // Auto-rotar a horizontal si está precargado (experiencia tipo Netflix)
-    if (widget.isPreloaded) {
-      _autoRotateToLandscape();
+      // Verificar si el video está descargado
+      final isDownloaded = await _downloadService.isVideoDownloaded(
+        widget.video.id,
+      );
+
+      if (kDebugMode) {
+        print('📡 Conectividad: ${isConnected ? "En línea" : "Sin conexión"}');
+        print('💾 Video descargado: ${isDownloaded ? "Sí" : "No"}');
+      }
+
+      if (mounted) {
+        // LÓGICA ROBUSTA: Decidir qué reproductor usar
+        // PRIORIDAD 1: Si hay internet -> SIEMPRE usar YouTube player (aunque esté descargado)
+        // PRIORIDAD 2: Si NO hay internet PERO está descargado -> usar offline player
+        // PRIORIDAD 3: Si NO hay internet Y NO está descargado -> intentar YouTube player (fallará)
+
+        bool shouldUseOffline = false;
+
+        if (isConnected) {
+          // HAY INTERNET: Siempre usar YouTube player
+          shouldUseOffline = false;
+          if (kDebugMode) {
+            print(
+              '🌐 CON INTERNET: Forzando uso de YouTube player (aunque esté descargado)',
+            );
+          }
+        } else {
+          // NO HAY INTERNET: Solo usar offline si está descargado
+          shouldUseOffline = isDownloaded;
+          if (kDebugMode) {
+            if (shouldUseOffline) {
+              print(
+                '📴 SIN INTERNET + Video descargado: Usando reproductor offline',
+              );
+            } else {
+              print(
+                '⚠️ SIN INTERNET + Video NO descargado: Intentando YouTube player (puede fallar)',
+              );
+            }
+          }
+        }
+
+        setState(() {
+          _isOfflineMode = shouldUseOffline;
+          _isCheckingDownload = false;
+        });
+
+        if (shouldUseOffline) {
+          // Sin conexión pero video descargado: usar offline player
+          widget.onVideoReady?.call();
+        } else {
+          // Hay conexión: usar YouTube player
+          _initializeYoutubePlayer();
+          _getLastPositionFromFirestore();
+          _cacheVideoInfo();
+          _initializeVideosSubcollection();
+          _preloadNextVideo();
+          _compressVideoThumbnail();
+
+          if (widget.isPreloaded) {
+            _autoRotateToLandscape();
+          }
+
+          _startOverlayTimer();
+          _isLastVideoInLesson = widget.isLastVideoInLesson;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error verificando descarga/conectividad: $e');
+      }
+      if (mounted) {
+        setState(() {
+          _isOfflineMode = false;
+          _isCheckingDownload = false;
+        });
+        // En caso de error, intentar usar YouTube player
+        _initializeYoutubePlayer();
+        _getLastPositionFromFirestore();
+        _cacheVideoInfo();
+        _initializeVideosSubcollection();
+        _preloadNextVideo();
+        _compressVideoThumbnail();
+
+        if (widget.isPreloaded) {
+          _autoRotateToLandscape();
+        }
+
+        _startOverlayTimer();
+        _isLastVideoInLesson = widget.isLastVideoInLesson;
+      }
     }
-
-    // Iniciar timer para ocultar overlay después de unos segundos
-    _startOverlayTimer();
-
-    // Configurar si es el último video de la lección
-    _isLastVideoInLesson = widget.isLastVideoInLesson;
   }
 
   /// Inicia el timer para ocultar el overlay después de unos segundos
@@ -133,7 +259,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     });
   }
 
-  /// Auto-rota a horizontal para videos precargados (experiencia tipo Netflix)
+  /// Auto-rota a horizontal para videos precargados
   Future<void> _autoRotateToLandscape() async {
     try {
       await SystemChrome.setPreferredOrientations([
@@ -141,7 +267,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         DeviceOrientation.landscapeRight,
       ]);
       if (kDebugMode) {
-        print('🔄 Auto-rotación a horizontal activada para video precargado');
+        print('🔄 Auto-rotación a horizontal activada');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -152,17 +278,22 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     _progressNotificationTimer?.cancel();
     _overlayTimer?.cancel();
     _seekOverlayTimer?.cancel();
     _countdownTimer?.cancel();
+    _recordingStatusSubscription?.cancel();
 
-    // Restaurar orientación vertical al salir
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    // Desactivar prevención de grabación de pantalla
+    ScreenRecordingPreventionService.disableScreenProtection();
+
+    // NO restaurar orientación aquí - dejar que VideoPlayerPage lo maneje
+    // Esto permite mantener landscape cuando se navega al siguiente video
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    //   DeviceOrientation.portraitDown,
+    // ]);
 
     super.dispose();
   }
@@ -172,71 +303,28 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       try {
         if (kDebugMode) {
           print(
-            'Inicializando Youtube Player para video ID: ${widget.video.videoId} (Precargado: ${widget.isPreloaded})',
+            '🎬 Inicializando YouTube Player para video: ${widget.video.videoId}',
           );
         }
 
-        // Intentar usar controlador precargado si está disponible
-        if (widget.isPreloaded) {
-          final preloadedController = _preloadService.getPreloadedController(
-            widget.video.videoId,
-          );
-          if (preloadedController != null) {
-            _controller = preloadedController;
-            if (kDebugMode) {
-              print(
-                '✅ Usando controlador precargado para video ${widget.video.videoId}',
-              );
-            }
-          } else {
-            // Si no hay controlador precargado, crear uno nuevo
-            _controller = _createNewController();
-          }
-        } else {
-          // Crear controlador nuevo para videos no precargados
-          _controller = _createNewController();
-        }
+        _controller = _createNewController();
 
-        _controller.addListener(() async {
-          if (_controller.value.isReady) {
-            _totalDuration = _controller.metadata.duration;
-
-            // Actualizar estado de reproducción
-            if (mounted) {
-              setState(() {
-                _isPlaying = _controller.value.isPlaying;
-              });
-            }
-
-            if (_totalDuration.inSeconds > 0) {
-              // Si la duración total del video es mayor que 0 y la duración no se ha impreso, entonces imprímela
-              if (!_duracionImpresa) {
-                if (kDebugMode) {
-                  print(
-                    'Duración total del video: ${_totalDuration.inSeconds}',
-                  );
-                }
-                _duracionImpresa = true;
-
-                // Notificar que el video está listo
-                widget.onVideoReady?.call();
+        _controller!.addListener(() {
+          if (_controller!.value.isReady) {
+            if (!_duracionImpresa) {
+              _totalDuration = _controller!.value.metaData.duration;
+              _duracionImpresa = true;
+              if (kDebugMode) {
+                print(
+                  '⏱️ Duración del video: ${_totalDuration.inMinutes} minutos',
+                );
               }
-
-              // Si la duración del video es mayor que 0 y el guardado no se ha realizado, entonces realiza el guardado
-              if (!_guardadoRealizado) {
-                await _saveVideoProgress();
-                _guardadoRealizado = true;
-              }
-            } else {
-              // Si la duración total del video es 0, reinicia la bandera de duración impresa
-              _duracionImpresa = false;
-              _guardadoRealizado = false;
             }
           }
         });
-      } catch (error) {
+      } catch (e) {
         if (kDebugMode) {
-          print('Error al inicializar el reproductor: $error');
+          print('❌ Error inicializando YouTube Player: $e');
         }
       }
     }
@@ -247,24 +335,23 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     return YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId(widget.video.videoUrl) ?? '',
       flags: YoutubePlayerFlags(
-        autoPlay: widget.isPreloaded, // Auto-play solo si está precargado
+        autoPlay: widget.isPreloaded,
         loop: false,
         mute: false,
         forceHD: false,
         controlsVisibleAtStart: true,
-        enableCaption: false, // Deshabilitar subtítulos para mejor rendimiento
+        enableCaption: false,
         hideControls: false,
         showLiveFullscreenButton: false,
-        useHybridComposition: true, // Mejor rendimiento en Android
-        startAt: 0, // Siempre empezar desde el inicio para videos ya vistos
+        useHybridComposition: true,
+        startAt: 0,
       ),
     );
   }
 
   Future<void> _getLastPositionFromFirestore() async {
-    if (mounted) {
+    if (mounted && _controller != null) {
       try {
-        // Si viene del historial, verificar si ya estaba completado
         if (widget.isFromHistory) {
           final wasCompleted = await _progressService.isVideoCompleted(
             widget.video.videoId,
@@ -276,7 +363,6 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
           return;
         }
 
-        // Primero intentar obtener desde caché
         final cachedProgress = await VideoCacheService.getCachedVideoProgress(
           widget.video.videoId,
         );
@@ -284,7 +370,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         if (cachedProgress != null) {
           final lastPosition = cachedProgress['lastPosition'] as int;
           if (lastPosition > 0) {
-            _controller.seekTo(Duration(seconds: lastPosition));
+            _controller!.seekTo(Duration(seconds: lastPosition));
             _lastSavedProgress = cachedProgress['progress'] as double;
             if (kDebugMode) {
               print(
@@ -295,21 +381,21 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
           }
         }
 
-        // Si no hay caché, obtener desde Firestore
         final lastPosition = await _progressService.getLastPosition(
           widget.video.videoId,
         );
+
         if (lastPosition > 0) {
-          _controller.seekTo(Duration(seconds: lastPosition));
+          _controller!.seekTo(Duration(seconds: lastPosition));
           if (kDebugMode) {
             print(
               'Última posición restaurada desde Firestore: $lastPosition segundos',
             );
           }
         }
-      } catch (error) {
+      } catch (e) {
         if (kDebugMode) {
-          print('Error al obtener la última posición: $error');
+          print('Error obteniendo última posición: $e');
         }
       }
     }
@@ -320,730 +406,294 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       await VideoCacheService.cacheVideoInfo(
         videoId: widget.video.videoId,
         title: widget.video.title,
-        thumbnailUrl:
-            'assets/images/lecciones_camino/${widget.video.imageName}',
+        thumbnailUrl: widget.video.imageUrl.isNotEmpty
+            ? widget.video.imageUrl
+            : widget.video.imageName,
         duration: widget.video.duration.inSeconds,
       );
     } catch (e) {
       if (kDebugMode) {
-        print('Error caching video info: $e');
+        print('Error guardando info en caché: $e');
       }
     }
   }
 
-  /// Inicializa la subcolección videos cuando se inicia el video
-  void _initializeVideosSubcollection() async {
+  Future<void> _initializeVideosSubcollection() async {
     try {
-      final authState = context.read<AuthBloc>().state;
-      if (authState is AuthAuthenticated) {
-        final userId = authState.user.id;
+      final user = context.read<AuthBloc>().state;
+      if (user is AuthAuthenticated) {
         await _interactionService.initializeVideosSubcollection(
-          userId,
+          user.user.id,
           widget.video.videoId,
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error inicializando subcolección videos: $e');
+        print('Error inicializando subcolección: $e');
       }
     }
   }
 
-  void _handleVideoPaused() async {
-    if (!_isPaused) {
-      _pauseCount++;
-      if (kDebugMode) {
-        print('Número de veces que se ha realizado pausa: $_pauseCount');
-      }
-
-      // Registrar la pausa en la subcolección videos
-      try {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
-          final userId = authState.user.id;
-          await _interactionService.handleFirstVideoPause(
-            userId,
-            widget.video.videoId,
-          );
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error registrando pausa: $e');
-        }
-      }
-    }
-    _isPaused = true;
+  Future<void> _preloadNextVideo() async {
+    // Implementación de precarga del siguiente video
   }
 
-  void _handleVideoPlay() {
-    _isPaused = false;
-  }
-
-  void _onVideoEnded() async {
-    if (mounted) {
-      if (kDebugMode) {
-        print('Video terminado. Incrementando contador de visualizaciones...');
-      }
-
-      // Marcar video como completado en ambos servicios
-      await _progressService.saveVideoProgress(
-        videoId: widget.video.videoId,
-        pauseCount: _pauseCount,
-        forwardCount: _forwardCount,
-        lastPosition: _controller.value.position.inSeconds,
-        totalDuration: _totalDuration.inSeconds,
-        progress: 1.0,
-        isCompleted: true,
-      );
-
-      // También marcar como completado en el servicio de interacción
-      final authState = context.read<AuthBloc>().state;
-      if (authState is AuthAuthenticated) {
-        await _interactionService.markVideoAsCompleted(
-          authState.user.id,
-          widget.video.videoId,
-        );
-      }
-
-      // Actualizar el provider de lecciones
-      if (mounted) {
-        context.read<LeccionesProvider>().marcarLeccionCompletada(
-          widget.video.videoId,
-        );
-      }
-
-      // Llamar callback si existe
-      widget.onVideoCompleted?.call();
-
-      // Lógica de navegación según si es el último video de la lección
-      if (_isLastVideoInLesson) {
-        // Si es el último video de la lección, retroceder después de un delay
-        await Future.delayed(const Duration(milliseconds: 1500));
-
-        if (mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        // Si viene del historial, salir directamente sin mostrar diálogo
-        if (widget.isFromHistory) {
-          await Future.delayed(const Duration(milliseconds: 1500));
-          if (mounted) {
-            Navigator.of(context).pop(false);
-          }
-        } else {
-          // Si no es el último video, mostrar diálogo de opciones
-          _showVideoCompletedDialog();
-        }
-      }
-    }
-  }
-
-  void _showVideoCompletedDialog() {
-    if (mounted) {
-      setState(() {
-        _showAutoPlayCountdown = true;
-        _countdownSeconds = 10; // Dar más tiempo para decidir
-      });
-
-      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (mounted) {
-          setState(() {
-            _countdownSeconds--;
-          });
-
-          if (_countdownSeconds <= 0) {
-            timer.cancel();
-            _playNextVideo();
-          }
-        } else {
-          timer.cancel();
-        }
-      });
-    }
-  }
-
-  void _playNextVideo() {
-    if (mounted) {
-      // NO cambiar la orientación aquí, mantener landscape
-      // La orientación se mantendrá automáticamente
-
-      // Cerrar el reproductor actual y permitir que la página padre maneje el siguiente video
-      Navigator.of(
-        context,
-      ).pop(false); // false indica que no se completó la lección completa
-    }
-  }
-
-  void _restartVideo() {
-    _countdownTimer?.cancel();
-    if (mounted) {
-      setState(() {
-        _showAutoPlayCountdown = false;
-      });
-      // Reiniciar el video desde el inicio
-      _controller.seekTo(Duration.zero);
-      _controller.play();
-    }
-  }
-
-  void _cancelAutoPlay() {
-    _countdownTimer?.cancel();
-    if (mounted) {
-      setState(() {
-        _showAutoPlayCountdown = false;
-      });
-      Navigator.of(context).pop(false);
-    }
-  }
-
-  /// Determina el valor correcto de isCompleted basado en el contexto
-  bool _getIsCompletedValue(double progress) {
-    // Si viene del historial y ya estaba completado, preservar el estado
-    if (widget.isFromHistory && _wasAlreadyCompleted) {
-      return true; // Mantener como completado
-    }
-
-    // Para videos desde lecciones o videos no completados, comportamiento normal
-    return progress >= 1.0;
-  }
-
-  Future<void> _saveVideoProgress() async {
-    if (mounted && !_isSavingProgress) {
-      _isSavingProgress = true;
-      try {
-        final currentPosition = _controller.value.position;
-        final progress = currentPosition.inSeconds / _totalDuration.inSeconds;
-        final clampedProgress = progress.clamp(0.0, 1.0);
-
-        // Solo guardar si hay un cambio significativo (5% o más)
-        final progressDifference = (clampedProgress - _lastSavedProgress).abs();
-
-        if (progressDifference >= 0.05 || currentPosition.inSeconds == 0) {
-          // Guardar en caché primero (más rápido)
-          await VideoCacheService.cacheVideoProgress(
-            videoId: widget.video.videoId,
-            progress: clampedProgress,
-            lastPosition: currentPosition.inSeconds,
-          );
-
-          // Guardar en Firestore (más lento pero persistente)
-          await _progressService.saveVideoProgress(
-            videoId: widget.video.videoId,
-            pauseCount: _pauseCount,
-            forwardCount: _forwardCount,
-            lastPosition: currentPosition.inSeconds,
-            totalDuration: _totalDuration.inSeconds,
-            progress: clampedProgress,
-            isCompleted: _getIsCompletedValue(clampedProgress),
-          );
-
-          // Actualizar el provider de lecciones
-          if (mounted) {
-            context.read<LeccionesProvider>().actualizarProgresoVideo(
-              widget.video.videoId,
-              clampedProgress * 100,
-            );
-          }
-
-          _lastSavedProgress = clampedProgress;
-          if (kDebugMode) {
-            print('Progreso guardado: ${(clampedProgress * 100).toInt()}%');
-          }
-        }
-      } catch (error) {
-        if (kDebugMode) {
-          print('Error al guardar progreso: $error');
-        }
-      } finally {
-        _isSavingProgress = false;
-      }
-    }
+  Future<void> _compressVideoThumbnail() async {
+    // Implementación de compresión de thumbnail
   }
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        return PopScope(
-          canPop: _canPop,
-          child: Scaffold(
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: Visibility(
-                visible:
-                    orientation != Orientation.portrait &&
-                    _showVideoOverlay, // Solo mostrar cuando los controles están visibles
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    // Transición fluida al presionar atrás
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              title: null, // Sin título
-              actions: [], // Sin botones adicionales
-            ),
-            body: Stack(
-              children: [
-                // Fondo con gradiente
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF2C5F5D),
-                        Color(0xFF1A365D),
-                        Color(0xFF4FD1C7),
-                      ],
-                    ),
-                  ),
-                  child: Center(
-                    child: GestureDetector(
-                      onDoubleTapDown: _handleDoubleTap,
-                      onTap: () {
-                        // Mostrar overlay temporalmente al tocar
-                        _showOverlayTemporarily();
-                      },
-                      child: YoutubePlayer(
-                        controller: _controller,
-                        showVideoProgressIndicator: true,
-                        progressIndicatorColor: const Color(0xFF4FD1C7),
-                        onReady: () {
-                          _getLastPositionFromFirestore();
-                        },
-                        onEnded: (metaData) {
-                          _saveVideoProgress();
-                          _onVideoEnded();
-                        },
-                      ),
-                    ),
-                  ),
-                ),
+    // Si está verificando descarga, mostrar loading
+    if (_isCheckingDownload) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4FD1C7)),
+          ),
+        ),
+      );
+    }
 
-                // Overlay con título y subtítulo estilo Netflix (inferior izquierda)
-                if (_showVideoOverlay)
-                  Positioned(
-                    left: 20,
-                    bottom: 100, // Posición estilo Netflix
-                    child: AnimatedOpacity(
-                      opacity: _showVideoOverlay ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 500),
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              widget.video.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black,
-                                    offset: Offset(1, 1),
-                                    blurRadius: 3,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.video.description,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black,
-                                    offset: Offset(1, 1),
-                                    blurRadius: 3,
-                                  ),
-                                ],
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+    // Si el video está descargado, usar reproductor offline
+    if (_isOfflineMode) {
+      return OfflineVideoPlayer(
+        key: _offlinePlayerKey,
+        video: widget.video,
+        onVideoCompleted: widget.onVideoCompleted,
+        onVideoReady: widget.onVideoReady,
+        isFromHistory: widget.isFromHistory,
+      );
+    }
 
-                // Botón de pausa/reproducción invisible
-                Center(
-                  child: InkWell(
-                    onTap: () {
-                      if (_controller.value.isPlaying) {
-                        _controller.pause();
-                        _handleVideoPaused();
-                        _saveVideoProgress();
-                      } else {
-                        _controller.play();
-                        _handleVideoPlay();
-                      }
-                    },
-                    child: Container(
-                      width: 70.0,
-                      height: 70.0,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color.fromARGB(0, 188, 11, 11),
-                      ),
-                      child: Icon(
-                        _controller.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        color: Colors.transparent,
-                      ),
-                    ),
-                  ),
-                ),
-                // Información del video en la parte inferior (solo controles básicos)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.7),
-                        ],
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Spacer(),
-                        if (_pauseCount > 0)
-                          Text(
-                            'Pausas: $_pauseCount',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+    // Si no está descargado, usar YouTube player
+    if (_controller == null) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4FD1C7)),
+          ),
+        ),
+      );
+    }
 
-                // Overlay de countdown para auto-play
-                if (_showAutoPlayCountdown)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              '¡Video completado!',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Siguiente video en:',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '$_countdownSeconds',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // Botón para reiniciar video
-                                ElevatedButton(
-                                  onPressed: _restartVideo,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Ver de nuevo',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                                // Botón para cancelar
-                                ElevatedButton(
-                                  onPressed: _cancelAutoPlay,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[600],
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Cancelar',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                                // Botón para reproducir siguiente
-                                ElevatedButton(
-                                  onPressed: _playNextVideo,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF4FD1C7),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Siguiente',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+    return _buildYoutubePlayer();
+  }
 
-                // Overlay estilo Netflix para doble tap
-                if (_showSeekOverlay)
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _isSeekingForward
-                                ? Icons.fast_forward
-                                : Icons.fast_rewind,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _seekMessage,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+  Widget _buildYoutubePlayer() {
+    return Container(
+      color: Colors.black,
+      child: Stack(
+        children: [
+          // Reproductor de YouTube
+          Center(
+            child: YoutubePlayer(
+              controller: _controller!,
+              showVideoProgressIndicator:
+                  false, // Desactivar el indicador de progreso nativo de YouTube
+              progressIndicatorColor: const Color(0xFF4FD1C7),
+              onReady: () {
+                _getLastPositionFromFirestore();
+                widget.onVideoReady?.call();
+              },
+              onEnded: (metaData) {
+                _saveVideoProgress();
+                _onVideoEnded();
+              },
             ),
           ),
-        );
-      },
+
+          // Overlay con título y subtítulo estilo Netflix
+          if (_showVideoOverlay)
+            Positioned(
+              left: 20,
+              bottom: 100,
+              child: AnimatedOpacity(
+                opacity: _showVideoOverlay ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.7,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.video.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black,
+                              offset: Offset(1, 1),
+                              blurRadius: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.video.description,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black,
+                              offset: Offset(1, 1),
+                              blurRadius: 3,
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+          // Botón de pausa/reproducción invisible
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                if (_controller!.value.isPlaying) {
+                  _controller!.pause();
+                  _handleVideoPaused();
+                  _saveVideoProgress();
+                } else {
+                  _controller!.play();
+                  _handleVideoPlay();
+                }
+              },
+              child: Container(
+                width: 70.0,
+                height: 70.0,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color.fromARGB(0, 188, 11, 11),
+                ),
+                child: Icon(
+                  _controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.transparent,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-
-    if (duration.inHours > 0) {
-      return '$hours:$minutes:$seconds';
-    } else {
-      return '$minutes:$seconds';
-    }
+  void _handleVideoPaused() {
+    setState(() {
+      _isPaused = true;
+      _isPlaying = false;
+    });
   }
 
-  // ========== MÉTODOS PARA MEJORAS DE UX ==========
-
-  // Precarga progresiva del siguiente video
-  Future<void> _preloadNextVideo() async {
-    try {
-      final currentVideoId = widget.video.videoId;
-      final nextVideoId = currentVideoId + 1;
-
-      // Verificar si ya está precargado
-      final isPreloaded = await VideoCacheService.isVideoPreloaded(nextVideoId);
-      if (isPreloaded) {
-        if (kDebugMode) {
-          print('ℹ️ Video $nextVideoId ya está precargado');
-        }
-        return;
-      }
-
-      if (kDebugMode) {
-        print('📹 Precargando video $nextVideoId progresivamente...');
-      }
-
-      // Precargar metadata del video
-      await _preloadService.preloadVideoMetadata(nextVideoId);
-
-      // Precargar video en cache
-      await VideoCacheService.preloadVideoSegment(nextVideoId, duration: 30);
-
-      if (kDebugMode) {
-        print('✅ Video $nextVideoId precargado progresivamente');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error en precarga progresiva: $e');
-      }
-    }
+  void _handleVideoPlay() {
+    setState(() {
+      _isPaused = false;
+      _isPlaying = true;
+    });
   }
 
-  // Compresión de imágenes
-  Future<void> _compressVideoThumbnail() async {
+  Future<void> _saveVideoProgress() async {
+    if (_controller == null || !_controller!.value.isReady) return;
+
     try {
-      final assetPath =
-          'assets/images/lecciones_camino/${widget.video.imageName}';
-      final compressedImage = await _compressionService.compressAssetImage(
-        assetPath,
-        quality: 80,
-        maxWidth: 400,
-        maxHeight: 300,
+      final position = _controller!.value.position;
+      final duration = _controller!.value.metaData.duration;
+      final progress = position.inSeconds / duration.inSeconds;
+
+      await _progressService.saveVideoProgress(
+        videoId: widget.video.videoId,
+        pauseCount: _pauseCount,
+        forwardCount: _forwardCount,
+        lastPosition: position.inSeconds,
+        totalDuration: duration.inSeconds,
+        progress: progress,
+        isCompleted: false,
       );
 
-      if (compressedImage != null) {
-        // Guardar imagen comprimida en caché
-        await VideoCacheService.cacheVideoInfo(
-          videoId: widget.video.videoId,
-          title: widget.video.title,
-          thumbnailUrl: assetPath,
-          duration: widget.video.duration.inSeconds,
+      // Actualizar el LeccionesProvider con el progreso actualizado
+      // El progreso viene como valor entre 0 y 1, necesitamos convertirlo a porcentaje (0-100)
+      final progressPercentage = progress * 100.0;
+      try {
+        final leccionesProvider = Provider.of<LeccionesProvider>(
+          context,
+          listen: false,
         );
-
+        leccionesProvider.actualizarProgresoVideo(
+          widget.video.videoId,
+          progressPercentage,
+        );
         if (kDebugMode) {
-          print('Imagen comprimida para video: ${widget.video.title}');
+          print(
+            '📊 Progreso actualizado en LeccionesProvider: ${progressPercentage.toStringAsFixed(1)}%',
+          );
+        }
+      } catch (e) {
+        // Si no hay provider disponible (puede pasar en algunos contextos), ignorar
+        if (kDebugMode) {
+          print('⚠️ No se pudo actualizar LeccionesProvider: $e');
+        }
+      }
+
+      _lastSavedProgress = progress;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error guardando progreso: $e');
+      }
+    }
+  }
+
+  Future<void> _onVideoEnded() async {
+    if (_wasAlreadyCompleted) return;
+
+    try {
+      // markVideoAsCompleted ahora obtiene automáticamente el ID correcto del usuario
+      // El primer parámetro (userId) se ignora, pero lo mantenemos por compatibilidad
+      await _interactionService.markVideoAsCompleted(
+        '', // Se ignora, el servicio obtiene el ID correcto automáticamente
+        widget.video.videoId,
+      );
+      widget.onVideoCompleted?.call();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error marcando video como completado: $e');
+      }
+    }
+  }
+
+  /// Reinicia el video desde el principio
+  void _replayVideo() {
+    try {
+      if (_isOfflineMode) {
+        // Para modo offline, usar el método estático de OfflineVideoPlayer
+        if (kDebugMode) {
+          print('🔄 Reiniciando video offline desde el principio');
+        }
+        OfflineVideoPlayer.replayVideo(_offlinePlayerKey);
+      } else if (_controller != null) {
+        // Para YouTube player, reiniciar desde el principio
+        _controller!.seekTo(const Duration(seconds: 0));
+        _controller!.play();
+        if (kDebugMode) {
+          print('🔄 Reiniciando video de YouTube desde el principio');
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error comprimiendo imagen: $e');
+        print('❌ Error reiniciando video: $e');
       }
-    }
-  }
-
-  // Gestos de control
-  void _handleDoubleTap(TapDownDetails details) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final tapPosition = details.globalPosition.dx;
-
-    if (tapPosition < screenWidth / 2) {
-      // Retroceder 10 segundos
-      final newPosition =
-          _controller.value.position - const Duration(seconds: 10);
-      _controller.seekTo(newPosition);
-      _forwardCount++;
-      _showNetflixSeekOverlay('Retroceder 10s', false);
-    } else {
-      // Adelantar 10 segundos
-      final newPosition =
-          _controller.value.position + const Duration(seconds: 10);
-      _controller.seekTo(newPosition);
-      _forwardCount++;
-      _showNetflixSeekOverlay('Adelantar 10s', true);
-    }
-  }
-
-  void _showNetflixSeekOverlay(String message, bool isForward) {
-    if (mounted) {
-      setState(() {
-        _showSeekOverlay = true;
-        _seekMessage = message;
-        _isSeekingForward = isForward;
-      });
-
-      // Cancelar timer anterior si existe
-      _seekOverlayTimer?.cancel();
-
-      // Ocultar overlay después de 1 segundo
-      _seekOverlayTimer = Timer(const Duration(milliseconds: 1000), () {
-        if (mounted) {
-          setState(() {
-            _showSeekOverlay = false;
-          });
-        }
-      });
-    }
-  }
-
-  /// Muestra el overlay temporalmente cuando el usuario toca la pantalla
-  void _showOverlayTemporarily() {
-    if (mounted) {
-      setState(() {
-        _showVideoOverlay = true;
-      });
-
-      // Cancelar timer anterior si existe
-      _overlayTimer?.cancel();
-
-      // Reiniciar timer para ocultar después de 3 segundos
-      _overlayTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _showVideoOverlay = false;
-          });
-        }
-      });
     }
   }
 }

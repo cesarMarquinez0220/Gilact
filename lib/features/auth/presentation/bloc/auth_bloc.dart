@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/auth_usecases.dart';
+import '../../data/services/offline_session_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -16,6 +18,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SendEmailVerificationUseCase _sendEmailVerificationUseCase;
   final UpdateProfileUseCase _updateProfileUseCase;
   final DeleteAccountUseCase _deleteAccountUseCase;
+  final OfflineSessionService _offlineSessionService;
+  final ConnectivityService _connectivityService;
 
   AuthBloc({
     required SignInUseCase signInUseCase,
@@ -26,6 +30,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SendEmailVerificationUseCase sendEmailVerificationUseCase,
     required UpdateProfileUseCase updateProfileUseCase,
     required DeleteAccountUseCase deleteAccountUseCase,
+    required OfflineSessionService offlineSessionService,
+    required ConnectivityService connectivityService,
   }) : _signInUseCase = signInUseCase,
        _signUpUseCase = signUpUseCase,
        _signOutUseCase = signOutUseCase,
@@ -34,6 +40,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _sendEmailVerificationUseCase = sendEmailVerificationUseCase,
        _updateProfileUseCase = updateProfileUseCase,
        _deleteAccountUseCase = deleteAccountUseCase,
+       _offlineSessionService = offlineSessionService,
+       _connectivityService = connectivityService,
        super(AuthInitial()) {
     on<SignInRequested>(_onSignInRequested);
     on<SignUpRequested>(_onSignUpRequested);
@@ -43,6 +51,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SendEmailVerificationRequested>(_onSendEmailVerificationRequested);
     on<UpdateProfileRequested>(_onUpdateProfileRequested);
     on<DeleteAccountRequested>(_onDeleteAccountRequested);
+    on<CheckOfflineSessionRequested>(_onCheckOfflineSessionRequested);
+    on<SyncOfflineSessionRequested>(_onSyncOfflineSessionRequested);
   }
 
   Future<void> _onSignInRequested(
@@ -51,13 +61,53 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
 
+    // Verificar conectividad
+    final isConnected = await _connectivityService.isConnected();
+
+    if (!isConnected) {
+      // Modo offline: validar credenciales localmente
+      final isValid = await _offlineSessionService.validateCredentialsOffline(
+        email: event.email,
+        password: event.password,
+      );
+
+      if (isValid) {
+        // Obtener usuario de sesión guardada
+        final offlineUser = await _offlineSessionService.getOfflineUser();
+
+        if (offlineUser != null) {
+          emit(AuthAuthenticated(offlineUser));
+        } else {
+          emit(AuthFailure(
+            'Sesión no encontrada. Se requiere conexión para iniciar sesión por primera vez.',
+          ));
+        }
+      } else {
+        emit(AuthFailure('Credenciales incorrectas'));
+      }
+      return;
+    }
+
+    // Modo online: autenticar con Firebase
     final result = await _signInUseCase(
       SignInParams(email: event.email, password: event.password),
     );
 
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
+    await result.fold(
+      (failure) async {
+        emit(AuthFailure(failure.message));
+      },
+      (user) async {
+        // Guardar sesión offline después de login exitoso
+        final passwordHash = _offlineSessionService.hashPassword(event.password);
+        await _offlineSessionService.saveOfflineSession(
+          user: user,
+          email: event.email,
+          passwordHash: passwordHash,
+        );
+
+        emit(AuthAuthenticated(user));
+      },
     );
   }
 
@@ -66,6 +116,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
+
+    // Verificar conectividad (registro siempre requiere conexión)
+    final isConnected = await _connectivityService.isConnected();
+    if (!isConnected) {
+      emit(AuthFailure(
+        'Se requiere conexión a internet para crear una cuenta nueva.',
+      ));
+      return;
+    }
 
     final result = await _signUpUseCase(
       SignUpParams(
@@ -80,9 +139,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
 
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
+    await result.fold(
+      (failure) async {
+        emit(AuthFailure(failure.message));
+      },
+      (user) async {
+        // Guardar sesión offline después de registro exitoso
+        final passwordHash = _offlineSessionService.hashPassword(event.password);
+        await _offlineSessionService.saveOfflineSession(
+          user: user,
+          email: event.email,
+          passwordHash: passwordHash,
+        );
+
+        emit(AuthAuthenticated(user));
+      },
     );
   }
 
@@ -92,12 +163,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
 
-    final result = await _signOutUseCase();
+    // Limpiar sesión offline
+    await _offlineSessionService.clearSession();
 
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(AuthUnauthenticated()),
-    );
+    // Intentar cerrar sesión en Firebase (puede fallar si no hay conexión)
+    final isConnected = await _connectivityService.isConnected();
+    if (isConnected) {
+      final result = await _signOutUseCase();
+      result.fold(
+        (failure) => emit(AuthFailure(failure.message)),
+        (_) => emit(AuthUnauthenticated()),
+      );
+    } else {
+      // Sin conexión, solo limpiar sesión local
+      emit(AuthUnauthenticated());
+    }
   }
 
   Future<void> _onGetCurrentUserRequested(
@@ -173,7 +253,101 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(AuthUnauthenticated()),
+      (_) async {
+        // Limpiar sesión offline al eliminar cuenta
+        await _offlineSessionService.clearSession();
+        emit(AuthUnauthenticated());
+      },
     );
+  }
+
+  /// Verificar sesión offline al iniciar app
+  Future<void> _onCheckOfflineSessionRequested(
+    CheckOfflineSessionRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      // 1. Verificar si hay sesión offline válida
+      final hasSession = await _offlineSessionService.hasValidSession();
+
+      if (hasSession) {
+        // 2. Obtener usuario de sesión offline
+        final offlineUser = await _offlineSessionService.getOfflineUser();
+
+        if (offlineUser != null) {
+          emit(AuthAuthenticated(offlineUser));
+          return;
+        }
+      }
+
+      // 3. Si no hay sesión offline, verificar Firebase (si hay conexión)
+      final isConnected = await _connectivityService.isConnected();
+
+      if (isConnected) {
+        // Intentar obtener usuario de Firebase
+        final result = await _getCurrentUserUseCase();
+        result.fold(
+          (failure) => emit(AuthUnauthenticated()),
+          (user) {
+            if (user != null) {
+              emit(AuthAuthenticated(user));
+            } else {
+              emit(AuthUnauthenticated());
+            }
+          },
+        );
+      } else {
+        // Sin conexión y sin sesión offline
+        emit(AuthUnauthenticated());
+      }
+    } catch (e) {
+      emit(AuthFailure('Error verificando sesión: $e'));
+    }
+  }
+
+  /// Sincronizar sesión offline cuando vuelve la conexión
+  Future<void> _onSyncOfflineSessionRequested(
+    SyncOfflineSessionRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      final isConnected = await _connectivityService.isConnected();
+      if (!isConnected) {
+        // No hay conexión, no se puede sincronizar
+        return;
+      }
+
+      // Verificar si hay sesión offline
+      final hasSession = await _offlineSessionService.hasValidSession();
+      if (!hasSession) {
+        return;
+      }
+
+      // Obtener usuario offline
+      final offlineUser = await _offlineSessionService.getOfflineUser();
+      if (offlineUser == null) {
+        return;
+      }
+
+      // Intentar obtener usuario de Firebase para sincronizar
+      final result = await _getCurrentUserUseCase();
+      result.fold(
+        (failure) {
+          // Si falla, mantener sesión offline
+          print('⚠️ No se pudo sincronizar sesión: ${failure.message}');
+        },
+        (firebaseUser) {
+          if (firebaseUser != null) {
+            // Usuario encontrado en Firebase, extender sesión
+            _offlineSessionService.extendSession();
+            emit(AuthAuthenticated(firebaseUser));
+          }
+        },
+      );
+    } catch (e) {
+      print('❌ Error sincronizando sesión: $e');
+    }
   }
 }

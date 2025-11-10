@@ -52,9 +52,11 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
   Future<void> _preloadData() async {
     if (_isPreloading) return;
 
-    setState(() {
-      _isPreloading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isPreloading = true;
+      });
+    }
 
     try {
       print('🔄 SmartLactationButton: Precargando datos...');
@@ -73,13 +75,15 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
         '📦 [DEBUG] SmartLactationButton: monthRecords = ${monthRecords.length}',
       );
 
-      setState(() {
-        // Evitar duplicados: usar monthRecords que ya incluye los registros del día
-        // porque getRecordsForMonth incluye todo el mes
-        _preloadedRecords = monthRecords;
-        _isDataPreloaded = true;
-        _isPreloading = false;
-      });
+      if (mounted) {
+        setState(() {
+          // Evitar duplicados: usar monthRecords que ya incluye los registros del día
+          // porque getRecordsForMonth incluye todo el mes
+          _preloadedRecords = monthRecords;
+          _isDataPreloaded = true;
+          _isPreloading = false;
+        });
+      }
 
       print(
         '📦 [DEBUG] SmartLactationButton: _preloadedRecords final = ${_preloadedRecords.length}',
@@ -88,9 +92,11 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
       print('✅ SmartLactationButton: Datos precargados exitosamente');
     } catch (e) {
       print('❌ SmartLactationButton: Error precargando datos: $e');
-      setState(() {
-        _isPreloading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isPreloading = false;
+        });
+      }
     }
   }
 

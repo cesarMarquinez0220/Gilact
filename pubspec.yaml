@@ -78,6 +78,12 @@ dependencies:
   path: ^1.8.3
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
+  crypto: ^3.0.3
+  connectivity_plus: ^5.0.2
+  dio: ^5.4.0
+  encrypt: ^5.0.3
+  path_provider: ^2.1.1
+  youtube_explode_dart: ^2.0.0
 
 dev_dependencies:
   flutter_test:

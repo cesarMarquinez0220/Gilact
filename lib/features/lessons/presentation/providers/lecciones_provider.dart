@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 
 class LeccionesProvider extends ChangeNotifier {
@@ -84,15 +85,98 @@ class LeccionesProvider extends ChangeNotifier {
       _progresoVideos.clear();
 
       // Cargar desde Firestore
-      final videosCollection = FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userId)
-          .collection('videos');
+      // El VideoProgressService guarda usando user.uid (UID de Firebase Auth)
+      // Necesitamos buscar en ambos lugares: el userId proporcionado y el UID de Firebase Auth
+      // y combinar los resultados porque los videos pueden estar guardados en diferentes lugares
+      final authUser = FirebaseAuth.instance.currentUser;
+      final List<QueryDocumentSnapshot> allDocs = [];
+      final Set<String> usedUserIds = {};
+      
+      // 1. Buscar con el userId proporcionado
+      if (userId.isNotEmpty) {
+        try {
+          final videosCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userId)
+              .collection('videos');
+          final querySnapshot = await videosCollection.get();
+          allDocs.addAll(querySnapshot.docs);
+          usedUserIds.add(userId);
+          print('📊 LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con userId: $userId');
+        } catch (e) {
+          print('⚠️ LeccionesProvider: Error buscando con userId $userId: $e');
+        }
+      }
+      
+      // 2. Buscar con el UID de Firebase Auth (si es diferente del userId)
+      if (authUser != null && authUser.uid != userId && !usedUserIds.contains(authUser.uid)) {
+        try {
+          final videosCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(authUser.uid)
+              .collection('videos');
+          final querySnapshot = await videosCollection.get();
+          allDocs.addAll(querySnapshot.docs);
+          usedUserIds.add(authUser.uid);
+          print('📊 LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con UID de Firebase Auth: ${authUser.uid}');
+        } catch (e) {
+          print('⚠️ LeccionesProvider: Error buscando con UID de Firebase Auth: $e');
+        }
+      }
+      
+      // 3. Si aún no hay documentos, buscar por email
+      if (allDocs.isEmpty && authUser != null && authUser.email != null) {
+        try {
+          final userQuery = await FirebaseFirestore.instance
+              .collection('Users')
+              .where('email', isEqualTo: authUser.email)
+              .limit(1)
+              .get();
+          
+          if (userQuery.docs.isNotEmpty) {
+            final actualUserId = userQuery.docs.first.id;
+            print('🔍 LeccionesProvider: Usuario encontrado por email, ID real: $actualUserId');
+            if (!usedUserIds.contains(actualUserId)) {
+              final videosCollection = FirebaseFirestore.instance
+                  .collection('Users')
+                  .doc(actualUserId)
+                  .collection('videos');
+              final querySnapshot = await videosCollection.get();
+              allDocs.addAll(querySnapshot.docs);
+              usedUserIds.add(actualUserId);
+              print('📊 LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con userId por email: $actualUserId');
+            }
+          }
+        } catch (e) {
+          print('⚠️ LeccionesProvider: Error buscando usuario por email: $e');
+        }
+      }
+      
+      // Eliminar duplicados basándose en el ID del documento (videoId)
+      final Map<String, QueryDocumentSnapshot> uniqueDocs = {};
+      for (final doc in allDocs) {
+        final videoId = doc.id;
+        // Si ya existe, mantener el más reciente (basado en fechaActualizacion si está disponible)
+        if (!uniqueDocs.containsKey(videoId)) {
+          uniqueDocs[videoId] = doc;
+        } else {
+          final existingData = uniqueDocs[videoId]!.data() as Map<String, dynamic>;
+          final newData = doc.data() as Map<String, dynamic>;
+          final existingDate = existingData['fechaActualizacion'];
+          final newDate = newData['fechaActualizacion'];
+          if (newDate != null && (existingDate == null || 
+              (newDate is Timestamp && existingDate is Timestamp && 
+               newDate.compareTo(existingDate) > 0))) {
+            uniqueDocs[videoId] = doc;
+          }
+        }
+      }
+      
+      final querySnapshot = uniqueDocs.values.toList();
+      print('📊 LeccionesProvider: Total documentos únicos encontrados: ${querySnapshot.length} (buscados en: ${usedUserIds.join(", ")})');
 
-      final querySnapshot = await videosCollection.get();
-
-      for (final doc in querySnapshot.docs) {
-        final data = doc.data();
+      for (final doc in querySnapshot) {
+        final data = doc.data() as Map<String, dynamic>;
         print(
           '🔍 LeccionesProvider: Procesando documento ${doc.id} con datos: $data',
         );
@@ -122,20 +206,32 @@ class LeccionesProvider extends ChangeNotifier {
             print('🔍 LeccionesProvider: avance ya es double: $avance');
           }
         } else {
-          print('🔍 LeccionesProvider: avanceRaw es null, usando 0.0');
+          // Si no hay avance, calcularlo desde ultimaPosicion y duracion
+          final ultimaPosicion = data['ultimaPosicion'] as int? ?? 0;
+          final duracion = data['duracion'] as int? ?? 0;
+          if (duracion > 0 && ultimaPosicion > 0) {
+            avance = ultimaPosicion / duracion;
+            print(
+              '🔍 LeccionesProvider: avance calculado desde ultimaPosicion ($ultimaPosicion) / duracion ($duracion) = ${avance.toStringAsFixed(3)}',
+            );
+          } else {
+            print('🔍 LeccionesProvider: avanceRaw es null y no se puede calcular, usando 0.0');
+          }
         }
 
         if (videoId != null) {
-          // Usar el progreso de Firestore
-          _progresoVideos[videoId] = avance * 100;
-
-          // Marcar como completado si está completado en Firestore
+          // Si el video está completado, el progreso debe ser 100%
+          // Si no está completado, usar el avance de Firestore (o calculado)
           if (estaCompletado) {
+            _progresoVideos[videoId] = 100.0;
             _leccionesCompletadas.add(videoId);
-            print('✅ Video $videoId marcado como completado desde Firestore');
+            print('✅ Video $videoId marcado como completado desde Firestore (progreso: 100%)');
           } else {
+            // Usar el progreso de Firestore (avance viene como 0.0-1.0, convertir a porcentaje)
+            final progressPercentage = avance * 100;
+            _progresoVideos[videoId] = progressPercentage;
             print(
-              '⏸️ Video $videoId NO completado (estaCompletado: $estaCompletado, avance: ${(avance * 100).toStringAsFixed(1)}%)',
+              '⏸️ Video $videoId NO completado (estaCompletado: $estaCompletado, avance: ${progressPercentage.toStringAsFixed(1)}%)',
             );
           }
         } else {

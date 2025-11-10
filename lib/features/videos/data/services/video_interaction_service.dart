@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Servicio para manejar las interacciones del usuario con los videos
 class VideoInteractionService {
@@ -126,14 +127,82 @@ class VideoInteractionService {
     }
   }
 
+  /// Obtiene el ID del documento del usuario en Firestore
+  /// Usa la misma lógica que VideoProgressService
+  Future<String?> _getUserDocumentId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('❌ VideoInteractionService: Usuario no autenticado');
+        return null;
+      }
+
+      // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
+      if (user.email != null) {
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print(
+            '✅ VideoInteractionService: Usuario encontrado por email, ID del documento: $userDocId',
+          );
+          return userDocId;
+        } else {
+          print(
+            '⚠️ VideoInteractionService: No se encontró usuario por email: ${user.email}',
+          );
+        }
+      } else {
+        print('⚠️ VideoInteractionService: Usuario no tiene email');
+      }
+
+      // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
+      final docSnapshot = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        print(
+          '⚠️ VideoInteractionService: Usando UID como fallback (no recomendado): ${user.uid}',
+        );
+        return user.uid;
+      }
+
+      print('❌ VideoInteractionService: No se encontró usuario en Firestore');
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo ID del usuario: $e');
+      return null;
+    }
+  }
+
   /// Marca un video como completado con todos los campos necesarios
+  /// Ahora obtiene automáticamente el ID correcto del documento del usuario
   Future<void> markVideoAsCompleted(String userId, int videoId) async {
     try {
+      // Obtener el ID correcto del documento del usuario (ignorar el userId pasado)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        print(
+          '❌ VideoInteractionService: No se pudo obtener el ID del documento del usuario',
+        );
+        return;
+      }
+
       final videoDoc = _firestore
           .collection('Users')
-          .doc(userId)
+          .doc(userDocId) // Usar el ID correcto del documento
           .collection('videos')
           .doc(videoId.toString());
+
+      print(
+        '📊 VideoInteractionService: Marcando video como completado en /Users/$userDocId/videos/$videoId',
+      );
 
       // Obtener el documento actual para preservar campos existentes
       final currentDoc = await videoDoc.get();
@@ -193,18 +262,48 @@ class VideoInteractionService {
   }
 
   /// Obtiene todos los videos completados por el usuario
+  /// Ahora obtiene automáticamente el ID correcto del documento del usuario
   Future<List<int>> getCompletedVideos(String userId) async {
     try {
+      // Obtener el ID correcto del documento del usuario (ignorar el userId pasado)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        print(
+          '❌ VideoInteractionService: No se pudo obtener el ID del documento del usuario',
+        );
+        return [];
+      }
+
+      print(
+        '📊 VideoInteractionService: Obteniendo videos completados de /Users/$userDocId/videos',
+      );
+
       final querySnapshot = await _firestore
           .collection('Users')
-          .doc(userId)
+          .doc(userDocId) // Usar el ID correcto del documento
           .collection('videos')
           .where('estaCompletado', isEqualTo: true)
           .get();
 
-      return querySnapshot.docs
-          .map((doc) => doc.data()['videoId'] as int)
+      final completedVideos = querySnapshot.docs
+          .map((doc) {
+            final videoId = doc.data()['videoId'];
+            if (videoId == null) {
+              // Si no hay videoId en el documento, usar el ID del documento
+              return int.tryParse(doc.id) ?? 0;
+            }
+            return videoId is int
+                ? videoId
+                : int.tryParse(videoId.toString()) ?? 0;
+          })
+          .where((id) => id > 0) // Filtrar IDs inválidos
           .toList();
+
+      print(
+        '✅ VideoInteractionService: Encontrados ${completedVideos.length} videos completados: $completedVideos',
+      );
+
+      return completedVideos;
     } catch (e) {
       print('❌ Error obteniendo videos completados: $e');
       return [];

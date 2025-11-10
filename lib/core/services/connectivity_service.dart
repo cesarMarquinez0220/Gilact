@@ -45,11 +45,9 @@ class ConnectivityService {
   /// Obtiene el tipo de conexión actual
   Future<ConnectivityResult> getConnectionType() async {
     try {
-      final connectivityResults = await _connectivity.checkConnectivity();
-      // Retorna el primer resultado si hay múltiples
-      return connectivityResults.isNotEmpty
-          ? connectivityResults.first
-          : ConnectivityResult.none;
+      final connectivityResult = await _connectivity.checkConnectivity();
+      // En la versión nueva de connectivity_plus, checkConnectivity retorna un solo resultado
+      return connectivityResult;
     } catch (e) {
       return ConnectivityResult.none;
     }

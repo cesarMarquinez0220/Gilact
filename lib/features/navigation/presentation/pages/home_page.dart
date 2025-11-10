@@ -11,8 +11,17 @@ import '../widgets/modern_header.dart';
 import '../widgets/home_feature_card.dart';
 import '../widgets/countdown_card.dart';
 import '../widgets/postparto_profile_widget.dart';
+import '../widgets/offline_badge.dart';
+import '../widgets/sync_indicator.dart';
 import '../../domain/services/navigation_service.dart';
 import '../../domain/services/app_color_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/offline_sync_service.dart';
+import '../../../../core/di/injection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import '../../../onboarding/data/services/user_subcollections_service.dart';
 
 /// Página principal de inicio con diseño consistente y arquitectura limpia
 class HomePage extends StatefulWidget {
@@ -23,6 +32,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final ConnectivityService _connectivityService = ConnectivityService();
+  StreamSubscription<bool>? _connectivitySubscription;
+  bool _wasOffline = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +45,305 @@ class _HomePageState extends State<HomePage> {
       provider.loadTodayData();
       provider.loadWeekData();
     });
+
+    // Escuchar cambios de conectividad
+    _connectivitySubscription = _connectivityService.connectivityStream.listen((
+      isConnected,
+    ) async {
+      // Si estaba offline y ahora hay conexión, recargar datos
+      if (_wasOffline && isConnected) {
+        if (mounted) {
+          print('🌐 HomePage: Conexión restaurada, recargando datos...');
+          await _reloadDataOnConnectionRestored();
+        }
+      }
+      _wasOffline = !isConnected;
+    });
+
+    // Verificar estado inicial de conectividad
+    _connectivityService.isConnected().then((isConnected) {
+      _wasOffline = !isConnected;
+    });
+  }
+
+  /// Recarga los datos cuando se restaura la conexión
+  Future<void> _reloadDataOnConnectionRestored() async {
+    if (!mounted) return;
+
+    try {
+      print(
+        '🔄 HomePage: Iniciando recarga de datos después de restaurar conexión...',
+      );
+
+      // 1. Obtener userId correcto (buscando por email si es necesario)
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('❌ HomePage: No hay usuario autenticado');
+        return;
+      }
+
+      String? userId = await _getUserDocumentId(user);
+
+      if (userId == null || userId.isEmpty) {
+        print(
+          '❌ HomePage: No se pudo obtener userId, intentando desde estado...',
+        );
+        // Fallback: intentar obtener del estado del bloc
+        final userProfileBloc = context.read<UserProfileBloc>();
+        final currentState = userProfileBloc.state;
+
+        if (currentState is UserProfileLoaded) {
+          userId = currentState.profile.id;
+        } else if (currentState is UserProfileUpdated) {
+          userId = currentState.profile.id;
+        }
+      }
+
+      if (userId == null || userId.isEmpty) {
+        print('❌ HomePage: No se pudo obtener userId de ninguna fuente');
+        return;
+      }
+
+      print('✅ HomePage: userId obtenido: $userId');
+
+      // 2. Recargar perfil de usuario desde Firestore
+      final userProfileBloc = context.read<UserProfileBloc>();
+      print('🔄 HomePage: Solicitando recarga de perfil...');
+      userProfileBloc.add(GetUserProfileRequested(userId: userId));
+
+      // 3. Esperar a que el perfil se cargue (con timeout)
+      await _waitForProfileToLoad(userProfileBloc, timeoutSeconds: 10);
+
+      // 3.5. Cargar y actualizar información de situación (CRÍTICO para mostrar PostpartoProfileWidget)
+      if (mounted) {
+        await _reloadSituationData(userId, userProfileBloc);
+      }
+
+      // 4. Recargar datos de lactancia
+      if (mounted) {
+        final provider = context.read<LactationProvider>();
+        provider.loadTodayData();
+        provider.loadWeekData();
+      }
+
+      // 5. Forzar sincronización de datos pendientes
+      final offlineSyncService = getIt<OfflineSyncService>();
+      offlineSyncService.forceSync();
+
+      print(
+        '✅ HomePage: Datos recargados exitosamente después de restaurar conexión',
+      );
+    } catch (e) {
+      print('❌ HomePage: Error recargando datos: $e');
+      // Intentar recargar desde cache como fallback
+      if (mounted) {
+        await _reloadFromCache();
+      }
+    }
+  }
+
+  /// Obtiene el ID del documento del usuario en Firestore (buscando por email primero)
+  Future<String?> _getUserDocumentId(User user) async {
+    try {
+      // PRIORIDAD 1: Buscar por email (más confiable)
+      if (user.email != null) {
+        print('🔍 HomePage: Buscando usuario por email: ${user.email}');
+
+        final userQuery = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get()
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                print('⏱️ HomePage: Timeout buscando usuario por email');
+                return FirebaseFirestore.instance
+                    .collection('Users')
+                    .where('email', isEqualTo: user.email)
+                    .limit(1)
+                    .get();
+              },
+            );
+
+        if (userQuery.docs.isNotEmpty) {
+          final userDocId = userQuery.docs.first.id;
+          print('✅ HomePage: Usuario encontrado por email, ID: $userDocId');
+          return userDocId;
+        } else {
+          print('⚠️ HomePage: No se encontró usuario por email: ${user.email}');
+        }
+      }
+
+      // PRIORIDAD 2: Intentar con UID directamente (fallback)
+      print('🔍 HomePage: Intentando con UID como fallback: ${user.uid}');
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get()
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('⏱️ HomePage: Timeout buscando usuario por UID');
+              return FirebaseFirestore.instance
+                  .collection('Users')
+                  .doc(user.uid)
+                  .get();
+            },
+          );
+
+      if (docSnapshot.exists) {
+        print(
+          '⚠️ HomePage: Usuario encontrado con UID (fallback): ${user.uid}',
+        );
+        return user.uid;
+      }
+
+      print('❌ HomePage: No se encontró usuario en Firestore');
+      return null;
+    } catch (e) {
+      print('❌ HomePage: Error obteniendo userId: $e');
+      return null;
+    }
+  }
+
+  /// Espera a que el perfil se cargue completamente
+  Future<void> _waitForProfileToLoad(
+    UserProfileBloc bloc, {
+    int timeoutSeconds = 10,
+  }) async {
+    if (!mounted) return;
+
+    try {
+      final completer = Completer<void>();
+      StreamSubscription? subscription;
+      Timer? timeoutTimer;
+
+      // Configurar timeout
+      timeoutTimer = Timer(Duration(seconds: timeoutSeconds), () {
+        if (!completer.isCompleted) {
+          print('⏱️ HomePage: Timeout esperando perfil');
+          subscription?.cancel();
+          completer.complete();
+        }
+      });
+
+      // Escuchar cambios de estado
+      subscription = bloc.stream.listen((state) {
+        if (state is UserProfileLoaded || state is UserProfileUpdated) {
+          print('✅ HomePage: Perfil cargado exitosamente');
+          timeoutTimer?.cancel();
+          subscription?.cancel();
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        } else if (state is UserProfileFailure) {
+          print('❌ HomePage: Error cargando perfil: ${state.message}');
+          timeoutTimer?.cancel();
+          subscription?.cancel();
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        }
+      });
+
+      await completer.future;
+    } catch (e) {
+      print('❌ HomePage: Error esperando perfil: $e');
+    }
+  }
+
+  /// Recarga la información de situación del usuario
+  Future<void> _reloadSituationData(
+    String userId,
+    UserProfileBloc userProfileBloc,
+  ) async {
+    if (!mounted) return;
+
+    try {
+      print('🔄 HomePage: Cargando información de situación...');
+
+      final userSubcollectionsService = UserSubcollectionsService(
+        FirebaseFirestore.instance,
+      );
+
+      final situationData = await userSubcollectionsService
+          .getUserSituationData(userId)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('⏱️ HomePage: Timeout cargando información de situación');
+              return null;
+            },
+          );
+
+      if (situationData != null) {
+        print('✅ HomePage: Información de situación cargada: $situationData');
+
+        // Determinar si es preparto o postparto
+        final situationType = situationData['situationType'] as String?;
+        final isPrePartum = situationType == 'preparto';
+        final isPostPartum = situationType == 'postparto';
+
+        print('🔍 HomePage: situationType = $situationType');
+        print(
+          '🔍 HomePage: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        );
+
+        // Actualizar el UserProfileBloc con la información de situación
+        if (mounted) {
+          userProfileBloc.add(
+            UpdateUserSituationRequested(
+              userId: userId,
+              isPrePartum: isPrePartum,
+              isPostPartum: isPostPartum,
+              situationData: situationData,
+            ),
+          );
+          print('✅ HomePage: Información de situación actualizada');
+        }
+      } else {
+        print('⚠️ HomePage: No se encontró información de situación');
+      }
+    } catch (e) {
+      print('❌ HomePage: Error cargando información de situación: $e');
+      // No es crítico, continuar sin actualizar la situación
+    }
+  }
+
+  /// Recarga desde cache como fallback
+  Future<void> _reloadFromCache() async {
+    if (!mounted) return;
+
+    try {
+      print('🔄 HomePage: Intentando recargar desde cache...');
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final currentState = userProfileBloc.state;
+
+      // Si ya hay un perfil cargado, no hacer nada
+      if (currentState is UserProfileLoaded ||
+          currentState is UserProfileUpdated) {
+        print('✅ HomePage: Perfil ya está cargado');
+        return;
+      }
+
+      // Intentar obtener userId y recargar
+      final userId = await _getUserDocumentId(user);
+      if (userId != null && userId.isNotEmpty) {
+        userProfileBloc.add(GetUserProfileRequested(userId: userId));
+      }
+    } catch (e) {
+      print('❌ HomePage: Error recargando desde cache: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 
   /// Maneja el estado cuando no hay registros
@@ -115,6 +427,12 @@ class _HomePageState extends State<HomePage> {
               return _buildHomeContent(context, state);
             },
           ),
+
+          // Badge de estado offline (discreto, no intrusivo)
+          const OfflineBadge(),
+
+          // Indicador de sincronización
+          const SyncIndicator(),
         ],
       ),
     );

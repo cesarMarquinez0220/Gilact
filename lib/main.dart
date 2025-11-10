@@ -28,7 +28,9 @@ import 'features/lactation/data/services/sleep_notification_service.dart';
 import 'features/lactation/data/services/notification_handler.dart';
 import 'features/lactation/data/services/push_notification_service.dart';
 import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
+import 'core/services/offline_sync_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -63,19 +65,114 @@ void main() async {
   // Configurar inyección de dependencias
   await configureDependencies();
 
-  // Inicializar servicios de notificaciones
-  await _initializeNotificationServices();
+  // Inicializar servicios de notificaciones (no bloquea si falla)
+  try {
+    await _initializeNotificationServices();
+  } catch (e) {
+    if (kDebugMode) {
+      print(
+        '⚠️ Error al inicializar servicios de notificación (no crítico): $e',
+      );
+    }
+  }
 
   // Registrar handler para mensajes en background
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Inicializar servicio de notificaciones push
-  await _initializePushNotificationService();
+  // Inicializar servicio de notificaciones push (no bloquea si falla)
+  try {
+    await _initializePushNotificationService();
+  } catch (e) {
+    if (kDebugMode) {
+      print('⚠️ Error al inicializar servicio de push (no crítico): $e');
+    }
+  }
 
   // Inicializar el manejador de notificaciones
   NotificationHandler.initialize(navigatorKey);
 
+  // Inicializar servicio de sincronización offline con callbacks (no bloquea si falla)
+  try {
+    final offlineSyncService = getIt<OfflineSyncService>();
+    offlineSyncService.startAutoSync(
+      onSyncCompleted: (int count) {
+        if (kDebugMode) {
+          print('✅ Sincronización completada: $count operaciones');
+        }
+        // Mostrar notificación de sincronización completada
+        _showSyncNotification(count, true);
+      },
+      onSyncFailed: (int count) {
+        if (kDebugMode) {
+          print('⚠️ Sincronización fallida: $count operaciones');
+        }
+        // Mostrar notificación de error
+        _showSyncNotification(count, false);
+      },
+    );
+
+    if (kDebugMode) {
+      print('✅ Servicio de sincronización offline iniciado');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print(
+        '⚠️ Error al inicializar servicio de sincronización (no crítico): $e',
+      );
+    }
+  }
+
   runApp(const MyApp());
+}
+
+/// Muestra una notificación de sincronización
+void _showSyncNotification(int count, bool success) {
+  // Usar SchedulerBinding para asegurarnos de que estamos en el hilo principal
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      if (kDebugMode) {
+        print('⚠️ No se puede mostrar notificación: contexto no disponible');
+      }
+      return;
+    }
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                success ? Icons.cloud_done : Icons.cloud_off,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  success
+                      ? '$count operación${count > 1 ? 'es' : ''} sincronizada${count > 1 ? 's' : ''} exitosamente'
+                      : '$count operación${count > 1 ? 'es' : ''} falló${count > 1 ? 'ron' : ''} al sincronizar',
+                  style: GoogleFonts.quicksand(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error mostrando notificación de sincronización: $e');
+      }
+    }
+  });
 }
 
 Future<void> updateLastOpened() async {

@@ -6,7 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart'; // Assuming this provides DialogExample
 import '../../../../core/services/app_initialization_service.dart' as app_init;
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/lactation_record.dart'; // Assuming this defines LactationRecord
+import '../../data/services/lactation_service.dart';
 
 class LactationRecordPage extends StatefulWidget {
   final DateTime? selectedDate;
@@ -24,6 +26,7 @@ class LactationRecordPage extends StatefulWidget {
 class _LactationRecordPageState extends State<LactationRecordPage>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final LactationService _lactationService = getIt<LactationService>();
 
   // Data map for the accordion flow
   Map<String, dynamic> _flowData = {};
@@ -1194,50 +1197,6 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        /* ... Error handling ... */
-        DialogExample.showErrorDialog(
-          context,
-          'Error de Autenticación',
-          'No hay usuario autenticado...',
-        );
-        return;
-      }
-
-      final userDocId = await _getUserDocumentId();
-      final situationDocRef = _getUserSituationDocRef(userDocId);
-      final lactationCollectionRef = _getLactationCollectionRef(
-        situationDocRef,
-      );
-
-      if (situationDocRef == null || lactationCollectionRef == null) {
-        /* ... Error handling ... */
-        DialogExample.showErrorDialog(
-          context,
-          'Error de Usuario',
-          'No se pudo encontrar la información del usuario...',
-        );
-        return;
-      }
-
-      // --- Verify situationType ('postparto') - Same as before ---
-      final situacionSnapshot = await situationDocRef.get();
-      if (!situacionSnapshot.exists ||
-          (situacionSnapshot.data()
-                  as Map<String, dynamic>?)?['situationType'] !=
-              'postparto') {
-        DialogExample.showInfoDialog(
-          context,
-          'Información Requerida',
-          'Debes seleccionar la situación "Post-Parto"...',
-        );
-        setState(() {
-          _isLoading = false;
-        }); // Stop loading indicator
-        return;
-      }
-
       final fechaRegistro = widget.selectedDate ?? DateTime.now();
       final timestampRegistro =
           widget.existingRecord?.timestamp ?? DateTime.now();
@@ -1308,39 +1267,57 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         incluyeSueno: sleepValue > 0, // true si hay datos de sueño
       );
 
-      // Use the toMap() method of your LactationRecord entity
-      final datosLactancia = record.toMap();
-
+      // Usar LactationService para guardar (offline-first)
       if (widget.existingRecord != null) {
-        await lactationCollectionRef
-            .doc(widget.existingRecord!.id)
-            .update(datosLactancia);
+        // Actualizar registro existente
+        await _lactationService.updateRecord(widget.existingRecord!.id, record);
       } else {
-        await lactationCollectionRef.add(datosLactancia);
+        // Crear nuevo registro usando LactationService (offline-first)
+        await _lactationService.saveRecord(record);
       }
+
+      // Guardar el contexto antes de navegar para mostrar mensaje después
+      final currentContext = context;
 
       // Navegar a Home y refrescar datos de lactancia de forma rápida
       if (mounted) {
         // Navegar a Home directamente (más rápido)
         Navigator.of(
-          context,
+          currentContext,
         ).pushNamedAndRemoveUntil('/home', (route) => false);
 
         // Refrescar datos de lactancia usando el context global después de la navegación
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 150));
         await app_init.AppInitializationService.refreshLactationDataOnly();
+
+        // Mostrar mensaje de éxito usando navigatorKey (evita error de widget desmontado)
+        await Future.delayed(const Duration(milliseconds: 100));
+        final homeContext =
+            app_init.AppInitializationService.navigationKey.currentContext;
+        if (homeContext != null) {
+          ScaffoldMessenger.of(homeContext).showSnackBar(
+            const SnackBar(
+              content: Text('Registro de lactancia guardado exitosamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       /* ... Error handling ... */
-      DialogExample.showErrorDialog(
-        context,
-        'Error al Guardar',
-        'No se pudieron guardar los datos...\n\nError: ${e.toString()}',
-      );
+      if (mounted) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error al Guardar',
+          'No se pudieron guardar los datos...\n\nError: ${e.toString()}',
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -1406,15 +1383,19 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       );
     } catch (e) {
       /* ... Error handling ... */
-      DialogExample.showErrorDialog(
-        context,
-        'Error al Eliminar',
-        'No se pudo eliminar...\n\nError: ${e.toString()}',
-      );
+      if (mounted) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error al Eliminar',
+          'No se pudo eliminar...\n\nError: ${e.toString()}',
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
 
 import '../../domain/entities/video.dart';
@@ -11,12 +13,17 @@ import '../providers/lecciones_provider.dart';
 import '../providers/video_images_provider.dart';
 import '../../../videos/presentation/pages/video_player_page.dart';
 import '../../../videos/domain/entities/video.dart' as video_entity;
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class LessonVideosPage extends StatefulWidget {
   final List<Video> videos;
   final bool fromNotification;
 
-  const LessonVideosPage({super.key, required this.videos, this.fromNotification = false});
+  const LessonVideosPage({
+    super.key,
+    required this.videos,
+    this.fromNotification = false,
+  });
 
   @override
   State<LessonVideosPage> createState() => _LessonVideosPageState();
@@ -31,6 +38,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     super.initState();
     _initializeProviders();
     _loadVideos();
+    _loadProgressFromFirestore();
   }
 
   Future<void> _initializeProviders() async {
@@ -40,6 +48,25 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       listen: false,
     );
     await videoImagesProvider.initialize();
+  }
+
+  /// Carga el progreso desde Firestore al entrar a la página
+  Future<void> _loadProgressFromFirestore() async {
+    try {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        final userId = authState.user.id;
+        final leccionesProvider = context.read<LeccionesProvider>();
+        await leccionesProvider.loadProgressFromFirestore(userId);
+        if (kDebugMode) {
+          print('📊 Progreso cargado desde Firestore al entrar a lecciones');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error cargando progreso al entrar a lecciones: $e');
+      }
+    }
   }
 
   Future<void> _loadVideos() async {
@@ -134,9 +161,25 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       context.read<LeccionesProvider>().marcarLeccionCompletada(videoId);
     } else if (result == false) {
       // Si result es false, significa que se presionó "Reproducir siguiente"
+      // Asegurar que la orientación landscape se mantenga durante la transición
+      // Hacer esto ANTES de buscar el siguiente video para evitar cualquier cambio
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+
+      // Pequeño delay para asegurar que la orientación se establezca
+      await Future.delayed(const Duration(milliseconds: 100));
+
       // Buscar el siguiente video disponible
       final nextVideo = _findNextVideo(videoId);
       if (nextVideo != null) {
+        // Asegurar landscape nuevamente antes de navegar
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+
         // Reproducir el siguiente video automáticamente
         _navigateToReproductorVideoHelper(
           nextVideo.videoId,
@@ -144,16 +187,39 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
           nextVideo.videoURL,
         );
       }
+    } else {
+      // Si el usuario retrocedió sin completar, recargar el progreso desde Firestore
+      // para actualizar el CircularProgressIndicator
+      await _refreshVideoProgress();
+    }
+  }
+
+  /// Recarga el progreso del video desde Firestore para actualizar el indicador
+  Future<void> _refreshVideoProgress() async {
+    try {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        final userId = authState.user.id;
+        final leccionesProvider = context.read<LeccionesProvider>();
+        await leccionesProvider.loadProgressFromFirestore(userId);
+        if (kDebugMode) {
+          print('🔄 Progreso recargado desde Firestore después de ver video');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error recargando progreso: $e');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final avancesProvider = Provider.of<LeccionesProvider>(
-      context,
-      listen: false,
-    );
-    avancesProvider.imprimirAvancesMap();
+    // Usar watch en lugar de read para que el widget se reconstruya cuando cambie el provider
+    final avancesProvider = context.watch<LeccionesProvider>();
+    if (kDebugMode) {
+      avancesProvider.imprimirAvancesMap();
+    }
 
     return WillPopScope(
       onWillPop: () async {
@@ -164,41 +230,42 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
         return true;
       },
       child: Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF2C5F5D), // Azul teal oscuro
-              Color(0xFF1A365D), // Azul marino oscuro
-              Color(0xFF4FD1C7), // Verde azulado vibrante
-            ],
-            stops: [0.0, 0.5, 1.0],
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF2C5F5D), // Azul teal oscuro
+                Color(0xFF1A365D), // Azul marino oscuro
+                Color(0xFF4FD1C7), // Verde azulado vibrante
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header con navegación
-              _buildHeader(),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header con navegación
+                _buildHeader(),
 
-              // Contenido principal - Camino de lecciones
-              Expanded(
-                child: _videos == null
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                // Contenido principal - Camino de lecciones
+                Expanded(
+                  child: _videos == null
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
-                        ),
-                      )
-                    : _buildLessonPath(),
-              ),
-            ],
+                        )
+                      : _buildLessonPath(),
+                ),
+              ],
+            ),
           ),
         ),
-      ),)
+      ),
     );
   }
 
@@ -359,21 +426,20 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     // Usar el estado real de estaCompletado desde Firestore
     final isCompleted = _isVideoCompletedFromFirestore(video.videoId);
 
-    // Obtener el progreso del video
-    final progress = context.watch<LeccionesProvider>().getProgresoVideo(
-      video.videoId,
-    );
-
-    // Log para debugging del progreso
-    if (progress > 0) {
-      print(
-        '📊 Video ${video.videoId}: Progreso ${progress.toStringAsFixed(1)}%',
-      );
-    }
+    // Obtener el progreso del video - usar watch para que se reconstruya cuando cambie
+    final leccionesProvider = context.watch<LeccionesProvider>();
+    final progress = leccionesProvider.getProgresoVideo(video.videoId);
 
     // Lógica de disponibilidad: solo el primer video de la primera lección está disponible inicialmente
     // Después, solo se habilita el siguiente video cuando el anterior está completado
     final isAvailable = _isVideoAvailable(video, index);
+
+    // Log para debugging del progreso (más detallado)
+    if (kDebugMode) {
+      print(
+        '📊 Video ${video.videoId}: Disponible=$isAvailable, Completado=$isCompleted, Progreso=${progress.toStringAsFixed(1)}%',
+      );
+    }
 
     // Tamaño dinámico del nodo
     final nodeSize = isCompleted
@@ -392,139 +458,144 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
               );
             }
           : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: nodeSize,
-        height: nodeSize,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isCompleted
-              ? Colors.green
-              : isAvailable
-              ? Colors.white
-              : Colors.grey.withValues(alpha: 0.3),
-          border: Border.all(
-            color: isCompleted
-                ? Colors.green
-                : isAvailable
-                ? const Color(0xFF4FD1C7)
-                : Colors.grey,
-            width: isCompleted ? 4 : 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isCompleted
-                  ? Colors.green.withValues(alpha: 0.4)
-                  : isAvailable
-                  ? const Color(0xFF4FD1C7).withValues(alpha: 0.3)
-                  : Colors.black.withValues(alpha: 0.1),
-              blurRadius: isCompleted ? 12 : 8,
-              spreadRadius: isCompleted ? 2 : 1,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Imagen del video como fondo
-            if (isAvailable || isCompleted)
-              Positioned.fill(
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/lecciones_camino/${video.pathImageName}',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _getIconForVideo(video),
-                          color: Colors.grey,
-                          size: 30,
-                        ),
-                      );
-                    },
-                  ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // CircularProgressIndicator como borde exterior (detrás del círculo)
+          // Mostrar si hay progreso > 0.01% (incluso progreso muy bajo) para que se vea el indicador
+          // Mostrar incluso si el video no está disponible, siempre que tenga progreso
+          if (!isCompleted && progress > 0.01)
+            SizedBox(
+              width:
+                  nodeSize +
+                  12, // Más grande para que se vea como borde exterior
+              height: nodeSize + 12,
+              child: CircularProgressIndicator(
+                value:
+                    progress /
+                    100.0, // El progreso ya viene como porcentaje del provider
+                strokeWidth: 4,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  const Color(
+                    0xFFFF9800,
+                  ), // Naranja vibrante para mejor visibilidad
                 ),
               ),
+            ),
 
-            // Overlay verde con checkmark para videos completados
-            if (isCompleted)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.green.withValues(alpha: 0.9),
-                        Colors.green.withValues(alpha: 0.7),
-                      ],
+          // Contenedor principal del nodo
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: nodeSize,
+            height: nodeSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCompleted
+                  ? Colors.green
+                  : isAvailable
+                  ? Colors.white
+                  : Colors.grey.withValues(alpha: 0.3),
+              border: Border.all(
+                color: isCompleted
+                    ? Colors.green
+                    : isAvailable
+                    ? const Color(0xFF4FD1C7)
+                    : Colors.grey,
+                width: isCompleted ? 4 : 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isCompleted
+                      ? Colors.green.withValues(alpha: 0.4)
+                      : isAvailable
+                      ? const Color(0xFF4FD1C7).withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.1),
+                  blurRadius: isCompleted ? 12 : 8,
+                  spreadRadius: isCompleted ? 2 : 1,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Imagen del video como fondo
+                if (isAvailable || isCompleted)
+                  Positioned.fill(
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/lecciones_camino/${video.pathImageName}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _getIconForVideo(video),
+                              color: Colors.grey,
+                              size: 30,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 35),
-                  ),
-                ),
-              ),
 
-            // Icono de candado para videos bloqueados
-            if (!isAvailable && !isCompleted)
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.withValues(alpha: 0.2),
+                // Overlay verde con checkmark para videos completados
+                if (isCompleted)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.green.withValues(alpha: 0.9),
+                            Colors.green.withValues(alpha: 0.7),
+                          ],
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.check, color: Colors.white, size: 35),
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.lock, color: Colors.grey, size: 25),
-                ),
-              ),
 
-            // CircularProgressIndicator que rodea la imagen
-            if (isAvailable && !isCompleted)
-              Positioned.fill(
-                child: Stack(
-                  children: [
-                    // CircularProgressIndicator como borde
-                    Center(
-                      child: SizedBox(
-                        width: nodeSize,
-                        height: nodeSize,
-                        child: CircularProgressIndicator(
-                          value:
-                              progress /
-                              100.0, // El progreso ya viene como porcentaje del provider
-                          strokeWidth: 6,
-                          backgroundColor: Colors.transparent,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            const Color(
-                              0xFFFF9800,
-                            ), // Verde vibrante para mejor visibilidad
-                          ),
+                // Icono de candado para videos bloqueados
+                if (!isAvailable && !isCompleted)
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
+                      child: const Icon(
+                        Icons.lock,
+                        color: Colors.grey,
+                        size: 25,
+                      ),
+                    ),
+                  ),
+
+                // Efecto de pulso para videos disponibles (solo si no hay progreso)
+                if (isAvailable && !isCompleted && progress == 0)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF4FD1C7).withValues(alpha: 0.3),
+                          width: 2,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-            // Efecto de pulso para videos disponibles
-            if (isAvailable && !isCompleted)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF4FD1C7).withValues(alpha: 0.3),
-                      width: 2,
-                    ),
                   ),
-                ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

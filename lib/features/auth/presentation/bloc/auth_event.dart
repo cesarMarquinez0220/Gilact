@@ -85,3 +85,11 @@ class UpdateProfileRequested extends AuthEvent {
 class DeleteAccountRequested extends AuthEvent {
   const DeleteAccountRequested();
 }
+
+class CheckOfflineSessionRequested extends AuthEvent {
+  const CheckOfflineSessionRequested();
+}
+
+class SyncOfflineSessionRequested extends AuthEvent {
+  const SyncOfflineSessionRequested();
+}

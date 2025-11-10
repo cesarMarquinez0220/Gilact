@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gilact/features/lactation/presentation/pages/daily_sleep_form_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
 import '../../../chatbot/presentation/pages/chatbot_page.dart';
@@ -58,14 +59,16 @@ class HealthPage extends StatelessWidget {
 
                   // Registro de temperatura
                   _buildHealthCard(
-                    'Temperatura',
-                    'Control de fiebre',
+                    'Sueño',
+                    'Registro de sueño',
                     Icons.thermostat,
                     const Color(0xFFFF9800),
                     () {
-                      _showDevelopmentMessage(
+                      Navigator.push(
                         context,
-                        'Registro de Temperatura',
+                        MaterialPageRoute(
+                          builder: (context) => const DailySleepFormPage(),
+                        ),
                       );
                     },
                   ),

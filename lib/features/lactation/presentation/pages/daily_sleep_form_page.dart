@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../data/datasources/sleep_offline_local_data_source.dart';
+import '../../domain/entities/sleep_record.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/sync_queue_service.dart';
+import '../../presentation/providers/lactation_provider.dart';
 import 'dart:ui';
 import '../../../../alerta_dialoge.dart';
 import '../../../../main.dart';
@@ -136,30 +142,96 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       final today = DateTime.now();
       final fechaRegistro =
           '${today.year}-${_pad(today.month)}-${_pad(today.day)}';
-      final horaRegistro = '${_pad(today.hour)}:${_pad(today.minute)}';
-
-      // Estructura de datos simplificada
+      // Estructura de datos simplificada (convertir DateTime a formato serializable)
       final sleepData = {
         'fecha_sueno': fechaSueno,
         'horas_dormido': _hoursSlept,
         if (_wakeUps != null) 'num_despertados': _wakeUps,
         if (_quality != null) 'calidad': _quality,
         'fecha_registro': fechaRegistro,
-        'creado_en': DateTime.now(),
-        'timestamp': FieldValue.serverTimestamp(),
+        'creado_en': DateTime.now()
+            .toIso8601String(), // Convertir DateTime a String
+        'timestamp': DateTime.now()
+            .millisecondsSinceEpoch, // Usar int en lugar de FieldValue
       };
 
-      // Guardar en Firestore: /Users/{userId}/situacion/seleccion/sueno_diario/{recordId}
-      final sleepCollection = FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userId)
-          .collection('situacion')
-          .doc('seleccion')
-          .collection('sueno_diario');
+      // OFFLINE-FIRST: Guardar localmente primero
+      final sleepOfflineDataSource = SleepOfflineLocalDataSource();
+      final sleepRecordId = 'sleep_${DateTime.now().millisecondsSinceEpoch}';
 
-      await sleepCollection.add(sleepData);
+      // Crear SleepRecord para guardar localmente
+      final sleepRecord = SleepRecord(
+        id: sleepRecordId,
+        userId: userId,
+        sleepStartTime: yesterday,
+        sleepEndTime: today,
+        totalSleepDuration: Duration(
+          hours: _hoursSlept.toInt(),
+          minutes: ((_hoursSlept % 1) * 60).toInt(),
+        ),
+        quality: _quality != null
+            ? SleepQuality.values.firstWhere(
+                (q) => q.displayName == _quality,
+                orElse: () => SleepQuality.good,
+              )
+            : SleepQuality.good,
+        notes: null,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Guardar localmente
+      await sleepOfflineDataSource.saveRecord(sleepRecord);
+
+      // Si hay conexión, guardar también en Firestore
+      final connectivityService = ConnectivityService();
+      final isConnected = await connectivityService.isConnected();
+
+      if (isConnected) {
+        try {
+          final sleepCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userId)
+              .collection('situacion')
+              .doc('seleccion')
+              .collection('sueno_diario');
+
+          final docRef = await sleepCollection.add(sleepData);
+
+          // Marcar como sincronizado
+          await sleepOfflineDataSource.markAsSynced(sleepRecordId, docRef.id);
+        } catch (e) {
+          // Si falla Firestore, agregar a cola de sincronización
+          final syncQueueService = SyncQueueService();
+          final operation = SyncOperation(
+            id: '${sleepRecordId}_${DateTime.now().millisecondsSinceEpoch}',
+            operationType: SyncOperationType.create,
+            collectionPath: 'sueno_diario',
+            localId: sleepRecordId,
+            data: sleepData,
+            createdAt: DateTime.now(),
+          );
+          await syncQueueService.addOperation(operation);
+        }
+      } else {
+        // Sin conexión: agregar a cola de sincronización
+        final syncQueueService = SyncQueueService();
+        final operation = SyncOperation(
+          id: '${sleepRecordId}_${DateTime.now().millisecondsSinceEpoch}',
+          operationType: SyncOperationType.create,
+          collectionPath: 'sueno_diario',
+          localId: sleepRecordId,
+          data: sleepData,
+          createdAt: DateTime.now(),
+        );
+        await syncQueueService.addOperation(operation);
+      }
 
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
         // Navegación y refresco igual que en flujos de lactancia
         void showSuccessSnack() {
           final homeCtx = navigatorKey.currentContext;
@@ -168,34 +240,51 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
               const SnackBar(
                 content: Text('Registro de sueño guardado exitosamente'),
                 backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
               ),
             );
           }
         }
 
+        // Intentar refrescar datos de lactancia sin navegar si es posible
+        try {
+          final homeCtx = navigatorKey.currentContext;
+          if (homeCtx != null) {
+            // Si el HomePage ya está montado, refrescar datos sin navegar
+            final provider = Provider.of<LactationProvider>(
+              homeCtx,
+              listen: false,
+            );
+            provider.loadTodayData();
+            provider.loadWeekData();
+          }
+        } catch (e) {
+          // Si no está disponible, no es crítico
+          print(
+            '⚠️ DailySleepFormPage: No se pudo refrescar datos sin navegar: $e',
+          );
+        }
+
         if (widget.cameFromNotification) {
+          // Si vino de notificación, navegar a home
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/home', (route) => false);
-          await Future.delayed(const Duration(milliseconds: 150));
-          await AppInitializationService.refreshLactationDataOnly();
-          await Future.delayed(const Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 200));
           showSuccessSnack();
         } else {
+          // Si no vino de notificación, solo volver atrás
           final canPop = Navigator.of(context).canPop();
           if (canPop) {
             Navigator.of(context).pop(true);
-            await Future.delayed(const Duration(milliseconds: 150));
-            await AppInitializationService.refreshLactationDataOnly();
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(const Duration(milliseconds: 200));
             showSuccessSnack();
           } else {
+            // Fallback: navegar a home solo si no se puede volver atrás
             Navigator.of(
               context,
             ).pushNamedAndRemoveUntil('/home', (route) => false);
-            await Future.delayed(const Duration(milliseconds: 150));
-            await AppInitializationService.refreshLactationDataOnly();
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(const Duration(milliseconds: 200));
             showSuccessSnack();
           }
         }

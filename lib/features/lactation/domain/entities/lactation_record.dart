@@ -106,13 +106,30 @@ class LactationRecord {
       pechoDado: map['pecho_dado'] ?? 'Ninguna',
       horasSuenoBebe: map['horas_sueno_bebe'] ?? 0,
       unidadSueno: map['unidad_sueno'] ?? 'No',
-      timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      timestamp: _parseTimestamp(map['timestamp']),
       fechaRegistroString:
           map['fecha_registro'] ?? DateTime.now().toIso8601String(),
       // NUEVO: Leer identificadores
       tipoRegistro: map['tipo_registro'] ?? 'completo',
-      incluyeSueno: map['incluye_sueno'] ?? false,
+      incluyeSueno: _parseBool(map['incluye_sueno']),
     );
+  }
+
+  /// Parsea timestamp desde diferentes formatos (Firestore Timestamp, DateTime, o int desde SQLite)
+  static DateTime _parseTimestamp(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    return DateTime.now();
+  }
+
+  /// Parsea bool desde diferentes formatos (bool o int 0/1 desde SQLite)
+  static bool _parseBool(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is int) return value != 0;
+    return false;
   }
 
   LactationRecord copyWith({

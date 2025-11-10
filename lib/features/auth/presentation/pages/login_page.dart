@@ -259,22 +259,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       return;
     }
 
-    // Verificar conectividad
-    final connectivityService = ConnectivityService();
-    final isConnected = await connectivityService.isConnected();
-
-    if (!isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Sin conexión a internet'),
-          backgroundColor: AppColors.warning,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    // Iniciar sesión
+    // Iniciar sesión (AuthBloc manejará online/offline automáticamente)
     context.read<AuthBloc>().add(
       SignInRequested(
         email: _emailController.text.trim(),
