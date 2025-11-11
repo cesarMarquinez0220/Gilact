@@ -22,6 +22,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
+import '../../../gamification/presentation/bloc/gamification_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_event.dart';
+import '../../../gamification/presentation/bloc/gamification_state.dart';
+import '../../../gamification/presentation/widgets/mascot_widget.dart';
 
 /// Página principal de inicio con diseño consistente y arquitectura limpia
 class HomePage extends StatefulWidget {
@@ -251,6 +255,115 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('❌ HomePage: Error esperando perfil: $e');
     }
+  }
+
+  /// Construye el widget de la mascota de gamificación
+  Widget _buildGamificationMascot(
+    BuildContext context,
+    UserProfileState state,
+  ) {
+    // Obtener userId del estado
+    String? userId;
+    if (state is UserProfileLoaded) {
+      userId = state.profile.id;
+    } else if (state is UserProfileUpdated) {
+      userId = state.profile.id;
+    }
+
+    if (userId == null || userId.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Cargar perfil de gamificación cuando se monta el widget (solo una vez)
+    final gamificationBloc = context.read<GamificationBloc>();
+    final currentGamificationState = gamificationBloc.state;
+    
+    // Solo cargar si no está ya cargando o cargado
+    if (currentGamificationState is! GamificationLoaded && 
+        currentGamificationState is! GamificationLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          gamificationBloc.add(LoadGamificationProfile(userId!));
+        }
+      });
+    }
+
+    return BlocBuilder<GamificationBloc, GamificationState>(
+      builder: (context, gamificationState) {
+        if (gamificationState is GamificationLoaded) {
+          return MascotWidget(profile: gamificationState.profile);
+        } else if (gamificationState is GamificationLoading) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (gamificationState is GamificationError) {
+          // En caso de error, mostrar un placeholder o intentar recargar
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.pets, size: 40, color: Colors.grey[400]),
+                const SizedBox(height: 8),
+                Text(
+                  'Cargando mascota...',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        // Estado inicial - mostrar placeholder mientras carga
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
   }
 
   /// Recarga la información de situación del usuario
@@ -598,6 +711,10 @@ class _HomePageState extends State<HomePage> {
 
     return Column(
       children: [
+        // Mascota de gamificación (siempre visible)
+        _buildGamificationMascot(context, state),
+        const SizedBox(height: 15),
+
         // Contenido específico según el tipo de usuario
         if (isPostPartum) ...[
           // Dashboard de lactancia para usuarios postparto

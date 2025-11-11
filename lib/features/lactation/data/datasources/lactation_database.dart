@@ -251,6 +251,20 @@ class LactationDatabase {
     );
   }
 
+  /// Obtiene todos los registros (para gamificación)
+  Future<List<LactationRecord>> getAllRecords() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'lactation_records',
+      orderBy: 'timestamp DESC',
+    );
+
+    return List.generate(
+      maps.length,
+      (i) => LactationRecord.fromMap(maps[i], maps[i]['id']),
+    );
+  }
+
   Future<List<LactationRecord>> getRecordsForDate(DateTime date) async {
     final db = await database;
     final dateString =

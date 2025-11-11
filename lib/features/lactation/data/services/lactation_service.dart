@@ -5,6 +5,11 @@ import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/sync_queue_service.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../main.dart' as app_main;
+import '../../../gamification/domain/services/gamification_service.dart';
+import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
+import 'package:flutter/widgets.dart';
 
 /// Servicio unificado para manejar todos los registros de lactancia en Firestore
 /// Implementa patrón offline-first: siempre guarda localmente primero
@@ -21,7 +26,19 @@ class LactationService {
   DateTime? _lastCacheUpdate;
   static const Duration _cacheValidityDuration = Duration(minutes: 5);
 
-  LactationService(this._firestore, this._auth);
+  // Servicio de gamificación
+  GamificationService? _gamificationService;
+
+  LactationService(this._firestore, this._auth) {
+    // Inicializar servicio de gamificación (puede fallar si no está registrado)
+    try {
+      _gamificationService = getIt<GamificationService>();
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ GamificationService no disponible: $e');
+      }
+    }
+  }
 
   /// Inicializa el caché del usuario (llamar desde MainNavigationPage)
   Future<void> initializeUserCache() async {
@@ -102,6 +119,16 @@ class LactationService {
         print('✅ Registro de lactancia guardado localmente: ${record.id}');
       }
 
+      // PASO 1.5: Agregar XP y detectar badges (GAMIFICACIÓN)
+      // Se ejecuta después de guardar para tener el conteo correcto
+      try {
+        await _addGamificationXP(record);
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Error agregando gamificación (no crítico): $e');
+        }
+      }
+
       // PASO 2: Si hay conexión, intentar guardar en Firestore inmediatamente
       final isConnected = await _connectivityService.isConnected();
       if (isConnected) {
@@ -150,6 +177,92 @@ class LactationService {
       }
       rethrow;
     }
+  }
+
+  /// Agrega XP y detecta badges después de guardar un registro
+  Future<void> _addGamificationXP(LactationRecord record) async {
+    if (_gamificationService == null) return;
+
+    try {
+      final userId = await getUserDocumentId();
+      if (userId == null) return;
+
+      // Obtener total de registros para detectar badges
+      final allRecords = await _localDatabase.getAllRecords();
+      final totalRecords = allRecords.length;
+
+      // Determinar si es el primer registro del día
+      // Nota: allRecords ya incluye el registro que acabamos de guardar
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayRecords = allRecords.where((r) {
+        final recordDate = r.timestamp;
+        final recordDateOnly = DateTime(recordDate.year, recordDate.month, recordDate.day);
+        final todayOnly = DateTime(today.year, today.month, today.day);
+        return recordDateOnly == todayOnly;
+      }).length;
+      // Si hay exactamente 1 registro hoy, es el primero del día
+      final isFirstOfDay = todayRecords == 1;
+
+      // Agregar XP (registro rápido o completo según el tipo)
+      if (record.tipoRegistro == 'completo') {
+        await _gamificationService!.addXPForCompleteLactation(
+          userId: userId,
+          recordId: record.id,
+          timestamp: record.timestamp,
+          includesSleep: record.incluyeSueno ?? false,
+          isFirstOfDay: isFirstOfDay,
+        );
+      } else {
+        await _gamificationService!.addXPForQuickLactation(
+          userId: userId,
+          recordId: record.id,
+          timestamp: record.timestamp,
+          isFirstOfDay: isFirstOfDay,
+        );
+      }
+
+      // Detectar badges progresivos
+      final achievements = await _gamificationService!.detectAndUnlockAchievements(
+        userId: userId,
+        totalLactationRecords: totalRecords,
+        completeLactationRecords: allRecords
+            .where((r) => r.tipoRegistro == 'completo')
+            .length,
+        totalLessonsCompleted: 0, // Por ahora 0
+        babyWeightRecords: 0, // Por ahora 0
+        hasNocturnalRecord: _hasNocturnalRecord(record),
+        dailyRecordsToday: todayRecords,
+      );
+
+      // Mostrar diálogo si hay badges nuevos
+      if (achievements.isRight()) {
+        final newAchievements = achievements.getOrElse(() => []);
+        if (newAchievements.isNotEmpty && app_main.navigatorKey.currentContext != null) {
+          // Mostrar el primer badge desbloqueado
+          final firstAchievement = newAchievements.first;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (app_main.navigatorKey.currentContext != null) {
+              AchievementUnlockedDialog.show(
+                app_main.navigatorKey.currentContext!,
+                firstAchievement,
+                firstAchievement.xpReward,
+              );
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error en gamificación: $e');
+      }
+    }
+  }
+
+  /// Verifica si el registro es nocturno (entre 12am-6am)
+  bool _hasNocturnalRecord(LactationRecord record) {
+    final hour = record.timestamp.hour;
+    return hour >= 0 && hour < 6;
   }
 
   /// Agrega un registro a la cola de sincronización

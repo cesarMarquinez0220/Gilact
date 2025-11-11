@@ -51,6 +51,14 @@ import '../../features/videos/data/services/video_download_service.dart';
 import '../../features/videos/data/datasources/video_offline_local_data_source.dart';
 import '../../features/user/data/datasources/user_profile_offline_local_data_source.dart';
 
+// Gamification
+import '../../features/gamification/data/datasources/gamification_local_data_source.dart';
+import '../../features/gamification/data/datasources/gamification_remote_data_source.dart';
+import '../../features/gamification/data/repositories/gamification_repository_impl.dart';
+import '../../features/gamification/domain/repositories/gamification_repository.dart';
+import '../../features/gamification/domain/services/gamification_service.dart';
+import '../../features/gamification/presentation/bloc/gamification_bloc.dart';
+
 // Providers
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
 import '../../features/lactation/presentation/providers/lactation_flow_provider.dart';
@@ -118,6 +126,26 @@ Future<void> configureDependencies() async {
   // User profile offline
   getIt.registerLazySingleton<UserProfileOfflineLocalDataSource>(
     () => UserProfileOfflineLocalDataSource(),
+  );
+
+  // Gamification
+  getIt.registerLazySingleton<GamificationLocalDataSource>(
+    () => GamificationLocalDataSource(),
+  );
+  getIt.registerLazySingleton<GamificationRemoteDataSource>(
+    () => GamificationRemoteDataSource(),
+  );
+  getIt.registerLazySingleton<GamificationRepository>(
+    () => GamificationRepositoryImpl(
+      localDataSource: getIt<GamificationLocalDataSource>(),
+      remoteDataSource: getIt<GamificationRemoteDataSource>(),
+      connectivityService: getIt<ConnectivityService>(),
+    ),
+  );
+  getIt.registerLazySingleton<GamificationService>(
+    () => GamificationService(
+      repository: getIt<GamificationRepository>(),
+    ),
   );
 
   // Providers
@@ -430,6 +458,12 @@ Future<void> configureDependencies() async {
   getIt.registerFactory(
     () => ChatbotBloc(
       sendMessageUseCase: getIt<chatbot_usecases.SendMessageUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => GamificationBloc(
+      repository: getIt<GamificationRepository>(),
     ),
   );
 }

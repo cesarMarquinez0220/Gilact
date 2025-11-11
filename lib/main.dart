@@ -32,6 +32,7 @@ import 'features/lactation/presentation/pages/baby_weight_form_page.dart';
 import 'core/services/offline_sync_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'features/gamification/presentation/bloc/gamification_bloc.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
@@ -243,6 +244,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<TipBloc>(create: (context) => getIt<TipBloc>()),
           BlocProvider<LessonBloc>(create: (context) => getIt<LessonBloc>()),
+          BlocProvider<GamificationBloc>(
+            create: (context) => getIt<GamificationBloc>(),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

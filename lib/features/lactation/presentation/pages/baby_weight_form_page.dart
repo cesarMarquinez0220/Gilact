@@ -115,7 +115,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
       final fechaRegistro =
           '${today.year}-${_pad(today.month)}-${_pad(today.day)}';
 
-      // Estructura de datos para Firestore
+      // Estructura de datos para Firestore 
       final weightData = {
         'peso': _weight,
         'unidad': 'kg', // Unidad de peso
