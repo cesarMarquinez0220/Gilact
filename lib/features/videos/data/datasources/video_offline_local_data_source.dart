@@ -183,7 +183,7 @@ class VideoOfflineLocalDataSource {
         file_size_bytes INTEGER NOT NULL,
         downloaded_at TEXT NOT NULL,
         last_accessed_at TEXT NOT NULL,
-        order INTEGER NOT NULL
+        "order" INTEGER NOT NULL
       )
     ''');
 

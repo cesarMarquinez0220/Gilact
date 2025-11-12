@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../entities/achievement.dart';
 import '../entities/user_gamification_profile.dart';
 
@@ -75,14 +74,78 @@ class AchievementService {
         requiredValue: 7,
         xpReward: 100,
       ),
+      // Badges de Registros Diarios (Incentivos)
       Achievement(
-        id: 'daily_goal_8',
+        id: 'daily_3',
+        title: 'Día Activo',
+        description: '3 registros en un día',
+        icon: 'assets/images/badges/medalla.png',
+        type: AchievementType.lactation,
+        requiredValue: 3,
+        xpReward: 25,
+      ),
+      Achievement(
+        id: 'daily_4',
+        title: 'Día Consistente',
+        description: '4 registros en un día',
+        icon: 'assets/images/badges/logro.png',
+        type: AchievementType.lactation,
+        requiredValue: 4,
+        xpReward: 35,
+      ),
+      Achievement(
+        id: 'daily_5',
+        title: 'Día Dedicado',
+        description: '5 registros en un día',
+        icon: 'assets/images/badges/racha.png',
+        type: AchievementType.lactation,
+        requiredValue: 5,
+        xpReward: 45,
+      ),
+      Achievement(
+        id: 'daily_6',
+        title: 'Día Intenso',
+        description: '6 registros en un día',
+        icon: 'assets/images/badges/birrete.png',
+        type: AchievementType.lactation,
+        requiredValue: 6,
+        xpReward: 55,
+      ),
+      Achievement(
+        id: 'daily_7',
+        title: 'Día Completo',
+        description: '7 registros en un día',
+        icon: 'assets/images/badges/medalla.png',
+        type: AchievementType.lactation,
+        requiredValue: 7,
+        xpReward: 65,
+      ),
+      Achievement(
+        id: 'daily_8',
         title: 'Objetivo Diario',
-        description: '8+ registros en un día',
-        icon: '🎯',
+        description: '8 registros en un día',
+        icon: 'assets/images/badges/logro.png',
         type: AchievementType.lactation,
         requiredValue: 8,
         xpReward: 75,
+      ),
+      Achievement(
+        id: 'daily_10',
+        title: 'Día Excepcional',
+        description: '10 registros en un día',
+        icon: 'assets/images/badges/racha.png',
+        type: AchievementType.lactation,
+        requiredValue: 10,
+        xpReward: 100,
+      ),
+      Achievement(
+        id: 'daily_12',
+        title: 'Día Extraordinario',
+        description: '12 registros en un día',
+        icon: 'assets/images/badges/birrete.png',
+        type: AchievementType.lactation,
+        requiredValue: 12,
+        xpReward: 150,
       ),
       Achievement(
         id: 'nocturnal',
@@ -248,8 +311,30 @@ class AchievementService {
             case 'consistent_7_days':
               shouldUnlock = profile.currentStreak >= 7;
               break;
-            case 'daily_goal_8':
+            // Badges de registros diarios (incentivos)
+            case 'daily_3':
+              shouldUnlock = dailyRecordsToday >= 3;
+              break;
+            case 'daily_4':
+              shouldUnlock = dailyRecordsToday >= 4;
+              break;
+            case 'daily_5':
+              shouldUnlock = dailyRecordsToday >= 5;
+              break;
+            case 'daily_6':
+              shouldUnlock = dailyRecordsToday >= 6;
+              break;
+            case 'daily_7':
+              shouldUnlock = dailyRecordsToday >= 7;
+              break;
+            case 'daily_8':
               shouldUnlock = dailyRecordsToday >= 8;
+              break;
+            case 'daily_10':
+              shouldUnlock = dailyRecordsToday >= 10;
+              break;
+            case 'daily_12':
+              shouldUnlock = dailyRecordsToday >= 12;
               break;
             case 'nocturnal':
               shouldUnlock = hasNocturnalRecord;

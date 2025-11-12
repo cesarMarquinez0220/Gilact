@@ -853,28 +853,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   bool _isVideoCompleted(int videoId) {
-    final isCompleted = _completedVideos.contains(videoId);
-    if (isCompleted) {
-      print('✅ Video $videoId está completado');
-    }
-    return isCompleted;
+    return _completedVideos.contains(videoId);
   }
 
   Future<void> _navigateToVideoPlayer(Video video) async {
     try {
-      // Obtener el nombre de imagen correcto usando el Provider
-      String imageName;
-      try {
-      final videoImagesProvider = Provider.of<VideoImagesProvider>(
-        context,
-        listen: false,
-      );
-        imageName = videoImagesProvider.getImageNameForVideo(video.videoId);
-      } catch (e) {
-        // Si no hay provider (modo offline), usar el imageName del video
-        imageName = video.imageName;
-      }
-
       // Convertir Video de lessons a Video de videos
       final videoEntity = _convertToVideoEntity(video);
 

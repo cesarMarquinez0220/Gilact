@@ -23,9 +23,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
-import '../../../gamification/presentation/bloc/gamification_event.dart';
 import '../../../gamification/presentation/bloc/gamification_state.dart';
-import '../../../gamification/presentation/widgets/mascot_widget.dart';
+import '../../../gamification/domain/repositories/gamification_repository.dart';
+import '../../../gamification/domain/entities/daily_streak.dart';
+import '../../../gamification/domain/entities/user_gamification_profile.dart';
+import '../../../gamification/domain/services/level_service.dart';
+import '../../../gamification/domain/services/streak_service.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 /// Página principal de inicio con diseño consistente y arquitectura limpia
 class HomePage extends StatefulWidget {
@@ -257,11 +261,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Construye el widget de la mascota de gamificación
-  Widget _buildGamificationMascot(
-    BuildContext context,
-    UserProfileState state,
-  ) {
+  /// Construye la tarjeta compacta de gamificación con XP y Racha
+  Widget _buildGamificationCard(BuildContext context, UserProfileState state) {
     // Obtener userId del estado
     String? userId;
     if (state is UserProfileLoaded) {
@@ -274,27 +275,53 @@ class _HomePageState extends State<HomePage> {
       return const SizedBox.shrink();
     }
 
-    // Cargar perfil de gamificación cuando se monta el widget (solo una vez)
-    final gamificationBloc = context.read<GamificationBloc>();
-    final currentGamificationState = gamificationBloc.state;
-    
-    // Solo cargar si no está ya cargando o cargado
-    if (currentGamificationState is! GamificationLoaded && 
-        currentGamificationState is! GamificationLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          gamificationBloc.add(LoadGamificationProfile(userId!));
-        }
-      });
-    }
+    // userId ya está verificado como no-null arriba
+    final validUserId = userId;
 
     return BlocBuilder<GamificationBloc, GamificationState>(
       builder: (context, gamificationState) {
         if (gamificationState is GamificationLoaded) {
-          return MascotWidget(profile: gamificationState.profile);
+          return FadeInUp(
+            duration: const Duration(milliseconds: 800),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 0),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Barra de XP compacta (horizontal)
+                  _buildCompactXPBar(gamificationState.profile),
+                  const SizedBox(height: 12),
+                  // Divider sutil
+                  Container(height: 1, color: Colors.grey[200]),
+                  const SizedBox(height: 12),
+                  // Racha compacta (horizontal)
+                  FutureBuilder<DailyStreak?>(
+                    future: _getStreak(validUserId),
+                    builder: (context, snapshot) {
+                      return _buildCompactStreak(
+                        gamificationState.profile,
+                        snapshot.data,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
         } else if (gamificationState is GamificationLoading) {
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -307,63 +334,229 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (gamificationState is GamificationError) {
-          // En caso de error, mostrar un placeholder o intentar recargar
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.pets, size: 40, color: Colors.grey[400]),
-                const SizedBox(height: 8),
-                Text(
-                  'Cargando mascota...',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
-        // Estado inicial - mostrar placeholder mientras carga
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+        // Estado inicial o error - no mostrar nada
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  /// Construye la barra de XP compacta (versión horizontal)
+  Widget _buildCompactXPBar(UserGamificationProfile profile) {
+    final levelService = LevelService();
+    final progress = profile.levelProgress;
+    final tierEmoji = levelService.getLevelTierEmoji(profile.currentLevel);
+    final tierName = levelService.getLevelTier(profile.currentLevel);
+
+    return Row(
+      children: [
+        // Emoji y nivel
+        Text(tierEmoji, style: const TextStyle(fontSize: 20)),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Nivel ${profile.currentLevel}',
+              style: GoogleFonts.quicksand(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2C3E50),
+              ),
+            ),
+            Text(
+              tierName,
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        const Spacer(),
+        // Barra de progreso
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${profile.totalXP} XP',
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF3498DB),
+                ),
+              ),
+              const SizedBox(height: 4),
+              LinearPercentIndicator(
+                lineHeight: 6.0,
+                percent: progress,
+                backgroundColor: Colors.grey[200]!,
+                progressColor: const Color(0xFF3498DB),
+                barRadius: const Radius.circular(3),
+                animation: true,
+                animationDuration: 500,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${profile.currentLevelXP}/${profile.nextLevelXP}',
+                style: GoogleFonts.quicksand(
+                  fontSize: 10,
+                  color: Colors.grey[600],
+                ),
               ),
             ],
           ),
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
+        ),
+      ],
     );
+  }
+
+  /// Construye la racha compacta (versión horizontal)
+  Widget _buildCompactStreak(
+    UserGamificationProfile profile,
+    DailyStreak? streak,
+  ) {
+    final streakService = StreakService();
+    final streakStatus = streak != null
+        ? streakService.checkStreakStatus(streak)
+        : StreakStatus.noActivity;
+    final message = streak != null
+        ? streakService.getEmpatheticMessage(
+            streakStatus,
+            profile.currentStreak,
+          )
+        : '¡Comienza tu primera racha hoy!';
+
+    Color streakColor;
+    IconData streakIcon;
+    String streakEmoji;
+
+    switch (streakStatus) {
+      case StreakStatus.active:
+        streakColor = const Color(0xFFE74C3C);
+        streakIcon = Icons.local_fire_department;
+        streakEmoji = '🔥';
+        break;
+      case StreakStatus.atRisk:
+        streakColor = const Color(0xFFF39C12);
+        streakIcon = Icons.warning_amber_rounded;
+        streakEmoji = '⚠️';
+        break;
+      case StreakStatus.lost:
+        streakColor = Colors.grey;
+        streakIcon = Icons.refresh;
+        streakEmoji = '💙';
+        break;
+      case StreakStatus.paused:
+        streakColor = const Color(0xFF3498DB);
+        streakIcon = Icons.pause_circle;
+        streakEmoji = '⏸️';
+        break;
+      case StreakStatus.noActivity:
+        streakColor = Colors.grey;
+        streakIcon = Icons.local_fire_department_outlined;
+        streakEmoji = '💤';
+        break;
+    }
+
+    return Row(
+      children: [
+        // Icono de racha
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: streakColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(streakEmoji, style: const TextStyle(fontSize: 24)),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Información de racha
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Icon(streakIcon, color: streakColor, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Racha',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${profile.currentStreak} días',
+                style: GoogleFonts.quicksand(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: streakColor,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                message,
+                style: GoogleFonts.quicksand(
+                  fontSize: 10,
+                  color: Colors.grey[600],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        // Días de descanso si aplica
+        if (profile.canUseRestDay && !profile.isPauseModeActive)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3498DB).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${profile.restDaysAvailable}\ndías',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.quicksand(
+                fontSize: 9,
+                color: const Color(0xFF3498DB),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Obtiene la racha del usuario desde el repositorio
+  Future<DailyStreak?> _getStreak(String userId) async {
+    try {
+      final repository = getIt<GamificationRepository>();
+      final result = await repository.getStreak(userId);
+      return result.fold((error) {
+        print('❌ Error obteniendo racha: $error');
+        return null;
+      }, (streak) => streak);
+    } catch (e) {
+      print('❌ Excepción obteniendo racha: $e');
+      return null;
+    }
   }
 
   /// Recarga la información de situación del usuario
@@ -711,8 +904,8 @@ class _HomePageState extends State<HomePage> {
 
     return Column(
       children: [
-        // Mascota de gamificación (siempre visible)
-        _buildGamificationMascot(context, state),
+        // Tarjeta compacta de gamificación
+        _buildGamificationCard(context, state),
         const SizedBox(height: 15),
 
         // Contenido específico según el tipo de usuario

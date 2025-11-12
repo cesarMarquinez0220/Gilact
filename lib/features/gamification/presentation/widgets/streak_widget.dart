@@ -10,7 +10,7 @@ class StreakWidget extends StatelessWidget {
   final DailyStreak? streak;
   final StreakService _streakService = StreakService();
 
-  const StreakWidget({
+   StreakWidget({
     super.key,
     required this.profile,
     this.streak,

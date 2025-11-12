@@ -47,11 +47,7 @@ class XPCelebrationAnimation extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                      const Icon(Icons.star, color: Colors.white, size: 24),
                       const SizedBox(width: 8),
                       Text(
                         '+$xpAmount XP',
@@ -86,9 +82,14 @@ class XPCelebrationAnimation extends StatelessWidget {
   }
 
   /// Muestra la animación como overlay
-  static void show(BuildContext context, int xpAmount, {VoidCallback? onComplete}) {
+  static void show(
+    BuildContext context,
+    int xpAmount, {
+    VoidCallback? onComplete,
+  }) {
     final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
+    late final OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
       builder: (context) => XPCelebrationAnimation(
         xpAmount: xpAmount,
         onComplete: () {
@@ -101,4 +102,3 @@ class XPCelebrationAnimation extends StatelessWidget {
     overlay.insert(overlayEntry);
   }
 }
-

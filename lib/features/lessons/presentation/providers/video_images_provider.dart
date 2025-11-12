@@ -98,9 +98,7 @@ class VideoImagesProvider extends ChangeNotifier {
   /// Obtiene el nombre de imagen para un videoId específico
   String getImageNameForVideo(int videoId) {
     if (!_isInitialized) {
-      debugPrint(
-        '⚠️ VideoImagesProvider no inicializado, usando imagen por defecto',
-      );
+      // No imprimir en cada llamada para evitar spam en logs
       return '1.png';
     }
 

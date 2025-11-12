@@ -102,13 +102,20 @@ class ModernBottomNavigationBar extends StatelessWidget {
                 _buildNavItem(
                   context,
                   1,
+                  Icons.pets_outlined,
+                  Icons.pets,
+                  'Compañera',
+                ),
+                _buildNavItem(
+                  context,
+                  2,
                   Icons.favorite_outline,
                   Icons.favorite,
                   'Salud',
                 ),
                 _buildNavItem(
                   context,
-                  2,
+                  3,
                   Icons.person_outline,
                   Icons.person,
                   'Perfil',

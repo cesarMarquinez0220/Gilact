@@ -17,6 +17,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Páginas refactorizadas
 import 'home_page_wrapper.dart';
+import 'companion_page.dart';
 import 'health_page.dart';
 import 'profile_page.dart';
 
@@ -93,7 +94,12 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                   _currentIndex = index;
                 });
               },
-              children: const [HomePageWrapper(), HealthPage(), ProfilePage()],
+              children: const [
+                HomePageWrapper(),
+                CompanionPage(),
+                HealthPage(),
+                ProfilePage(),
+              ],
             ),
           ),
           // Navegación flotante sobre el contenido

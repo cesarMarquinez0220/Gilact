@@ -9,7 +9,7 @@ class XPBarWidget extends StatelessWidget {
   final UserGamificationProfile profile;
   final LevelService _levelService = LevelService();
 
-  const XPBarWidget({
+   XPBarWidget({
     super.key,
     required this.profile,
   });
