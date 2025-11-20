@@ -5,194 +5,530 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
 import '../../../chatbot/presentation/pages/chatbot_page.dart';
 import '../../../chatbot/presentation/bloc/chatbot_bloc.dart';
+import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
+import '../../../lactation/domain/entities/baby_weight_record.dart';
+import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
+import '../../../lactation/domain/entities/sleep_record.dart';
 
-/// Página de salud del bebé con diseño consistente
-class HealthPage extends StatelessWidget {
+/// Página de salud del bebé con diseño mejorado y funcionalidades adicionales
+class HealthPage extends StatefulWidget {
   const HealthPage({super.key});
+
+  @override
+  State<HealthPage> createState() => _HealthPageState();
+}
+
+class _HealthPageState extends State<HealthPage> {
+  BabyWeightRecord? _lastWeightRecord;
+  SleepRecord? _lastSleepRecord;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentData();
+  }
+
+  Future<void> _loadRecentData() async {
+    try {
+      // Cargar último registro de peso
+      final weightDataSource = BabyWeightOfflineLocalDataSource();
+      final weightRecords = await weightDataSource.getAllRecords();
+      if (weightRecords.isNotEmpty) {
+        weightRecords.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+        if (mounted) {
+          setState(() {
+            _lastWeightRecord = weightRecords.first;
+          });
+        }
+      }
+
+      // Cargar último registro de sueño
+      final sleepDataSource = SleepOfflineLocalDataSource();
+      final sleepRecords = await sleepDataSource.getAllRecords();
+      if (sleepRecords.isNotEmpty) {
+        sleepRecords.sort(
+          (a, b) => b.sleepStartTime.compareTo(a.sleepStartTime),
+        );
+        if (mounted) {
+          setState(() {
+            _lastSleepRecord = sleepRecords.first;
+          });
+        }
+      }
+    } catch (e) {
+      // Si hay error, continuar sin datos recientes
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header personalizado
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Text(
-                    'Salud del Bebé',
-                    style: GoogleFonts.quicksand(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+            child: Row(
+              children: [
+                Text(
+                  'Salud del Bebé',
+                  style: GoogleFonts.quicksand(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => _loadRecentData(),
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  tooltip: 'Actualizar',
+                ),
+              ],
+            ),
+          ),
+          // Contenido scrollable
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Sección: Seguimiento de Crecimiento
+                    _buildSectionTitle('Seguimiento de Crecimiento'),
+                    const SizedBox(height: 12),
+                    _buildEnhancedHealthCard(
+                      context,
+                      title: 'Peso del Bebé',
+                      subtitle: 'Registra y monitorea el peso',
+                      icon: Icons.monitor_weight_rounded,
+                      color: const Color(0xFF4CAF50),
+                      onTap: () {
+                        Navigator.of(context).pushNamed('/baby-weight-form');
+                      },
+                      lastRecord: _lastWeightRecord != null
+                          ? 'Último: ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                          : 'Sin registros',
+                      recordDate: _lastWeightRecord?.recordedAt,
+                      badge: _lastWeightRecord != null ? 'Activo' : null,
                     ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      // Mostrar estadísticas de salud
-                    },
-                    icon: const Icon(Icons.analytics, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
+                    const SizedBox(height: 16),
 
-            // Tarjetas de funcionalidades de salud
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  // Seguimiento de peso
-                  _buildHealthCard(
-                    'Peso del Bebé',
-                    'Registra el peso diario',
-                    Icons.monitor_weight,
-                    const Color(0xFF4CAF50),
-                    () {
-                      Navigator.of(context).pushNamed('/baby-weight-form');
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Registro de temperatura
-                  _buildHealthCard(
-                    'Sueño',
-                    'Registro de sueño',
-                    Icons.thermostat,
-                    const Color(0xFFFF9800),
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const DailySleepFormPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // ChatBot
-                  _buildHealthCard(
-                    'ChatBot',
-                    'Chat con el chatbot',
-                    Icons.chat,
-                    const Color(0xFF03A696),
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider(
-                            create: (context) => GetIt.instance<ChatbotBloc>(),
-                            child: const ChatbotPage(),
+                    // Sección: Bienestar Diario
+                    _buildSectionTitle('Bienestar Diario'),
+                    const SizedBox(height: 12),
+                    _buildEnhancedHealthCard(
+                      context,
+                      title: 'Registro de Sueño',
+                      subtitle: 'Controla las horas de sueño',
+                      icon: Icons.bedtime_rounded,
+                      color: const Color(0xFFFF9800),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DailySleepFormPage(),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // Emergencias
-                  _buildHealthCard(
-                    'Emergencias',
-                    'Contactos de emergencia',
-                    Icons.emergency,
-                    const Color(0xFFF44336),
-                    () {
-                      _showDevelopmentMessage(
-                        context,
-                        'Contactos de Emergencia',
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 100), // Espacio para el bottom bar
-                ],
+                        );
+                      },
+                      lastRecord: _lastSleepRecord != null
+                          ? 'Último: ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                          : 'Sin registros',
+                      recordDate: _lastSleepRecord?.sleepStartTime,
+                      badge: _lastSleepRecord != null ? 'Activo' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Sección: Asistencia
+                    _buildSectionTitle('Asistencia y Ayuda'),
+                    const SizedBox(height: 12),
+                    _buildEnhancedHealthCard(
+                      context,
+                      title: 'Asistente Virtual',
+                      subtitle: 'Pregunta sobre salud y cuidados',
+                      icon: Icons.smart_toy_rounded,
+                      color: const Color(0xFF03A696),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) =>
+                                  GetIt.instance<ChatbotBloc>(),
+                              child: const ChatbotPage(),
+                            ),
+                          ),
+                        );
+                      },
+                      lastRecord: 'Disponible 24/7',
+                      badge: 'Nuevo',
+                      badgeColor: Colors.blue,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Sección: Emergencias
+                    _buildSectionTitle('Emergencias'),
+                    const SizedBox(height: 12),
+                    _buildEnhancedHealthCard(
+                      context,
+                      title: 'Contactos de Emergencia',
+                      subtitle: 'Acceso rápido a ayuda médica',
+                      icon: Icons.emergency_rounded,
+                      color: const Color(0xFFF44336),
+                      onTap: () {
+                        _showEmergencyContacts(context);
+                      },
+                      lastRecord: 'Siempre disponible',
+                      badge: 'Importante',
+                      badgeColor: Colors.red,
+                    ),
+                    const SizedBox(height: 100), // Espacio para el bottom bar
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        title,
+        style: GoogleFonts.quicksand(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
     );
   }
 
-  Widget _buildHealthCard(
+  Widget _buildEnhancedHealthCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    String? lastRecord,
+    DateTime? recordDate,
+    String? badge,
+    Color? badgeColor,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: color.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Icono con fondo degradado
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color, color.withValues(alpha: 0.7)],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, color: Colors.white, size: 32),
+              ),
+              const SizedBox(width: 16),
+              // Información
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF2C3E50),
+                            ),
+                          ),
+                        ),
+                        if (badge != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (badgeColor ?? color).withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: (badgeColor ?? color).withValues(
+                                  alpha: 0.3,
+                                ),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              badge,
+                              style: GoogleFonts.quicksand(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: badgeColor ?? color,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        color: const Color(0xFF7F8C8D),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (lastRecord != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 14,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            lastRecord,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (recordDate != null) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              _formatDate(recordDate),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Flecha
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.grey[600],
+                  size: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final recordDay = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(recordDay).inDays;
+
+    if (difference == 0) {
+      return 'Hoy';
+    } else if (difference == 1) {
+      return 'Ayer';
+    } else if (difference < 7) {
+      return 'Hace $difference días';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  void _showEmergencyContacts(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.emergency_rounded, color: Colors.red[700], size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Contactos de Emergencia',
+              style: GoogleFonts.quicksand(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.red[700],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'En caso de emergencia, contacta inmediatamente:',
+              style: GoogleFonts.quicksand(
+                fontSize: 14,
+                color: const Color(0xFF7F8C8D),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildEmergencyContactItem(
+              'Emergencias',
+              '911',
+              Icons.phone,
+              Colors.red,
+              () {
+                // Llamar a emergencias
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildEmergencyContactItem(
+              'Pediatra',
+              'Contacta a tu pediatra',
+              Icons.local_hospital,
+              const Color(0xFF03A696),
+              () {
+                // Abrir contactos del pediatra
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildEmergencyContactItem(
+              'Línea de Lactancia',
+              '0800-LACTANCIA',
+              Icons.support_agent,
+              Colors.blue,
+              () {
+                // Llamar a línea de lactancia
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cerrar',
+              style: GoogleFonts.quicksand(
+                color: const Color(0xFF03A696),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmergencyContactItem(
     String title,
-    String subtitle,
+    String contact,
     IconData icon,
     Color color,
     VoidCallback onTap,
   ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(15),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
               ),
-              child: Icon(icon, color: color, size: 30),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2C3E50),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      contact,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12,
+                        color: const Color(0xFF7F8C8D),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Muestra un mensaje de que la funcionalidad está en desarrollo
-  void _showDevelopmentMessage(BuildContext context, String featureName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$featureName está en desarrollo. Pronto estará disponible.',
-          style: GoogleFonts.quicksand(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
+              Icon(Icons.phone, color: color, size: 20),
+            ],
           ),
         ),
-        backgroundColor: const Color(0xFF03A696),
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
       ),
     );
   }

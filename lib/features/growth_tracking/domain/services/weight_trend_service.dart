@@ -6,7 +6,6 @@ import 'who_percentiles_service.dart';
 import 'feeding_analysis_service.dart';
 import 'growth_alert_service.dart';
 import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
-import '../../../lactation/data/services/lactation_service.dart';
 import '../../../lactation/domain/entities/baby_weight_record.dart';
 import '../../../../core/services/connectivity_service.dart';
 
@@ -37,19 +36,60 @@ class WeightTrendService {
       final startDate = today.subtract(Duration(days: daysBack));
       final endDate = today;
 
+      if (kDebugMode) {
+        print('📊 WeightTrendService: Obteniendo datos de tendencia...');
+        print(
+          '   - Rango: ${startDate.toIso8601String()} a ${endDate.toIso8601String()}',
+        );
+        print('   - UserId: $userId');
+        print('   - Fecha de nacimiento: $birthDate');
+      }
+
       // 1. Obtener registros de peso
-      final weightRecords = await _getWeightRecords(
-        startDate,
-        endDate,
-        userId,
-      );
+      final weightRecords = await _getWeightRecords(startDate, endDate, userId);
+      if (kDebugMode) {
+        print(
+          '📊 WeightTrendService: Registros de peso obtenidos: ${weightRecords.length}',
+        );
+        if (weightRecords.isNotEmpty) {
+          print(
+            '   - Primer registro: ${weightRecords.values.first.weight} kg el ${weightRecords.keys.first}',
+          );
+        }
+      }
 
       // 2. Obtener datos de alimentación
+      if (kDebugMode) {
+        print('🍼 WeightTrendService: Obteniendo datos de alimentación...');
+      }
       final feedingData = await _feedingService.getDailyFeedingData(
         startDate,
         endDate,
         userId,
       );
+
+      if (kDebugMode) {
+        final daysWithFeeding = feedingData
+            .where((d) => d.totalVolume > 0)
+            .toList();
+        print(
+          '🍼 WeightTrendService: ${feedingData.length} días de datos de alimentación',
+        );
+        print('   - Días con volumen > 0: ${daysWithFeeding.length}');
+        if (daysWithFeeding.isNotEmpty) {
+          final avgVolume =
+              daysWithFeeding
+                  .map((d) => d.totalVolume)
+                  .reduce((a, b) => a + b) /
+              daysWithFeeding.length;
+          print('   - Volumen promedio: ${avgVolume.toStringAsFixed(1)} ml');
+        }
+      }
+      if (kDebugMode) {
+        print(
+          '📊 WeightTrendService: Datos de alimentación obtenidos: ${feedingData.length} días',
+        );
+      }
 
       // 3. Crear mapa de alimentación por fecha para acceso rápido
       final feedingMap = <String, DailyFeedingData>{};
@@ -59,6 +99,11 @@ class WeightTrendService {
       }
 
       // 4. Generar datos de tendencia día por día
+      if (kDebugMode) {
+        print(
+          '📈 WeightTrendService: Generando datos de tendencia día por día...',
+        );
+      }
       final trendData = <WeightTrendData>[];
       final days = endDate.difference(startDate).inDays + 1;
 
@@ -88,28 +133,47 @@ class WeightTrendService {
           );
         }
 
-        trendData.add(WeightTrendData(
-          date: currentDate,
-          ageInDays: ageInDays,
-          actualWeight: weightRecord?.weight,
-          percentile3: percentiles['p3'],
-          percentile15: percentiles['p15'],
-          percentile50: percentiles['p50'],
-          percentile85: percentiles['p85'],
-          percentile97: percentiles['p97'],
-          feedingVolume: feeding?.totalVolume,
-          feedingFrequency: feeding?.feedingFrequency,
-          feedingScore: feedingScore,
-        ));
+        trendData.add(
+          WeightTrendData(
+            date: currentDate,
+            ageInDays: ageInDays,
+            actualWeight: weightRecord?.weight,
+            percentile3: percentiles['p3'],
+            percentile15: percentiles['p15'],
+            percentile50: percentiles['p50'],
+            percentile85: percentiles['p85'],
+            percentile97: percentiles['p97'],
+            feedingVolume: feeding?.totalVolume,
+            feedingFrequency: feeding?.feedingFrequency,
+            feedingScore: feedingScore,
+          ),
+        );
       }
 
       // 5. Analizar tendencia y detectar alertas
       final analysis = _alertService.analyzeGrowthTrend(trendData);
 
       if (kDebugMode) {
-        print(
-          '✅ WeightTrendService: Datos de tendencia generados para ${trendData.length} días',
-        );
+        final dataWithWeight = trendData
+            .where((data) => data.actualWeight != null)
+            .toList();
+        final dataWithVolume = trendData
+            .where(
+              (data) => data.feedingVolume != null && data.feedingVolume! > 0,
+            )
+            .toList();
+        print('✅ WeightTrendService: Análisis completado:');
+        print('   - Total días generados: ${trendData.length}');
+        print('   - Días con peso real: ${dataWithWeight.length}');
+        print('   - Días con volumen: ${dataWithVolume.length}');
+        if (dataWithWeight.isNotEmpty) {
+          print(
+            '   - Primer peso: ${dataWithWeight.first.actualWeight} kg (día ${dataWithWeight.first.ageInDays})',
+          );
+          print(
+            '   - Último peso: ${dataWithWeight.last.actualWeight} kg (día ${dataWithWeight.last.ageInDays})',
+          );
+        }
       }
 
       return analysis;
@@ -128,17 +192,28 @@ class WeightTrendService {
     String userId,
   ) async {
     try {
+      if (kDebugMode) {
+        print('📊 _getWeightRecords: Buscando registros de peso...');
+        print(
+          '   - Rango: ${startDate.toIso8601String()} a ${endDate.toIso8601String()}',
+        );
+        print('   - UserId: $userId');
+      }
+
       final records = <BabyWeightRecord>[];
 
       // Intentar obtener desde Firestore si hay conexión
       final isConnected = await _connectivityService.isConnected();
+      if (kDebugMode) {
+        print('   - Conexión disponible: $isConnected');
+      }
 
       if (isConnected) {
         try {
           final user = FirebaseAuth.instance.currentUser;
           if (user != null) {
             // Obtener ID del documento del usuario
-            String? userDocId = userId;
+            String userDocId = userId;
             if (user.email != null) {
               final userQuery = await FirebaseFirestore.instance
                   .collection('Users')
@@ -150,7 +225,8 @@ class WeightTrendService {
               }
             }
 
-            if (userDocId != null) {
+            // userDocId siempre tiene un valor (userId nunca es null)
+            {
               final weightCollection = FirebaseFirestore.instance
                   .collection('Users')
                   .doc(userDocId)
@@ -158,11 +234,35 @@ class WeightTrendService {
                   .doc('seleccion')
                   .collection('peso');
 
+              if (kDebugMode) {
+                print(
+                  '   - Consultando Firestore: Users/$userDocId/situacion/seleccion/peso',
+                );
+                print(
+                  '   - Timestamp desde: ${startDate.millisecondsSinceEpoch}',
+                );
+                print(
+                  '   - Timestamp hasta: ${endDate.millisecondsSinceEpoch}',
+                );
+              }
+
               final querySnapshot = await weightCollection
-                  .where('timestamp', isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
-                  .where('timestamp', isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
+                  .where(
+                    'timestamp',
+                    isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch,
+                  )
+                  .where(
+                    'timestamp',
+                    isLessThanOrEqualTo: endDate.millisecondsSinceEpoch,
+                  )
                   .orderBy('timestamp', descending: false)
                   .get();
+
+              if (kDebugMode) {
+                print(
+                  '   - Documentos encontrados en Firestore: ${querySnapshot.docs.length}',
+                );
+              }
 
               for (final doc in querySnapshot.docs) {
                 final data = doc.data();
@@ -172,15 +272,23 @@ class WeightTrendService {
                         data['timestamp'] as int,
                       );
 
-                records.add(BabyWeightRecord(
-                  id: doc.id,
-                  userId: userDocId,
-                  weight: (data['peso'] as num).toDouble(),
-                  recordedAt: recordedAt,
-                  notes: data['notas'] as String?,
-                  createdAt: recordedAt,
-                  updatedAt: recordedAt,
-                ));
+                if (kDebugMode && querySnapshot.docs.length <= 5) {
+                  print(
+                    '   📝 Documento ${doc.id}: peso=${data['peso']}, fecha=$recordedAt',
+                  );
+                }
+
+                records.add(
+                  BabyWeightRecord(
+                    id: doc.id,
+                    userId: userDocId,
+                    weight: (data['peso'] as num).toDouble(),
+                    recordedAt: recordedAt,
+                    notes: data['notas'] as String?,
+                    createdAt: recordedAt,
+                    updatedAt: recordedAt,
+                  ),
+                );
               }
             }
           }
@@ -196,12 +304,13 @@ class WeightTrendService {
       // También obtener desde datos locales
       try {
         final localRecords = await _weightDataSource.getAllRecords();
+        if (kDebugMode) {
+          print('   - Registros locales obtenidos: ${localRecords.length}');
+        }
         records.addAll(localRecords);
       } catch (e) {
         if (kDebugMode) {
-          print(
-            '⚠️ WeightTrendService: Error obteniendo datos locales: $e',
-          );
+          print('⚠️ WeightTrendService: Error obteniendo datos locales: $e');
         }
       }
 
@@ -217,6 +326,16 @@ class WeightTrendService {
         }
       }
 
+      if (kDebugMode) {
+        print('📊 _getWeightRecords: Resultado final:');
+        print('   - Total registros únicos: ${recordsMap.length}');
+        if (recordsMap.isNotEmpty) {
+          final firstKey = recordsMap.keys.first;
+          final firstRecord = recordsMap[firstKey]!;
+          print('   - Primer registro: ${firstRecord.weight} kg el $firstKey');
+        }
+      }
+
       return recordsMap;
     } catch (e) {
       if (kDebugMode) {
@@ -226,4 +345,3 @@ class WeightTrendService {
     }
   }
 }
-

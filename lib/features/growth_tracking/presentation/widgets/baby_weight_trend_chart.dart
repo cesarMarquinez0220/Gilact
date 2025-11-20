@@ -339,7 +339,7 @@ class BabyWeightTrendChart extends StatelessWidget {
       }
     }
 
-    // Crear spots invertidos para cerrar el polígono
+    // Crear spots invertidos para cerrar el polígono (de P15 en reversa)
     final normalRangeSpotsReversed = <FlSpot>[];
     for (int i = data.length - 1; i >= 0; i--) {
       final dataPoint = data[i];
@@ -347,6 +347,24 @@ class BabyWeightTrendChart extends StatelessWidget {
         normalRangeSpotsReversed.add(
           FlSpot(i.toDouble(), dataPoint.percentile15!),
         );
+      }
+    }
+    
+    // Asegurar que el polígono esté cerrado correctamente
+    final normalRangePolygon = <FlSpot>[];
+    if (normalRangeSpots.isNotEmpty && normalRangeSpotsReversed.isNotEmpty) {
+      // Ir de P85[0] a P85[n]
+      normalRangePolygon.addAll(normalRangeSpots);
+      // Si el último punto de P85 no coincide con el último de P15, agregar un punto de cierre
+      if (normalRangeSpots.last.x != normalRangeSpotsReversed.first.x ||
+          normalRangeSpots.last.y != normalRangeSpotsReversed.first.y) {
+        // Ya está bien conectado, solo agregamos los reversos
+      }
+      // Volver de P15[n] a P15[0] para cerrar el polígono
+      normalRangePolygon.addAll(normalRangeSpotsReversed);
+      // Cerrar el polígono conectando el último punto con el primero
+      if (normalRangePolygon.isNotEmpty) {
+        normalRangePolygon.add(normalRangePolygon.first);
       }
     }
 
@@ -418,54 +436,51 @@ class BabyWeightTrendChart extends StatelessWidget {
         if (p3Spots.isNotEmpty)
           LineChartBarData(
             spots: p3Spots,
-            isCurved: true,
+            isCurved: p3Spots.length > 2, // Solo curvar si hay más de 2 puntos
             color: Colors.grey.withOpacity(0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
           ),
-        // Percentil 15 (gris claro)
+        // Percentil 15 (gris claro) - límite inferior del rango normal
         if (p15Spots.isNotEmpty)
           LineChartBarData(
             spots: p15Spots,
-            isCurved: true,
+            isCurved: p15Spots.length > 2, // Solo curvar si hay más de 2 puntos
             color: Colors.grey.withOpacity(0.4),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
           ),
-        // Área sombreada para rango normal (P15-P85) - franja gris como Flo
-        // Creamos un polígono cerrado combinando P85 y P15 en reversa
-        if (normalRangeSpots.isNotEmpty && normalRangeSpotsReversed.isNotEmpty)
+        // Área sombreada para rango normal (P15-P85) - franja gris
+        // Usamos un polígono cerrado para crear el área entre P15 y P85
+        if (normalRangePolygon.isNotEmpty && normalRangePolygon.length >= 4)
           LineChartBarData(
-            spots: [
-              ...normalRangeSpots, // Ir de P85[0] a P85[n]
-              ...normalRangeSpotsReversed, // Volver de P15[n] a P15[0]
-            ],
-            isCurved: true,
+            spots: normalRangePolygon,
+            isCurved: false, // Polígono cerrado, no necesita curvar
             color: Colors.transparent,
             barWidth: 0,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.grey[200]!.withOpacity(0.4),
+              color: Colors.grey[200]!.withOpacity(0.3),
             ),
           ),
         // Percentil 50 (mediana) - línea más visible
         if (p50Spots.isNotEmpty)
           LineChartBarData(
             spots: p50Spots,
-            isCurved: true,
+            isCurved: p50Spots.length > 2, // Solo curvar si hay más de 2 puntos
             color: Colors.grey[400]!,
             barWidth: 2,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
           ),
-        // Línea superior del rango normal (P85)
+        // Línea superior del rango normal (P85) - límite superior del rango normal
         if (p85Spots.isNotEmpty)
           LineChartBarData(
             spots: p85Spots,
-            isCurved: true,
+            isCurved: p85Spots.length > 2, // Solo curvar si hay más de 2 puntos
             color: Colors.grey[300]!,
             barWidth: 1,
             dotData: const FlDotData(show: false),
@@ -475,17 +490,19 @@ class BabyWeightTrendChart extends StatelessWidget {
         if (p97Spots.isNotEmpty)
           LineChartBarData(
             spots: p97Spots,
-            isCurved: true,
+            isCurved: p97Spots.length > 2, // Solo curvar si hay más de 2 puntos
             color: Colors.grey.withOpacity(0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
           ),
-        // Peso real del bebé (azul destacado)
+        // Peso real del bebé (verde destacado)
         if (actualSpots.isNotEmpty)
           LineChartBarData(
             spots: actualSpots,
-            isCurved: true,
+            // Solo curvar si hay más de 2 puntos, de lo contrario será una línea recta
+            isCurved: actualSpots.length > 2,
+            curveSmoothness: 0.35, // Suavidad de la curva
             color: const Color(0xFF03A696), // Color del tema
             barWidth: 3,
             dotData: FlDotData(
@@ -500,7 +517,7 @@ class BabyWeightTrendChart extends StatelessWidget {
               },
             ),
             belowBarData: BarAreaData(
-              show: true,
+              show: actualSpots.length > 1, // Solo mostrar área si hay más de un punto
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

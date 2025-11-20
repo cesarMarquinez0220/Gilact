@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'dart:ui';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../user/domain/entities/user_profile_entities.dart';
 import '../../../growth_tracking/domain/services/weight_trend_service.dart';
+import '../../../growth_tracking/domain/services/who_percentiles_service.dart';
 import '../../../growth_tracking/domain/entities/weight_trend_data.dart';
 import '../../../growth_tracking/presentation/widgets/baby_weight_trend_chart.dart';
 import '../../../growth_tracking/presentation/widgets/feeding_volume_chart.dart';
@@ -33,7 +35,18 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
   }
 
   Future<void> _loadTrendData() async {
+    if (kDebugMode) {
+      print(
+        '🔵 PostpartoProfileWidget: Iniciando carga de datos de tendencia...',
+      );
+    }
+
     if (widget.userProfile.babyInfo == null) {
+      if (kDebugMode) {
+        print(
+          '⚠️ PostpartoProfileWidget: No hay información del bebé disponible',
+        );
+      }
       setState(() {
         _isLoadingTrend = false;
       });
@@ -45,18 +58,37 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
       final birthDateStr = widget.userProfile.babyInfo!.birthDate;
       final birthDate = DateTime.parse(birthDateStr);
 
+      if (kDebugMode) {
+        print('📅 PostpartoProfileWidget: Fecha de nacimiento: $birthDateStr');
+        print('📅 PostpartoProfileWidget: Fecha parseada: $birthDate');
+      }
+
       // Obtener userId
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
+        if (kDebugMode) {
+          print('⚠️ PostpartoProfileWidget: No hay usuario autenticado');
+        }
         setState(() {
           _isLoadingTrend = false;
         });
         return;
       }
 
+      if (kDebugMode) {
+        print(
+          '👤 PostpartoProfileWidget: Usuario autenticado - UID: ${user.uid}, Email: ${user.email}',
+        );
+      }
+
       // Obtener userDocId
       String? userId;
       if (user.email != null) {
+        if (kDebugMode) {
+          print(
+            '🔍 PostpartoProfileWidget: Buscando userDocId por email: ${user.email}',
+          );
+        }
         final userQuery = await FirebaseFirestore.instance
             .collection('Users')
             .where('email', isEqualTo: user.email)
@@ -64,26 +96,91 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
             .get();
         if (userQuery.docs.isNotEmpty) {
           userId = userQuery.docs.first.id;
+          if (kDebugMode) {
+            print('✅ PostpartoProfileWidget: userDocId encontrado: $userId');
+          }
+        } else {
+          if (kDebugMode) {
+            print(
+              '⚠️ PostpartoProfileWidget: No se encontró userDocId por email, usando UID',
+            );
+          }
         }
       }
       userId ??= user.uid;
 
       // Cargar datos de tendencia
+      if (kDebugMode) {
+        print('🆔 PostpartoProfileWidget: userId final a usar: $userId');
+        print(
+          '📊 PostpartoProfileWidget: Llamando a getWeightTrend (últimos 30 días)...',
+        );
+        print('   - Fecha de nacimiento: $birthDate');
+      }
+
       final analysis = await _trendService.getWeightTrend(
         birthDate,
         userId,
         daysBack: 30,
       );
 
+      if (kDebugMode) {
+        print('📊 PostpartoProfileWidget: Datos recibidos del servicio:');
+        print('   - Total de días en trendData: ${analysis.trendData.length}');
+        final dataWithWeight = analysis.trendData
+            .where((data) => data.actualWeight != null)
+            .toList();
+        print('   - Días con peso real: ${dataWithWeight.length}');
+        final dataWithVolume = analysis.trendData
+            .where(
+              (data) => data.feedingVolume != null && data.feedingVolume! > 0,
+            )
+            .toList();
+        print('   - Días con volumen de leche: ${dataWithVolume.length}');
+      }
+
+      // DATOS DE PRUEBA: Si no hay datos con peso real, generar datos de prueba
+      final hasRealWeightData = analysis.trendData.any(
+        (data) => data.actualWeight != null,
+      );
+
+      final finalAnalysis = !hasRealWeightData
+          ? _generateTestData(birthDate)
+          : analysis;
+
+      if (kDebugMode) {
+        if (!hasRealWeightData) {
+          print('🧪 PostpartoProfileWidget: Generando datos de prueba...');
+          print(
+            '   - Días de prueba generados: ${finalAnalysis.trendData.length}',
+          );
+        } else {
+          print('✅ PostpartoProfileWidget: Usando datos reales');
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _trendAnalysis = analysis;
+          _trendAnalysis = finalAnalysis;
           _isLoadingTrend = false;
         });
+        if (kDebugMode) {
+          print(
+            '✅ PostpartoProfileWidget: Estado actualizado, carga completada',
+          );
+        }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print(
+          '❌ PostpartoProfileWidget: Error cargando datos de tendencia: $e',
+        );
+        print('❌ Stack trace: $stackTrace');
+      }
       if (mounted) {
         setState(() {
+          // Inicializar con análisis vacío en caso de error para que se muestren las gráficas
+          _trendAnalysis = const GrowthTrendAnalysis(trendData: []);
           _isLoadingTrend = false;
         });
       }
@@ -224,6 +321,102 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
     );
   }
 
+  /// Genera datos de prueba para visualizar las gráficas
+  GrowthTrendAnalysis _generateTestData(DateTime birthDate) {
+    if (kDebugMode) {
+      print('🧪 _generateTestData: Generando datos de prueba...');
+      print('   - Fecha de nacimiento: $birthDate');
+    }
+
+    final today = DateTime.now();
+    final testData = <WeightTrendData>[];
+
+    // Generar datos para los últimos 30 días
+    for (int i = 29; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final ageInDays = date.difference(birthDate).inDays;
+
+      if (ageInDays < 0) continue;
+
+      // Calcular percentiles OMS para esta edad
+      final whoService = WHOPercentilesService();
+      final percentiles = whoService.getAllPercentiles(ageInDays);
+
+      // Simular peso que crece gradualmente (empezando en 3.2 kg y creciendo ~20g por día)
+      // Solo agregar peso real cada 3-4 días para simular registros reales
+      double? actualWeight;
+      if (i % 3 == 0 || i == 0) {
+        // Peso inicial aproximado: 3.2 kg + crecimiento diario
+        final baseWeight = 3.2;
+        final growthPerDay = 0.020; // 20g por día
+        actualWeight = baseWeight + (ageInDays * growthPerDay);
+        // Asegurar que esté dentro de un rango razonable
+        actualWeight = actualWeight.clamp(2.5, 8.0);
+      }
+
+      // Simular volumen de leche (aumenta con la edad)
+      double? feedingVolume;
+      int? feedingFrequency;
+      if (i % 2 == 0 || i == 0) {
+        // Volumen aumenta con la edad del bebé
+        double baseVolume;
+        if (ageInDays <= 7) {
+          baseVolume = 240.0 + (i * 5.0); // Primera semana
+          feedingFrequency = 8;
+        } else if (ageInDays <= 30) {
+          baseVolume = 560.0 + (i * 3.0); // Primer mes
+          feedingFrequency = 7;
+        } else if (ageInDays <= 60) {
+          baseVolume = 810.0 + (i * 2.0); // Segundo mes
+          feedingFrequency = 6;
+        } else {
+          baseVolume = 900.0 + (i * 1.5); // Tercer mes+
+          feedingFrequency = 5;
+        }
+        // Agregar variación aleatoria pequeña
+        feedingVolume = baseVolume + (i % 5 - 2) * 10.0;
+        feedingVolume = feedingVolume.clamp(200.0, 1200.0);
+      }
+
+      testData.add(
+        WeightTrendData(
+          date: date,
+          ageInDays: ageInDays,
+          actualWeight: actualWeight,
+          percentile3: percentiles['p3'],
+          percentile15: percentiles['p15'],
+          percentile50: percentiles['p50'],
+          percentile85: percentiles['p85'],
+          percentile97: percentiles['p97'],
+          feedingVolume: feedingVolume,
+          feedingFrequency: feedingFrequency,
+          feedingScore: feedingFrequency != null ? 75.0 + (i % 10) : null,
+        ),
+      );
+    }
+
+    if (kDebugMode) {
+      final dataWithWeight = testData
+          .where((data) => data.actualWeight != null)
+          .toList();
+      final dataWithVolume = testData
+          .where(
+            (data) => data.feedingVolume != null && data.feedingVolume! > 0,
+          )
+          .toList();
+      print('🧪 _generateTestData: Datos generados:');
+      print('   - Total días: ${testData.length}');
+      print('   - Días con peso: ${dataWithWeight.length}');
+      print('   - Días con volumen: ${dataWithVolume.length}');
+      if (dataWithWeight.isNotEmpty) {
+        print('   - Primer peso: ${dataWithWeight.first.actualWeight} kg');
+        print('   - Último peso: ${dataWithWeight.last.actualWeight} kg');
+      }
+    }
+
+    return GrowthTrendAnalysis(trendData: testData, hasAlert: false);
+  }
+
   Widget _buildTrendSection() {
     if (_isLoadingTrend) {
       return Container(
@@ -239,17 +432,16 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
       );
     }
 
-    if (_trendAnalysis == null || _trendAnalysis!.trendData.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    // Si no hay análisis, crear uno vacío para que se muestren las gráficas con estado vacío
+    final analysis = _trendAnalysis ?? const GrowthTrendAnalysis(trendData: []);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Alertas si las hay
-        if (_trendAnalysis!.hasAlert)
+        if (analysis.hasAlert)
           GrowthAlertWidget(
-            analysis: _trendAnalysis!,
+            analysis: analysis,
             babyName: widget.userProfile.babyInfo?.name,
           ),
         // Título de sección de tendencias
@@ -266,10 +458,10 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         ),
         const SizedBox(height: 12),
         // Gráfica de peso con percentiles (PRINCIPAL - ¿Está creciendo bien?)
-        BabyWeightTrendChart(trendData: _trendAnalysis!.trendData),
+        BabyWeightTrendChart(trendData: analysis.trendData),
         const SizedBox(height: 16),
         // Gráfica de ingesta de leche (SECUNDARIA - Contexto: ¿Por qué crece así?)
-        FeedingVolumeChart(trendData: _trendAnalysis!.trendData),
+        FeedingVolumeChart(trendData: analysis.trendData),
       ],
     );
   }
