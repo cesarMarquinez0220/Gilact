@@ -8,8 +8,13 @@ import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
 import '../pages/lactation_record_page.dart';
 import '../../../../alerta_dialoge.dart';
+import '../../domain/entities/baby_weight_record.dart';
+import '../../data/datasources/baby_weight_offline_local_data_source.dart';
+import '../../../../core/services/connectivity_service.dart';
 
 enum CalendarView { day, week, month }
+
+enum RecordFilter { all, lactation, weight }
 
 class LactationCalendarWidget extends StatefulWidget {
   final List<LactationRecord>? preloadedRecords;
@@ -27,6 +32,11 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   DateTime _selectedDate = DateTime.now();
   List<LactationRecord> _records = [];
   List<LactationRecord> _monthRecords = []; // Datos del mes precargados
+  List<BabyWeightRecord> _weightRecords =
+      []; // Registros de peso para el día/vista actual
+  List<BabyWeightRecord> _monthWeightRecords =
+      []; // Datos de peso del mes precargados
+  RecordFilter _currentFilter = RecordFilter.all; // Filtro actual
   LactationStats? _stats;
   bool _isLoading = true;
   bool _isFullScreenCalendar =
@@ -38,6 +48,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   late Animation<double> _fadeAnimation;
 
   late LactationService _lactationService;
+  final BabyWeightOfflineLocalDataSource _weightDataSource =
+      BabyWeightOfflineLocalDataSource();
 
   @override
   void initState() {
@@ -53,10 +65,13 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     }
   }
 
-  void _usePreloadedData() {
+  void _usePreloadedData() async {
     print(
       '📦 [DEBUG] _usePreloadedData(): ${widget.preloadedRecords!.length} registros precargados',
     );
+
+    // Cargar registros de peso
+    final weightRecords = await _loadWeightRecordsForMonth(_selectedDate);
 
     setState(() {
       // Si hay datos precargados, pueden ser del mes completo
@@ -79,6 +94,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       }
 
       _monthRecords = widget.preloadedRecords!;
+      _weightRecords = weightRecords;
       _monthDataLoaded = true;
       _isLoading = false;
     });
@@ -128,6 +144,137 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       FirebaseFirestore.instance,
       FirebaseAuth.instance,
     );
+  }
+
+  /// Carga registros de peso para el mes seleccionado
+  Future<List<BabyWeightRecord>> _loadWeightRecordsForMonth(
+    DateTime date,
+  ) async {
+    try {
+      final firstDayOfMonth = DateTime(date.year, date.month, 1);
+      final lastDayOfMonth = DateTime(date.year, date.month + 1, 0);
+      final startTimestamp = firstDayOfMonth.millisecondsSinceEpoch;
+      final endTimestamp = lastDayOfMonth
+          .add(const Duration(days: 1))
+          .millisecondsSinceEpoch;
+
+      final List<BabyWeightRecord> records = [];
+
+      // Obtener userId
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('⚠️ No hay usuario autenticado para cargar registros de peso');
+        return [];
+      }
+
+      String? userDocId;
+      if (user.email != null) {
+        final userQuery = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+        if (userQuery.docs.isNotEmpty) {
+          userDocId = userQuery.docs.first.id;
+        }
+      }
+      userDocId ??= user.uid;
+
+      // Consultar desde Firestore
+      final connectivityService = ConnectivityService();
+      final isConnected = await connectivityService.isConnected();
+
+      if (isConnected) {
+        try {
+          final weightCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userDocId)
+              .collection('situacion')
+              .doc('seleccion')
+              .collection('peso');
+
+          final querySnapshot = await weightCollection
+              .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+              .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+              .orderBy('timestamp', descending: false)
+              .get();
+
+          print(
+            '📊 Registros de peso desde Firestore: ${querySnapshot.docs.length}',
+          );
+
+          for (final doc in querySnapshot.docs) {
+            final data = doc.data();
+            final recordedAt = data['fecha_peso'] != null
+                ? DateTime.parse(data['fecha_peso'] as String)
+                : DateTime.fromMillisecondsSinceEpoch(data['timestamp'] as int);
+
+            records.add(
+              BabyWeightRecord(
+                id: doc.id,
+                userId: userDocId,
+                weight: (data['peso'] as num).toDouble(),
+                recordedAt: recordedAt,
+                notes: data['notas'] as String?,
+                createdAt: recordedAt,
+                updatedAt: recordedAt,
+              ),
+            );
+          }
+        } catch (e) {
+          print('⚠️ Error consultando Firestore para peso: $e');
+        }
+      }
+
+      // También obtener desde datos locales (para registros no sincronizados)
+      try {
+        final localRecords = await _weightDataSource.getAllRecords();
+        final localRecordsInRange = localRecords.where((record) {
+          final recordDate = DateTime(
+            record.recordedAt.year,
+            record.recordedAt.month,
+            record.recordedAt.day,
+          );
+          final firstDay = DateTime(
+            firstDayOfMonth.year,
+            firstDayOfMonth.month,
+            firstDayOfMonth.day,
+          );
+          final lastDay = DateTime(
+            lastDayOfMonth.year,
+            lastDayOfMonth.month,
+            lastDayOfMonth.day,
+          );
+          return recordDate.isAfter(
+                firstDay.subtract(const Duration(days: 1)),
+              ) &&
+              recordDate.isBefore(lastDay.add(const Duration(days: 1)));
+        }).toList();
+
+        // Agregar solo los que no están ya en records (por ID)
+        final existingIds = records.map((r) => r.id).toSet();
+        for (final localRecord in localRecordsInRange) {
+          if (!existingIds.contains(localRecord.id)) {
+            records.add(localRecord);
+          }
+        }
+
+        print(
+          '📊 Registros de peso locales adicionales: ${localRecordsInRange.length}',
+        );
+      } catch (e) {
+        print('⚠️ Error obteniendo datos locales de peso: $e');
+      }
+
+      // Ordenar por fecha
+      records.sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+
+      print('✅ Total registros de peso cargados: ${records.length}');
+      return records;
+    } catch (e) {
+      print('❌ Error cargando registros de peso: $e');
+      return [];
+    }
   }
 
   Future<void> _loadData() async {
@@ -183,11 +330,27 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           break;
       }
 
+      // Cargar registros de peso para el mes actual
+      final weightRecords = await _loadWeightRecordsForMonth(_selectedDate);
+
       print('💾 [DEBUG] Asignando ${records.length} registros a _records');
+      print('💾 [DEBUG] Asignando ${weightRecords.length} registros de peso');
+      print('💾 [DEBUG] Vista actual: $_currentView');
       setState(() {
         _records = records;
+        _weightRecords = weightRecords;
         _stats = stats;
         _isLoading = false;
+
+        // Si estamos en vista de mes, también actualizar los datos del mes precargados
+        if (_currentView == CalendarView.month) {
+          _monthRecords = records;
+          _monthWeightRecords = weightRecords;
+          _monthDataLoaded = true;
+          print(
+            '✅ [DEBUG] Datos del mes actualizados: ${_monthRecords.length} lactancia, ${_monthWeightRecords.length} peso',
+          );
+        }
       });
       print('✅ [DEBUG] _records actualizado con ${_records.length} elementos');
 
@@ -225,6 +388,14 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         // Usar datos precargados si están disponibles
         if (_monthDataLoaded) {
           _records = _monthRecords;
+          _weightRecords =
+              _monthWeightRecords; // También actualizar registros de peso
+        } else {
+          // Si no hay datos precargados, usar los datos actuales como datos del mes
+          // Pero primero necesitamos cargar los datos del mes completo
+          _monthRecords = _records;
+          _monthWeightRecords = _weightRecords;
+          // No marcar como cargado todavía, necesitamos cargar el mes completo
         }
       } else {
         _currentView = CalendarView.day;
@@ -232,8 +403,12 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       }
     });
 
-    // Solo cargar datos si no están precargados
+    // Cargar datos del mes si no están precargados o si necesitamos actualizarlos
     if (_currentView == CalendarView.month && !_monthDataLoaded) {
+      _loadData();
+    } else if (_currentView == CalendarView.month &&
+        _monthWeightRecords.isEmpty) {
+      // Si estamos en vista de mes pero no hay datos de peso, cargar
       _loadData();
     }
   }
@@ -244,9 +419,19 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       final monthRecords = await _lactationService.getRecordsForMonth(
         _selectedDate,
       );
-      _monthRecords = monthRecords;
-      _monthDataLoaded = true;
-      print('✅ Datos del mes precargados exitosamente');
+      final monthWeightRecords = await _loadWeightRecordsForMonth(
+        _selectedDate,
+      );
+
+      setState(() {
+        _monthRecords = monthRecords;
+        _monthWeightRecords =
+            monthWeightRecords; // Solo actualizar _monthWeightRecords, no _weightRecords
+        _monthDataLoaded = true;
+      });
+      print(
+        '✅ Datos del mes precargados exitosamente (${monthRecords.length} lactancia, ${monthWeightRecords.length} peso)',
+      );
     } catch (e) {
       print('❌ Error precargando datos del mes: $e');
     }
@@ -377,7 +562,6 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -436,7 +620,6 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       ),
                     ),
                   ),
-
                 ],
               ),
               const SizedBox(height: 10),
@@ -614,13 +797,34 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   }
 
   Widget _buildDayView() {
-    // NO filtrar aquí porque _lactationService.getRecordsForDate ya filtra por fecha
-    // usar _records directamente
-    final dayRecords = _records;
+    // Filtrar registros de lactancia para el día seleccionado (por si acaso hay registros de otros días)
+    final dayRecords = _records.where((record) {
+      final recordDate = DateTime(
+        record.fechaRegistro.year,
+        record.fechaRegistro.month,
+        record.fechaRegistro.day,
+      );
+      return recordDate.year == _selectedDate.year &&
+          recordDate.month == _selectedDate.month &&
+          recordDate.day == _selectedDate.day;
+    }).toList();
+
+    // Obtener registros de peso para el día seleccionado
+    final dayWeightRecords = _weightRecords.where((record) {
+      final recordDate = DateTime(
+        record.recordedAt.year,
+        record.recordedAt.month,
+        record.recordedAt.day,
+      );
+      return recordDate.year == _selectedDate.year &&
+          recordDate.month == _selectedDate.month &&
+          recordDate.day == _selectedDate.day;
+    }).toList();
 
     print('🏗️ [DEBUG] _buildDayView():');
     print('   - Total de registros en _records: ${_records.length}');
     print('   - dayRecords.length: ${dayRecords.length}');
+    print('   - dayWeightRecords.length: ${dayWeightRecords.length}');
     print('   - Fecha seleccionada: $_selectedDate');
 
     if (dayRecords.isNotEmpty) {
@@ -632,11 +836,13 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       );
     }
 
+    final hasAnyRecords = dayRecords.isNotEmpty || dayWeightRecords.isNotEmpty;
+
     return Column(
       children: [
         _buildDateHeader(),
         Expanded(
-          child: dayRecords.isEmpty
+          child: !hasAnyRecords
               ? _buildEmptyState(title: 'No hay registros para este día')
               : ScrollConfiguration(
                   behavior: ScrollConfiguration.of(context).copyWith(
@@ -645,13 +851,23 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   child: ListView.builder(
                     // Tu ListView original va aquí DENTRO
                     padding: const EdgeInsets.all(16),
-                    itemCount: dayRecords.length,
+                    itemCount: dayRecords.length + dayWeightRecords.length,
                     itemBuilder: (context, index) {
-                      final record = dayRecords[index];
-                      print(
-                        '🎴 [DEBUG] Construyendo card #${index + 1}/${dayRecords.length} - ID: ${record.id}, Fecha: ${record.fechaRegistro}',
-                      );
-                      return _buildRecordCard(record);
+                      // Mostrar primero registros de lactancia, luego peso
+                      if (index < dayRecords.length) {
+                        final record = dayRecords[index];
+                        print(
+                          '🎴 [DEBUG] Construyendo card lactancia #${index + 1}/${dayRecords.length} - ID: ${record.id}, Fecha: ${record.fechaRegistro}',
+                        );
+                        return _buildLactationRecordCard(record);
+                      } else {
+                        final weightRecord =
+                            dayWeightRecords[index - dayRecords.length];
+                        print(
+                          '⚖️ [DEBUG] Construyendo card peso #${index - dayRecords.length + 1}/${dayWeightRecords.length} - ID: ${weightRecord.id}, Fecha: ${weightRecord.recordedAt}',
+                        );
+                        return _buildWeightRecordCard(weightRecord);
+                      }
                     },
                   ),
                 ),
@@ -776,6 +992,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     return Column(
       children: [
         _buildDateHeader(),
+        const SizedBox(height: 10),
+        // Filtros
+        _buildFilterButtons(),
         const SizedBox(height: 10),
         // Días de la semana
         Container(
@@ -958,8 +1177,15 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             day.month == DateTime.now().month &&
             day.year == DateTime.now().year;
 
-        // Verificar si hay registros para este día
-        final dayRecords = _records
+        // Verificar si hay registros de lactancia para este día
+        // En vista de mes, siempre usar _monthRecords si están disponibles
+        final monthRecordsToUse =
+            (_currentView == CalendarView.month && _monthRecords.isNotEmpty)
+            ? _monthRecords
+            : (_monthDataLoaded && _monthRecords.isNotEmpty)
+            ? _monthRecords
+            : _records;
+        final dayRecords = monthRecordsToUse
             .where(
               (record) =>
                   record.fechaRegistro.year == day.year &&
@@ -968,7 +1194,55 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             )
             .toList();
 
-        return _buildMonthDayCard(day, isCurrentMonth, isToday, dayRecords);
+        // Verificar si hay registros de peso para este día
+        // En vista de mes, siempre usar _monthWeightRecords si están disponibles
+        // Si estamos en vista de mes, priorizar _monthWeightRecords, sino usar _weightRecords
+        // IMPORTANTE: En vista de mes, _weightRecords también contiene los datos del mes cuando se cargan
+        final monthWeightRecordsToUse = (_currentView == CalendarView.month)
+            ? (_monthWeightRecords.isNotEmpty
+                  ? _monthWeightRecords
+                  : _weightRecords) // En vista de mes, usar _weightRecords como fallback (contiene datos del mes)
+            : (_monthDataLoaded && _monthWeightRecords.isNotEmpty)
+            ? _monthWeightRecords
+            : _weightRecords;
+
+        final dayWeightRecords = monthWeightRecordsToUse.where((record) {
+          final recordDate = DateTime(
+            record.recordedAt.year,
+            record.recordedAt.month,
+            record.recordedAt.day,
+          );
+          return recordDate.year == day.year &&
+              recordDate.month == day.month &&
+              recordDate.day == day.day;
+        }).toList();
+
+        // Debug para el día 15 (que sabemos que tiene peso)
+        if (day.day == 15 && day.month == 11) {
+          print('🔍 [DEBUG] Día 15 - Vista: $_currentView');
+          print(
+            '   - _monthWeightRecords.length: ${_monthWeightRecords.length}',
+          );
+          print('   - _weightRecords.length: ${_weightRecords.length}');
+          print(
+            '   - monthWeightRecordsToUse.length: ${monthWeightRecordsToUse.length}',
+          );
+          print('   - dayWeightRecords.length: ${dayWeightRecords.length}');
+          print('   - _monthDataLoaded: $_monthDataLoaded');
+          if (monthWeightRecordsToUse.isNotEmpty) {
+            print(
+              '   - Primer registro de peso: ${monthWeightRecordsToUse.first.recordedAt}',
+            );
+          }
+        }
+
+        return _buildMonthDayCard(
+          day,
+          isCurrentMonth,
+          isToday,
+          dayRecords,
+          dayWeightRecords,
+        );
       },
     );
   }
@@ -978,7 +1252,20 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     bool isCurrentMonth,
     bool isToday,
     List<LactationRecord> dayRecords,
+    List<BabyWeightRecord> dayWeightRecords,
   ) {
+    // Aplicar filtro
+    final showLactation =
+        _currentFilter == RecordFilter.all ||
+        _currentFilter == RecordFilter.lactation;
+    final showWeight =
+        _currentFilter == RecordFilter.all ||
+        _currentFilter == RecordFilter.weight;
+
+    final hasLactation = dayRecords.isNotEmpty && showLactation;
+    final hasWeight = dayWeightRecords.isNotEmpty && showWeight;
+    final hasAnyRecord = hasLactation || hasWeight;
+
     return GestureDetector(
       onTap: () {
         if (_isFullScreenCalendar) {
@@ -986,12 +1273,12 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           _switchToDayView(day);
         } else {
           // Lógica original para cuando no está en pantalla completa
-          if (dayRecords.isEmpty) {
-            // Si no hay registros, agregar nuevo registro
-            _navigateToRecordPageForDay(day);
+          if (hasLactation || hasWeight) {
+            // Hay registros (lactancia, peso o ambos), mostrar lista
+            _showDayRecordsList(day, dayRecords, dayWeightRecords);
           } else {
-            // Si hay registros, mostrar lista de registros del día
-            _showDayRecordsList(day, dayRecords);
+            // No hay registros, agregar nuevo registro
+            _navigateToRecordPageForDay(day);
           }
         }
       },
@@ -1048,38 +1335,13 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isCurrentMonth && dayRecords.length == 1) // <-- Cambiado a == 1
-          Container(
-            margin: const EdgeInsets.only(top: 2),
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.8), // Usar withOpacity
-            ),
-          ),
-
-        // Indicador de MÚLTIPLES registros (Número)
-        if (isCurrentMonth && dayRecords.length > 1) // <-- Se mantiene > 1
-          Container(
-            margin: const EdgeInsets.only(top: 2), // Ajustar margen si es necesario
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4,
-              vertical: 1,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3), // Usar withOpacity
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '${dayRecords.length}',
-              style: GoogleFonts.quicksand(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
+                  // Indicadores de registros
+                  if (isCurrentMonth && hasAnyRecord)
+                    _buildDayIndicators(
+                      hasLactation,
+                      hasWeight,
+                      dayRecords.length,
+                    ),
                 ],
               ),
             ),
@@ -1089,7 +1351,61 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     );
   }
 
-  Widget _buildRecordCard(LactationRecord record) {
+  /// Construye los indicadores visuales para un día del calendario
+  Widget _buildDayIndicators(
+    bool hasLactation,
+    bool hasWeight,
+    int lactationCount,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Indicador de lactancia (círculo blanco)
+          if (hasLactation)
+            Container(
+              margin: EdgeInsets.only(right: hasWeight ? 2 : 0),
+              width: lactationCount == 1 ? 6 : null,
+              height: 6,
+              padding: lactationCount > 1
+                  ? const EdgeInsets.symmetric(horizontal: 4, vertical: 1)
+                  : null,
+              decoration: BoxDecoration(
+                shape: lactationCount == 1
+                    ? BoxShape.circle
+                    : BoxShape.rectangle,
+                borderRadius: lactationCount > 1
+                    ? BorderRadius.circular(8)
+                    : null,
+                color: Colors.white.withOpacity(0.8),
+              ),
+              child: lactationCount > 1
+                  ? Text(
+                      '$lactationCount',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  : null,
+            ),
+          // Indicador de peso (triángulo verde)
+          if (hasWeight)
+            SizedBox(
+              width: 6,
+              height: 6,
+              child: CustomPaint(painter: _TrianglePainter()),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Construye una tarjeta para registro de lactancia en el diálogo
+  Widget _buildLactationRecordCard(LactationRecord record) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(15),
@@ -1325,7 +1641,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       itemCount: weekRecords.length,
       itemBuilder: (context, index) {
         final record = weekRecords[index];
-        return _buildRecordCard(record);
+        return _buildLactationRecordCard(record);
       },
     );
   }
@@ -1374,7 +1690,12 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         });
   }
 
-  void _showDayRecordsList(DateTime day, List<LactationRecord> records) {
+  void _showDayRecordsList(
+    DateTime day,
+    List<LactationRecord> records, [
+    List<BabyWeightRecord>? weightRecords,
+  ]) {
+    final weightList = weightRecords ?? [];
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -1424,7 +1745,10 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                                 ),
                               ),
                               Text(
-                                '${records.length} registro${records.length > 1 ? 's' : ''}',
+                                _getRecordsCountText(
+                                  records.length,
+                                  weightList.length,
+                                ),
                                 style: GoogleFonts.quicksand(
                                   fontSize: 14,
                                   color: Colors.white.withValues(alpha: 0.8),
@@ -1445,76 +1769,15 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   Flexible(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: records.length,
+                      itemCount: records.length + weightList.length,
                       itemBuilder: (context, index) {
-                        final record = records[index];
-                        return Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.grey.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      const Color(
-                                        0xFF667eea,
-                                      ).withValues(alpha: 0.3),
-                                      const Color(
-                                        0xFF764ba2,
-                                      ).withValues(alpha: 0.1),
-                                    ],
-                                  ),
-                                ),
-                                child: Icon(
-                                  _getTypeIcon(record.tipo),
-                                  color: const Color(0xFF667eea),
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _getTypeName(record.tipo),
-                                      style: GoogleFonts.quicksand(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${record.timestamp.hour.toString().padLeft(2, '0')}:${record.timestamp.minute.toString().padLeft(2, '0')} • ${record.duracion.inMinutes} min',
-                                      style: GoogleFonts.quicksand(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  _showEditRecordDialog(record);
-                                },
-                                icon: const Icon(Icons.edit, size: 20),
-                                color: const Color(0xFF667eea),
-                              ),
-                            ],
-                          ),
-                        );
+                        // Mostrar primero registros de lactancia, luego peso
+                        if (index < records.length) {
+                          final record = records[index];
+                          return _buildLactationRecordCard(record);
+                        }
+                        final weightRecord = weightList[index - records.length];
+                        return _buildWeightRecordCard(weightRecord);
                       },
                     ),
                   ),
@@ -1768,4 +2031,204 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         return 'Biberón';
     }
   }
+
+  /// Obtiene el texto de conteo de registros
+  String _getRecordsCountText(int lactationCount, int weightCount) {
+    final parts = <String>[];
+    if (lactationCount > 0) {
+      parts.add('$lactationCount lactancia${lactationCount > 1 ? 's' : ''}');
+    }
+    if (weightCount > 0) {
+      parts.add('$weightCount peso${weightCount > 1 ? 's' : ''}');
+    }
+    if (parts.isEmpty) {
+      return 'Sin registros';
+    }
+    return parts.join(', ');
+  }
+
+  /// Construye una tarjeta para registro de peso en el diálogo
+  Widget _buildWeightRecordCard(BabyWeightRecord record) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                      const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    ],
+                  ),
+                ),
+                child: const Icon(
+                  Icons.monitor_weight,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Peso',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF4CAF50,
+                            ).withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${record.weight.toStringAsFixed(2)} kg',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${record.recordedAt.hour.toString().padLeft(2, '0')}:${record.recordedAt.minute.toString().padLeft(2, '0')}',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Construye los botones de filtro
+  Widget _buildFilterButtons() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildFilterButton('Todos', RecordFilter.all, Icons.view_module),
+          const SizedBox(width: 8),
+          _buildFilterButton(
+            'Lactancia',
+            RecordFilter.lactation,
+            Icons.child_care,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterButton('Peso', RecordFilter.weight, Icons.monitor_weight),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String label, RecordFilter filter, IconData icon) {
+    final isSelected = _currentFilter == filter;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentFilter = filter;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.4),
+                    Colors.white.withValues(alpha: 0.2),
+                  ],
+                )
+              : null,
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.8)
+                : Colors.white.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// CustomPainter para dibujar un triángulo
+class _TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF4CAF50)
+      ..style = PaintingStyle.fill;
+
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
