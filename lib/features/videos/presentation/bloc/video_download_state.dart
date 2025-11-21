@@ -102,3 +102,26 @@ class VideoDownloadError extends VideoDownloadState {
   List<Object?> get props => [message];
 }
 
+/// Estado que mantiene información de múltiples descargas simultáneas
+class MultipleDownloadsState extends VideoDownloadState {
+  /// Mapa de estados de descarga por videoId
+  /// La clave es el videoId y el valor es un mapa con:
+  /// - 'isDownloading': bool
+  /// - 'progress': double (0.0 a 1.0)
+  /// - 'bytesDownloaded': int
+  /// - 'totalBytes': int
+  /// - 'isDownloaded': bool
+  final Map<String, Map<String, dynamic>> downloads;
+
+  const MultipleDownloadsState(this.downloads);
+
+  MultipleDownloadsState copyWith({
+    Map<String, Map<String, dynamic>>? downloads,
+  }) {
+    return MultipleDownloadsState(downloads ?? this.downloads);
+  }
+
+  @override
+  List<Object?> get props => [downloads];
+}
+

@@ -34,6 +34,16 @@ class _UserVideosPageState extends State<UserVideosPage> {
   String? _error;
   // Mapeo de videoIdNumber (int) a videoId (String) para modo offline
   final Map<int, String> _videoIdMap = {};
+  // Rastrear errores mostrados para evitar duplicados
+  final Set<String> _shownErrors = {};
+  // Timestamp del último error mostrado
+  DateTime? _lastErrorTime;
+  // Rastrear videos que ya han sido verificados para evitar verificaciones repetidas
+  final Set<String> _checkedVideos = {};
+  // Flag para saber si ya se verificaron los videos inicialmente
+  bool _initialCheckDone = false;
+  // Mapa para mantener el estado de descarga de cada video independientemente
+  final Map<String, bool> _videoDownloadStatus = {};
 
   final VideoInteractionService _interactionService =
       GetIt.instance<VideoInteractionService>();
@@ -185,9 +195,53 @@ class _UserVideosPageState extends State<UserVideosPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<VideoDownloadBloc>(),
-      child: BlocListener<VideoDownloadBloc, VideoDownloadState>(
+        child: BlocListener<VideoDownloadBloc, VideoDownloadState>(
         listener: (context, state) {
+          // Verificar estado de todos los videos al cargar por primera vez
+          if (!_initialCheckDone && _videos.isNotEmpty && !_isLoading) {
+            _initialCheckDone = true;
+            _checkAllVideosDownloadStatus(context);
+          }
+          
+          // Actualizar el mapa cuando se recibe un estado de múltiples descargas
+          if (state is MultipleDownloadsState) {
+            // Actualizar el mapa local con todos los estados de descarga
+            for (final entry in state.downloads.entries) {
+              final videoId = entry.key;
+              final downloadInfo = entry.value;
+              final isDownloaded = downloadInfo['isDownloaded'] as bool? ?? false;
+              final isDownloading = downloadInfo['isDownloading'] as bool? ?? false;
+              
+              _videoDownloadStatus[videoId] = isDownloaded;
+              
+              // Actualizar el set de verificados
+              if (!isDownloading && isDownloaded) {
+                _checkedVideos.add(videoId);
+              } else if (isDownloading) {
+                _checkedVideos.remove(videoId);
+              }
+            }
+            // No necesitamos setState aquí porque BlocBuilder se reconstruirá automáticamente
+          }
+          
+          // Actualizar el mapa cuando se recibe un estado verificado
+          if (state is VideoDownloadStatusChecked) {
+            _videoDownloadStatus[state.videoId] = state.isDownloaded;
+            _checkedVideos.add(state.videoId);
+            // Forzar reconstrucción para actualizar el botón
+            if (mounted) {
+              setState(() {});
+            }
+          }
+          
+          // Manejar estados de descarga
           if (state is VideoDownloadCompleted) {
+            // Limpiar errores relacionados con este video
+            _shownErrors.removeWhere((error) => error.contains(state.videoId));
+            
+            // Actualizar el mapa de estados inmediatamente
+            _videoDownloadStatus[state.videoId] = true;
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -198,18 +252,41 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 duration: const Duration(seconds: 2),
               ),
             );
+            // El estado VideoDownloadStatusChecked se emitirá automáticamente
+            // después de guardar, así que no necesitamos verificar manualmente
           } else if (state is VideoDownloadError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Error: ${state.message}',
-                  style: GoogleFonts.quicksand(),
+            // Evitar mostrar el mismo error repetidamente
+            final errorKey = state.message;
+            final now = DateTime.now();
+            
+            // Solo mostrar el error si:
+            // 1. No se ha mostrado antes, O
+            // 2. Han pasado más de 5 segundos desde el último error
+            final shouldShow = !_shownErrors.contains(errorKey) ||
+                (_lastErrorTime != null &&
+                    now.difference(_lastErrorTime!).inSeconds > 5);
+            
+            if (shouldShow) {
+              _shownErrors.add(errorKey);
+              _lastErrorTime = now;
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Error: ${state.message}',
+                    style: GoogleFonts.quicksand(),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 4),
                 ),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
+              );
+            }
           } else if (state is VideoDownloadDeleted) {
+            // Actualizar el mapa de estados inmediatamente
+            _videoDownloadStatus[state.videoId] = false;
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -220,6 +297,17 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 duration: const Duration(seconds: 2),
               ),
             );
+            // Verificar el estado después de eliminar la descarga
+            // para actualizar el botón correctamente
+            // Remover del set de verificados para forzar nueva verificación
+            _checkedVideos.remove(state.videoId);
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                context.read<VideoDownloadBloc>().add(
+                  CheckVideoDownloadStatus(state.videoId),
+                );
+              }
+            });
           }
         },
         child: Scaffold(
@@ -655,6 +743,50 @@ class _UserVideosPageState extends State<UserVideosPage> {
     }
 
     return BlocBuilder<VideoDownloadBloc, VideoDownloadState>(
+      buildWhen: (previous, current) {
+        // Reconstruir si:
+        // 1. El estado cambió a MultipleDownloadsState (siempre reconstruir para ver todos los cambios)
+        // 2. El estado específico corresponde a este video
+        final videoEntity = _convertToVideoEntity(video);
+        final videoId = videoEntity.id;
+        
+        // Siempre reconstruir cuando hay MultipleDownloadsState para que cada video
+        // pueda obtener su estado actualizado independientemente
+        if (current is MultipleDownloadsState) {
+          // Verificar si este video específico tiene información en el estado
+          // o si el estado anterior era diferente
+          if (previous is MultipleDownloadsState) {
+            final prevInfo = previous.downloads[videoId];
+            final currInfo = current.downloads[videoId];
+            // Reconstruir si cambió la información de este video
+            if (prevInfo != currInfo) {
+              return true;
+            }
+          } else {
+            // Si el estado anterior no era MultipleDownloadsState, reconstruir
+            return true;
+          }
+        }
+        
+        // Reconstruir si el estado corresponde a este video específico
+        if (current is VideoDownloadStatusChecked && current.videoId == videoId) {
+          return true;
+        }
+        if (current is VideoDownloadInProgress && current.videoId == videoId) {
+          return true;
+        }
+        if (current is VideoDownloadProgress && current.videoId == videoId) {
+          return true;
+        }
+        if (current is VideoDownloadCompleted && current.videoId == videoId) {
+          return true;
+        }
+        if (current is VideoDownloadDeleted && current.videoId == videoId) {
+          return true;
+        }
+        
+        return false;
+      },
       builder: (context, downloadState) {
         // Convertir Video de lessons a video_entity.Video
         final videoEntity = _convertToVideoEntity(video);
@@ -664,27 +796,91 @@ class _UserVideosPageState extends State<UserVideosPage> {
         bool isDownloaded = false;
         bool isDownloading = false;
         double downloadProgress = 0.0;
+        bool needsStatusCheck = false;
+        bool hasStateFromMultipleDownloads = false;
 
-        if (downloadState is VideoDownloadStatusChecked &&
-            downloadState.videoId == videoId) {
-          isDownloaded = downloadState.isDownloaded;
-        } else if (downloadState is VideoDownloadInProgress &&
-            downloadState.videoId == videoId) {
-          isDownloading = true;
-        } else if (downloadState is VideoDownloadProgress &&
-            downloadState.videoId == videoId) {
-          isDownloading = true;
-          downloadProgress = downloadState.progress;
-        } else if (downloadState is VideoDownloadCompleted &&
-            downloadState.videoId == videoId) {
-          isDownloaded = true;
+        // PRIORIDAD 1: MultipleDownloadsState es la fuente principal de verdad
+        // Cada video obtiene su estado independiente de este mapa
+        if (downloadState is MultipleDownloadsState) {
+          final downloadInfo = downloadState.downloads[videoId];
+          if (downloadInfo != null) {
+            hasStateFromMultipleDownloads = true;
+            isDownloading = downloadInfo['isDownloading'] as bool? ?? false;
+            isDownloaded = downloadInfo['isDownloaded'] as bool? ?? false;
+            downloadProgress = (downloadInfo['progress'] as num?)?.toDouble() ?? 0.0;
+            // Actualizar el mapa local para persistencia
+            _videoDownloadStatus[videoId] = isDownloaded;
+            if (!isDownloading && isDownloaded) {
+              _checkedVideos.add(videoId);
+            }
+          }
+        }
+        
+        // PRIORIDAD 2: Solo usar otros estados si NO hay información en MultipleDownloadsState
+        // o si el estado específico corresponde a este video y es más reciente
+        if (!hasStateFromMultipleDownloads) {
+          if (downloadState is VideoDownloadStatusChecked &&
+              downloadState.videoId == videoId) {
+            isDownloaded = downloadState.isDownloaded;
+            // Actualizar el mapa local para mantener el estado
+            _videoDownloadStatus[videoId] = isDownloaded;
+            // Marcar como verificado cuando recibimos el estado
+            _checkedVideos.add(videoId);
+          } else if (downloadState is VideoDownloadInProgress &&
+              downloadState.videoId == videoId) {
+            isDownloading = true;
+            // Remover del set cuando inicia descarga para permitir nueva verificación después
+            _checkedVideos.remove(videoId);
+          } else if (downloadState is VideoDownloadProgress &&
+              downloadState.videoId == videoId) {
+            isDownloading = true;
+            downloadProgress = downloadState.progress;
+          } else if (downloadState is VideoDownloadCompleted &&
+              downloadState.videoId == videoId) {
+            // Cuando se completa, marcar como descargado y actualizar el mapa
+            isDownloaded = true;
+            _videoDownloadStatus[videoId] = true;
+            isDownloading = false; // Ya no está descargando
+            needsStatusCheck = false; // El listener ya se encarga de verificar
+          } else if (downloadState is VideoDownloadDeleted &&
+              downloadState.videoId == videoId) {
+            // Cuando se elimina, actualizar el mapa
+            _videoDownloadStatus[videoId] = false;
+            needsStatusCheck = false; // El listener ya se encarga de verificar
+          } else {
+            // Si el estado no corresponde a este video, usar el estado guardado en el mapa
+            // o verificar si no se ha verificado antes
+            if (_videoDownloadStatus.containsKey(videoId)) {
+              isDownloaded = _videoDownloadStatus[videoId] ?? false;
+            } else {
+              needsStatusCheck = !_checkedVideos.contains(videoId);
+            }
+          }
         }
 
-        // Verificar estado inicial
-        if (!isDownloaded && !isDownloading) {
-          context.read<VideoDownloadBloc>().add(
-            CheckVideoDownloadStatus(videoId),
-          );
+        // Verificar estado inicial solo si no se ha verificado antes y no está descargando
+        // Esto evita verificaciones repetidas que causan el cambio intermitente
+        if (needsStatusCheck && !isDownloading && !_checkedVideos.contains(videoId)) {
+          _checkedVideos.add(videoId);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final currentState = context.read<VideoDownloadBloc>().state;
+              // Solo verificar si el estado actual no corresponde a este video
+              // y no está en proceso de descarga para este video
+              final shouldCheck = !(currentState is VideoDownloadInProgress &&
+                      currentState.videoId == videoId) &&
+                  !(currentState is VideoDownloadProgress &&
+                      currentState.videoId == videoId) &&
+                  !(currentState is VideoDownloadStatusChecked &&
+                      currentState.videoId == videoId);
+              
+              if (shouldCheck) {
+                context.read<VideoDownloadBloc>().add(
+                  CheckVideoDownloadStatus(videoId),
+                );
+              }
+            }
+          });
         }
 
         return Row(
@@ -854,6 +1050,43 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
   bool _isVideoCompleted(int videoId) {
     return _completedVideos.contains(videoId);
+  }
+
+  /// Verifica el estado de descarga de todos los videos al cargar la página
+  void _checkAllVideosDownloadStatus(BuildContext context) {
+    if (_videos.isEmpty) return;
+    
+    // Esperar un momento para que el BlocProvider esté completamente listo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      try {
+        final downloadBloc = context.read<VideoDownloadBloc>();
+        
+        // Verificar estado de cada video desbloqueado
+        for (final video in _videos) {
+          if (_isVideoCompleted(video.videoId)) {
+            final videoEntity = _convertToVideoEntity(video);
+            final videoId = videoEntity.id;
+            
+            // Solo verificar si no se ha verificado antes
+            if (!_checkedVideos.contains(videoId)) {
+              _checkedVideos.add(videoId);
+              downloadBloc.add(CheckVideoDownloadStatus(videoId));
+            }
+          }
+        }
+        
+        // Forzar reconstrucción para actualizar los botones con los estados verificados
+        if (mounted) {
+          setState(() {});
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Error verificando estado de descargas: $e');
+        }
+      }
+    });
   }
 
   Future<void> _navigateToVideoPlayer(Video video) async {
