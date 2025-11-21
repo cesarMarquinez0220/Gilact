@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/services/lactation_service.dart';
+import '../../data/services/lactation_notification_service.dart';
 import '../../domain/entities/lactation_record.dart';
 
 /// Provider para manejar el estado de lactancia de manera reactiva
@@ -19,6 +20,10 @@ class LactationProvider extends ChangeNotifier {
   LactationStats? _todayStats;
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Cache para intervalo dinámico basado en edad del bebé
+  Duration? _cachedLactationInterval;
+  DateTime? _lastIntervalUpdate;
 
   // Getters
   List<LactationRecord> get todayRecords => _todayRecords;
@@ -45,6 +50,10 @@ class LactationProvider extends ChangeNotifier {
 
       _todayRecords = records;
       _todayStats = _calculateTodayStats(records);
+      
+      // Actualizar intervalo dinámico basado en edad del bebé
+      await _updateLactationInterval();
+      
       _isLoading = false;
       notifyListeners();
       print('📥 loadTodayData: Datos cargados y notificados');
@@ -53,6 +62,36 @@ class LactationProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       print('❌ loadTodayData: Error: $e');
+    }
+  }
+  
+  /// Actualiza el intervalo de lactancia basado en la edad del bebé
+  Future<void> _updateLactationInterval() async {
+    try {
+      // Actualizar cada 5 minutos máximo para evitar consultas excesivas
+      if (_lastIntervalUpdate != null &&
+          DateTime.now().difference(_lastIntervalUpdate!) <
+              const Duration(minutes: 5)) {
+        return;
+      }
+
+      final birthDate = await _lactationService.getBabyBirthDate();
+      if (birthDate != null) {
+        _cachedLactationInterval =
+            LactationNotificationService.calculateLactationInterval(birthDate);
+        _lastIntervalUpdate = DateTime.now();
+        print(
+          '⏰ LactationProvider: Intervalo dinámico actualizado: ${_cachedLactationInterval!.inHours}h ${_cachedLactationInterval!.inMinutes.remainder(60)}m',
+        );
+      } else {
+        // Usar intervalo por defecto si no se puede obtener la fecha
+        _cachedLactationInterval = const Duration(hours: 2, minutes: 30);
+        print('⏰ LactationProvider: Usando intervalo por defecto (no se pudo obtener fecha de nacimiento)');
+      }
+    } catch (e) {
+      print('⚠️ LactationProvider: Error actualizando intervalo: $e');
+      // Usar intervalo por defecto en caso de error
+      _cachedLactationInterval = const Duration(hours: 2, minutes: 30);
     }
   }
 
@@ -196,6 +235,7 @@ class LactationProvider extends ChangeNotifier {
   }
 
   /// Obtiene el tiempo hasta la próxima toma
+  /// Calcula el intervalo dinámico basado en la edad del bebé
   String getNextFeedTime() {
     print('⏰ getNextFeedTime: _todayRecords.length = ${_todayRecords.length}');
 
@@ -208,10 +248,13 @@ class LactationProvider extends ChangeNotifier {
     // Por lo tanto, el PRIMER elemento es el más reciente
     final lastFeed = _todayRecords.first;
     final now = DateTime.now();
-    final suggestedInterval = const Duration(hours: 2, minutes: 30);
+    
+    // Usar intervalo dinámico cacheado, o por defecto si no está disponible
+    final suggestedInterval = _cachedLactationInterval ?? const Duration(hours: 2, minutes: 30);
     final nextFeedTime = lastFeed.fechaRegistro.add(suggestedInterval);
 
     print('⏰ Toma más reciente: ${lastFeed.fechaRegistro}');
+    print('⏰ Intervalo usado: ${suggestedInterval.inHours}h ${suggestedInterval.inMinutes.remainder(60)}m');
     print('⏰ Hora actual: $now');
     print('⏰ Próxima toma sugerida: $nextFeedTime');
     print('⏰ ¿Ya pasó?: ${now.isAfter(nextFeedTime)}');

@@ -30,6 +30,7 @@ import 'features/lactation/data/services/push_notification_service.dart';
 import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
 import 'features/lactation/presentation/pages/baby_weight_form_page.dart';
 import 'core/services/offline_sync_service.dart';
+import 'core/services/app_initialization_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'features/gamification/presentation/bloc/gamification_bloc.dart';
@@ -92,6 +93,17 @@ void main() async {
 
   // Inicializar el manejador de notificaciones
   NotificationHandler.initialize(navigatorKey);
+
+  // Iniciar verificación periódica de notificaciones (no bloquea si falla)
+  try {
+    AppInitializationService.startPeriodicNotificationVerification();
+  } catch (e) {
+    if (kDebugMode) {
+      print(
+        '⚠️ Error al iniciar verificación periódica de notificaciones (no crítico): $e',
+      );
+    }
+  }
 
   // Inicializar servicio de sincronización offline con callbacks (no bloquea si falla)
   try {

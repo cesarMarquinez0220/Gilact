@@ -29,9 +29,6 @@ class NotificationHandler {
 
     // Determinar el tipo de notificación basado en el ID y payload
     switch (response.id) {
-      case 888: // Notificación inmediata de prueba
-        _handleDailySleepNotification(context);
-        break;
       case 889: // Notificación diaria programada de las 8 AM
         _handleDailySleepNotification(context);
         break;

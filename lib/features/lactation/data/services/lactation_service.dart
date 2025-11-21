@@ -10,6 +10,7 @@ import '../../../../main.dart' as app_main;
 import '../../../gamification/domain/services/gamification_service.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
 import 'package:flutter/widgets.dart';
+import 'lactation_notification_service.dart';
 
 /// Servicio unificado para manejar todos los registros de lactancia en Firestore
 /// Implementa patrón offline-first: siempre guarda localmente primero
@@ -65,6 +66,61 @@ class LactationService {
       }
     } catch (e) {
       print('❌ Error inicializando caché: $e');
+    }
+  }
+
+  /// Obtiene la fecha de nacimiento del bebé desde Firestore
+  Future<DateTime?> getBabyBirthDate() async {
+    try {
+      final userDocId = await getUserDocumentId();
+      if (userDocId == null) return null;
+
+      final userDoc = await _firestore.collection('Users').doc(userDocId).get();
+      if (!userDoc.exists) return null;
+
+      final situationData = userDoc.data();
+      if (situationData == null || situationData['situacion'] == null) {
+        return null;
+      }
+
+      final situacionDoc = await _firestore
+          .collection('Users')
+          .doc(userDocId)
+          .collection('situaciones')
+          .doc(situationData['situacion'] as String)
+          .get();
+
+      if (!situacionDoc.exists) return null;
+
+      final situacionData = situacionDoc.data();
+      if (situacionData == null) return null;
+
+      // Intentar obtener fecha de nacimiento
+      final birthDateValue = situacionData['birthDate'];
+      if (birthDateValue != null) {
+        if (birthDateValue is DateTime) {
+          return birthDateValue;
+        } else if (birthDateValue is String) {
+          return DateTime.tryParse(birthDateValue);
+        } else if (birthDateValue is Timestamp) {
+          return birthDateValue.toDate();
+        }
+      }
+
+      // Si no se encontró birthDate, intentar con fecha nacimiento bebe
+      final fechaNacimientoBebe = situacionData['fecha nacimiento bebe'];
+      if (fechaNacimientoBebe != null) {
+        if (fechaNacimientoBebe is String) {
+          return DateTime.tryParse(fechaNacimientoBebe);
+        } else if (fechaNacimientoBebe is Timestamp) {
+          return fechaNacimientoBebe.toDate();
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ LactationService: Error obteniendo fecha de nacimiento: $e');
+      return null;
     }
   }
 
@@ -126,6 +182,82 @@ class LactationService {
       } catch (e) {
         if (kDebugMode) {
           print('⚠️ Error agregando gamificación (no crítico): $e');
+        }
+      }
+
+      // PASO 1.6: Programar notificación de lactancia según la edad del bebé
+      try {
+        final notificationService = LactationNotificationService();
+        // Obtener nombre del bebé y fecha de nacimiento si está disponible
+        String? babyName;
+        DateTime? babyBirthDate;
+        try {
+          final userDocId = await getUserDocumentId();
+          if (userDocId != null) {
+            final userDoc = await _firestore.collection('Users').doc(userDocId).get();
+            if (userDoc.exists) {
+              final situationData = userDoc.data();
+              if (situationData != null && situationData['situacion'] != null) {
+                final situacionDoc = await _firestore
+                    .collection('Users')
+                    .doc(userDocId)
+                    .collection('situaciones')
+                    .doc(situationData['situacion'] as String)
+                    .get();
+                if (situacionDoc.exists) {
+                  final situacionData = situacionDoc.data();
+                  if (situacionData != null) {
+                    babyName = situacionData['nombre_bebe'] as String?;
+                    // Intentar obtener fecha de nacimiento
+                    final birthDateValue = situacionData['birthDate'];
+                    if (birthDateValue != null) {
+                      if (birthDateValue is DateTime) {
+                        babyBirthDate = birthDateValue;
+                      } else if (birthDateValue is String) {
+                        babyBirthDate = DateTime.tryParse(birthDateValue);
+                      } else if (birthDateValue is Timestamp) {
+                        babyBirthDate = birthDateValue.toDate();
+                      }
+                    }
+                    // Si no se encontró birthDate, intentar con fecha nacimiento bebe
+                    if (babyBirthDate == null) {
+                      final fechaNacimientoBebe = situacionData['fecha nacimiento bebe'];
+                      if (fechaNacimientoBebe != null) {
+                        if (fechaNacimientoBebe is String) {
+                          babyBirthDate = DateTime.tryParse(fechaNacimientoBebe);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Error obteniendo información del bebé (no crítico): $e');
+          }
+        }
+        
+        // Calcular intervalo basado en la edad del bebé
+        final interval = LactationNotificationService.calculateLactationInterval(babyBirthDate);
+        final intervalHours = interval.inHours;
+        final intervalMinutes = interval.inMinutes.remainder(60);
+        final intervalText = intervalMinutes > 0 
+            ? '${intervalHours}h ${intervalMinutes}m'
+            : '${intervalHours}h';
+        
+        await notificationService.scheduleLactationReminder(
+          lastFeedTime: record.timestamp,
+          babyName: babyName,
+          babyBirthDate: babyBirthDate,
+        );
+        if (kDebugMode) {
+          print('✅ Notificación de lactancia programada para $intervalText después');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Error programando notificación de lactancia (no crítico): $e');
         }
       }
 
@@ -194,7 +326,6 @@ class LactationService {
       // Determinar si es el primer registro del día
       // Nota: allRecords ya incluye el registro que acabamos de guardar
       final today = DateTime.now();
-      final todayStart = DateTime(today.year, today.month, today.day);
       final todayRecords = allRecords.where((r) {
         final recordDate = r.timestamp;
         final recordDateOnly = DateTime(recordDate.year, recordDate.month, recordDate.day);

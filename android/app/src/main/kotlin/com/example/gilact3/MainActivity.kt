@@ -1,8 +1,12 @@
-package com.example.gilact
+package com.example.gilact3
 
 import android.os.Build
 import android.view.WindowManager
 import android.view.View
+import android.content.Intent
+import android.provider.Settings
+import android.app.AlarmManager
+import android.app.PendingIntent
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -11,6 +15,8 @@ import io.flutter.plugin.common.EventChannel
 class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "screen_recording_prevention"
     private val EVENT_CHANNEL = "screen_recording_prevention_events"
+    private val NOTIFICATION_CHANNEL = "notification_permissions"
+    private val NATIVE_ALARM_CHANNEL = "native_alarm_scheduler"
     private var isSecureFlagEnabled = false
     private var eventSink: EventChannel.EventSink? = null
 
@@ -31,6 +37,78 @@ class MainActivity : FlutterFragmentActivity() {
                 "isScreenRecordingActive" -> {
                     val isRecording = isScreenRecordingActive()
                     result.success(isRecording)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+        
+        // Configurar MethodChannel para permisos de notificaciones
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NOTIFICATION_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "canScheduleExactAlarms" -> {
+                    val canSchedule = canScheduleExactAlarms()
+                    result.success(canSchedule)
+                }
+                "openAppSettings" -> {
+                    openAppSettings()
+                    result.success(true)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+        
+        // Configurar MethodChannel para programar alarmas nativas
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NATIVE_ALARM_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "scheduleSleepNotification" -> {
+                    try {
+                        val timestamp = call.argument<Long>("timestamp")
+                        if (timestamp != null) {
+                            scheduleNativeAlarm(timestamp)
+                            result.success(true)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Timestamp is required", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("SCHEDULE_ERROR", e.message, null)
+                    }
+                }
+                "cancelSleepNotification" -> {
+                    try {
+                        cancelNativeAlarm()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("CANCEL_ERROR", e.message, null)
+                    }
+                }
+                "scheduleLactationNotification" -> {
+                    try {
+                        val timestamp = call.argument<Long>("timestamp")
+                        val notificationId = call.argument<Int>("notification_id") ?: 1000
+                        val title = call.argument<String>("title") ?: "🍼 Recordatorio de Lactancia"
+                        val body = call.argument<String>("body") ?: "Han pasado 2h desde la última toma"
+                        if (timestamp != null) {
+                            scheduleNativeLactationAlarm(timestamp, notificationId, title, body)
+                            result.success(true)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Timestamp is required", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("SCHEDULE_ERROR", e.message, null)
+                    }
+                }
+                "cancelLactationNotification" -> {
+                    try {
+                        val notificationId = call.argument<Int>("notification_id") ?: 1000
+                        cancelNativeLactationAlarm(notificationId)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("CANCEL_ERROR", e.message, null)
+                    }
                 }
                 else -> {
                     result.notImplemented()
@@ -87,5 +165,138 @@ class MainActivity : FlutterFragmentActivity() {
         if (isSecureFlagEnabled) {
             enableSecureFlag()
         }
+    }
+    
+    private fun canScheduleExactAlarms(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            // En versiones anteriores a Android 12, siempre se puede programar alarmas exactas
+            true
+        }
+    }
+    
+    private fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = android.net.Uri.fromParts("package", packageName, null)
+        }
+        startActivity(intent)
+    }
+    
+    private fun scheduleNativeAlarm(timestamp: Long) {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, SleepNotificationReceiver::class.java).apply {
+            action = "com.example.gilact3.SLEEP_NOTIFICATION"
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            889,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        timestamp,
+                        pendingIntent
+                    )
+                } else {
+                    // Fallback a modo inexacto si no hay permiso
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        timestamp,
+                        pendingIntent
+                    )
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    timestamp,
+                    pendingIntent
+                )
+            }
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
+        }
+    }
+    
+    private fun cancelNativeAlarm() {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, SleepNotificationReceiver::class.java).apply {
+            action = "com.example.gilact3.SLEEP_NOTIFICATION"
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            889,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+    
+    private fun scheduleNativeLactationAlarm(
+        timestamp: Long,
+        notificationId: Int,
+        title: String,
+        body: String
+    ) {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, LactationNotificationReceiver::class.java).apply {
+            action = "com.example.gilact3.LACTATION_NOTIFICATION"
+            putExtra("notification_id", notificationId)
+            putExtra("title", title)
+            putExtra("body", body)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        timestamp,
+                        pendingIntent
+                    )
+                } else {
+                    // Fallback a modo inexacto si no hay permiso
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        timestamp,
+                        pendingIntent
+                    )
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    timestamp,
+                    pendingIntent
+                )
+            }
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
+        }
+    }
+    
+    private fun cancelNativeLactationAlarm(notificationId: Int) {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, LactationNotificationReceiver::class.java).apply {
+            action = "com.example.gilact3.LACTATION_NOTIFICATION"
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        alarmManager.cancel(pendingIntent)
     }
 }

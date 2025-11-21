@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../features/auth/domain/services/credentials_cache_service.dart';
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
 import '../../features/lactation/data/services/sleep_notification_service.dart';
+import '../../features/lactation/data/services/lactation_notification_service.dart';
 import 'package:get_it/get_it.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
@@ -92,7 +93,20 @@ class AppInitializationService {
         }
       }
 
-      // 6) Navegar a Home
+      // 6) Verificar y reprogramar notificaciones eliminadas
+      try {
+        final lactationNotificationService = LactationNotificationService();
+        await lactationNotificationService.verifyAndRescheduleNotifications();
+
+        // Diagnosticar problemas con notificaciones de sueño
+        final sleepNotificationService =
+            GetIt.instance<SleepNotificationService>();
+        await sleepNotificationService.diagnoseNotificationIssue();
+      } catch (_) {
+        // Ignorar errores de verificación de notificaciones
+      }
+
+      // 7) Navegar a Home
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
     } catch (_) {
       // Fallback defensivo
@@ -181,6 +195,69 @@ class AppInitializationService {
     } catch (e) {
       print(
         '⚠️ AppInitializationService: Error refrescando datos de lactancia: $e',
+      );
+    }
+  }
+
+  /// Inicia la verificación periódica de notificaciones
+  /// Verifica cada 3 minutos si las notificaciones fueron eliminadas y las reprograma
+  static void startPeriodicNotificationVerification() {
+    _NotificationVerificationManager.start();
+  }
+
+  static void stopPeriodicNotificationVerification() {
+    _NotificationVerificationManager.stop();
+  }
+}
+
+/// Clase privada para manejar el timer de verificación de notificaciones
+class _NotificationVerificationManager {
+  static Timer? _timer;
+
+  static void start() {
+    // Cancelar timer anterior si existe
+    _timer?.cancel();
+
+    // Verificar inmediatamente al iniciar
+    _verifyNotifications();
+
+    // Verificar cada 3 minutos
+    _timer = Timer.periodic(
+      const Duration(minutes: 3),
+      (_) => _verifyNotifications(),
+    );
+
+    print(
+      '✅ AppInitializationService: Verificación periódica de notificaciones iniciada',
+    );
+  }
+
+  static void stop() {
+    _timer?.cancel();
+    _timer = null;
+    print(
+      '🛑 AppInitializationService: Verificación periódica de notificaciones detenida',
+    );
+  }
+
+  static Future<void> _verifyNotifications() async {
+    try {
+      final lactationNotificationService = LactationNotificationService();
+      await lactationNotificationService.verifyAndRescheduleNotifications();
+
+      // Verificar también notificaciones de sueño
+      try {
+        final sleepNotificationService =
+            GetIt.instance<SleepNotificationService>();
+        await sleepNotificationService.verifyAndRescheduleIfNeeded();
+      } catch (e) {
+        print(
+          '⚠️ AppInitializationService: Error verificando notificaciones de sueño: $e',
+        );
+      }
+    } catch (e) {
+      print(
+        '⚠️ AppInitializationService: Error verificando notificaciones: $e',
       );
     }
   }
