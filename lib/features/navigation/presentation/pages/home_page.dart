@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../lactation/domain/entities/lactation_record.dart';
 import '../../../lactation/presentation/providers/lactation_provider.dart';
@@ -491,7 +493,7 @@ class _HomePageState extends State<HomePage> {
                   Icon(streakIcon, color: streakColor, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    'Racha',
+                    'gamification.streak'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -502,7 +504,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 2),
               Text(
-                '${profile.currentStreak} días',
+                '${profile.currentStreak} ${'home.days'.tr()}',
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -531,7 +533,7 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '${profile.restDaysAvailable}\ndías',
+              '${profile.restDaysAvailable}\n${'home.days'.tr()}',
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
                 fontSize: 9,
@@ -672,7 +674,7 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.child_care, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            '¡Bienvenida!',
+            'home.welcome'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -681,7 +683,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Comienza registrando tu primera sesión de lactancia para ver tu progreso aquí.',
+            'home.welcomeMessage'.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
               fontSize: 14,
@@ -921,9 +923,9 @@ class _HomePageState extends State<HomePage> {
 
         // Tarjeta de Lecciones (arriba de Tips e Historial)
         HomeFeatureCard(
-          title: 'Lecciones',
+          title: 'home.lessons'.tr(),
           icon: Icons.school,
-          description: 'Mira tu progreso de lecciones',
+          description: 'home.lessonsDescription'.tr(),
           onTap: () => NavigationService.navigateToLessons(context),
           color: AppColorService.getFeatureColor('Lecciones'),
         ),
@@ -948,9 +950,9 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             child: HomeFeatureCard(
-              title: 'Tips',
+              title: 'home.tips'.tr(),
               icon: Icons.lightbulb,
-              description: 'Consejos y más',
+              description: 'home.tipsDescription'.tr(),
               onTap: () => NavigationService.navigateToTips(context),
               color: AppColorService.getFeatureColor('Tips'),
             ),
@@ -958,9 +960,9 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 15),
           Expanded(
             child: HomeFeatureCard(
-              title: 'Historial',
+              title: 'home.history'.tr(),
               icon: Icons.video_library,
-              description: 'Progreso de videos completados',
+              description: 'home.historyDescription'.tr(),
               onTap: () => NavigationService.navigateToUserVideos(context),
               color: AppColorService.getFeatureColor('Historial'),
             ),
@@ -970,9 +972,9 @@ class _HomePageState extends State<HomePage> {
     } else {
       // Para preparto: solo Tips
       return HomeFeatureCard(
-        title: 'Tips',
+        title: 'home.tips'.tr(),
         icon: Icons.lightbulb,
-        description: 'Consejos y más',
+        description: 'home.tipsDescription'.tr(),
         onTap: () => NavigationService.navigateToTips(context),
         color: AppColorService.getFeatureColor('Tips'),
       );
@@ -1742,7 +1744,7 @@ class _SlidingGradientTransform extends GradientTransform {
   const _SlidingGradientTransform({required this.slidePercent});
   final double slidePercent;
   @override
-  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+  Matrix4? transform(Rect bounds, {ui.TextDirection? textDirection}) {
     return Matrix4.translationValues(bounds.width * slidePercent, 0.0, 0.0);
   }
 }

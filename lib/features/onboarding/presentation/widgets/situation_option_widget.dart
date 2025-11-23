@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SituationOptionWidget extends StatelessWidget {
   final String title;
@@ -99,9 +100,9 @@ class SituationOptionWidget extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Seleccionar',
-                              style: TextStyle(
+                            Text(
+                              'onboarding.select'.tr(),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),

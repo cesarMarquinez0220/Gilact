@@ -179,3 +179,30 @@ class GetFeedbackMessageCountRequested extends SettingsEvent {
   @override
   List<Object> get props => [userId];
 }
+
+// Eventos de configuración local
+class GetLocalSettingsRequested extends SettingsEvent {
+  const GetLocalSettingsRequested();
+}
+
+class UpdateLocalSettingRequested extends SettingsEvent {
+  final String key;
+  final dynamic value;
+
+  const UpdateLocalSettingRequested({
+    required this.key,
+    required this.value,
+  });
+
+  @override
+  List<Object> get props => [key, value];
+}
+
+class UpdateLocalSettingsRequested extends SettingsEvent {
+  final Map<String, dynamic> settings;
+
+  const UpdateLocalSettingsRequested({required this.settings});
+
+  @override
+  List<Object> get props => [settings];
+}

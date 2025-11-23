@@ -3,6 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -21,8 +22,8 @@ class ContinuacionHigieneLactanciaInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Tu Dieta y la Lactancia',
+        child: Text(
+          'tips.content.hygieneContinuation.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingLarge,
         ),
@@ -31,8 +32,8 @@ class ContinuacionHigieneLactanciaInfo extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const Text(
-            'Puedes comer todo tipo de alimentos. Solo asegúrate de comer saludable y tomar mucha agua.',
+          child: Text(
+            'tips.content.hygieneContinuation.text'.tr(),
             textAlign: TextAlign.center,
             style: TipTypography.paragraph,
           ),

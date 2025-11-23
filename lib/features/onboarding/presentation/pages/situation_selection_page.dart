@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
@@ -66,7 +68,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
       // Obtener el usuario actual
       final authState = context.read<AuthBloc>().state;
       if (authState is! AuthAuthenticated) {
-        throw Exception('Usuario no autenticado');
+        throw Exception('profile.noUserAuthenticated'.tr());
       }
 
       final userId = authState.user.id;
@@ -88,7 +90,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al guardar situación: $e'),
+            content: Text('${'common.error'.tr()}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -156,9 +158,9 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                         const SizedBox(height: 30),
 
                         // Título principal
-                        const Text(
-                          'Elige tu situación actual',
-                          style: TextStyle(
+                        Text(
+                          'onboarding.chooseSituation'.tr(),
+                          style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -169,8 +171,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                         const SizedBox(height: 12),
 
                         // Subtítulo
-                        const Text(
-                          'Selecciona la opción que mejor describa tu momento',
+                        Text(
+                          'onboarding.selectSituationDescription'.tr(),
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white70,
@@ -188,8 +190,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                               // Opción Pre-parto
                               Expanded(
                                 child: SituationOptionWidget(
-                                  title: 'Pre-Parto',
-                                  description: 'Estoy embarazada',
+                                  title: 'onboarding.preParto'.tr(),
+                                  description: 'onboarding.prePartoDescription'.tr(),
                                   illustrationPath: 'assets/images/mamapre.png',
                                   backgroundColor: const Color(0xFF4FD1C7),
                                   isSelected: _selectedSituation == 'preparto',
@@ -207,8 +209,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                               // Opción Post-parto
                               Expanded(
                                 child: SituationOptionWidget(
-                                  title: 'Post-Parto',
-                                  description: 'Ya tuve mi bebé',
+                                  title: 'onboarding.postParto'.tr(),
+                                  description: 'onboarding.postPartoDescription'.tr(),
                                   illustrationPath:
                                       'assets/images/mamapost.png',
                                   backgroundColor: const Color(0xFF1A365D),

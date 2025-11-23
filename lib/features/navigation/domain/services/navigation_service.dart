@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart' as user_bloc;
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../../videos/presentation/pages/user_videos_page.dart';
@@ -137,18 +138,18 @@ class CountdownService {
       final daysLeft = difference.inDays;
 
       if (daysLeft < 0) {
-        return '¡Es hora de comenzar una nueva aventura!';
+        return 'countdown.newAdventure'.tr();
       } else if (daysLeft == 0) {
-        return '¡El gran día ha llegado! Prepárate para conocer a tu bebé.';
+        return 'countdown.greatDayArrived'.tr();
       } else if (daysLeft <= 7) {
-        return '¡Falta muy poco! Tu bebé está casi aquí.';
+        return 'countdown.verySoon'.tr();
       } else if (daysLeft <= 30) {
-        return 'Un mes más y tendrás a tu bebé en brazos. ¡Ánimo!';
+        return 'countdown.oneMonthLeft'.tr();
       } else {
-        return 'Cada día es un paso más cerca de conocer a tu bebé. ¡Sigue así!';
+        return 'countdown.motivationalMessage'.tr();
       }
     } catch (e) {
-      return 'Mantente fuerte, el gran día se acerca.';
+      return 'countdown.stayStrong'.tr();
     }
   }
 }

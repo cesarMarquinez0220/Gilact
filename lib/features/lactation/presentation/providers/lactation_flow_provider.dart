@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/services/lactation_decision_tree.dart';
 import '../../data/services/lactation_flow_service.dart';
 import '../../domain/entities/lactation_record.dart';
@@ -61,7 +62,9 @@ class LactationFlowProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      _setError('Error al procesar selección: ${e.toString()}');
+      _setError(
+        'lactation.flow.processingError'.tr(namedArgs: {'error': e.toString()}),
+      );
     } finally {
       _setLoading(false);
     }
@@ -102,7 +105,9 @@ class LactationFlowProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError('Error al guardar registro: ${e.toString()}');
+      _setError(
+        'lactation.flow.saveRecordError'.tr(namedArgs: {'error': e.toString()}),
+      );
       return false;
     } finally {
       _setLoading(false);
@@ -120,7 +125,11 @@ class LactationFlowProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError('Error al eliminar registro: ${e.toString()}');
+      _setError(
+        'lactation.flow.deleteRecordError'.tr(
+          namedArgs: {'error': e.toString()},
+        ),
+      );
       return false;
     } finally {
       _setLoading(false);
@@ -246,9 +255,11 @@ class LactationFlowProvider extends ChangeNotifier {
     final summary = <String, String>{};
 
     if (_context.hasBreastfeeding) {
-      final lado = _context.data['breastSide'] ?? 'No especificado';
+      final lado =
+          _context.data['breastSide'] ??
+          'lactation.recordForm.notSpecified'.tr();
       final duracion = _context.data['breastDuration'] ?? '0';
-      summary['Lactancia Materna'] = '$lado - $duracion min';
+      summary['lactation.flow.breastfeeding'.tr()] = '$lado - $duracion min';
     }
 
     final bottleVolume = _context.data['bottleVolume'];
@@ -258,7 +269,7 @@ class LactationFlowProvider extends ChangeNotifier {
 
     final sleepTime = _context.data['sleepTime'];
     if (sleepTime != null && sleepTime != '0') {
-      summary['Sueño'] = '$sleepTime min';
+      summary['lactation.flow.sleep'.tr()] = '$sleepTime min';
     }
 
     final extractionVolume = _context.data['extractionVolume'];

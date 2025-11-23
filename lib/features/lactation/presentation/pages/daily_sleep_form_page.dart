@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/datasources/sleep_offline_local_data_source.dart';
 import '../../domain/entities/sleep_record.dart';
 import '../../../../core/services/connectivity_service.dart';
@@ -237,10 +238,10 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
           final homeCtx = navigatorKey.currentContext;
           if (homeCtx != null) {
             ScaffoldMessenger.of(homeCtx).showSnackBar(
-              const SnackBar(
-                content: Text('Registro de sueño guardado exitosamente'),
+              SnackBar(
+                content: Text('forms.sleep.saved'.tr()),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
           }
@@ -293,7 +294,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       if (mounted) {
         DialogExample.showErrorDialog(
           context,
-          'Error al Guardar',
+          'forms.sleep.error'.tr(),
           'No se pudieron guardar los datos.\n\nError: ${e.toString()}',
         );
         setState(() {
@@ -473,9 +474,9 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
           child: const Icon(Icons.nights_stay, color: Colors.white, size: 50),
         ),
         const SizedBox(height: 32),
-        const Text(
-          'Registro de Sueño',
-          style: TextStyle(
+        Text(
+          'forms.sleep.title'.tr(),
+          style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -492,7 +493,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         ),
         const SizedBox(height: 12),
         Text(
-          '¿Cuántas horas durmió el bebé anoche?',
+          'forms.sleep.question'.tr(),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -707,7 +708,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '¿Cuántas veces se despertó? (Opcional)',
+          'forms.sleep.wakeUpsQuestion'.tr(),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -768,7 +769,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '¿Cómo fue el sueño? (Opcional)',
+          'forms.sleep.qualityQuestion'.tr(),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -778,11 +779,20 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildQualityChip('Bueno', 'bueno')),
+            Expanded(
+              child: _buildQualityChip('forms.sleep.qualityGood'.tr(), 'bueno'),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _buildQualityChip('Regular', 'regular')),
+            Expanded(
+              child: _buildQualityChip(
+                'forms.sleep.qualityFair'.tr(),
+                'regular',
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _buildQualityChip('Malo', 'malo')),
+            Expanded(
+              child: _buildQualityChip('forms.sleep.qualityPoor'.tr(), 'malo'),
+            ),
           ],
         ),
       ],
@@ -884,7 +894,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                   )
                 : Text(
                     // 6. Texto con estilo blanco
-                    'Guardar',
+                    'forms.sleep.save'.tr(),
                     style: GoogleFonts.quicksand(
                       // Usa GoogleFonts si prefieres
                       fontSize: 18,

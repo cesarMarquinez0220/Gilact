@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import '../../domain/entities/weight_trend_data.dart';
 
@@ -132,7 +133,7 @@ class BabyWeightTrendChart extends StatelessWidget {
               children: [
                 const SizedBox(height: 8),
                 Text(
-                  'Tendencia de Peso',
+                  'growth.weightTrend'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -141,7 +142,7 @@ class BabyWeightTrendChart extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Comparación con estándares OMS',
+                  'growth.whoComparison'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -201,17 +202,17 @@ class BabyWeightTrendChart extends StatelessWidget {
       case 'subiendo':
         trendColor = Colors.green;
         trendIcon = Icons.trending_up;
-        trendText = 'En aumento';
+        trendText = 'growth.increasing'.tr();
         break;
       case 'bajando':
         trendColor = Colors.orange;
         trendIcon = Icons.trending_down;
-        trendText = 'En descenso';
+        trendText = 'growth.decreasing'.tr();
         break;
       default:
         trendColor = Colors.blue;
         trendIcon = Icons.trending_flat;
-        trendText = 'Estable';
+        trendText = 'growth.stable'.tr();
     }
 
     return Container(
@@ -237,7 +238,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           // Peso actual
           Expanded(
             child: _buildStatItem(
-              'Peso actual',
+              'growth.currentWeight'.tr(),
               '${latestData.actualWeight!.toStringAsFixed(2)} kg',
               Icons.monitor_weight,
               const Color(0xFF03A696),
@@ -247,7 +248,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           // Percentil
           Expanded(
             child: _buildStatItem(
-              'Percentil',
+              'growth.percentile'.tr(),
               currentPercentile != null
                   ? 'P${currentPercentile.toStringAsFixed(0)}'
                   : 'N/A',
@@ -259,7 +260,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           // Tendencia
           Expanded(
             child: _buildStatItem(
-              'Tendencia',
+              'growth.trend'.tr(),
               trendText,
               trendIcon,
               trendColor,
@@ -349,7 +350,7 @@ class BabyWeightTrendChart extends StatelessWidget {
         );
       }
     }
-    
+
     // Asegurar que el polígono esté cerrado correctamente
     final normalRangePolygon = <FlSpot>[];
     if (normalRangeSpots.isNotEmpty && normalRangeSpotsReversed.isNotEmpty) {
@@ -517,7 +518,9 @@ class BabyWeightTrendChart extends StatelessWidget {
               },
             ),
             belowBarData: BarAreaData(
-              show: actualSpots.length > 1, // Solo mostrar área si hay más de un punto
+              show:
+                  actualSpots.length >
+                  1, // Solo mostrar área si hay más de un punto
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -542,11 +545,11 @@ class BabyWeightTrendChart extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildLegendItem(const Color(0xFF03A696), 'Peso del bebé'),
+          _buildLegendItem(const Color(0xFF03A696), 'health.babyWeight'.tr()),
           const SizedBox(width: 16),
-          _buildLegendItem(Colors.grey[400]!, 'Mediana (P50)'),
+          _buildLegendItem(Colors.grey[400]!, 'growth.median'.tr()),
           const SizedBox(width: 16),
-          _buildLegendItem(Colors.grey[200]!, 'Rango normal'),
+          _buildLegendItem(Colors.grey[200]!, 'growth.normalRange'.tr()),
         ],
       ),
     );
@@ -634,7 +637,7 @@ class BabyWeightTrendChart extends StatelessWidget {
               Icon(Icons.info_outline, color: Colors.orange[700], size: 24),
               const SizedBox(width: 8),
               Text(
-                'Importante',
+                'growth.important'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -644,9 +647,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             ],
           ),
           content: Text(
-            'Esta información es solo orientativa y no reemplaza el consejo médico profesional. '
-            'Cualquier preocupación sobre el peso o la alimentación de tu bebé debe ser consultada '
-            'con un pediatra o nutricionista.',
+            'growth.disclaimerFull'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 14,
               color: Colors.grey[700],
@@ -657,7 +658,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Entendido',
+                'dialogs.understood'.tr(),
                 style: GoogleFonts.quicksand(
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF03A696),
@@ -670,4 +671,3 @@ class BabyWeightTrendChart extends StatelessWidget {
     );
   }
 }
-

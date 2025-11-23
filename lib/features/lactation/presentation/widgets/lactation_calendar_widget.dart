@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:ui';
@@ -547,7 +548,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   ),
                   Expanded(
                     child: Text(
-                      'Calendario de Lactancia',
+                      'lactation.calendar.title'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -605,7 +606,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   ),
                   Expanded(
                     child: Text(
-                      'Registros de Lactancia',
+                      'lactation.calendar.recordsTitle'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -636,21 +637,23 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatItem(
-          _currentView == CalendarView.day ? 'Este día' : 'Hoy',
+          _currentView == CalendarView.day
+              ? 'lactation.calendar.thisDay'.tr()
+              : 'lactation.calendar.today'.tr(),
           '${_stats?.feedsToday ?? 0}',
-          'sesiones',
+          'lactation.calendar.sessions'.tr(),
           Icons.child_care,
         ),
         _buildStatItem(
-          'Duración',
+          'lactation.calendar.duration'.tr(),
           '${_stats?.durationToday.inMinutes ?? 0}',
-          'min',
+          'lactation.calendar.min'.tr(),
           Icons.timer,
         ),
         _buildStatItem(
-          'Total',
+          'lactation.calendar.total'.tr(),
           '${_stats?.totalFeeds ?? 0}',
-          'sesiones',
+          'lactation.calendar.sessions'.tr(),
           Icons.trending_up,
         ),
       ],
@@ -843,7 +846,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         _buildDateHeader(),
         Expanded(
           child: !hasAnyRecords
-              ? _buildEmptyState(title: 'No hay registros para este día')
+              ? _buildEmptyState(title: 'lactation.calendar.noRecords'.tr())
               : ScrollConfiguration(
                   behavior: ScrollConfiguration.of(context).copyWith(
                     overscroll: false, // Esto desactiva el resplandor
@@ -928,7 +931,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             ),
             const SizedBox(height: 4),
             Text(
-              'Toca aquí para agregar un registro',
+              'lactation.calendar.tapToAdd'.tr(),
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
                 fontSize: 12,
@@ -971,7 +974,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: weekRecords.isEmpty
-                  ? _buildEmptyState(title: 'No hay registros para esta semana')
+                  ? _buildEmptyState(
+                      title: 'lactation.calendar.noRecordsWeek'.tr(),
+                    )
                   : Column(
                       children: [
                         // Días de la semana
@@ -1114,8 +1119,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   color: Colors.white,
                 ),
                 tooltip: _currentView == CalendarView.month
-                    ? 'Ver lista de registros'
-                    : 'Ver calendario mensual',
+                    ? 'lactation.calendar.viewList'.tr()
+                    : 'lactation.calendar.viewMonth'.tr(),
               ),
             ],
           ),
@@ -1136,18 +1141,18 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         return '${startOfWeek.day}/${startOfWeek.month} - ${endOfWeek.day}/${endOfWeek.month}';
       case CalendarView.month:
         final months = [
-          'Enero',
-          'Febrero',
-          'Marzo',
-          'Abril',
-          'Mayo',
-          'Junio',
-          'Julio',
-          'Agosto',
-          'Septiembre',
-          'Octubre',
-          'Noviembre',
-          'Diciembre',
+          'lactation.calendar.months.january'.tr(),
+          'lactation.calendar.months.february'.tr(),
+          'lactation.calendar.months.march'.tr(),
+          'lactation.calendar.months.april'.tr(),
+          'lactation.calendar.months.may'.tr(),
+          'lactation.calendar.months.june'.tr(),
+          'lactation.calendar.months.july'.tr(),
+          'lactation.calendar.months.august'.tr(),
+          'lactation.calendar.months.september'.tr(),
+          'lactation.calendar.months.october'.tr(),
+          'lactation.calendar.months.november'.tr(),
+          'lactation.calendar.months.december'.tr(),
         ];
         return '${months[_selectedDate.month - 1]} ${_selectedDate.year}';
     }
@@ -1475,12 +1480,12 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   IconButton(
                     onPressed: () => _showEditRecordDialog(record),
                     icon: const Icon(Icons.edit, color: Colors.white, size: 20),
-                    tooltip: 'Editar registro',
+                    tooltip: 'lactation.calendar.editRecord'.tr(),
                   ),
                   IconButton(
                     onPressed: () => _showDeleteConfirmation(record),
                     icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                    tooltip: 'Eliminar registro',
+                    tooltip: 'lactation.calendar.deleteRecord'.tr(),
                   ),
                 ],
               ),
@@ -1545,7 +1550,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         foregroundColor: const Color(0xFF667eea),
         icon: const Icon(Icons.add),
         label: Text(
-          'Agregar Registro',
+          'lactation.calendar.addRecord'.tr(),
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
         ),
       ),
@@ -1655,7 +1660,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 8),
             Text(
-              '¡Registro guardado exitosamente!',
+              'lactation.calendar.savedSuccess'.tr(),
               style: GoogleFonts.quicksand(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -1737,7 +1742,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Registros del ${day.day}/${day.month}',
+                                '${'lactation.calendar.recordsOf'.tr()} ${day.day}/${day.month}',
                                 style: GoogleFonts.quicksand(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -1802,7 +1807,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                         ),
                         icon: const Icon(Icons.add),
                         label: Text(
-                          'Agregar Registro',
+                          'lactation.calendar.addRecord'.tr(),
                           style: GoogleFonts.quicksand(
                             fontWeight: FontWeight.bold,
                           ),
@@ -1871,7 +1876,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
                     // Título
                     Text(
-                      'Eliminar Registro',
+                      'lactation.calendar.deleteConfirmTitle'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -1882,7 +1887,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
                     // Mensaje
                     Text(
-                      '¿Estás seguro de que quieres eliminar este registro de lactancia? Esta acción no se puede deshacer.',
+                      'lactation.calendar.deleteConfirmMessage'.tr(),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.quicksand(
                         fontSize: 16,
@@ -1929,7 +1934,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                               elevation: 0,
                             ),
                             child: Text(
-                              'Eliminar',
+                              'lactation.calendar.deleteButton'.tr(),
                               style: GoogleFonts.quicksand(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -1966,7 +1971,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
               const Icon(Icons.check_circle, color: Colors.white),
               const SizedBox(width: 8),
               Text(
-                'Registro eliminado exitosamente',
+                'lactation.calendar.deletedSuccess'.tr(),
                 style: GoogleFonts.quicksand(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -1986,8 +1991,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
     } catch (e) {
       DialogExample.showErrorDialog(
         context,
-        'Error al Eliminar',
-        'No se pudo eliminar el registro. Por favor, inténtalo nuevamente.',
+        'lactation.calendar.deleteError'.tr(),
+        'lactation.calendar.deleteErrorMessage'.tr(),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -2024,7 +2029,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   String _getTypeName(LactationType type) {
     switch (type) {
       case LactationType.breastfeeding:
-        return 'Lactancia Directa';
+        return 'lactation.recordForm.breastfeeding'.tr();
       case LactationType.pumping:
         return 'Extracción';
       case LactationType.bottle:
@@ -2042,7 +2047,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       parts.add('$weightCount peso${weightCount > 1 ? 's' : ''}');
     }
     if (parts.isEmpty) {
-      return 'Sin registros';
+      return 'lactation.calendar.noRecordsText'.tr();
     }
     return parts.join(', ');
   }
@@ -2097,7 +2102,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                     Row(
                       children: [
                         Text(
-                          'Peso',
+                          'lactation.calendar.weight'.tr(),
                           style: GoogleFonts.quicksand(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -2151,15 +2156,23 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildFilterButton('Todos', RecordFilter.all, Icons.view_module),
+          _buildFilterButton(
+            'lactation.calendar.filters.all'.tr(),
+            RecordFilter.all,
+            Icons.view_module,
+          ),
           const SizedBox(width: 8),
           _buildFilterButton(
-            'Lactancia',
+            'lactation.calendar.filters.lactation'.tr(),
             RecordFilter.lactation,
             Icons.child_care,
           ),
           const SizedBox(width: 8),
-          _buildFilterButton('Peso', RecordFilter.weight, Icons.monitor_weight),
+          _buildFilterButton(
+            'lactation.calendar.filters.weight'.tr(),
+            RecordFilter.weight,
+            Icons.monitor_weight,
+          ),
         ],
       ),
     );

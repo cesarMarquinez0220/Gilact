@@ -131,3 +131,21 @@ class FeedbackMessageCountLoaded extends SettingsState {
   @override
   List<Object> get props => [count];
 }
+
+// Estados de configuración local
+class LocalSettingsLoaded extends SettingsState {
+  final Map<String, dynamic> settings;
+
+  const LocalSettingsLoaded(this.settings);
+
+  @override
+  List<Object> get props => [settings];
+}
+
+class LocalSettingUpdated extends SettingsState {
+  const LocalSettingUpdated();
+}
+
+class LocalSettingsUpdated extends SettingsState {
+  const LocalSettingsUpdated();
+}

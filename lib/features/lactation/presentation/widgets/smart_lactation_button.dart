@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../pages/lactation_record_page.dart';
 import '../pages/lactation_calendar_page.dart';
 import '../pages/lactation_flow_page_enhanced.dart';
@@ -168,7 +169,7 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Registrar Lactancia',
+                        'home.registerLactation'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -177,7 +178,7 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Registro Rápido Predefinido',
+                        'home.quickRegister'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 14,
                           color: Colors.white.withValues(alpha: 0.9),
@@ -220,7 +221,7 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
       onPressed: () => _showQuickDialog(context),
       icon: const Icon(Icons.child_care, size: 18),
       label: Text(
-        'Completo',
+        'home.complete'.tr(),
         style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
@@ -236,7 +237,7 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
       onPressed: () => _showFullScreen(context),
       icon: const Icon(Icons.calendar_month, size: 18),
       label: Text(
-        'Registro',
+        'home.register'.tr(),
         style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(

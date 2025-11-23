@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:math' as math;
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -175,7 +176,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
     }
 
     if (_selectedBirthDate == null || _selectedMenstruationDate == null) {
-      DialogExample.showValidationErrorDialog(context, 'fechas requeridas');
+      DialogExample.showValidationErrorDialog(context, 'onboarding.dateRequired'.tr());
       return;
     }
 
@@ -187,7 +188,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       // Obtener el usuario actual
       final authState = context.read<AuthBloc>().state;
       if (authState is! AuthAuthenticated) {
-        throw Exception('Usuario no autenticado');
+        throw Exception('profile.noUserAuthenticated'.tr());
       }
 
       final userId = authState.user.id;
@@ -300,9 +301,9 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                     ),
                                   ),
                                   const SizedBox(height: 12),
-                                  const Text(
-                                    'Registro del Bebé',
-                                    style: TextStyle(
+                                  Text(
+                                    'onboarding.babyRegistration'.tr(),
+                                    style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -318,8 +319,8 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 6),
-                                  const Text(
-                                    'Completa la información de tu bebé',
+                                  Text(
+                                    'onboarding.completeBabyInfo'.tr(),
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.white70,
@@ -335,13 +336,13 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               // Campo nombre del bebé
                               _buildLargerTextField(
-                                label: 'Nombre del Bebé',
-                                hint: 'Nombre del bebé',
+                                label: 'onboarding.babyName'.tr(),
+                                hint: 'onboarding.babyNameHint'.tr(),
                                 controller: _babyNameController,
                                 icon: Icons.child_care_outlined,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Nombre requerido';
+                                    return 'onboarding.nameRequired'.tr();
                                   }
                                   return null;
                                 },
@@ -354,14 +355,14 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                 children: [
                                   Expanded(
                                     child: _buildLargerDateField(
-                                      label: 'Fecha',
-                                      hint: 'Fecha',
+                                      label: 'onboarding.date'.tr(),
+                                      hint: 'onboarding.dateHint'.tr(),
                                       controller: _birthDateController,
                                       onTap: _selectBirthDate,
                                       icon: Icons.calendar_today_outlined,
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Fecha requerida';
+                                          return 'onboarding.dateRequired'.tr();
                                         }
                                         return null;
                                       },
@@ -370,14 +371,14 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: _buildLargerTimeField(
-                                      label: 'Hora',
-                                      hint: 'Hora',
+                                      label: 'onboarding.time'.tr(),
+                                      hint: 'onboarding.timeHint'.tr(),
                                       controller: _birthTimeController,
                                       onTap: _selectBirthTime,
                                       icon: Icons.access_time_outlined,
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Hora requerida';
+                                          return 'onboarding.timeRequired'.tr();
                                         }
                                         return null;
                                       },
@@ -390,13 +391,13 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               // Campo lugar de nacimiento
                               _buildLargerTextField(
-                                label: 'Lugar de Nacimiento',
-                                hint: 'Hospital, clínica, etc.',
+                                label: 'onboarding.birthPlace'.tr(),
+                                hint: 'onboarding.birthPlaceHint'.tr(),
                                 controller: _birthPlaceController,
                                 icon: Icons.location_on_outlined,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Lugar requerido';
+                                    return 'onboarding.placeRequired'.tr();
                                   }
                                   return null;
                                 },
@@ -406,8 +407,8 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               // Campo peso al nacer
                               _buildLargerTextField(
-                                label: 'Peso al Nacer (kg)',
-                                hint: 'Ej: 3.2',
+                                label: 'onboarding.birthWeight'.tr(),
+                                hint: 'onboarding.birthWeightHint'.tr(),
                                 controller: _birthWeightController,
                                 icon: Icons.monitor_weight_outlined,
                                 keyboardType: TextInputType.number,
@@ -418,11 +419,11 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                 ],
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Peso requerido';
+                                    return 'onboarding.weightRequired'.tr();
                                   }
                                   final weight = double.tryParse(value);
                                   if (weight == null || weight <= 0) {
-                                    return 'Peso inválido';
+                                    return 'onboarding.invalidWeight'.tr();
                                   }
                                   return null;
                                 },
@@ -432,14 +433,14 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               // Campo última menstruación
                               _buildLargerDateField(
-                                label: 'Última Menstruación',
-                                hint: 'Fecha última menstruación',
+                                label: 'onboarding.lastMenstruation'.tr(),
+                                hint: 'onboarding.lastMenstruationHint'.tr(),
                                 controller: _lastMenstruationController,
                                 onTap: _selectLastMenstruation,
                                 icon: Icons.calendar_today_outlined,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Fecha requerida';
+                                    return 'onboarding.dateRequired'.tr();
                                   }
                                   return null;
                                 },
@@ -500,9 +501,9 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                             strokeWidth: 2.5,
                                           ),
                                         )
-                                      : const Text(
-                                          'Guardar',
-                                          style: TextStyle(
+                                      : Text(
+                                          'common.save'.tr(),
+                                          style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
                                             color: Colors.white,
@@ -535,9 +536,9 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                     ),
                                     foregroundColor: Colors.white,
                                   ),
-                                  child: const Text(
-                                    'Cancelar',
-                                    style: TextStyle(
+                                  child: Text(
+                                    'common.cancel'.tr(),
+                                    style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
@@ -628,9 +629,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 20),
               // Reduce el padding interno del TextField
             ),
           ),
@@ -702,9 +701,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
             ),
           ),
         ),
@@ -775,9 +772,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 20),
               // Reduce el padding interno del TextField
             ),
           ),

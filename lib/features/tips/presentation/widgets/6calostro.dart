@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -21,41 +22,38 @@ class CalostroInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Calostro: La Primera Leche',
+        child: Text(
+          'tips.content.colostrum.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingXL,
         ),
       ),
       body: [
         const SizedBox(height: 8),
-        const CompactTextContent(
-          text:
-              'El calostro es la primera leche que produce la madre. Aquí tienes información clave:',
+        CompactTextContent(
+          text: 'tips.content.colostrum.intro'.tr(),
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
         const SizedBox(height: 8),
-        const CompactTextContent(
-          text: '- Es de color amarillento y contiene alto valor nutritivo.',
+        CompactTextContent(
+          text: '- ${'tips.content.colostrum.items.0'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const CompactTextContent(
-          text:
-              '- Satisface al lactante porque tiene los nutrientes que necesita el bebé.',
+        CompactTextContent(
+          text: '- ${'tips.content.colostrum.items.1'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
-        const CompactTextContent(
-          text: '- Contiene defensas que protegen al bebé contra enfermedades.',
+        CompactTextContent(
+          text: '- ${'tips.content.colostrum.items.2'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
         const SizedBox(height: 8),
-        const CompactTextContent(
-          text:
-              'Es el único alimento que el bebé necesita en los primeros seis meses.',
+        CompactTextContent(
+          text: 'tips.content.colostrum.items.3'.tr(),
           style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),

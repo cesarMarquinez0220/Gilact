@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 
 /// Widget para el header modernizado de la pantalla de inicio
@@ -47,7 +48,7 @@ class ModernHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hola $userName',
+                  '${'home.hello'.tr()} $userName',
                   style: GoogleFonts.quicksand(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -63,7 +64,7 @@ class ModernHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '¿Avanzamos en las lecciones?',
+                  'home.advanceLessons'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

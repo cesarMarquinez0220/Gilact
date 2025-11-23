@@ -3,6 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -21,8 +22,8 @@ class LactanciaExitosa extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Consejos para una Lactancia Exitosa',
+        child: Text(
+          'tips.content.successfulBreastfeeding.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingXL,
         ),
@@ -31,9 +32,8 @@ class LactanciaExitosa extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const CompactTextContent(
-            text:
-                '- Infórmate y prepárate todo lo que puedas acerca de la lactancia antes del momento del parto.',
+          child: CompactTextContent(
+            text: '- ${'tips.content.successfulBreastfeeding.items.0'.tr()}',
             style: TipTypography.paragraph,
             textAlign: TextAlign.center,
           ),
@@ -42,9 +42,8 @@ class LactanciaExitosa extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const CompactTextContent(
-            text:
-                '- Da el pecho inmediatamente después del parto, esto facilita el inicio de la lactancia.',
+          child: CompactTextContent(
+            text: '- ${'tips.content.successfulBreastfeeding.items.1'.tr()}',
             style: TipTypography.paragraph,
             textAlign: TextAlign.center,
           ),
@@ -53,8 +52,8 @@ class LactanciaExitosa extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const CompactTextContent(
-            text: '- Toma mucha agua.',
+          child: CompactTextContent(
+            text: '- ${'tips.content.successfulBreastfeeding.items.2'.tr()}',
             style: TipTypography.paragraph,
             textAlign: TextAlign.center,
           ),
@@ -63,9 +62,8 @@ class LactanciaExitosa extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const CompactTextContent(
-            text:
-                '- Confía en ti y en tu capacidad de alimentar a tu bebé: ¡sí tienes leche!',
+          child: CompactTextContent(
+            text: '- ${'tips.content.successfulBreastfeeding.items.3'.tr()}',
             style: TipTypography.paragraph,
             textAlign: TextAlign.center,
           ),
@@ -74,9 +72,8 @@ class LactanciaExitosa extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const CompactTextContent(
-            text:
-                '- Coloca al bebé con frecuencia en el pecho: deja que lacte a libre demanda.',
+          child: CompactTextContent(
+            text: '- ${'tips.content.successfulBreastfeeding.items.4'.tr()}',
             style: TipTypography.paragraph,
             textAlign: TextAlign.center,
           ),

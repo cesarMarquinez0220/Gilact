@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -8,6 +9,16 @@ import 'package:animate_do/animate_do.dart';
 
 class BeneficiosBebeInfo extends StatelessWidget {
   const BeneficiosBebeInfo({super.key});
+
+  static List<String> _getItemsList(String key) {
+    try {
+      final items = key.tr() as List<dynamic>;
+      return items.map((item) => item.toString()).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TipCard(
@@ -19,8 +30,8 @@ class BeneficiosBebeInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 800),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Beneficios de Lactancia Materna Exclusiva',
+        child: Text(
+          'tips.content.benefitsBaby.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingLarge,
         ),
@@ -32,19 +43,14 @@ class BeneficiosBebeInfo extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AdaptiveTextContent(
-                text: 'Durante los primeros 6 meses de vida:',
+              AdaptiveTextContent(
+                text: 'tips.content.benefitsBaby.subtitle'.tr(),
                 style: TipTypography.paragraph,
                 textAlign: TextAlign.start,
               ),
               const SizedBox(height: 12),
               AdaptiveListContent(
-                items: const [
-                  'Mayor coeficiente intelectual y mejor rendimiento escolar.',
-                  'Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.',
-                  'Niños(as) más cariñosos(as).',
-                  'Menos caries dentales y mejor desarrollo de musculatura facial y cuello.',
-                ],
+                items: _getItemsList('tips.content.benefitsBaby.items'),
                 itemStyle: TipTypography.paragraph,
                 bullet: '-',
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/datasources/baby_weight_offline_local_data_source.dart';
 import '../../domain/entities/baby_weight_record.dart';
 import '../../../../core/services/connectivity_service.dart';
@@ -201,10 +202,10 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
           final homeCtx = navigatorKey.currentContext;
           if (homeCtx != null) {
             ScaffoldMessenger.of(homeCtx).showSnackBar(
-              const SnackBar(
-                content: Text('Registro de peso guardado exitosamente'),
+              SnackBar(
+                content: Text('forms.babyWeight.saved'.tr()),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
           }
@@ -229,7 +230,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
       if (mounted) {
         DialogExample.showErrorDialog(
           context,
-          'Error al Guardar',
+          'forms.babyWeight.error'.tr(),
           'No se pudieron guardar los datos.\n\nError: ${e.toString()}',
         );
         setState(() {
@@ -414,9 +415,9 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
           ),
         ),
         const SizedBox(height: 32),
-        const Text(
-          'Registro de Peso',
-          style: TextStyle(
+        Text(
+          'forms.babyWeight.title'.tr(),
+          style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -433,7 +434,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
         ),
         const SizedBox(height: 12),
         Text(
-          '¿Cuál es el peso actual del bebé?',
+          'forms.babyWeight.question'.tr(),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -637,7 +638,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
             maxLines: 3,
             style: GoogleFonts.quicksand(fontSize: 16, color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Notas (opcional)',
+              hintText: 'forms.babyWeight.notesPlaceholder'.tr(),
               hintStyle: GoogleFonts.quicksand(
                 fontSize: 16,
                 color: Colors.white.withValues(alpha: 0.6),
@@ -703,7 +704,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                     ),
                   )
                 : Text(
-                    'Guardar',
+                    'forms.babyWeight.save'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

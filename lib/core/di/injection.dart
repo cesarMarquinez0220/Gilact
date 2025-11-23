@@ -10,6 +10,9 @@ import '../../features/videos/data/datasources/video_remote_data_source.dart';
 import '../../features/tips/data/datasources/tip_remote_data_source.dart';
 import '../../features/user/data/datasources/user_profile_remote_data_source.dart';
 import '../../features/chatbot/data/datasources/chatbot_remote_data_source.dart';
+import '../../features/settings/data/datasources/settings_remote_data_source.dart';
+import '../../features/settings/data/datasources/settings_remote_data_source_impl.dart';
+import '../../features/settings/data/datasources/settings_local_data_source.dart';
 
 // Repositories
 import '../../features/ui/data/repositories/ui_repository_impl.dart';
@@ -19,6 +22,8 @@ import '../../features/tips/data/repositories/tip_repository_impl.dart';
 import '../../features/user/data/repositories/user_profile_repository_impl.dart';
 import '../../features/lessons/data/repositories/lesson_repository_impl.dart';
 import '../../features/chatbot/data/repositories/chatbot_repository_impl.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
 
 // Use Cases - Solo los básicos necesarios
 import '../../features/ui/domain/usecases/ui_usecases.dart' as ui_usecases;
@@ -33,6 +38,8 @@ import '../../features/lessons/domain/usecases/lesson_usecases.dart'
     as lesson_usecases;
 import '../../features/chatbot/domain/usecases/chatbot_usecases.dart'
     as chatbot_usecases;
+import '../../features/settings/domain/usecases/settings_usecases.dart'
+    as settings_usecases;
 
 // Services
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
@@ -40,12 +47,15 @@ import '../../features/videos/data/services/video_interaction_service.dart';
 import '../../features/lactation/data/services/lactation_service.dart';
 import '../../features/lactation/data/services/lactation_flow_service.dart';
 import '../../features/lactation/data/services/sleep_notification_service.dart';
-import '../../features/lactation/data/services/notification_handler.dart';
 import '../../features/auth/data/services/offline_session_service.dart';
 import '../../core/services/connectivity_service.dart';
 import '../../core/services/sync_queue_service.dart';
 import '../../core/services/offline_sync_service.dart';
 import '../../core/services/conflict_resolution_service.dart';
+import '../../core/services/localization_service.dart';
+import '../../core/services/sound_service.dart';
+import '../../core/services/vibration_service.dart';
+import '../../core/services/auto_save_service.dart';
 import '../../features/videos/data/services/video_encryption_service.dart';
 import '../../features/videos/data/services/video_download_service.dart';
 import '../../features/videos/data/datasources/video_offline_local_data_source.dart';
@@ -72,6 +82,7 @@ import '../../features/tips/presentation/bloc/tip_bloc.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
 import '../../features/lessons/presentation/bloc/lesson_bloc.dart';
 import '../../features/chatbot/presentation/bloc/chatbot_bloc.dart';
+import '../../features/settings/presentation/bloc/settings_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -104,6 +115,24 @@ Future<void> configureDependencies() async {
     () => OfflineSessionService(),
   );
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
+
+  // Settings Services
+  getIt.registerLazySingleton<LocalizationService>(
+    () => LocalizationService(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<SoundService>(
+    () => SoundService(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<VibrationService>(
+    () => VibrationService(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<AutoSaveService>(
+    () => AutoSaveService(
+      getIt<SharedPreferences>(),
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseAuth>(),
+    ),
+  );
 
   // Video offline services
   getIt.registerLazySingleton<VideoEncryptionService>(
@@ -181,6 +210,12 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<ChatbotRemoteDataSource>(
     () => ChatbotRemoteDataSourceImpl(getIt<FirebaseFirestore>()),
   );
+  getIt.registerLazySingleton<SettingsRemoteDataSource>(
+    () => SettingsRemoteDataSourceImpl(firestore: getIt<FirebaseFirestore>()),
+  );
+  getIt.registerLazySingleton<SettingsLocalDataSource>(
+    () => SettingsLocalDataSource(getIt<SharedPreferences>()),
+  );
 
   // Repositories
   getIt.registerLazySingleton<UIRepositoryImpl>(
@@ -203,6 +238,12 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<ChatbotRepositoryImpl>(
     () => ChatbotRepositoryImpl(getIt<ChatbotRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(
+      remoteDataSource: getIt<SettingsRemoteDataSource>(),
+      localDataSource: getIt<SettingsLocalDataSource>(),
+    ),
   );
 
   // Use Cases - UI
@@ -360,6 +401,32 @@ Future<void> configureDependencies() async {
     () => chatbot_usecases.SendMessageUseCase(getIt<ChatbotRepositoryImpl>()),
   );
 
+  // Use Cases - Settings
+  getIt.registerLazySingleton(
+    () => settings_usecases.GetAppConfigurationUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.UpdateAppConfigurationUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.GetUserStatisticsUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.UpdateUserStatisticsUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.SubmitFeedbackUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.GetLocalSettingsUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.UpdateLocalSettingUseCase(getIt<SettingsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => settings_usecases.UpdateLocalSettingsUseCase(getIt<SettingsRepository>()),
+  );
+
   // BLoCs - Solo los básicos necesarios para que funcione la app
   getIt.registerFactory(
     () => UIBloc(
@@ -464,6 +531,19 @@ Future<void> configureDependencies() async {
   getIt.registerFactory(
     () => GamificationBloc(
       repository: getIt<GamificationRepository>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => SettingsBloc(
+      getAppConfigurationUseCase: getIt<settings_usecases.GetAppConfigurationUseCase>(),
+      updateAppConfigurationUseCase: getIt<settings_usecases.UpdateAppConfigurationUseCase>(),
+      getUserStatisticsUseCase: getIt<settings_usecases.GetUserStatisticsUseCase>(),
+      updateUserStatisticsUseCase: getIt<settings_usecases.UpdateUserStatisticsUseCase>(),
+      submitFeedbackUseCase: getIt<settings_usecases.SubmitFeedbackUseCase>(),
+      getLocalSettingsUseCase: getIt<settings_usecases.GetLocalSettingsUseCase>(),
+      updateLocalSettingUseCase: getIt<settings_usecases.UpdateLocalSettingUseCase>(),
+      updateLocalSettingsUseCase: getIt<settings_usecases.UpdateLocalSettingsUseCase>(),
     ),
   );
 }

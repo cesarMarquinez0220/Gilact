@@ -27,4 +27,11 @@ abstract class SettingsRepository {
   Future<Either<Failure, List<FeedbackMessage>>> getUserFeedback(String userId);
   
   Future<Either<Failure, void>> updateFeedbackStatus(String feedbackId, String status);
+
+  // Métodos de configuración local
+  Future<Either<Failure, Map<String, dynamic>>> getLocalSettings();
+  
+  Future<Either<Failure, void>> updateLocalSetting(String key, dynamic value);
+  
+  Future<Either<Failure, void>> updateLocalSettings(Map<String, dynamic> settings);
 }

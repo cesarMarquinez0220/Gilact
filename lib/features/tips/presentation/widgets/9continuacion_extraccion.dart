@@ -3,6 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -21,26 +22,26 @@ class ContinuacionExtraccionInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Extracción, Manejo y Almacenamiento de la Leche Materna',
+        child: Text(
+          'tips.content.extractionContinuation.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingLarge,
         ),
       ),
-      body: const [
-        SizedBox(height: 10),
+      body: [
+        const SizedBox(height: 10),
         AdaptiveTextContent(
-            text: '- La leche descongelada debe consumirse y el sobrante descartarse.',
+            text: '- ${'tips.content.extractionContinuation.items.0'.tr()}',
             style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
         AdaptiveTextContent(
-            text: '- Dejarla un rato a temperatura ambiente antes de darla.',
+            text: '- ${'tips.content.extractionContinuation.items.1'.tr()}',
             style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),
         AdaptiveTextContent(
-            text: '- A todos los recipientes donde se pone la leche se les debe etiquetar con nombre y fecha.',
+            text: '- ${'tips.content.extractionContinuation.items.2'.tr()}',
             style: TipTypography.paragraph,
           textAlign: TextAlign.start,
         ),

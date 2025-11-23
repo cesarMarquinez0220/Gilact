@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 
 class DialogExample {
@@ -39,7 +40,7 @@ class DialogExample {
         iconColor: Colors.green,
         primaryColor: Colors.green,
         onContinue: onContinue,
-        continueText: 'Continuar',
+        continueText: 'dialogs.continue'.tr(),
       ),
     );
   }
@@ -177,7 +178,7 @@ class DialogExample {
                         // Botón secundario (Cancelar)
                         Expanded(
                           child: _buildDialogButton(
-                            text: 'Cancelar',
+                            text: 'dialogs.cancel'.tr(),
                             onPressed: () => Navigator.of(context).pop(),
                             isPrimary: false,
                             primaryColor: primaryColor,
@@ -190,8 +191,8 @@ class DialogExample {
                       Expanded(
                         child: _buildDialogButton(
                           text: onContinue != null
-                              ? (continueText ?? 'Aceptar')
-                              : 'Entendido',
+                              ? (continueText ?? 'dialogs.accept'.tr())
+                              : 'dialogs.understood'.tr(),
                           onPressed: () {
                             Navigator.of(context).pop();
                             if (onContinue != null) {
@@ -269,8 +270,8 @@ class DialogExample {
   static void showUserAlreadyExistsDialog(BuildContext context) {
     showErrorDialog(
       context,
-      'Email Ya Registrado',
-      'Este correo electrónico ya está asociado a una cuenta existente. Por favor, utiliza otro email o inicia sesión.',
+      'dialogs.emailAlreadyRegistered'.tr(),
+      'dialogs.emailAlreadyRegisteredMessage'.tr(),
     );
   }
 
@@ -280,8 +281,8 @@ class DialogExample {
   ) {
     showSuccessDialog(
       context,
-      '¡Registro Exitoso!',
-      'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión con tus credenciales.',
+      'dialogs.registrationSuccess'.tr(),
+      'dialogs.registrationSuccessMessage'.tr(),
       onContinue,
     );
   }
@@ -289,24 +290,24 @@ class DialogExample {
   static void showValidationErrorDialog(BuildContext context, String field) {
     showErrorDialog(
       context,
-      'Campo Requerido',
-      'Por favor, completa el campo "$field" para continuar con el registro.',
+      'dialogs.fieldRequired'.tr(),
+      'dialogs.fieldRequiredMessage'.tr(namedArgs: {'field': field}),
     );
   }
 
   static void showInvalidEmailDialog(BuildContext context) {
     showErrorDialog(
       context,
-      'Email Inválido',
-      'Por favor, ingresa una dirección de correo electrónico válida (ejemplo: usuario@dominio.com).',
+      'dialogs.invalidEmail'.tr(),
+      'dialogs.invalidEmailMessage'.tr(),
     );
   }
 
   static void showNetworkErrorDialog(BuildContext context) {
     showErrorDialog(
       context,
-      'Error de Conexión',
-      'No se pudo conectar al servidor. Verifica tu conexión a internet e inténtalo nuevamente.',
+      'dialogs.connectionError'.tr(),
+      'dialogs.connectionErrorMessage'.tr(),
     );
   }
 }

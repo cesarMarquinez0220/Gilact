@@ -163,10 +163,11 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
                 children: [
                   _buildHeader(),
                   Expanded(
-                    
-                    child: ScrollConfiguration( // <-- 1. Envuelve con esto
- behavior: ScrollConfiguration.of(context).copyWith(
-overscroll: false, ),
+                    child: ScrollConfiguration(
+                      // <-- 1. Envuelve con esto
+                      behavior: ScrollConfiguration.of(
+                        context,
+                      ).copyWith(overscroll: false),
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
                         child: Form(
@@ -236,8 +237,8 @@ overscroll: false, ),
               children: [
                 Text(
                   widget.existingRecord != null
-                      ? 'Editar Registro'
-                      : 'Nuevo Registro',
+                      ? 'lactation.calendar.editRecord'.tr()
+                      : 'common.newRecord'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -907,7 +908,7 @@ overscroll: false, ),
 
       DialogExample.showSuccessDialog(
         context,
-        'Registro Exitoso',
+        'lactation.flow.recordSuccess'.tr(),
         widget.existingRecord != null
             ? 'El registro de lactancia ha sido actualizado correctamente.'
             : 'El registro de lactancia ha sido guardado correctamente.',

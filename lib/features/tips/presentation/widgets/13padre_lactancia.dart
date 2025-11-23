@@ -3,6 +3,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -21,8 +22,8 @@ class RolPadreLactanciaInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'El Papel del Padre en la Lactancia',
+        child: Text(
+          'tips.content.fatherRole.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingXL,
         ),
@@ -31,8 +32,8 @@ class RolPadreLactanciaInfo extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const Text(
-            'La figura del padre desempeña un papel principal en asegurar y apoyar la lactancia materna exclusiva, para el bienestar y pleno desarrollo de la madre y el bebé.',
+          child: Text(
+            'tips.content.fatherRole.items.0'.tr(),
             style: TipTypography.paragraph,
             textAlign: TextAlign.justify,
           ),
@@ -41,8 +42,8 @@ class RolPadreLactanciaInfo extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1000),
           delay: const Duration(milliseconds: 500),
-          child: const Text(
-            'Corresponsabilizarse de las tareas de cuidado y labores domésticas durante este periodo tan importante facilita que la madre pueda dedicarle al bebé el tiempo que necesita, así como tener tiempo para sí misma.',
+          child: Text(
+            'tips.content.fatherRole.items.1'.tr(),
             style: TipTypography.paragraph,
             textAlign: TextAlign.justify,
           ),

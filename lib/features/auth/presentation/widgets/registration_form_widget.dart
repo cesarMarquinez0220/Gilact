@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegistrationFormWidget extends StatefulWidget {
   final int currentStep;
@@ -65,19 +66,19 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         _passwordStrength = '';
         _passwordStrengthColor = Colors.grey;
       } else if (password.length < 6) {
-        _passwordStrength = 'Muy débil';
+        _passwordStrength = 'auth.register.passwordStrength.veryWeak'.tr();
         _passwordStrengthColor = Colors.red;
       } else if (password.length < 8) {
-        _passwordStrength = 'Débil';
+        _passwordStrength = 'auth.register.passwordStrength.weak'.tr();
         _passwordStrengthColor = Colors.orange;
       } else if (password.length >= 8 &&
           password.contains(RegExp(r'[A-Z]')) &&
           password.contains(RegExp(r'[a-z]')) &&
           password.contains(RegExp(r'[0-9]'))) {
-        _passwordStrength = 'Fuerte';
+        _passwordStrength = 'auth.register.passwordStrength.strong'.tr();
         _passwordStrengthColor = Colors.green;
       } else {
-        _passwordStrength = 'Media';
+        _passwordStrength = 'auth.register.passwordStrength.medium'.tr();
         _passwordStrengthColor = Colors.yellow;
       }
     });
@@ -123,9 +124,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Título y subtítulo
           Column(
             children: [
-              const Text(
-                'Crear Cuenta',
-                style: TextStyle(
+              Text(
+                'auth.register.createAccount'.tr(),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -140,9 +141,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Información básica para comenzar',
-                style: TextStyle(
+              Text(
+                'auth.register.basicInfo'.tr(),
+                style: const TextStyle(
                   fontSize: 17,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
@@ -157,7 +158,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de nombre
           _buildTextField(
             controller: widget.nameController,
-            hintText: 'Nombre completo *',
+            hintText: 'auth.register.fullName'.tr(),
             icon: Icons.person_outlined,
             errorText: widget.errors['name'],
             onChanged: (value) => widget.onFieldChanged('name'),
@@ -168,7 +169,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de email
           _buildTextField(
             controller: widget.emailController,
-            hintText: 'Email *',
+            hintText: 'auth.register.email'.tr(),
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             errorText: widget.errors['email'],
@@ -180,7 +181,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de contraseña
           _buildTextField(
             controller: widget.passwordController,
-            hintText: 'Contraseña *',
+            hintText: 'auth.register.password'.tr(),
             icon: Icons.lock_outlined,
             obscureText: _obscurePassword,
             errorText: widget.errors['password'],
@@ -214,7 +215,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
 
           // Botón siguiente
           _buildActionButton(
-            text: 'Siguiente',
+            text: 'auth.register.next'.tr(),
             onPressed: widget.onNextStep,
             isLoading: widget.isLoading,
           ),
@@ -244,9 +245,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Título y subtítulo
           Column(
             children: [
-              const Text(
-                'Datos Personales',
-                style: TextStyle(
+              Text(
+                'auth.register.personalData'.tr(),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -261,9 +262,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Información adicional sobre ti',
-                style: TextStyle(
+              Text(
+                'auth.register.personalDataDescription'.tr(),
+                style: const TextStyle(
                   fontSize: 17,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
@@ -278,7 +279,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de teléfono
           _buildTextField(
             controller: widget.phoneController,
-            hintText: 'Teléfono (opcional)',
+            hintText: 'profile.phoneOptional'.tr(),
             icon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
             errorText: widget.errors['phone'],
@@ -290,7 +291,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de ubicación
           _buildTextField(
             controller: widget.locationController,
-            hintText: 'Ubicación',
+            hintText: 'profile.location'.tr(),
             icon: Icons.location_on_outlined,
             errorText: widget.errors['location'],
             onChanged: (value) => widget.onFieldChanged('location'),
@@ -304,7 +305,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
               Expanded(
                 child: _buildTextField(
                   controller: widget.birthDateController,
-                  hintText: 'Fecha de nacimiento *',
+                  hintText: '${'profile.birthDate'.tr()} *',
                   icon: Icons.calendar_today_outlined,
                   readOnly: true,
                   onTap: widget.onBirthDateTap,
@@ -316,7 +317,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
               Expanded(
                 child: _buildTextField(
                   controller: widget.ageController,
-                  hintText: 'Edad',
+                  hintText: 'profile.age'.tr(),
                   icon: Icons.cake_outlined,
                   keyboardType: TextInputType.number,
                   errorText: widget.errors['age'],
@@ -333,14 +334,14 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             children: [
               Expanded(
                 child: _buildSecondaryButton(
-                  text: 'Anterior',
+                  text: 'auth.register.back'.tr(),
                   onPressed: widget.onPreviousStep,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildActionButton(
-                  text: 'Siguiente',
+                  text: 'auth.register.next'.tr(),
                   onPressed: widget.onNextStep,
                   isLoading: widget.isLoading,
                 ),
@@ -368,9 +369,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Título y subtítulo
           Column(
             children: [
-              const Text(
-                'Información Adicional',
-                style: TextStyle(
+              Text(
+                'auth.register.additionalInfo'.tr(),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -385,9 +386,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Últimos detalles para completar',
-                style: TextStyle(
+              Text(
+                'auth.register.additionalInfoDescription'.tr(),
+                style: const TextStyle(
                   fontSize: 17,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
@@ -402,7 +403,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de nombre de la madre
           _buildTextField(
             controller: widget.motherNameController,
-            hintText: 'Nombre de la madre (opcional)',
+            hintText: 'auth.register.motherNameOptional'.tr(),
             icon: Icons.family_restroom_outlined,
             errorText: widget.errors['motherName'],
             onChanged: (value) => widget.onFieldChanged('motherName'),
@@ -413,7 +414,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           // Campo de número de identificación
           _buildTextField(
             controller: widget.idNumberController,
-            hintText: 'Número de identificación (opcional)',
+            hintText: 'auth.register.idNumberOptional'.tr(),
             icon: Icons.badge_outlined,
             errorText: widget.errors['idNumber'],
             onChanged: (value) => widget.onFieldChanged('idNumber'),
@@ -449,9 +450,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Acepto los términos y condiciones de uso',
+                    'auth.register.acceptTerms'.tr(),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -470,14 +471,14 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             children: [
               Expanded(
                 child: _buildSecondaryButton(
-                  text: 'Anterior',
+                  text: 'auth.register.back'.tr(),
                   onPressed: widget.onPreviousStep,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildActionButton(
-                  text: 'Crear Cuenta',
+                  text: 'auth.register.register'.tr(),
                   onPressed: widget.onRegister,
                   isLoading: widget.isLoading,
                 ),
@@ -796,9 +797,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            '¿Ya tienes una cuenta? ',
-            style: TextStyle(
+          Text(
+            'auth.login.alreadyHaveAccount'.tr(),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 15,
               fontWeight: FontWeight.w400,
@@ -812,9 +813,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Inicia Sesión',
-              style: TextStyle(
+            child: Text(
+              'auth.login.login'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.bold,

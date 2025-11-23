@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 
 /// Widget para la barra de navegación inferior moderna que se adapta a la navegación nativa del sistema
@@ -97,28 +98,28 @@ class ModernBottomNavigationBar extends StatelessWidget {
                   0,
                   Icons.home_outlined,
                   Icons.home,
-                  'Inicio',
+                  'navigation.home'.tr(),
                 ),
                 _buildNavItem(
                   context,
                   1,
                   Icons.pets_outlined,
                   Icons.pets,
-                  'Compañera',
+                  'navigation.companion'.tr(),
                 ),
                 _buildNavItem(
                   context,
                   2,
                   Icons.favorite_outline,
                   Icons.favorite,
-                  'Salud',
+                  'navigation.health'.tr(),
                 ),
                 _buildNavItem(
                   context,
                   3,
                   Icons.person_outline,
                   Icons.person,
-                  'Perfil',
+                  'navigation.profile'.tr(),
                 ),
               ],
             ),

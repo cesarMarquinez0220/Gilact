@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets/onboarding_slide_widget.dart';
 import 'situation_selection_page.dart';
@@ -174,7 +175,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Desliza',
+                          'onboarding.swipe'.tr(),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 11,
@@ -217,7 +218,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Continuando automáticamente...',
+                          'onboarding.continuingAutomatically'.tr(),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontSize: 12,

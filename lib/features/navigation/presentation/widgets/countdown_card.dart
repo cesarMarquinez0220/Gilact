@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget para el contador de cuenta regresiva del embarazo
 class CountdownCard extends StatelessWidget {
@@ -64,7 +65,7 @@ class CountdownCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mi Bebé Llega',
+                'countdown.myBabyArrives'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -72,7 +73,7 @@ class CountdownCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Cuenta regresiva especial',
+                'countdown.specialCountdown'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 13,
                   color: const Color(0xFF7F8C8D),
@@ -196,7 +197,7 @@ class CountdownCard extends StatelessWidget {
         children: [
           _buildTimeUnit(
             difference.inDays.toString(),
-            'DÍAS',
+            'countdown.days'.tr(),
             const Color(0xFFf093fb),
           ),
           const SizedBox(width: 30),
@@ -210,7 +211,7 @@ class CountdownCard extends StatelessWidget {
             difference.inHours % 24 < 10
                 ? '0${difference.inHours % 24}'
                 : '${difference.inHours % 24}',
-            'HORAS',
+            'countdown.hours'.tr(),
             const Color(0xFFf093fb),
           ),
         ],
@@ -230,7 +231,7 @@ class CountdownCard extends StatelessWidget {
           const Icon(Icons.schedule, color: Color(0xFF95A5A6), size: 32),
           const SizedBox(height: 10),
           Text(
-            'Preparando cuenta regresiva...',
+            'countdown.preparingCountdown'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 14,
               color: const Color(0xFF7F8C8D),
@@ -297,7 +298,7 @@ class CountdownCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Progreso del embarazo',
+                'countdown.pregnancyProgress'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
                   color: const Color(0xFF7F8C8D),
@@ -382,18 +383,18 @@ class CountdownCard extends StatelessWidget {
       final daysLeft = difference.inDays;
 
       if (daysLeft < 0) {
-        return '¡Es hora de comenzar una nueva aventura!';
+        return 'countdown.newAdventure'.tr();
       } else if (daysLeft == 0) {
-        return '¡El gran día ha llegado! Prepárate para conocer a tu bebé.';
+        return 'countdown.greatDayArrived'.tr();
       } else if (daysLeft <= 7) {
-        return '¡Falta muy poco! Tu bebé está casi aquí.';
+        return 'countdown.verySoon'.tr();
       } else if (daysLeft <= 30) {
-        return 'Un mes más y tendrás a tu bebé en brazos. ¡Ánimo!';
+        return 'countdown.oneMonthLeft'.tr();
       } else {
-        return 'Cada día es un paso más cerca de conocer a tu bebé. ¡Sigue así!';
+        return 'countdown.motivationalMessage'.tr();
       }
     } catch (e) {
-      return 'Mantente fuerte, el gran día se acerca.';
+      return 'countdown.stayStrong'.tr();
     }
   }
 }

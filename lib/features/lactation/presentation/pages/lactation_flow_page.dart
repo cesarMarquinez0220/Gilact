@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -222,8 +223,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   children: [
                     Text(
                       widget.existingRecord != null
-                          ? 'Editar Registro'
-                          : 'Registro de Lactancia',
+                          ? 'lactation.calendar.editRecord'.tr()
+                          : 'lactation.flow.recordTitle'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -239,7 +240,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Registro paso a paso',
+                      'lactation.flow.stepByStepRecord'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.8),
@@ -463,7 +464,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Resumen del Registro',
+                'lactation.flow.summaryTitle'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -482,7 +483,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 children: [
                   Expanded(
                     child: _buildActionButton(
-                      'Editar',
+                      'lactation.flow.edit'.tr(),
                       Icons.edit,
                       Colors.orange,
                       () => _goToPreviousStep(),
@@ -491,7 +492,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildActionButton(
-                      'Guardar',
+                      'lactation.flow.save'.tr(),
                       Icons.save,
                       Colors.green,
                       _guardarRegistro,
@@ -510,10 +511,16 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     final items = <Widget>[];
 
     if (_context.hasBreastfeeding) {
-      final lado = _context.data['breastSide'] ?? 'No especificado';
+      final lado =
+          _context.data['breastSide'] ??
+          'lactation.recordForm.notSpecified'.tr();
       final duracion = _context.data['breastDuration'] ?? '0';
       items.add(
-        _buildSummaryItem('🤱', 'Lactancia Materna', '$lado - $duracion min'),
+        _buildSummaryItem(
+          '🤱',
+          'lactation.flow.breastfeeding'.tr(),
+          '$lado - $duracion min',
+        ),
       );
     }
 
@@ -524,7 +531,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
     final sleepTime = _context.data['sleepTime'];
     if (sleepTime != null && sleepTime != '0') {
-      items.add(_buildSummaryItem('😴', 'Sueño', '$sleepTime min'));
+      items.add(
+        _buildSummaryItem('😴', 'lactation.flow.sleep'.tr(), '$sleepTime min'),
+      );
     }
 
     final extractionVolume = _context.data['extractionVolume'];
@@ -691,8 +700,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       if (user == null) {
         DialogExample.showErrorDialog(
           context,
-          'Error de Autenticación',
-          'No hay usuario autenticado. Por favor, inicia sesión nuevamente.',
+          'lactation.flow.authenticationError'.tr(),
+          'lactation.flow.authenticationErrorMessage'.tr(),
         );
         return;
       }
@@ -702,8 +711,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       if (userDocId == null) {
         DialogExample.showErrorDialog(
           context,
-          'Error de Usuario',
-          'No se pudo encontrar la información del usuario.',
+          'lactation.flow.userError'.tr(),
+          'lactation.flow.userErrorMessage'.tr(),
         );
         return;
       }
@@ -718,8 +727,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       if (!situacionSnapshot.exists) {
         DialogExample.showInfoDialog(
           context,
-          'Información Requerida',
-          'Debes completar el proceso de onboarding y seleccionar la situación "Post-Parto".',
+          'lactation.flow.infoRequired'.tr(),
+          'lactation.flow.infoRequiredMessage'.tr(),
         );
         return;
       }
@@ -729,8 +738,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       if (situationType != 'postparto') {
         DialogExample.showInfoDialog(
           context,
-          'Información Requerida',
-          'Debes completar el proceso de onboarding y seleccionar la situación "Post-Parto".',
+          'lactation.flow.infoRequired'.tr(),
+          'lactation.flow.infoRequiredMessage'.tr(),
         );
         return;
       }
@@ -767,8 +776,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
       DialogExample.showSuccessDialog(
         context,
-        'Registro Exitoso',
-        'Los datos de lactancia han sido registrados correctamente.',
+        'lactation.flow.recordSuccess'.tr(),
+        'lactation.flow.recordSavedSuccess'.tr(),
         () {
           Navigator.of(context).pop(true);
         },
@@ -776,8 +785,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     } catch (e) {
       DialogExample.showErrorDialog(
         context,
-        'Error al Guardar',
-        'No se pudieron guardar los datos. Por favor, inténtalo nuevamente.\n\nError: ${e.toString()}',
+        'lactation.flow.saveError'.tr(),
+        'lactation.flow.saveErrorMessage'.tr(
+          namedArgs: {'error': e.toString()},
+        ),
       );
     } finally {
       setState(() {
@@ -830,7 +841,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               ),
               const SizedBox(height: 20),
               Text(
-                '¿Eliminar Registro?',
+                'lactation.flow.deleteConfirmTitle'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -839,7 +850,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               ),
               const SizedBox(height: 12),
               Text(
-                'Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este registro de lactancia?',
+                'lactation.flow.deleteConfirmMessage'.tr(),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.quicksand(
                   fontSize: 16,
@@ -860,7 +871,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         ),
                       ),
                       child: Text(
-                        'Cancelar',
+                        'common.cancel'.tr(),
                         style: GoogleFonts.quicksand(
                           color: Colors.grey,
                           fontWeight: FontWeight.w600,
@@ -881,7 +892,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         elevation: 0,
                       ),
                       child: Text(
-                        'Eliminar',
+                        'common.delete'.tr(),
                         style: GoogleFonts.quicksand(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -909,7 +920,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         DialogExample.showErrorDialog(
           context,
           'Error de Autenticación',
-          'No hay usuario autenticado.',
+          'lactation.flow.authenticationErrorMessage'.tr(),
         );
         return;
       }
@@ -926,7 +937,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       DialogExample.showSuccessDialog(
         context,
         'Registro Eliminado',
-        'El registro de lactancia ha sido eliminado correctamente.',
+        'lactation.flow.recordDeletedSuccess'.tr(),
         () {
           Navigator.of(context).pop(true);
         },
@@ -934,8 +945,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     } catch (e) {
       DialogExample.showErrorDialog(
         context,
-        'Error al Eliminar',
-        'No se pudo eliminar el registro. Por favor, inténtalo nuevamente.\n\nError: ${e.toString()}',
+        'lactation.flow.deleteError'.tr(),
+        'lactation.flow.deleteErrorMessage'.tr(
+          namedArgs: {'error': e.toString()},
+        ),
       );
     } finally {
       setState(() {

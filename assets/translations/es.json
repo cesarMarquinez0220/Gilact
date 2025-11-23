@@ -1,0 +1,1044 @@
+{
+  "app": {
+    "name": "GuiLact",
+    "subtitle": "Guía Interactiva de Lactancia Materna"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "companion": "Compañera",
+    "health": "Salud",
+    "profile": "Perfil",
+    "lessons": "Lecciones",
+    "tips": "Tips",
+    "history": "Historial"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar Perfil",
+    "name": "Nombre",
+    "email": "Email",
+    "motherName": "Nombre de la Madre",
+    "idNumber": "Cédula",
+    "idNumberOptional": "Cédula (opcional)",
+    "birthDate": "Fecha de Nacimiento",
+    "phone": "Teléfono",
+    "phoneOptional": "Teléfono (opcional)",
+    "location": "Ubicación",
+    "locationOptional": "Ubicación (opcional)",
+    "age": "Edad",
+    "noUserAuthenticated": "No hay usuario autenticado"
+  },
+  "settings": {
+    "title": "Configuración de la Aplicación",
+    "sound": "Sonido",
+    "soundDescription": "Reproducir sonidos en la app",
+    "vibration": "Vibración",
+    "vibrationDescription": "Vibrar en interacciones",
+    "autoSave": "Guardado Automático",
+    "autoSaveDescription": "Guardar progreso automáticamente",
+    "language": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
+    "spanish": "Español",
+    "english": "English",
+    "languageChanged": "Idioma cambiado a {language}",
+    "@languageChanged": {
+      "placeholders": {
+        "language": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "help": {
+    "title": "Ayuda y Soporte",
+    "helpCenter": "Centro de Ayuda",
+    "helpCenterDescription": "Chatea con nuestro asistente virtual",
+    "contactSupport": "Contactar Soporte",
+    "supportEmail": "soporte@gilact.com"
+  },
+  "account": {
+    "title": "Cuenta",
+    "signOut": "Cerrar Sesión",
+    "signOutDescription": "Salir de tu cuenta",
+    "signOutConfirmTitle": "Cerrar Sesión",
+    "signOutConfirmMessage": "¿Estás seguro de que quieres cerrar sesión?",
+    "deleteAccount": "Eliminar Cuenta",
+    "deleteAccountDescription": "Eliminar permanentemente tu cuenta",
+    "deleteAccountConfirmTitle": "Eliminar Cuenta",
+    "deleteAccountConfirmMessage": "¿Estás seguro de que quieres eliminar tu cuenta?\n\nEsta acción no se puede deshacer. Se eliminarán todos tus datos de forma permanente.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "featureInDevelopment": "Funcionalidad en desarrollo",
+    "version": "Versión",
+    "signOutSuccess": "Sesión cerrada exitosamente",
+    "signOutError": "Error al cerrar sesión"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "finish": "Finalizar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "unknownError": "Error desconocido",
+    "no": "No",
+    "accept": "Aceptar",
+    "understood": "Entendido",
+    "other": "Otro",
+    "newRecord": "Nuevo Registro",
+    "retry": "Reintentar",
+    "markAsCompleted": "Marcar como completado",
+    "noVideosAvailable": "No hay videos disponibles",
+    "lesson": "Lección",
+    "duration": "Duración",
+    "minutes": "minutos",
+    "description": "Descripción",
+    "syncNow": "Sincronizar Ahora",
+    "languageChanged": "Idioma cambiado a {name}",
+    "@languageChanged": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+    },
+    "termsAndConditions": "Términos y Condiciones",
+    "privacyPolicy": "Política de Privacidad",
+    "noCredentialsFound": "No se encontraron credenciales guardadas",
+    "biometricAuthError": "Error en autenticación biométrica: {error}",
+    "@biometricAuthError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "settingsSaved": "Configuración guardada exitosamente",
+    "messageSent": "Mensaje enviado exitosamente",
+    "pleaseWriteMessage": "Por favor, escribe un mensaje",
+    "signOutError": "Error al cerrar sesión: {error}",
+    "@signOutError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "saveError": "Error al guardar: {error}",
+    "@saveError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "contentMarkedCompleted": "¡Contenido marcado como completado!",
+    "videoMarkedCompleted": "Video marcado como completado",
+    "errorLoadingVideos": "Error al cargar los videos: {error}",
+    "@errorLoadingVideos": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "validation": {
+    "nameRequired": "El nombre es requerido",
+    "emailRequired": "El email es requerido",
+    "validEmail": "Ingresa un email válido",
+    "motherNameRequired": "El nombre de la madre es requerido",
+    "birthDateRequired": "La fecha de nacimiento es requerida",
+    "invalidIdNumber": "Formato de cédula inválido (8-9 dígitos)"
+  },
+  "messages": {
+    "profileUpdatedSuccess": "Perfil actualizado exitosamente",
+    "profileUpdateError": "Error al actualizar perfil",
+    "settingsSaved": "Configuración guardada exitosamente"
+  },
+  "dialogs": {
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "accept": "Aceptar",
+    "understood": "Entendido",
+    "emailAlreadyRegistered": "Email Ya Registrado",
+    "emailAlreadyRegisteredMessage": "Este correo electrónico ya está asociado a una cuenta existente. Por favor, utiliza otro email o inicia sesión.",
+    "registrationSuccess": "¡Registro Exitoso!",
+    "registrationSuccessMessage": "Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión con tus credenciales.",
+    "fieldRequired": "Campo Requerido",
+    "fieldRequiredMessage": "Por favor, completa el campo \"{field}\" para continuar con el registro.",
+    "@fieldRequiredMessage": {
+      "placeholders": {
+        "field": {
+          "type": "String"
+        }
+      }
+    },
+    "invalidEmail": "Email Inválido",
+    "invalidEmailMessage": "Por favor, ingresa una dirección de correo electrónico válida (ejemplo: usuario@dominio.com).",
+    "connectionError": "Error de Conexión",
+    "connectionErrorMessage": "No se pudo conectar al servidor. Verifica tu conexión a internet e inténtalo nuevamente."
+  },
+  "lactation": {
+    "title": "Lactancia",
+    "registerLactation": "Registrar Lactación",
+    "hints": {
+      "durationMinutes": "Duración en minutos",
+      "volumeMl": "Volumen en ml",
+      "observations": "Observaciones sobre la lactancia...",
+      "example120": "Ej: 120",
+      "example15": "Ej: 15",
+      "exampleNotes": "Ej: El bebé se durmió mientras comía...",
+      "addNotes": "Agregar notas sobre la sesión...",
+      "bottleTimes": "Veces que se le dio biberón",
+      "breastTimes": "Veces que se le dio pecho",
+      "extractionVolume": "Volumen de extracción",
+      "sleepHours": "Horas/minutos de sueño"
+    },
+    "labels": {
+      "quantity": "Cantidad",
+      "durationMinutes": "Duración en minutos",
+      "observationsOptional": "Observaciones (opcional)"
+    },
+    "quickRegister": "Registro Rápido",
+    "fullRegister": "Registro Completo",
+    "calendar": "Calendario de Lactancia",
+    "records": "Registros",
+    "quickDialog": {
+      "title": "Registro de Lactancia",
+      "cancel": "Cancelar",
+      "back": "Atrás",
+      "quickRegisterButton": "Registro Rápido"
+    },
+    "decisionTree": {
+      "initial": "¿Cómo alimentaste a tu bebé esta vez?",
+      "breastSide": "¿Qué pecho le diste?",
+      "breastDuration": "¿Cuánto tiempo duró la lactancia?",
+      "bottleVolume": "¿Cuánta leche tomó?",
+      "sleepTime": "¿Cuánto tiempo durmió después?",
+      "extractionVolume": "¿Cuánta leche extrajiste?",
+      "confirmation": "¿Confirmas estos datos?",
+      "options": {
+        "pecho": "Pecho",
+        "pechoDescription": "Lactancia materna directa",
+        "biberon": "Biberón",
+        "biberonDescription": "Fórmula o leche extraída",
+        "mixto": "Mixto",
+        "mixtoDescription": "Combinación de pecho y biberón",
+        "izquierdo": "Pecho Izquierdo",
+        "izquierdoDescription": "Lado izquierdo",
+        "derecho": "Pecho Derecho",
+        "derechoDescription": "Lado derecho",
+        "ambos": "Ambos Pechos",
+        "ambosDescription": "Los dos lados",
+        "5min": "5 minutos",
+        "5minDescription": "Corta duración",
+        "10min": "10 minutos",
+        "10minDescription": "Duración media",
+        "15min": "15 minutos",
+        "15minDescription": "Duración normal",
+        "20min": "20+ minutos",
+        "20minDescription": "Duración larga",
+        "30ml": "30 ml",
+        "60ml": "60 ml",
+        "90ml": "90 ml",
+        "120ml": "120 ml",
+        "150ml": "150 ml",
+        "180ml": "180 ml",
+        "240ml": "240 ml",
+        "guardar": "Guardar",
+        "guardarDescription": "Guardar registro de lactancia",
+        "noSleep": "Sin sueño",
+        "noSleepDescription": "No durmió",
+        "30min": "30 minutos",
+        "30minDescription": "Siesta corta",
+        "1hour": "1 hora",
+        "1hourDescription": "Siesta normal",
+        "2hours": "2 horas",
+        "2hoursDescription": "Siesta larga",
+        "3hours": "3+ horas",
+        "3hoursDescription": "Sueño prolongado",
+        "noExtraction": "Sin extracción",
+        "noExtractionDescription": "No extraje leche"
+      }
+    },
+    "recordForm": {
+      "title": "Registro de Lactancia",
+      "deleteRecord": "Eliminar Registro",
+      "saveRecord": "Guardar Registro",
+      "updateRecord": "Actualizar Registro",
+      "cancel": "Cancelar",
+      "feedingType": "Tipo de Alimentación",
+      "feedingTypeQuestion": "¿Cómo alimentaste a tu bebé esta vez?",
+      "breast": "Pecho",
+      "breastDescription": "Lactancia directamente del pecho.",
+      "bottle": "Biberón",
+      "bottleDescription": "Leche materna extraída o fórmula.",
+      "mixed": "Mixto",
+      "mixedDescription": "Combinación de pecho y biberón.",
+      "selectType": "Seleccionar tipo",
+      "selectTypeHint": "Elige el tipo de alimentación.",
+      "breastSide": "Lado del Pecho",
+      "breastSideQuestion": "¿De qué lado amamantaste?",
+      "left": "Izquierdo",
+      "right": "Derecho",
+      "both": "Ambos",
+      "breastDuration": "Duración del Pecho",
+      "breastDurationQuestion": "¿Cuánto tiempo duró la toma?",
+      "min": "min",
+      "bottleVolume": "Volumen del Biberón",
+      "bottleVolumeQuestion": "¿Cuánto volumen tomó del biberón?",
+      "ml": "ml",
+      "oz": "oz",
+      "sleepTime": "Tiempo de Sueño",
+      "sleepTimeQuestion": "¿Cuánto tiempo durmió el bebé?",
+      "hr": "hr",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales (opcional)",
+      "saved": "Registro de lactancia guardado exitosamente",
+      "error": "Error al Guardar",
+      "errorMessage": "No se pudo guardar el registro. Por favor, inténtalo nuevamente.",
+      "deleteConfirm": "¿Estás seguro de que quieres eliminar este registro de lactancia? Esta acción no se puede deshacer.",
+      "delete": "Eliminar",
+      "deleted": "Registro Eliminado",
+      "deletedMessage": "Eliminado correctamente.",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.",
+      "breastfeeding": "Lactancia Directa",
+      "customVolume": "Volumen personalizado",
+      "customTime": "Tiempo personalizado",
+      "notSpecified": "No especificado"
+    },
+    "calendar": {
+      "title": "Calendario de Lactancia",
+      "recordsTitle": "Registros de Lactancia",
+      "thisDay": "Este día",
+      "today": "Hoy",
+      "duration": "Duración",
+      "total": "Total",
+      "sessions": "sesiones",
+      "min": "min",
+      "addRecord": "Agregar Registro",
+      "deleteRecord": "Eliminar registro",
+      "savedSuccess": "¡Registro guardado exitosamente!",
+      "deletedSuccess": "Registro eliminado exitosamente",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.",
+      "recordsOf": "Registros del",
+      "deleteConfirmTitle": "Eliminar Registro",
+      "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar este registro de lactancia? Esta acción no se puede deshacer.",
+      "deleteButton": "Eliminar",
+      "filters": {
+        "all": "Todos",
+        "lactation": "Lactancia",
+        "weight": "Peso"
+      },
+      "weight": "Peso",
+      "viewList": "Ver lista de registros",
+      "viewMonth": "Ver calendario mensual",
+      "noRecords": "No hay registros para este día",
+      "tapToAdd": "Toca aquí para agregar un registro",
+      "noRecordsWeek": "No hay registros para esta semana",
+      "editRecord": "Editar registro",
+      "noRecordsText": "Sin registros",
+      "months": {
+        "january": "Enero",
+        "february": "Febrero",
+        "march": "Marzo",
+        "april": "Abril",
+        "may": "Mayo",
+        "june": "Junio",
+        "july": "Julio",
+        "august": "Agosto",
+        "september": "Septiembre",
+        "october": "Octubre",
+        "november": "Noviembre",
+        "december": "Diciembre"
+      }
+    },
+    "flow": {
+      "feedingTypeQuestion": "¿Qué tipo de alimentación?",
+      "breastSideQuestion": "¿Qué lado del pecho?",
+      "back": "Atrás",
+      "confirmRecord": "Confirmar registro",
+      "customTimeHint": "Ingresar tiempo personalizado",
+      "other": "Otro",
+      "edit": "Editar",
+      "save": "Guardar",
+      "recordTitle": "Registro de Lactancia",
+      "stepByStepRecord": "Registro paso a paso",
+      "summaryTitle": "Resumen del Registro",
+      "breastfeeding": "Lactancia Materna",
+      "sleep": "Sueño",
+      "authenticationError": "Error de Autenticación",
+      "authenticationErrorMessage": "No hay usuario autenticado. Por favor, inicia sesión nuevamente.",
+      "userError": "Error de Usuario",
+      "userErrorMessage": "No se pudo encontrar la información del usuario.",
+      "infoRequired": "Información Requerida",
+      "infoRequiredMessage": "Debes completar el proceso de onboarding y seleccionar la situación \"Post-Parto\".",
+      "recordSavedSuccess": "Los datos de lactancia han sido registrados correctamente.",
+      "saveError": "Error al Guardar",
+      "saveErrorMessage": "No se pudieron guardar los datos. Por favor, inténtalo nuevamente.\n\nError: {error}",
+      "@saveErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteConfirmTitle": "¿Eliminar Registro?",
+      "deleteConfirmMessage": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este registro de lactancia?",
+      "recordDeletedSuccess": "El registro de lactancia ha sido eliminado correctamente.",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.\n\nError: {error}",
+      "@deleteErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSavedSuccessEnhanced": "Registro de lactancia guardado exitosamente",
+      "saveErrorEnhanced": "Error al guardar el registro: {error}",
+      "@saveErrorEnhanced": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "processingError": "Error al procesar selección: {error}",
+      "@processingError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveRecordError": "Error al guardar registro: {error}",
+      "@saveRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteRecordError": "Error al eliminar registro: {error}",
+      "@deleteRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSuccess": "Registro Exitoso"
+    },
+    "today": "Hoy",
+    "yesterday": "Ayer"
+  },
+  "health": {
+    "title": "Salud",
+    "babyWeight": "Peso del Bebé",
+    "registerWeight": "Registrar Peso",
+    "sleep": "Sueño",
+    "registerSleep": "Registrar Sueño",
+    "temperature": "Temperatura",
+    "emergencyContacts": "Contactos de Emergencia"
+  },
+  "lessons": {
+    "title": "Lecciones",
+    "progress": "Progreso",
+    "completed": "Completado",
+    "inProgress": "En Progreso",
+    "notStarted": "No Iniciado",
+    "watchVideo": "Ver Video",
+    "completeLesson": "Completar Lección"
+  },
+  "gamification": {
+    "xp": "XP",
+    "level": "Nivel",
+    "streak": "Racha",
+    "achievements": "Logros",
+    "achievementUnlocked": "¡Logro Desbloqueado!",
+    "levelUp": "¡Subiste de Nivel!",
+    "excellent": "¡Excelente!"
+  },
+  "home": {
+    "lessons": "Lecciones",
+    "lessonsDescription": "Mira tu progreso de lecciones",
+    "tips": "Tips",
+    "tipsDescription": "Consejos útiles para ti",
+    "history": "Historial",
+    "historyDescription": "Videos vistos recientemente"
+  },
+  "companion": {
+    "title": "Compañera",
+    "level": "Nivel",
+    "streak": "Racha",
+    "achievements": "Logros"
+  },
+  "health": {
+    "title": "Salud",
+    "babyWeight": "Peso del Bebé",
+    "babyWeightDescription": "Registra y monitorea el peso",
+    "sleep": "Registro de Sueño",
+    "sleepDescription": "Controla las horas de sueño",
+    "assistant": "Asistente Virtual",
+    "assistantDescription": "Pregunta sobre salud y cuidados",
+    "emergencyContacts": "Contactos de Emergencia",
+    "emergencyContactsDescription": "Acceso rápido a contactos de emergencia",
+    "growthTracking": "Seguimiento de Crecimiento",
+    "dailyWellness": "Bienestar Diario",
+    "assistanceHelp": "Asistencia y Ayuda",
+    "emergencies": "Emergencias",
+    "available247": "Disponible 24/7",
+    "new": "Nuevo",
+    "active": "Activo",
+    "last": "Último:",
+    "alwaysAvailable": "Siempre disponible",
+    "important": "Importante",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo": "Hace {days} días",
+    "@daysAgo": {
+      "placeholders": {
+        "days": {
+          "type": "int"
+        }
+      }
+    },
+    "emergencyContactsTitle": "Contactos de Emergencia",
+    "emergencyContactMessage": "En caso de emergencia, contacta inmediatamente:",
+    "emergenciesLabel": "Emergencias",
+    "pediatrician": "Pediatra",
+    "contactPediatrician": "Contacta a tu pediatra",
+    "breastfeedingLine": "Línea de Lactancia",
+    "refresh": "Actualizar",
+    "emergencyContacts": "Contactos de Emergencia",
+    "emergencyContactsDescription": "Acceso rápido a ayuda médica"
+  },
+  "helpSupport": {
+    "helpCenter": "Centro de Ayuda",
+    "helpCenterDescription": "Chatea con nuestro asistente virtual",
+    "contactSupport": "Contactar Soporte",
+    "supportEmail": "soporte@gilact.com",
+    "terms": "Términos y Condiciones",
+    "termsDescription": "Ver términos de uso",
+    "privacy": "Política de Privacidad",
+    "privacyDescription": "Ver política de privacidad",
+    "contactDialogTitle": "Contactar Soporte",
+    "contactDialogMessage": "¿Necesitas ayuda?\n\nPuedes contactarnos en:\n📧 soporte@gilact.com\n\nEstamos aquí para ayudarte con cualquier duda o problema.",
+    "close": "Cerrar"
+  },
+  "tips": {
+    "title": "Tips de Lactancia",
+    "progress": "Progreso",
+    "favorites": "Favoritos",
+    "tip": "Tip",
+    "titles": {
+      "complementaryFeeding": "Alimentación Complementaria",
+      "ironSupplementation": "Suplementación de Hierro",
+      "benefitsBaby": "Beneficios para el Bebé",
+      "benefitsMom": "Beneficios para la Mamá",
+      "postureLatch": "Postura y Agarre",
+      "colostrum": "Calostro",
+      "breastfeedingTips": "Consejos de Lactancia",
+      "extractionStorage": "Extracción y Almacenamiento",
+      "extractionContinuation": "Continuación Extracción",
+      "hygiene": "Higiene en Lactancia",
+      "hygieneContinuation": "Continuación Higiene",
+      "successfulBreastfeeding": "Lactancia Exitosa",
+      "fatherRole": "Rol del Padre",
+      "commonProblems": "Problemas Comunes"
+    },
+    "content": {
+      "complementaryFeeding": "Es recomendable dar solo leche maternal al bebe hasta los 6 meses y a partir de este momento, agregar poco a poco alimentos de acuerdo con la sugerencia del pediatra o nutricionista. Se recomienda mantener la lactancia materna combinada con la alimentación hasta que la madre y el niño deseen.",
+      "ironSupplementation": "Si tu bebé tuvo bajo peso al nacer y/o es prematuro, se suplementará con hierro.\n\n*Según indicación del personal de salud.",
+      "benefitsBaby": {
+        "title": "Beneficios de Lactancia Materna Exclusiva",
+        "subtitle": "Durante los primeros 6 meses de vida:",
+        "items": [
+          "Mayor coeficiente intelectual y mejor rendimiento escolar.",
+          "Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.",
+          "Niños(as) más cariñosos(as).",
+          "Menos caries dentales y mejor desarrollo de musculatura facial y cuello."
+        ]
+      },
+      "benefitsMom": {
+        "items": [
+          "Disminuye el sangrado postparto.",
+          "Ayuda a que el útero vuelva a su estado normal.",
+          "Protege contra el cáncer de ovario, mama y útero.",
+          "Recupera rápidamente la figura eliminando reservas de grasa.",
+          "Disminuye el riesgo de depresión posparto."
+        ]
+      },
+      "postureLatch": {
+        "title": "Consejos para una Buena Postura y Agarre",
+        "items": [
+          "Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.",
+          "La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.",
+          "El Agarre Apropiado es Importante:",
+          "La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón)."
+        ]
+      },
+      "colostrum": {
+        "title": "Calostro: La Primera Leche",
+        "intro": "El calostro es la primera leche que produce la madre. Aquí tienes información clave:",
+        "items": [
+          "Es de color amarillento y contiene alto valor nutritivo.",
+          "Satisface al lactante porque tiene los nutrientes que necesita el bebé.",
+          "Contiene defensas que protegen al bebé contra enfermedades.",
+          "Es el único alimento que el bebé necesita en los primeros seis meses."
+        ]
+      },
+      "breastfeedingTips": {
+        "title": "Consejos para una Lactancia Materna Exitosa",
+        "items": [
+          "¡No te rindas! Tú puedes amamantar.",
+          "La madre debe continuar la suplementación con hierro y ácido fólico durante los primeros 3 meses de la lactancia.",
+          "Dale pecho a tu bebé inmediatamente después del parto.",
+          "El bebé te hará saber cuando tiene hambre suele mamar de 8 a 12 veces al día.",
+          "Dale de mamar en un ambiente tranquilo.",
+          "Busca la posición más cómoda para amamantar.",
+          "Toma abundante agua."
+        ]
+      },
+      "extractionStorage": {
+        "title": "Extracción, Manejo y Almacenamiento",
+        "intro": "La extracción puede realizarse manual o mecánicamente. Para facilitar la extracción, haga estimulación aplicando compresas tibias y masajes circulares sobre toda la mama.",
+        "items": [
+          "No mezclar leche materna recién extraída con leche materna que ya está refrigerada."
+        ]
+      },
+      "extractionContinuation": {
+        "title": "Extracción, Manejo y Almacenamiento de la Leche Materna",
+        "items": [
+          "La leche descongelada debe consumirse y el sobrante descartarse.",
+          "Dejarla un rato a temperatura ambiente antes de darla.",
+          "A todos los recipientes donde se pone la leche se les debe etiquetar con nombre y fecha."
+        ]
+      },
+      "hygiene": {
+        "title": "Higiene y Medidas Generales",
+        "items": [
+          "Lávate bien las manos con agua y jabón antes de dar pecho.",
+          "El baño diario es suficiente para el aseo de los pezones.",
+          "Lávate las manos con agua y jabón después de cada cambio de pañal.",
+          "Da pecho con alegría y aumentará tu producción."
+        ]
+      },
+      "hygieneContinuation": {
+        "title": "Tu Dieta y la Lactancia",
+        "text": "Puedes comer todo tipo de alimentos. Solo asegúrate de comer saludable y tomar mucha agua."
+      },
+      "successfulBreastfeeding": {
+        "title": "Consejos para una Lactancia Exitosa",
+        "items": [
+          "Infórmate y prepárate todo lo que puedas acerca de la lactancia antes del momento del parto.",
+          "Da el pecho inmediatamente después del parto, esto facilita el inicio de la lactancia.",
+          "Toma mucha agua.",
+          "Confía en ti y en tu capacidad de alimentar a tu bebé: ¡sí tienes leche!",
+          "Coloca al bebé con frecuencia en el pecho: deja que lacte a libre demanda."
+        ]
+      },
+      "fatherRole": {
+        "title": "El Papel del Padre en la Lactancia",
+        "items": [
+          "La figura del padre desempeña un papel principal en asegurar y apoyar la lactancia materna exclusiva, para el bienestar y pleno desarrollo de la madre y el bebé.",
+          "Corresponsabilizarse de las tareas de cuidado y labores domésticas durante este periodo tan importante facilita que la madre pueda dedicarle al bebé el tiempo que necesita, así como tener tiempo para sí misma."
+        ]
+      },
+      "commonProblems": {
+        "title": "Problemas Comunes en la Lactancia",
+        "congestion": {
+          "title": "Congestión Mamaria:",
+          "items": [
+            "No suspendas la lactancia; hazte masajes circulares en toda la mama.",
+            "Amamanta con frecuencia para evitar los abcesos mamarios."
+          ]
+        },
+        "fissures": {
+          "title": "Fisuras y Erosiones del Pezón:",
+          "items": [
+            "Verifica si el niño tiene sapito (Moniliasis oral en el bebé o la madre).",
+            "Acude al médico para diagnóstico y tratamiento."
+          ]
+        },
+        "lowProduction": {
+          "title": "Baja Producción de Leche:",
+          "items": [
+            "Toma más agua.",
+            "Descansa y trata de relajarte."
+          ]
+        }
+      }
+    }
+  },
+  "lessons": {
+    "title": "Lecciones",
+    "pathTitle": "Camino de Lactancia",
+    "noLessonsAvailable": "No hay lecciones disponibles",
+    "errorLoading": "Error al cargar lecciones",
+    "retry": "Reintentar",
+    "statistics": "Estadísticas",
+    "statisticsTitle": "Estadísticas",
+    "completedLessons": "Lecciones completadas",
+    "completedVideos": "Videos completados",
+    "totalTime": "Tiempo total",
+    "overallProgress": "Progreso general",
+    "lesson": "Lección",
+    "category": "Categoría",
+    "progress": "Progreso",
+    "videos": "Videos",
+    "viewVideos": "Ver Videos",
+    "completed": "Completado",
+    "markCompleted": "Marcar como completado",
+    "lessonMarkedCompleted": "Lección marcada como completada",
+    "percentCompleted": "% completado",
+    "subtitles": {
+      "lesson1": "Lactancia materna y sus beneficios",
+      "lesson2": "Calostro, leche de transición y leche madura",
+      "lesson3": "Cosas en tomar en cuenta al momento de amamantar",
+      "lesson4": "Composición Nutricional de la Leche Materna",
+      "lesson5": "¿Cómo saber que el bebé se alimentó lo suficiente?",
+      "lesson6": "Hitos de peso a vigilar",
+      "lesson7": "Higiene de manos y técnicas de lactancia materna",
+      "lesson8": "Medicamentos durante la lactancia materna",
+      "lesson9": "Signos o Complicaciones en la Lactancia",
+      "lesson10": "Masajes al seno antes de iniciar la lactancia",
+      "lesson11": "Mi banco de leche en casa y su preservacion",
+      "lesson12": "Leyes en Panamá que apoyan la lactancia materna",
+      "lesson13": "Diferencias entre la leche materna y la leche de vaca",
+      "lesson14": "Mitos de la lactancia materna"
+    }
+  },
+  "forms": {
+    "babyWeight": {
+      "title": "Registro de Peso del Bebé",
+      "question": "¿Cuál es el peso actual del bebé?",
+      "weight": "Peso",
+      "weightPlaceholder": "Ingresa el peso en kg",
+      "weightRequired": "El peso es requerido",
+      "weightInvalid": "Ingresa un peso válido (ej: 3.5)",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales (opcional)",
+      "save": "Guardar Peso",
+      "saving": "Guardando...",
+      "saved": "Peso guardado exitosamente",
+      "error": "Error al guardar el peso",
+      "kg": "kg"
+    },
+    "sleep": {
+      "title": "Registro de Sueño del Bebé",
+      "question": "¿Cuántas horas durmió el bebé anoche?",
+      "wakeUpsQuestion": "¿Cuántas veces se despertó? (Opcional)",
+      "qualityQuestion": "¿Cómo fue el sueño? (Opcional)",
+      "hoursSlept": "Horas de Sueño",
+      "hoursPlaceholder": "Ingresa las horas",
+      "hoursRequired": "Las horas son requeridas",
+      "hoursInvalid": "Ingresa un valor válido (ej: 8.0)",
+      "wakeUps": "Despertares",
+      "wakeUpsPlaceholder": "Número de despertares (opcional)",
+      "quality": "Calidad del Sueño",
+      "qualityExcellent": "Excelente",
+      "qualityGood": "Buena",
+      "qualityFair": "Regular",
+      "qualityPoor": "Mala",
+      "save": "Guardar Sueño",
+      "saving": "Guardando...",
+      "saved": "Sueño guardado exitosamente",
+      "error": "Error al guardar el sueño",
+      "hours": "horas"
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Bienvenido de vuelta",
+      "loginToContinue": "Inicia sesión para continuar",
+      "email": "Email",
+      "password": "Contraseña",
+      "remember": "Recordar",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "login": "Iniciar Sesión",
+      "noAccount": "¿No tienes una cuenta? ",
+      "signUp": "Regístrate",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta? "
+    },
+    "register": {
+      "createAccount": "Crear Cuenta",
+      "basicInfo": "Información básica para comenzar",
+      "fullName": "Nombre completo *",
+      "email": "Email *",
+      "password": "Contraseña *",
+      "passwordStrength": {
+        "veryWeak": "Muy débil",
+        "weak": "Débil",
+        "medium": "Media",
+        "strong": "Fuerte"
+      },
+      "next": "Siguiente",
+      "back": "Atrás",
+      "register": "Registrarse",
+      "backToLogin": "Volver al inicio de sesión",
+      "step": "Paso {current} de {total}",
+      "@step": {
+        "placeholders": {
+          "current": {
+            "type": "int"
+          },
+          "total": {
+            "type": "int"
+          }
+        }
+      },
+      "personalData": "Datos Personales",
+      "personalDataDescription": "Información adicional sobre ti",
+      "additionalInfo": "Información Adicional",
+      "additionalInfoDescription": "Últimos detalles para completar",
+      "motherNameOptional": "Nombre de la madre (opcional)",
+      "idNumberOptional": "Número de identificación (opcional)",
+      "acceptTerms": "Acepto los términos y condiciones de uso",
+      "confirmRegistration": "Confirmar Registro",
+      "confirmRegistrationMessage": "¿Estás seguro de que quieres crear tu cuenta con esta información?",
+      "confirm": "Confirmar"
+    }
+  },
+  "history": {
+    "title": "Historial",
+    "lastLessonCompleted": "Última lección completada",
+    "generalProgress": "Progreso General",
+    "percentCompleted": "% completado",
+    "completed": "Completado",
+    "pending": "Pendiente",
+    "noVideosAvailable": "No hay videos disponibles",
+    "videosWillAppear": "Los videos aparecerán aquí cuando estén disponibles",
+    "video": "Video",
+    "loadingVideos": "Cargando videos...",
+    "errorLoading": "Error al cargar videos",
+    "retry": "Reintentar",
+    "videoDownloaded": "Video descargado exitosamente",
+    "videoDeleted": "Video eliminado",
+    "deleteDownload": "Eliminar descarga",
+    "deleteDownloadConfirm": "¿Estás seguro de que quieres eliminar la descarga de",
+    "unknownError": "Error desconocido"
+  },
+  "baby": {
+    "data": {
+      "title": "Datos del Bebé",
+      "name": "Nombre del bebé",
+      "gestationalAge": "Edad Gestacional",
+      "birthDate": "Fecha de Nacimiento",
+      "birthPlace": "Lugar de Nacimiento",
+      "weight": "Peso",
+      "weeks": "semanas",
+      "noInfoAvailable": "No hay información del bebé disponible"
+    }
+  },
+  "growth": {
+    "alertTitle": "Alerta de Crecimiento",
+    "trendTitle": "Tendencia de Crecimiento",
+    "disclaimer": "Esta información es solo orientativa. Siempre consulta con tu pediatra o nutricionista para cualquier preocupación sobre el crecimiento o alimentación de tu bebé.",
+    "currentWeight": "Peso actual",
+    "percentile": "Percentil",
+    "trend": "Tendencia",
+    "stable": "Estable",
+    "increasing": "En aumento",
+    "decreasing": "En descenso",
+    "normalRange": "Rango normal",
+    "median": "Mediana (P50)",
+    "weightTrend": "Tendencia de Peso",
+    "whoComparison": "Comparación con estándares OMS",
+    "important": "Importante",
+    "disclaimerFull": "Esta información es solo orientativa y no reemplaza el consejo médico profesional. Cualquier preocupación sobre el peso o la alimentación de tu bebé debe ser consultada con un pediatra o nutricionista."
+  },
+  "feeding": {
+    "totalExtractedMilk": "Total de Leche Extraída",
+    "dailyVolumeSubtitle": "Volumen diario de leche extraída y medida",
+    "extractedOnlyNote": "Solo incluye leche extraída. No incluye lactancia directa al pecho.",
+    "dailyAverage": "Promedio diario",
+    "extractedOnly": "Solo extraída",
+    "lastRecord": "Último registro"
+  },
+  "home": {
+    "lessons": "Lecciones",
+    "lessonsDescription": "Mira tu progreso de lecciones",
+    "tips": "Tips",
+    "tipsDescription": "Consejos útiles para ti",
+    "history": "Historial",
+    "historyDescription": "Videos vistos recientemente",
+    "welcome": "¡Bienvenida!",
+    "welcomeMessage": "Comienza registrando tu primera sesión de lactancia para ver tu progreso aquí.",
+    "registerLactation": "Registrar Lactancia",
+    "quickRegister": "Registro Rápido Predefinido",
+    "complete": "Completo",
+    "register": "Registro",
+    "advanceLessons": "¿Avanzamos en las lecciones?",
+    "streakAtRisk": "Tu racha está en riesgo, pero puedes usar un día de des...",
+    "days": "días",
+    "hello": "Hola"
+  },
+  "welcome": {
+    "title": "¡Bienvenido!",
+    "verifying": "Verificando tu perfil...",
+    "loading": "Cargando..."
+  },
+  "countdown": {
+    "myBabyArrives": "Mi Bebé Llega",
+    "specialCountdown": "Cuenta regresiva especial",
+    "days": "DÍAS",
+    "hours": "HORAS",
+    "pregnancyProgress": "Progreso del embarazo",
+    "motivationalMessage": "Cada día es un paso más cerca de conocer a tu bebé. ¡Sigue así!",
+    "preparingCountdown": "Preparando cuenta regresiva...",
+    "newAdventure": "¡Es hora de comenzar una nueva aventura!",
+    "greatDayArrived": "¡El gran día ha llegado! Prepárate para conocer a tu bebé.",
+    "verySoon": "¡Falta muy poco! Tu bebé está casi aquí.",
+    "oneMonthLeft": "Un mes más y tendrás a tu bebé en brazos. ¡Ánimo!",
+    "stayStrong": "Mantente fuerte, el gran día se acerca."
+  },
+  "onboarding": {
+    "babyName": "Nombre del Bebé",
+    "babyNameHint": "Nombre del bebé",
+    "date": "Fecha",
+    "dateHint": "Fecha",
+    "time": "Hora",
+    "timeHint": "Hora",
+    "birthPlace": "Lugar de Nacimiento",
+    "birthPlaceHint": "Hospital, clínica, etc.",
+    "birthWeight": "Peso al Nacer (kg)",
+    "birthWeightHint": "Ej: 3.2",
+    "lastMenstruation": "Última Menstruación",
+    "lastMenstruationHint": "Fecha última menstruación",
+    "nameRequired": "Nombre requerido",
+    "dateRequired": "Fecha requerida",
+    "timeRequired": "Hora requerida",
+    "placeRequired": "Lugar requerido",
+    "weightRequired": "Peso requerido",
+    "invalidWeight": "Peso inválido",
+    "preParto": "Pre-Parto",
+    "prePartoDescription": "Estoy embarazada",
+    "hypertension": "Hipertensión arterial",
+    "swipe": "Desliza",
+    "continuingAutomatically": "Continuando automáticamente...",
+    "chooseSituation": "Elige tu situación actual",
+    "selectSituationDescription": "Selecciona la opción que mejor describa tu momento",
+    "postParto": "Post-Parto",
+    "postPartoDescription": "Ya tuve mi bebé",
+    "select": "Seleccionar",
+    "prepartoInfo": "Información de Preparto",
+    "prepartoInfoDescription": "Cuéntanos cuándo esperas a tu bebé",
+    "selectExpectedDate": "Selecciona la fecha esperada",
+    "babyRegistration": "Registro del Bebé",
+    "completeBabyInfo": "Completa la información de tu bebé",
+    "slides": {
+      "babyBenefits": "Beneficios para el bebé",
+      "decreasesRisk": "Disminuye la posibilidad de enfermarse de:",
+      "protectionAgainst": "Protección contra enfermedades como:",
+      "nothingCompares": "Nada se compara con la",
+      "breastMilk": "Leche Materna!",
+      "bestFood": "Es el mejor alimento para el lactante. Es un complejo fluido nutricional vivo que contiene anticuerpos, enzimas, ácidos grasos y hormonas.",
+      "breastfeedWithPride": "¡Amamanta con orgullo!",
+      "diseases": {
+        "diabetes": "Diabetes",
+        "hypertension": "Hipertensión arterial",
+        "obesity": "Obesidad",
+        "cancer": "Cáncer (leucemia, linfoma)",
+        "diarrhea": "Diarrea",
+        "allergies": "Alergias",
+        "colds": "Resfriados",
+        "earInfections": "Infecciones del oído",
+        "sids": "Síndrome de muerte súbita"
+      }
+    }
+  },
+  "chatbot": {
+    "title": "ChatBot Gilact",
+    "subtitle": "Tu asistente de lactancia",
+    "quickQuestions": "Preguntas rápidas",
+    "writeQuestion": "Escribe tu pregunta...",
+    "loginRequired": "Inicio de sesión requerido",
+    "loginRequiredMessage": "Por favor, inicia sesión para acceder a las lecciones."
+  },
+  "tips": {
+    "favoritesInDevelopment": "Funcionalidad de favoritos en desarrollo"
+  },
+  "videos": {
+    "playError": "Error al reproducir video: {error}",
+    "@playError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "download": {
+      "checkStatusError": "Error verificando estado: {error}",
+      "@checkStatusError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveError": "Error: El video no se guardó correctamente",
+      "metadataError": "Error guardando metadata: {error}",
+      "@metadataError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "downloadError": "Error descargando video: {error}",
+      "@downloadError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      }
+    },
+    "noVideosAvailable": "No hay videos disponibles",
+    "lesson": "Lección",
+    "duration": "Duración",
+    "minutes": "minutos",
+    "description": "Descripción",
+    "markAsCompleted": "Marcar como completado",
+    "videoMarkedCompleted": "Video marcado como completado"
+  },
+  "educationalContent": {
+    "title": "Contenido Educativo",
+    "statistics": "Estadísticas",
+    "searchContent": "Buscar contenido...",
+    "noContentAvailable": "No hay contenido disponible",
+    "contentMarkedCompleted": "¡Contenido marcado como completado!",
+    "information": "Información",
+    "lactanciaExitosa": "Lactancia Exitosa",
+    "beneficiosBebe": "Beneficios para el Bebé",
+    "alimentacionComplementaria": "Alimentación Complementaria"
+  },
+  "gamification": {
+    "messages": {
+      "excellentWork": "¡Excelente trabajo! 🎉",
+      "closeToLevelUp": "Estás muy cerca de subir de nivel",
+      "streakAtRisk": "Tu racha está en riesgo, pero puedes usar un día de descanso",
+      "takeYourTime": "Tómate el tiempo que necesites, estaremos aquí 💙",
+      "restWell": "Descansa bien, te esperamos mañana",
+      "helloHowAreYou": "¡Hola! ¿Cómo estás hoy?"
+    }
+  },
+  "sync": {
+    "syncNow": "Sincronizar Ahora",
+    "close": "Cerrar"
+  }
+}
+

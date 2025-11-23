@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_event.dart';
@@ -776,7 +778,7 @@ class CompanionPage extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.star,
-                  label: 'Nivel',
+                  label: 'gamification.level'.tr(),
                   value: '${profile.currentLevel}',
                   color: const Color(0xFF3498DB),
                 ),
@@ -784,7 +786,7 @@ class CompanionPage extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.local_fire_department,
-                  label: 'Racha',
+                  label: 'gamification.streak'.tr(),
                   value: '${profile.currentStreak}',
                   color: const Color(0xFFE74C3C),
                 ),
@@ -792,7 +794,7 @@ class CompanionPage extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.emoji_events,
-                  label: 'Logros',
+                  label: 'gamification.achievements'.tr(),
                   value: '${profile.unlockedAchievements.length}',
                   color: Colors.amber[700]!,
                 ),
@@ -1320,7 +1322,7 @@ class _SpeechBubble extends StatelessWidget {
           height: 1.3,
         ),
       ),
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
       maxLines: 3,
     );
     textPainter.layout(maxWidth: 200);

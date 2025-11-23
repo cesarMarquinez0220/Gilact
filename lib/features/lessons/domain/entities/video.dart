@@ -6,11 +6,21 @@ class Video extends Equatable {
   final String videoURL;
   final String imageName; // Para miniaturas de video (imgVideos)
   final String pathImageName; // Para imágenes del camino de lecciones (imagen)
-  final String title;
+  final String title; // Título por defecto (español o fallback)
+  final String? titleEn; // Título en inglés (opcional)
   final String description;
   final Duration duration;
   final bool isCompleted;
   final double progress;
+  
+  /// Obtiene el título localizado según el idioma proporcionado
+  /// Si no se proporciona locale, devuelve el título por defecto
+  String getLocalizedTitle([String? languageCode]) {
+    if (languageCode == 'en' && titleEn != null && titleEn!.isNotEmpty) {
+      return titleEn!;
+    }
+    return title;
+  }
 
   const Video({
     required this.videoId,
@@ -19,6 +29,7 @@ class Video extends Equatable {
     required this.imageName,
     required this.pathImageName,
     required this.title,
+    this.titleEn,
     required this.description,
     required this.duration,
     this.isCompleted = false,
@@ -33,6 +44,7 @@ class Video extends Equatable {
     imageName,
     pathImageName,
     title,
+    titleEn,
     description,
     duration,
     isCompleted,
@@ -46,6 +58,7 @@ class Video extends Equatable {
     String? imageName,
     String? pathImageName,
     String? title,
+    String? titleEn,
     String? description,
     Duration? duration,
     bool? isCompleted,
@@ -58,6 +71,7 @@ class Video extends Equatable {
       imageName: imageName ?? this.imageName,
       pathImageName: pathImageName ?? this.pathImageName,
       title: title ?? this.title,
+      titleEn: titleEn ?? this.titleEn,
       description: description ?? this.description,
       duration: duration ?? this.duration,
       isCompleted: isCompleted ?? this.isCompleted,

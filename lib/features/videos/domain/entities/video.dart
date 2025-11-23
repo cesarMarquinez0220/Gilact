@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 
 class Video extends Equatable {
   final String id;
-  final String title;
+  final String title; // Título por defecto (español o fallback)
+  final String? titleEn; // Título en inglés (opcional)
   final String videoUrl;
   final String imageUrl;
   final String imageName;
@@ -14,10 +15,20 @@ class Video extends Equatable {
   final DateTime updatedAt;
   final bool isCompleted;
   final int order;
+  
+  /// Obtiene el título localizado según el idioma proporcionado
+  /// Si no se proporciona locale, devuelve el título por defecto
+  String getLocalizedTitle([String? languageCode]) {
+    if (languageCode == 'en' && titleEn != null && titleEn!.isNotEmpty) {
+      return titleEn!;
+    }
+    return title;
+  }
 
   const Video({
     required this.id,
     required this.title,
+    this.titleEn,
     required this.videoUrl,
     required this.imageUrl,
     required this.imageName,
@@ -35,6 +46,7 @@ class Video extends Equatable {
   List<Object?> get props => [
     id,
     title,
+    titleEn,
     videoUrl,
     imageUrl,
     imageName,
@@ -54,6 +66,7 @@ class Video extends Equatable {
   Video copyWith({
     String? id,
     String? title,
+    String? titleEn,
     String? videoUrl,
     String? imageUrl,
     String? imageName,
@@ -69,6 +82,7 @@ class Video extends Equatable {
     return Video(
       id: id ?? this.id,
       title: title ?? this.title,
+      titleEn: titleEn ?? this.titleEn,
       videoUrl: videoUrl ?? this.videoUrl,
       imageUrl: imageUrl ?? this.imageUrl,
       imageName: imageName ?? this.imageName,

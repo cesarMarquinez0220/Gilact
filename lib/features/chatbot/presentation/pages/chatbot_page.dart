@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/chat_message.dart';
 import '../bloc/chatbot_bloc.dart';
 
@@ -220,7 +221,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ChatBot Gilact',
+                  'chatbot.title'.tr(),
                   style: GoogleFonts.quicksand(
                     color: Colors.white,
                     fontSize: 20,
@@ -229,7 +230,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   ),
                 ),
                 Text(
-                  'Tu asistente de lactancia',
+                  'chatbot.subtitle'.tr(),
                   style: GoogleFonts.quicksand(
                     color: Colors.white70,
                     fontSize: 14,
@@ -245,7 +246,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
-
           ),
         ],
       ),
@@ -538,7 +538,7 @@ class _EmptyChatWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Preguntas rápidas',
+                  'chatbot.quickQuestions'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 12,
                     color: Colors.white70,

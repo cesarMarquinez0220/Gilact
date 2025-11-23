@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/services/connectivity_service.dart';
 import '../bloc/auth_bloc.dart';
@@ -453,8 +454,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                   const SizedBox(height: 20),
 
                   // Título
-                  const Text(
-                    'Confirmar Registro',
+                  Text(
+                    'auth.register.confirmRegistration'.tr(),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -476,35 +477,35 @@ class _RegistrationPageState extends State<RegistrationPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildConfirmationRow(
-                          'Nombre:',
+                          '${'profile.name'.tr()}:',
                           _nameController.text.trim(),
                         ),
                         _buildConfirmationRow(
-                          'Email:',
+                          '${'profile.email'.tr()}:',
                           _emailController.text.trim(),
                         ),
                         _buildConfirmationRow(
-                          'Fecha de nacimiento:',
+                          '${'profile.birthDate'.tr()}:',
                           _birthDateController.text.trim(),
                         ),
                         if (_phoneController.text.trim().isNotEmpty)
                           _buildConfirmationRow(
-                            'Teléfono:',
+                            '${'profile.phone'.tr()}:',
                             _phoneController.text.trim(),
                           ),
                         if (_locationController.text.trim().isNotEmpty)
                           _buildConfirmationRow(
-                            'Ubicación:',
+                            '${'profile.location'.tr()}:',
                             _locationController.text.trim(),
                           ),
                         if (_motherNameController.text.trim().isNotEmpty)
                           _buildConfirmationRow(
-                            'Nombre de la madre:',
+                            '${'profile.motherName'.tr()}:',
                             _motherNameController.text.trim(),
                           ),
                         if (_idNumberController.text.trim().isNotEmpty)
                           _buildConfirmationRow(
-                            'Cédula:',
+                            '${'profile.idNumber'.tr()}:',
                             _idNumberController.text.trim(),
                           ),
                       ],
@@ -514,8 +515,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                   const SizedBox(height: 20),
 
                   // Texto de confirmación
-                  const Text(
-                    '¿Estás seguro de que quieres crear tu cuenta con esta información?',
+                  Text(
+                    'auth.register.confirmRegistrationMessage'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
@@ -538,8 +539,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Cancelar',
+                          child: Text(
+                            'common.cancel'.tr(),
                             style: TextStyle(
                               color: Colors.grey,
                               fontWeight: FontWeight.w600,
@@ -559,8 +560,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Confirmar',
+                          child: Text(
+                            'auth.register.confirm'.tr(),
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

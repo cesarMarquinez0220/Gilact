@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
@@ -113,7 +114,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
     if (_selectedDate == null) {
       DialogExample.showValidationErrorDialog(
         context,
-        'fecha aproximada de nacimiento',
+        'onboarding.dateRequired'.tr(),
       );
       return;
     }
@@ -126,7 +127,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
       // Obtener el usuario actual
       final authState = context.read<AuthBloc>().state;
       if (authState is! AuthAuthenticated) {
-        throw Exception('Usuario no autenticado');
+        throw Exception('profile.noUserAuthenticated'.tr());
       }
 
       final userId = authState.user.id;
@@ -228,9 +229,9 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   ),
                                 ),
                                 const SizedBox(height: 32),
-                                const Text(
-                                  'Información de Preparto',
-                                  style: TextStyle(
+                                Text(
+                                  'onboarding.prepartoInfo'.tr(),
+                                  style: const TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -246,8 +247,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'Cuéntanos cuándo esperas a tu bebé',
+                                Text(
+                                  'onboarding.prepartoInfoDescription'.tr(),
                                   style: TextStyle(
                                     fontSize: 17,
                                     color: Colors.white70,
@@ -289,7 +290,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                 onTap: _selectExpectedBirthDate,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Por favor selecciona la fecha aproximada de nacimiento';
+                                    return 'onboarding.dateRequired'.tr();
                                   }
                                   return null;
                                 },
@@ -299,7 +300,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   fontWeight: FontWeight.w500,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Selecciona la fecha esperada',
+                                  hintText: 'onboarding.selectExpectedDate'.tr(),
                                   hintStyle: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 16,
@@ -374,9 +375,9 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                           strokeWidth: 2.5,
                                         ),
                                       )
-                                    : const Text(
-                                        'Guardar',
-                                        style: TextStyle(
+                                    : Text(
+                                        'common.save'.tr(),
+                                        style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -409,9 +410,9 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   ),
                                   foregroundColor: Colors.white,
                                 ),
-                                child: const Text(
-                                  'Cancelar',
-                                  style: TextStyle(
+                                child: Text(
+                                  'common.cancel'.tr(),
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,

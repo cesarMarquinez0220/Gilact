@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -710,7 +711,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             child: Column(
               children: [
                 Text(
-                  '¡Bienvenido!',
+                  'welcome.title'.tr(),
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.w800,
@@ -729,7 +730,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 const SizedBox(height: 16),
 
                 Text(
-                  'Verificando tu perfil...',
+                  'welcome.verifying'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
@@ -788,7 +789,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
             // Texto de estado
             Text(
-              'Cargando...',
+              'welcome.loading'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white.withOpacity(0.7),

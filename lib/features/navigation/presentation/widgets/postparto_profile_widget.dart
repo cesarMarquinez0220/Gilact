@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -235,7 +236,7 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
                 children: [
                   Center(
                     child: Text(
-                      "Datos del Bebé",
+                      'baby.data.title'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 23,
                         color: Colors.white,
@@ -253,30 +254,30 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
                   const SizedBox(height: 20),
                   if (widget.userProfile.babyInfo != null) ...[
                     _buildInfoRow(
-                      'Nombre del bebé',
+                      'baby.data.name'.tr(),
                       widget.userProfile.babyInfo!.name,
                     ),
                     _buildInfoRow(
-                      'Edad Gestacional',
-                      '${widget.userProfile.babyInfo!.gestationalAge} semanas',
+                      'baby.data.gestationalAge'.tr(),
+                      '${widget.userProfile.babyInfo!.gestationalAge} ${'baby.data.weeks'.tr()}',
                     ),
                     _buildInfoRow(
-                      'Fecha de Nacimiento',
+                      'baby.data.birthDate'.tr(),
                       widget.userProfile.babyInfo!.birthDate,
                     ),
                     _buildInfoRow(
-                      'Lugar de Nacimiento',
+                      'baby.data.birthPlace'.tr(),
                       widget.userProfile.babyInfo!.birthPlace,
                     ),
                     _buildInfoRow(
-                      'Peso',
+                      'baby.data.weight'.tr(),
                       '${widget.userProfile.babyInfo!.weight} kg',
                     ),
                   ] else ...[
-                    const Center(
+                    Center(
                       child: Text(
-                        'No hay información del bebé disponible',
-                        style: TextStyle(color: Colors.white70),
+                        'baby.data.noInfoAvailable'.tr(),
+                        style: const TextStyle(color: Colors.white70),
                       ),
                     ),
                   ],
@@ -448,7 +449,7 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           child: Text(
-            'Tendencia de Crecimiento',
+            'growth.trendTitle'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 20,
               fontWeight: FontWeight.bold,

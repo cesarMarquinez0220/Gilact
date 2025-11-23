@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../widgets/tip_widgets.dart';
 import '../widgets/decorations/shape.dart';
 
@@ -166,7 +167,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                         ),
                       ),
                       Text(
-                        'Tips de Lactancia',
+                        'tips.title'.tr(),
                         style: GoogleFonts.quicksand(
                           color: Colors.white,
                           fontSize: 20,
@@ -446,23 +447,25 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
       final t = tip?.title?.toString();
       if (t != null && t.isNotEmpty) return t;
     } catch (_) {}
-    const titles = [
-      'Alimentación Complementaria',
-      'Suplementación de Hierro',
-      'Beneficios para el Bebé',
-      'Beneficios para la Mamá',
-      'Postura y Agarre',
-      'Calostro',
-      'Consejos de Lactancia',
-      'Extracción y Almacenamiento',
-      'Continuación Extracción',
-      'Higiene en Lactancia',
-      'Continuación Higiene',
-      'Lactancia Exitosa',
-      'Rol del Padre',
-      'Problemas Comunes',
+    final titles = [
+      'tips.titles.complementaryFeeding'.tr(),
+      'tips.titles.ironSupplementation'.tr(),
+      'tips.titles.benefitsBaby'.tr(),
+      'tips.titles.benefitsMom'.tr(),
+      'tips.titles.postureLatch'.tr(),
+      'tips.titles.colostrum'.tr(),
+      'tips.titles.breastfeedingTips'.tr(),
+      'tips.titles.extractionStorage'.tr(),
+      'tips.titles.extractionContinuation'.tr(),
+      'tips.titles.hygiene'.tr(),
+      'tips.titles.hygieneContinuation'.tr(),
+      'tips.titles.successfulBreastfeeding'.tr(),
+      'tips.titles.fatherRole'.tr(),
+      'tips.titles.commonProblems'.tr(),
     ];
-    return (index >= 0 && index < titles.length) ? titles[index] : 'Tip';
+    return (index >= 0 && index < titles.length)
+        ? titles[index]
+        : 'tips.tip'.tr();
   }
 
   String _resolveCategory(dynamic tip, int index) {
@@ -470,7 +473,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
       final c = tip?.category?.toString();
       if (c != null && c.isNotEmpty) return c;
     } catch (_) {}
-    return 'Consejo';
+    return 'tips.tip'.tr();
   }
 
   String _resolveDescription(dynamic tip) {
@@ -581,7 +584,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Progreso',
+                        'tips.progress'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -655,9 +658,9 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
 
   void _toggleFavorite(String tipId) {
     // Aquí implementarías la lógica para marcar/desmarcar como favorito
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidad de favoritos en desarrollo')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('tips.favoritesInDevelopment'.tr())));
   }
 
   void _showFavoriteTips() {
@@ -669,7 +672,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
         builder: (context, state) {
           if (state is FavoriteTipsLoaded) {
             return AlertDialog(
-              title: const Text('Tips Favoritos'),
+              title: Text('tips.favorites'.tr()),
               content: SizedBox(
                 width: double.maxFinite,
                 height: 300,
@@ -692,7 +695,7 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cerrar'),
+                  child: Text('common.close'.tr()),
                 ),
               ],
             );

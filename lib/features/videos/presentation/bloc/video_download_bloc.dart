@@ -5,6 +5,8 @@ import '../../data/services/video_download_service.dart';
 import '../../data/datasources/video_offline_local_data_source.dart';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
+
 part 'video_download_event.dart';
 part 'video_download_state.dart';
 
@@ -12,16 +14,16 @@ part 'video_download_state.dart';
 class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
   final VideoDownloadService _downloadService;
   final VideoOfflineLocalDataSource _localDataSource;
-  
+
   // Mapa para mantener estados de múltiples descargas simultáneas
   final Map<String, Map<String, dynamic>> _activeDownloadsMap = {};
 
   VideoDownloadBloc({
     required VideoDownloadService downloadService,
     required VideoOfflineLocalDataSource localDataSource,
-  })  : _downloadService = downloadService,
-        _localDataSource = localDataSource,
-        super(VideoDownloadInitial()) {
+  }) : _downloadService = downloadService,
+       _localDataSource = localDataSource,
+       super(VideoDownloadInitial()) {
     on<CheckVideoDownloadStatus>(_onCheckVideoDownloadStatus);
     on<DownloadVideoRequested>(_onDownloadVideoRequested);
     on<CancelDownloadRequested>(_onCancelDownloadRequested);
@@ -38,13 +40,23 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
     Emitter<VideoDownloadState> emit,
   ) async {
     try {
-      final isDownloaded = await _localDataSource.isVideoDownloaded(event.videoId);
-      emit(VideoDownloadStatusChecked(
-        videoId: event.videoId,
-        isDownloaded: isDownloaded,
-      ));
+      final isDownloaded = await _localDataSource.isVideoDownloaded(
+        event.videoId,
+      );
+      emit(
+        VideoDownloadStatusChecked(
+          videoId: event.videoId,
+          isDownloaded: isDownloaded,
+        ),
+      );
     } catch (e) {
-      emit(VideoDownloadError('Error verificando estado: $e'));
+      emit(
+        VideoDownloadError(
+          'videos.download.checkStatusError'.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        ),
+      );
     }
   }
 
@@ -54,7 +66,7 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
   ) async {
     try {
       final videoId = event.video.id;
-      
+
       // Actualizar el mapa de descargas activas
       _activeDownloadsMap[videoId] = {
         'isDownloading': true,
@@ -66,7 +78,7 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
       _emitMultipleDownloadsState(emit);
 
       String? errorMessage;
-      
+
       try {
         await _downloadService.downloadVideo(
           event.video,
@@ -80,56 +92,78 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
                 'totalBytes': progress.totalBytes,
                 'isDownloaded': true,
               };
-              
+
               // Emitir estado actualizado
               if (!emit.isDone) {
                 _emitMultipleDownloadsState(emit);
                 emit(VideoDownloadCompleted(videoId));
               }
-              
+
               // Guardar información en base de datos local de forma asíncrona
-              _saveVideoMetadata(event.video, progress).then((_) async {
-                // Verificar que el archivo se guardó correctamente
-                final isDownloaded = await _localDataSource.isVideoDownloaded(videoId);
-                if (isDownloaded) {
-                  // Actualizar el mapa
-                  _activeDownloadsMap[videoId] = {
-                    'isDownloading': false,
-                    'progress': 1.0,
-                    'bytesDownloaded': progress.totalBytes,
-                    'totalBytes': progress.totalBytes,
-                    'isDownloaded': true,
-                  };
-                  
-                  // Verificar si el emitter aún está activo antes de emitir
-                  if (!emit.isDone) {
-                    _emitMultipleDownloadsState(emit);
-                    // Emitir estado verificado inmediatamente después de guardar
-                    emit(VideoDownloadStatusChecked(
-                      videoId: videoId,
-                      isDownloaded: true,
-                    ));
-                  }
-                } else {
-                  _activeDownloadsMap.remove(videoId);
-                  if (!emit.isDone) {
-                    _emitMultipleDownloadsState(emit);
-                    emit(VideoDownloadError('Error: El video no se guardó correctamente'));
-                  }
-                }
-              }).catchError((e) {
-                _activeDownloadsMap.remove(videoId);
-                if (!emit.isDone) {
-                  _emitMultipleDownloadsState(emit);
-                  emit(VideoDownloadError('Error guardando metadata: $e'));
-                }
-              });
+              _saveVideoMetadata(event.video, progress)
+                  .then((_) async {
+                    // Verificar que el archivo se guardó correctamente
+                    final isDownloaded = await _localDataSource
+                        .isVideoDownloaded(videoId);
+                    if (isDownloaded) {
+                      // Actualizar el mapa
+                      _activeDownloadsMap[videoId] = {
+                        'isDownloading': false,
+                        'progress': 1.0,
+                        'bytesDownloaded': progress.totalBytes,
+                        'totalBytes': progress.totalBytes,
+                        'isDownloaded': true,
+                      };
+
+                      // Verificar si el emitter aún está activo antes de emitir
+                      if (!emit.isDone) {
+                        _emitMultipleDownloadsState(emit);
+                        // Emitir estado verificado inmediatamente después de guardar
+                        emit(
+                          VideoDownloadStatusChecked(
+                            videoId: videoId,
+                            isDownloaded: true,
+                          ),
+                        );
+                      }
+                    } else {
+                      _activeDownloadsMap.remove(videoId);
+                      if (!emit.isDone) {
+                        _emitMultipleDownloadsState(emit);
+                        emit(
+                          VideoDownloadError('videos.download.saveError'.tr()),
+                        );
+                      }
+                    }
+                  })
+                  .catchError((e) {
+                    _activeDownloadsMap.remove(videoId);
+                    if (!emit.isDone) {
+                      _emitMultipleDownloadsState(emit);
+                      emit(
+                        VideoDownloadError(
+                          'videos.download.metadataError'.tr(
+                            namedArgs: {'error': e.toString()},
+                          ),
+                        ),
+                      );
+                    }
+                  });
             } else if (progress.status == DownloadStatus.failed) {
-              errorMessage = progress.errorMessage ?? 'Error desconocido';
+              errorMessage =
+                  progress.errorMessage ?? 'common.unknownError'.tr();
               _activeDownloadsMap.remove(videoId);
               if (!emit.isDone) {
                 _emitMultipleDownloadsState(emit);
-                emit(VideoDownloadError('Error descargando video: $errorMessage'));
+                emit(
+                  VideoDownloadError(
+                    'videos.download.downloadError'.tr(
+                      namedArgs: {
+                        'error': errorMessage ?? 'common.unknownError'.tr(),
+                      },
+                    ),
+                  ),
+                );
               }
             } else {
               // Actualizar progreso en el mapa
@@ -140,15 +174,17 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
                 'totalBytes': progress.totalBytes,
                 'isDownloaded': false,
               };
-              
+
               if (!emit.isDone) {
                 _emitMultipleDownloadsState(emit);
-                emit(VideoDownloadProgress(
-                  videoId: videoId,
-                  progress: progress.progress,
-                  bytesDownloaded: progress.bytesDownloaded,
-                  totalBytes: progress.totalBytes,
-                ));
+                emit(
+                  VideoDownloadProgress(
+                    videoId: videoId,
+                    progress: progress.progress,
+                    bytesDownloaded: progress.bytesDownloaded,
+                    totalBytes: progress.totalBytes,
+                  ),
+                );
               }
             }
           },
@@ -157,7 +193,13 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
         _activeDownloadsMap.remove(videoId);
         if (!emit.isDone) {
           _emitMultipleDownloadsState(emit);
-          emit(VideoDownloadError('Error descargando video: $e'));
+          emit(
+            VideoDownloadError(
+              'videos.download.downloadError'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
@@ -168,7 +210,7 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
       }
     }
   }
-  
+
   /// Emite el estado de múltiples descargas
   void _emitMultipleDownloadsState(Emitter<VideoDownloadState> emit) {
     if (!emit.isDone) {
@@ -176,9 +218,14 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
     }
   }
 
-  Future<void> _saveVideoMetadata(Video video, DownloadProgress progress) async {
+  Future<void> _saveVideoMetadata(
+    Video video,
+    DownloadProgress progress,
+  ) async {
     try {
-      final encryptedPath = await _downloadService.getDownloadedVideoPath(video.id);
+      final encryptedPath = await _downloadService.getDownloadedVideoPath(
+        video.id,
+      );
       if (encryptedPath == null) return;
 
       final encryptedFile = File(encryptedPath);
@@ -200,7 +247,10 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
         order: video.order,
       );
 
-      await _localDataSource.saveOfflineVideo(model, originalVideoUrl: video.videoUrl);
+      await _localDataSource.saveOfflineVideo(
+        model,
+        originalVideoUrl: video.videoUrl,
+      );
     } catch (e) {
       print('Error guardando metadata: $e');
     }
@@ -289,4 +339,3 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
     emit(VideoDownloadError('Error descargando video: ${event.error}'));
   }
 }
-

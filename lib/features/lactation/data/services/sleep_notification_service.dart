@@ -444,17 +444,17 @@ class SleepNotificationService {
       final bool? granted = await androidImplementation
           .requestNotificationsPermission();
 
-      if (granted != true) {
-        print(
-          '❌ SleepNotificationService: Permisos de notificación NO concedidos',
-        );
-        print('⚠️ No se programará la notificación sin permisos');
-        return;
-      } else {
+    if (granted != true) {
+      print(
+        '❌ SleepNotificationService: Permisos de notificación NO concedidos',
+      );
+      print('⚠️ No se programará la notificación sin permisos');
+      return;
+    } else {
         print(
           '✅ SleepNotificationService: Permisos de notificación concedidos',
         );
-      }
+    }
 
       // Verificar permiso de alarmas exactas (Android 12+)
       try {
@@ -584,7 +584,7 @@ class SleepNotificationService {
       );
 
       if (result == true) {
-        print(
+    print(
           '✅ SleepNotificationService: Notificación programada con método NATIVO',
         );
         scheduledSuccessfully = true;
@@ -626,17 +626,17 @@ class SleepNotificationService {
         );
         await _notifications.zonedSchedule(
           889, // ID para la notificación diaria de las 8 AM
-          '🌙 Registro de Sueño Diario',
-          '¿Cuántas horas durmió el bebé anoche?',
+      '🌙 Registro de Sueño Diario',
+      '¿Cuántas horas durmió el bebé anoche?',
           scheduledDate,
-          details,
+      details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           // 🧪 MODO PRUEBA: Comentar matchDateTimeComponents para prueba única
           // matchDateTimeComponents: DateTimeComponents.time,
-          payload: 'daily_sleep_registration',
-        );
+      payload: 'daily_sleep_registration',
+    );
         print('✅ Notificación programada (modo exacto)');
         scheduledSuccessfully = true;
 
@@ -695,19 +695,19 @@ class SleepNotificationService {
     // Si el modo exacto falló o no está disponible, usar modo inexacto
     if (!scheduledSuccessfully) {
       try {
-        await _notifications.zonedSchedule(
+    await _notifications.zonedSchedule(
           889,
-          '🌙 Registro de Sueño Diario',
-          '¿Cuántas horas durmió el bebé anoche?',
-          scheduledDate,
-          details,
-          androidScheduleMode: AndroidScheduleMode.inexact,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
+      '🌙 Registro de Sueño Diario',
+      '¿Cuántas horas durmió el bebé anoche?',
+      scheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexact,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
           // 🧪 MODO PRUEBA: Comentar matchDateTimeComponents para prueba única
           // matchDateTimeComponents: DateTimeComponents.time,
-          payload: 'daily_sleep_registration',
-        );
+      payload: 'daily_sleep_registration',
+    );
         print(
           '✅ Notificación programada (modo inexacto - puede tener retraso)',
         );
@@ -817,15 +817,15 @@ class SleepNotificationService {
       final pendingNotifications = await androidNotifications
           .pendingNotificationRequests();
 
-      print(
+    print(
         '📋 Total de notificaciones pendientes: ${pendingNotifications.length}',
-      );
+    );
       pendingNotifications.forEach((notification) {
-        print('  📱 ID: ${notification.id}, Título: "${notification.title}"');
-        if (notification.body != null) {
-          print('     💬 Cuerpo: "${notification.body}"');
-        }
-      });
+      print('  📱 ID: ${notification.id}, Título: "${notification.title}"');
+      if (notification.body != null) {
+        print('     💬 Cuerpo: "${notification.body}"');
+      }
+    });
 
       // Verificar específicamente nuestra notificación
       final ourNotificationList = pendingNotifications

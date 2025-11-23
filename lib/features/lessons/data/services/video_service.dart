@@ -21,6 +21,7 @@ class VideoService {
           pathImageName:
               data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
+          titleEn: data['title_en'] ?? data['titleEn'] ?? null,
           description:
               data['title'] ?? '', // Usar el título como descripción por ahora
           duration: Duration(seconds: data['duracion'] ?? 0),
@@ -63,6 +64,7 @@ class VideoService {
           pathImageName:
               data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
+          titleEn: data['title_en'] ?? data['titleEn'] ?? null,
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),
           progress: 0.0,
@@ -99,6 +101,7 @@ class VideoService {
           pathImageName:
               data['imagen'] ?? '', // Para imágenes del camino de lecciones
           title: data['title'] ?? '',
+          titleEn: data['title_en'] ?? data['titleEn'] ?? null,
           description: data['title'] ?? '',
           duration: Duration(seconds: data['duracion'] ?? 0),
           progress: 0.0,

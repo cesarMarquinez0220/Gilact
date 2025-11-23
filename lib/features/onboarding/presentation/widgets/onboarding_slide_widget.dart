@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
 
 class OnboardingSlideWidget extends StatefulWidget {
   final int slideIndex;
@@ -280,7 +281,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: Text(
-            'Beneficios para el bebé',
+            'onboarding.slides.babyBenefits'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize:
@@ -296,7 +297,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
 
         // Subtítulo integrado sin caja separada
         Text(
-          'Disminuye la posibilidad de enfermarse de:',
+          'onboarding.slides.decreasesRisk'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: subtitleSize,
@@ -311,10 +312,10 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
         _buildSimpleBenefitList(
           context,
           [
-            'Diabetes',
-            'Hipertensión arterial',
-            'Obesidad',
-            'Cáncer (leucemia, linfoma)',
+            'onboarding.slides.diseases.diabetes'.tr(),
+            'onboarding.slides.diseases.hypertension'.tr(),
+            'onboarding.slides.diseases.obesity'.tr(),
+            'onboarding.slides.diseases.cancer'.tr(),
           ],
           isExtraSmall,
           isSmall,
@@ -368,7 +369,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: Text(
-            'Beneficios para el bebé',
+            'onboarding.slides.babyBenefits'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: titleSize + 2,
@@ -383,7 +384,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
 
         // Subtítulo integrado sin caja separada
         Text(
-          'Protección contra enfermedades como:',
+          'onboarding.slides.protectionAgainst'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: subtitleSize,
@@ -398,11 +399,11 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
         _buildSimpleBenefitList(
           context,
           [
-            'Diarrea',
-            'Alergias',
-            'Resfriados',
-            'Infecciones del oído',
-            'Síndrome de muerte súbita',
+            'onboarding.slides.diseases.diarrhea'.tr(),
+            'onboarding.slides.diseases.allergies'.tr(),
+            'onboarding.slides.diseases.colds'.tr(),
+            'onboarding.slides.diseases.earInfections'.tr(),
+            'onboarding.slides.diseases.sids'.tr(),
           ],
           isExtraSmall,
           isSmall,
@@ -470,7 +471,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: Text(
-            'Nada se compara con la',
+            'onboarding.slides.nothingCompares'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: titleSize + 1,
@@ -491,7 +492,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: Text(
-            'Leche Materna!',
+            'onboarding.slides.breastMilk'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: mainTitleSize + 2,
@@ -523,7 +524,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             ],
           ),
           child: Text(
-            'Es el mejor alimento para el lactante. Es un complejo fluido nutricional vivo que contiene anticuerpos, enzimas, ácidos grasos y hormonas.',
+            'onboarding.slides.bestFood'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: contentSize,
@@ -561,7 +562,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
             ],
           ),
           child: Text(
-            '¡Amamanta con orgullo!',
+            'onboarding.slides.breastfeedWithPride'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: callToActionSize + 1,

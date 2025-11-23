@@ -4,12 +4,17 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/settings_entities.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../datasources/settings_remote_data_source.dart';
+import '../datasources/settings_local_data_source.dart';
 import '../models/settings_models.dart';
 
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsRemoteDataSource remoteDataSource;
+  final SettingsLocalDataSource localDataSource;
 
-  SettingsRepositoryImpl({required this.remoteDataSource});
+  SettingsRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
 
   @override
   Future<Either<Failure, AppConfiguration>> getAppConfiguration(
@@ -438,6 +443,62 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(UnknownFailure(message: 'Error inesperado: ${e.toString()}'));
+    }
+  }
+
+  // Métodos de configuración local
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getLocalSettings() async {
+    try {
+      final settings = await localDataSource.getAllLocalSettings();
+      return Right(settings);
+    } catch (e) {
+      return Left(UnknownFailure(message: 'Error obteniendo configuraciones locales: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateLocalSetting(
+    String key,
+    dynamic value,
+  ) async {
+    try {
+      switch (key) {
+        case 'soundEnabled':
+          await localDataSource.setSoundEnabled(value as bool);
+          break;
+        case 'vibrationEnabled':
+          await localDataSource.setVibrationEnabled(value as bool);
+          break;
+        case 'autoSaveProgress':
+          await localDataSource.setAutoSaveProgress(value as bool);
+          break;
+        case 'language':
+          await localDataSource.setLanguage(value as String);
+          break;
+        case 'appVersion':
+          await localDataSource.setAppVersion(value as String);
+          break;
+        default:
+          return Left(UnknownFailure(message: 'Clave de configuración desconocida: $key'));
+      }
+      return const Right(null);
+    } catch (e) {
+      return Left(UnknownFailure(message: 'Error actualizando configuración local: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateLocalSettings(
+    Map<String, dynamic> settings,
+  ) async {
+    try {
+      for (final entry in settings.entries) {
+        await updateLocalSetting(entry.key, entry.value);
+      }
+      return const Right(null);
+    } catch (e) {
+      return Left(UnknownFailure(message: 'Error actualizando configuraciones locales: ${e.toString()}'));
     }
   }
 }

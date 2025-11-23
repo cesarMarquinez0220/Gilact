@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../bloc/lesson_bloc.dart';
 import 'lesson_videos_page.dart';
@@ -23,14 +24,14 @@ class _LessonsPageState extends State<LessonsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lecciones'),
+        title: Text('lessons.title'.tr()),
         backgroundColor: const Color(0xFF03A696),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             onPressed: _showStatistics,
             icon: const Icon(Icons.analytics),
-            tooltip: 'Estadísticas',
+            tooltip: 'lessons.statistics'.tr(),
           ),
         ],
       ),
@@ -43,7 +44,7 @@ class _LessonsPageState extends State<LessonsPage> {
           } else if (state is LessonFailure) {
             return _buildErrorWidget(state.message);
           } else {
-            return const Center(child: Text('No hay lecciones disponibles'));
+            return Center(child: Text('lessons.noLessonsAvailable'.tr()));
           }
         },
       ),
@@ -73,7 +74,7 @@ class _LessonsPageState extends State<LessonsPage> {
           Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
           const SizedBox(height: 16),
           Text(
-            'Error al cargar lecciones',
+            'lessons.errorLoading'.tr(),
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -87,7 +88,7 @@ class _LessonsPageState extends State<LessonsPage> {
             onPressed: () {
               context.read<LessonBloc>().add(const GetAllLessonsRequested());
             },
-            child: const Text('Reintentar'),
+            child: Text('lessons.retry'.tr()),
           ),
         ],
       ),
@@ -103,9 +104,11 @@ class _LessonsPageState extends State<LessonsPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Categoría: ${lesson.category}'),
-            Text('Progreso: ${(lesson.progress * 100).toInt()}%'),
-            Text('Videos: ${lesson.videoIds.length}'),
+            Text('${'lessons.category'.tr()}: ${lesson.category}'),
+            Text(
+              '${'lessons.progress'.tr()}: ${(lesson.progress * 100).toInt()}%',
+            ),
+            Text('${'lessons.videos'.tr()}: ${lesson.videoIds.length}'),
             const SizedBox(height: 8),
             Text(lesson.description),
           ],
@@ -113,14 +116,14 @@ class _LessonsPageState extends State<LessonsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
+            child: Text('common.close'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               _showVideosForLesson(lesson.id);
             },
-            child: const Text('Ver Videos'),
+            child: Text('lessons.viewVideos'.tr()),
           ),
         ],
       ),
@@ -143,8 +146,8 @@ class _LessonsPageState extends State<LessonsPage> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Lección marcada como completada'),
+      SnackBar(
+        content: Text('lessons.lessonMarkedCompleted'.tr()),
         backgroundColor: Colors.green,
       ),
     );
@@ -159,29 +162,29 @@ class _LessonsPageState extends State<LessonsPage> {
         builder: (context, state) {
           if (state is UserStatisticsLoaded) {
             return AlertDialog(
-              title: const Text('Estadísticas'),
+              title: Text('lessons.statisticsTitle'.tr()),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Lecciones completadas: ${state.statistics['completedLessons'] ?? 0}',
+                    '${'lessons.completedLessons'.tr()}: ${state.statistics['completedLessons'] ?? 0}',
                   ),
                   Text(
-                    'Videos completados: ${state.statistics['completedVideos'] ?? 0}',
+                    '${'lessons.completedVideos'.tr()}: ${state.statistics['completedVideos'] ?? 0}',
                   ),
                   Text(
-                    'Tiempo total: ${state.statistics['totalTime'] ?? '0 min'}',
+                    '${'lessons.totalTime'.tr()}: ${state.statistics['totalTime'] ?? '0 min'}',
                   ),
                   Text(
-                    'Progreso general: ${state.statistics['overallProgress'] ?? 0}%',
+                    '${'lessons.overallProgress'.tr()}: ${state.statistics['overallProgress'] ?? 0}%',
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cerrar'),
+                  child: Text('common.close'.tr()),
                 ),
               ],
             );
@@ -268,7 +271,7 @@ class LessonCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${(lesson.progress * 100).toInt()}% completado',
+                      '${(lesson.progress * 100).toInt()}${'lessons.percentCompleted'.tr()}',
                       style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                   ],
@@ -285,8 +288,8 @@ class LessonCard extends StatelessWidget {
                   color: lesson.isCompleted ? Colors.green : Colors.grey,
                 ),
                 tooltip: lesson.isCompleted
-                    ? 'Completado'
-                    : 'Marcar como completado',
+                    ? 'lessons.completed'.tr()
+                    : 'lessons.markCompleted'.tr(),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import '../../domain/entities/weight_trend_data.dart';
 
@@ -8,11 +9,7 @@ class GrowthAlertWidget extends StatelessWidget {
   final GrowthTrendAnalysis analysis;
   final String? babyName;
 
-  const GrowthAlertWidget({
-    super.key,
-    required this.analysis,
-    this.babyName,
-  });
+  const GrowthAlertWidget({super.key, required this.analysis, this.babyName});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,7 @@ class GrowthAlertWidget extends StatelessWidget {
     // Determinar color según tipo de alerta
     Color alertColor;
     IconData alertIcon;
-    
+
     switch (analysis.alertType) {
       case 'weight_decreasing':
         alertColor = Colors.orange;
@@ -48,10 +45,7 @@ class GrowthAlertWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: alertColor.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: alertColor.withOpacity(0.5),
-          width: 1.5,
-        ),
+        border: Border.all(color: alertColor.withOpacity(0.5), width: 1.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -66,11 +60,7 @@ class GrowthAlertWidget extends StatelessWidget {
                   color: alertColor.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  alertIcon,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: Icon(alertIcon, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -78,7 +68,7 @@ class GrowthAlertWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Alerta de Crecimiento',
+                      'growth.alertTitle'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -111,7 +101,7 @@ class GrowthAlertWidget extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Esta información es solo orientativa. Siempre consulta con tu pediatra o nutricionista para cualquier preocupación sobre el crecimiento o alimentación de tu bebé.',
+                              'growth.disclaimer'.tr(),
                               style: GoogleFonts.quicksand(
                                 fontSize: 10,
                                 color: Colors.white70,
@@ -132,4 +122,3 @@ class GrowthAlertWidget extends StatelessWidget {
     );
   }
 }
-

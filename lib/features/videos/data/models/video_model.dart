@@ -5,6 +5,7 @@ class VideoModel extends Video {
   const VideoModel({
     required super.id,
     required super.title,
+    super.titleEn,
     required super.videoUrl,
     required super.imageUrl,
     required super.imageName,
@@ -24,6 +25,7 @@ class VideoModel extends Video {
     return VideoModel(
       id: doc.id,
       title: data['title'] ?? '',
+      titleEn: data['title_en'] ?? data['titleEn'] ?? null,
       videoUrl: data['url'] ?? '',
       imageUrl: data['imgVideos'] ?? '',
       imageName: data['imgVideos'] ?? '',
@@ -44,6 +46,7 @@ class VideoModel extends Video {
     return VideoModel(
       id: doc.id,
       title: data['title'] ?? '',
+      titleEn: data['title_en'] ?? data['titleEn'] ?? null,
       videoUrl: data['url'] ?? '',
       imageUrl: data['imgVideos'] ?? '',
       imageName: data['imgVideos'] ?? '',
@@ -77,6 +80,7 @@ class VideoModel extends Video {
   VideoModel copyWith({
     String? id,
     String? title,
+    String? titleEn,
     String? videoUrl,
     String? imageUrl,
     String? imageName,
@@ -92,6 +96,7 @@ class VideoModel extends Video {
     return VideoModel(
       id: id ?? this.id,
       title: title ?? this.title,
+      titleEn: titleEn ?? this.titleEn,
       videoUrl: videoUrl ?? this.videoUrl,
       imageUrl: imageUrl ?? this.imageUrl,
       imageName: imageName ?? this.imageName,

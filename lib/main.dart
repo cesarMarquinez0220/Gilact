@@ -31,15 +31,22 @@ import 'features/lactation/presentation/pages/daily_sleep_form_page.dart';
 import 'features/lactation/presentation/pages/baby_weight_form_page.dart';
 import 'core/services/offline_sync_service.dart';
 import 'core/services/app_initialization_service.dart';
+import 'core/services/localization_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'features/gamification/presentation/bloc/gamification_bloc.dart';
+import 'features/settings/presentation/bloc/settings_bloc.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
 // image: "assets/images/splash.png"
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar EasyLocalization
+  await EasyLocalization.ensureInitialized();
 
   try {
     // Inicializar Firebase de forma segura
@@ -259,31 +266,68 @@ class MyApp extends StatelessWidget {
           BlocProvider<GamificationBloc>(
             create: (context) => getIt<GamificationBloc>(),
           ),
+          BlocProvider<SettingsBloc>(
+            create: (context) => getIt<SettingsBloc>(),
+          ),
         ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.light(),
-          navigatorKey: navigatorKey,
-          home: const LoginPage(),
-          routes: {
-            '/login': (context) => const LoginPage(),
-            '/welcome': (context) => const WelcomeScreen(),
-            '/home': (context) => const MainNavigationPage(),
-            '/register': (context) => const RegistrationPage(),
-            '/onboarding': (context) => const OnboardingPage(),
-            '/situation': (context) => const SituationSelectionPage(),
-            '/prepartum-form': (context) => const PrepartumFormPage(),
-            '/postpartum-form': (context) => const PostpartumFormPage(),
-            '/configuracion': (context) => const SettingsPage(),
-            '/perfil': (context) => const MainNavigationPage(),
-            '/lecciones': (context) => const LessonsPage(),
-            '/secciones': (context) => const MainNavigationPage(),
-            '/historial': (context) => const UserVideosPage(),
-            '/edicion': (context) => const MainNavigationPage(),
-            '/tips': (context) => const TipsPage(),
-            '/Onboar_Info': (context) => const MainNavigationPage(),
-            '/daily-sleep-form': (context) => const DailySleepFormPage(),
-            '/baby-weight-form': (context) => const BabyWeightFormPage(),
+        child: BlocBuilder<SettingsBloc, SettingsState>(
+          buildWhen: (previous, current) =>
+              current is LocalSettingUpdated || current is LocalSettingsLoaded,
+          builder: (context, state) {
+            final localizationService = getIt<LocalizationService>();
+            final savedLocale = localizationService.getLocale();
+
+            return EasyLocalization(
+              // Idiomas soportados: Español e Inglés
+              supportedLocales: const [
+                Locale('es'), // Español
+                Locale('en'), // Inglés
+              ],
+              // Ruta donde están los archivos de traducción
+              path: 'assets/translations',
+              // Idioma de respaldo: si el dispositivo está en un idioma no soportado,
+              // se mostrará inglés (más universal que español)
+              fallbackLocale: const Locale('en'),
+              // Si el usuario ya cambió el idioma manualmente, usar su preferencia guardada
+              // Si es null, easy_localization detectará automáticamente el idioma del dispositivo
+              startLocale: savedLocale,
+              // Guardar la preferencia del usuario cuando cambie el idioma manualmente
+              // Esto permite que la app recuerde la selección del usuario
+              saveLocale: true,
+              child: Builder(
+                builder: (context) => MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData.light(),
+                  navigatorKey: navigatorKey,
+                  localizationsDelegates: context.localizationDelegates,
+                  supportedLocales: context.supportedLocales,
+                  locale: context.locale,
+                  home: const LoginPage(),
+                  routes: {
+                    '/login': (context) => const LoginPage(),
+                    '/welcome': (context) => const WelcomeScreen(),
+                    '/home': (context) => const MainNavigationPage(),
+                    '/register': (context) => const RegistrationPage(),
+                    '/onboarding': (context) => const OnboardingPage(),
+                    '/situation': (context) => const SituationSelectionPage(),
+                    '/prepartum-form': (context) => const PrepartumFormPage(),
+                    '/postpartum-form': (context) => const PostpartumFormPage(),
+                    '/configuracion': (context) => const SettingsPage(),
+                    '/perfil': (context) => const MainNavigationPage(),
+                    '/lecciones': (context) => const LessonsPage(),
+                    '/secciones': (context) => const MainNavigationPage(),
+                    '/historial': (context) => const UserVideosPage(),
+                    '/edicion': (context) => const MainNavigationPage(),
+                    '/tips': (context) => const TipsPage(),
+                    '/Onboar_Info': (context) => const MainNavigationPage(),
+                    '/daily-sleep-form': (context) =>
+                        const DailySleepFormPage(),
+                    '/baby-weight-form': (context) =>
+                        const BabyWeightFormPage(),
+                  },
+                ),
+              ),
+            );
           },
         ),
       ),

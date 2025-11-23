@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 
 // Colores de la aplicación
@@ -791,7 +792,7 @@ class LactationSummaryWidget extends StatelessWidget {
 
   String _getDurationDisplay() {
     final duration = data['duration'];
-    if (duration == null) return 'No especificado';
+    if (duration == null) return 'lactation.recordForm.notSpecified'.tr();
 
     if (duration is Duration) {
       final minutes = duration.inMinutes;
@@ -810,7 +811,7 @@ class LactationSummaryWidget extends StatelessWidget {
     final volume = data['volume'];
     final unit = data['unit'] ?? 'ml';
 
-    if (volume == null) return 'No especificado';
+    if (volume == null) return 'lactation.recordForm.notSpecified'.tr();
     return '${volume.toStringAsFixed(0)} $unit';
   }
 }

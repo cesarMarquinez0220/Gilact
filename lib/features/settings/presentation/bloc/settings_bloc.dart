@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/settings_entities.dart';
 import '../../domain/usecases/settings_usecases.dart';
 
@@ -12,6 +13,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetUserStatisticsUseCase _getUserStatisticsUseCase;
   final UpdateUserStatisticsUseCase _updateUserStatisticsUseCase;
   final SubmitFeedbackUseCase _submitFeedbackUseCase;
+  final GetLocalSettingsUseCase _getLocalSettingsUseCase;
+  final UpdateLocalSettingUseCase _updateLocalSettingUseCase;
+  final UpdateLocalSettingsUseCase _updateLocalSettingsUseCase;
 
   SettingsBloc({
     required GetAppConfigurationUseCase getAppConfigurationUseCase,
@@ -19,17 +23,26 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     required GetUserStatisticsUseCase getUserStatisticsUseCase,
     required UpdateUserStatisticsUseCase updateUserStatisticsUseCase,
     required SubmitFeedbackUseCase submitFeedbackUseCase,
+    required GetLocalSettingsUseCase getLocalSettingsUseCase,
+    required UpdateLocalSettingUseCase updateLocalSettingUseCase,
+    required UpdateLocalSettingsUseCase updateLocalSettingsUseCase,
   }) : _getAppConfigurationUseCase = getAppConfigurationUseCase,
        _updateAppConfigurationUseCase = updateAppConfigurationUseCase,
        _getUserStatisticsUseCase = getUserStatisticsUseCase,
        _updateUserStatisticsUseCase = updateUserStatisticsUseCase,
        _submitFeedbackUseCase = submitFeedbackUseCase,
+       _getLocalSettingsUseCase = getLocalSettingsUseCase,
+       _updateLocalSettingUseCase = updateLocalSettingUseCase,
+       _updateLocalSettingsUseCase = updateLocalSettingsUseCase,
        super(SettingsInitial()) {
     on<GetAppConfigurationRequested>(_onGetAppConfigurationRequested);
     on<UpdateAppConfigurationRequested>(_onUpdateAppConfigurationRequested);
     on<GetUserStatisticsRequested>(_onGetUserStatisticsRequested);
     on<UpdateUserStatisticsRequested>(_onUpdateUserStatisticsRequested);
     on<SaveFeedbackMessageRequested>(_onSaveFeedbackMessageRequested);
+    on<GetLocalSettingsRequested>(_onGetLocalSettingsRequested);
+    on<UpdateLocalSettingRequested>(_onUpdateLocalSettingRequested);
+    on<UpdateLocalSettingsRequested>(_onUpdateLocalSettingsRequested);
   }
 
   Future<void> _onGetAppConfigurationRequested(
@@ -66,7 +79,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       autoSaveProgress: event.updates['autoSaveProgress'] ?? true,
       showTips: event.updates['showTips'] ?? true,
       darkMode: event.updates['darkMode'] ?? false,
-      fontSize: event.updates['fontSize'] ?? 14.0,
+      fontSize: event.updates['fontSize'] ?? 'medium',
       soundEnabled: event.updates['soundEnabled'] ?? true,
       vibrationEnabled: event.updates['vibrationEnabled'] ?? true,
       createdAt: DateTime.now(),
@@ -147,6 +160,48 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
       (_) => emit(FeedbackMessageSaved()),
+    );
+  }
+
+  Future<void> _onGetLocalSettingsRequested(
+    GetLocalSettingsRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(SettingsLoading());
+
+    final result = await _getLocalSettingsUseCase(const NoParams());
+
+    result.fold(
+      (failure) => emit(SettingsFailure(failure.message)),
+      (settings) => emit(LocalSettingsLoaded(settings)),
+    );
+  }
+
+  Future<void> _onUpdateLocalSettingRequested(
+    UpdateLocalSettingRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    final result = await _updateLocalSettingUseCase(
+      UpdateLocalSettingParams(key: event.key, value: event.value),
+    );
+
+    result.fold(
+      (failure) => emit(SettingsFailure(failure.message)),
+      (_) => emit(LocalSettingUpdated()),
+    );
+  }
+
+  Future<void> _onUpdateLocalSettingsRequested(
+    UpdateLocalSettingsRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    final result = await _updateLocalSettingsUseCase(
+      UpdateLocalSettingsParams(settings: event.settings),
+    );
+
+    result.fold(
+      (failure) => emit(SettingsFailure(failure.message)),
+      (_) => emit(LocalSettingsUpdated()),
     );
   }
 }

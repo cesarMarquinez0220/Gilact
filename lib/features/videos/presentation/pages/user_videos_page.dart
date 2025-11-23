@@ -18,6 +18,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../videos/data/datasources/video_offline_local_data_source.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class UserVideosPage extends StatefulWidget {
   const UserVideosPage({super.key});
@@ -175,17 +176,17 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
       // Log para debugging
       if (kDebugMode) {
-      print('📊 Historial cargado:');
-      print('📹 Total videos: ${_videos.length}');
-      print('✅ Videos completados: $_completedVideos');
-      print('🎯 Última lección completada: $lastCompletedLesson');
+        print('📊 Historial cargado:');
+        print('📹 Total videos: ${_videos.length}');
+        print('✅ Videos completados: $_completedVideos');
+        print('🎯 Última lección completada: $lastCompletedLesson');
       }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error cargando videos: $e');
       }
       setState(() {
-        _error = 'Error al cargar videos: $e';
+        _error = 'history.errorLoading'.tr();
         _isLoading = false;
       });
     }
@@ -195,25 +196,27 @@ class _UserVideosPageState extends State<UserVideosPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<VideoDownloadBloc>(),
-        child: BlocListener<VideoDownloadBloc, VideoDownloadState>(
+      child: BlocListener<VideoDownloadBloc, VideoDownloadState>(
         listener: (context, state) {
           // Verificar estado de todos los videos al cargar por primera vez
           if (!_initialCheckDone && _videos.isNotEmpty && !_isLoading) {
             _initialCheckDone = true;
             _checkAllVideosDownloadStatus(context);
           }
-          
+
           // Actualizar el mapa cuando se recibe un estado de múltiples descargas
           if (state is MultipleDownloadsState) {
             // Actualizar el mapa local con todos los estados de descarga
             for (final entry in state.downloads.entries) {
               final videoId = entry.key;
               final downloadInfo = entry.value;
-              final isDownloaded = downloadInfo['isDownloaded'] as bool? ?? false;
-              final isDownloading = downloadInfo['isDownloading'] as bool? ?? false;
-              
+              final isDownloaded =
+                  downloadInfo['isDownloaded'] as bool? ?? false;
+              final isDownloading =
+                  downloadInfo['isDownloading'] as bool? ?? false;
+
               _videoDownloadStatus[videoId] = isDownloaded;
-              
+
               // Actualizar el set de verificados
               if (!isDownloading && isDownloaded) {
                 _checkedVideos.add(videoId);
@@ -223,7 +226,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             }
             // No necesitamos setState aquí porque BlocBuilder se reconstruirá automáticamente
           }
-          
+
           // Actualizar el mapa cuando se recibe un estado verificado
           if (state is VideoDownloadStatusChecked) {
             _videoDownloadStatus[state.videoId] = state.isDownloaded;
@@ -233,19 +236,19 @@ class _UserVideosPageState extends State<UserVideosPage> {
               setState(() {});
             }
           }
-          
+
           // Manejar estados de descarga
           if (state is VideoDownloadCompleted) {
             // Limpiar errores relacionados con este video
             _shownErrors.removeWhere((error) => error.contains(state.videoId));
-            
+
             // Actualizar el mapa de estados inmediatamente
             _videoDownloadStatus[state.videoId] = true;
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Video descargado exitosamente',
+                  'history.videoDownloaded'.tr(),
                   style: GoogleFonts.quicksand(),
                 ),
                 backgroundColor: Colors.green,
@@ -258,18 +261,19 @@ class _UserVideosPageState extends State<UserVideosPage> {
             // Evitar mostrar el mismo error repetidamente
             final errorKey = state.message;
             final now = DateTime.now();
-            
+
             // Solo mostrar el error si:
             // 1. No se ha mostrado antes, O
             // 2. Han pasado más de 5 segundos desde el último error
-            final shouldShow = !_shownErrors.contains(errorKey) ||
+            final shouldShow =
+                !_shownErrors.contains(errorKey) ||
                 (_lastErrorTime != null &&
                     now.difference(_lastErrorTime!).inSeconds > 5);
-            
+
             if (shouldShow) {
               _shownErrors.add(errorKey);
               _lastErrorTime = now;
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -286,11 +290,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
           } else if (state is VideoDownloadDeleted) {
             // Actualizar el mapa de estados inmediatamente
             _videoDownloadStatus[state.videoId] = false;
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Video eliminado',
+                  'history.videoDeleted'.tr(),
                   style: GoogleFonts.quicksand(),
                 ),
                 backgroundColor: Colors.orange,
@@ -311,14 +315,14 @@ class _UserVideosPageState extends State<UserVideosPage> {
           }
         },
         child: Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
-      appBar: _buildAppBar(),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _error != null
-          ? _buildErrorState()
-          : _buildContent(),
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.transparent,
+          appBar: _buildAppBar(),
+          body: _isLoading
+              ? _buildLoadingState()
+              : _error != null
+              ? _buildErrorState()
+              : _buildContent(),
         ),
       ),
     );
@@ -349,17 +353,17 @@ class _UserVideosPageState extends State<UserVideosPage> {
           stops: [0.0, 0.5, 1.0],
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Cargando videos...',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              'history.loadingVideos'.tr(),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ],
         ),
@@ -388,7 +392,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             const Icon(Icons.error_outline, size: 64, color: Colors.white),
             const SizedBox(height: 16),
             Text(
-              _error ?? 'Error desconocido',
+              _error ?? 'common.unknownError'.tr(),
               style: const TextStyle(fontSize: 16, color: Colors.white),
               textAlign: TextAlign.center,
             ),
@@ -399,9 +403,9 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF1A365D),
               ),
-              child: const Text(
-                'Reintentar',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Text(
+                'history.retry'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -455,7 +459,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Historial',
+            'history.title'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -464,7 +468,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Última lección completada: $lastCompletedLesson',
+            '${'history.lastLessonCompleted'.tr()}: $lastCompletedLesson',
             style: GoogleFonts.quicksand(
               fontSize: 16,
               color: Colors.white.withOpacity(0.9),
@@ -499,7 +503,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Progreso General',
+                'history.generalProgress'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -536,7 +540,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${(progress * 100).toInt()}% completado',
+            '${(progress * 100).toInt()}${'history.percentCompleted'.tr()}',
             style: GoogleFonts.quicksand(
               fontSize: 12,
               color: Colors.white.withOpacity(0.8),
@@ -581,7 +585,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No hay videos disponibles',
+            'history.noVideosAvailable'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -590,7 +594,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Los videos aparecerán aquí cuando estén disponibles',
+            'history.videosWillAppear'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 14,
               color: AppColors.textSecondary.withOpacity(0.7),
@@ -687,7 +691,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          video.title,
+          video.getLocalizedTitle(context.locale.languageCode),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -698,7 +702,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Video ${video.videoId}',
+          '${'history.video'.tr()} ${video.videoId}',
           style: GoogleFonts.quicksand(
             fontSize: 14,
             color: AppColors.textSecondary,
@@ -714,7 +718,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             ),
             const SizedBox(width: 4),
             Text(
-              isCompleted ? 'Completado' : 'Pendiente',
+              isCompleted ? 'history.completed'.tr() : 'history.pending'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 12,
                 color: isCompleted
@@ -749,7 +753,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         // 2. El estado específico corresponde a este video
         final videoEntity = _convertToVideoEntity(video);
         final videoId = videoEntity.id;
-        
+
         // Siempre reconstruir cuando hay MultipleDownloadsState para que cada video
         // pueda obtener su estado actualizado independientemente
         if (current is MultipleDownloadsState) {
@@ -767,9 +771,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
             return true;
           }
         }
-        
+
         // Reconstruir si el estado corresponde a este video específico
-        if (current is VideoDownloadStatusChecked && current.videoId == videoId) {
+        if (current is VideoDownloadStatusChecked &&
+            current.videoId == videoId) {
           return true;
         }
         if (current is VideoDownloadInProgress && current.videoId == videoId) {
@@ -784,7 +789,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         if (current is VideoDownloadDeleted && current.videoId == videoId) {
           return true;
         }
-        
+
         return false;
       },
       builder: (context, downloadState) {
@@ -807,7 +812,8 @@ class _UserVideosPageState extends State<UserVideosPage> {
             hasStateFromMultipleDownloads = true;
             isDownloading = downloadInfo['isDownloading'] as bool? ?? false;
             isDownloaded = downloadInfo['isDownloaded'] as bool? ?? false;
-            downloadProgress = (downloadInfo['progress'] as num?)?.toDouble() ?? 0.0;
+            downloadProgress =
+                (downloadInfo['progress'] as num?)?.toDouble() ?? 0.0;
             // Actualizar el mapa local para persistencia
             _videoDownloadStatus[videoId] = isDownloaded;
             if (!isDownloading && isDownloaded) {
@@ -815,7 +821,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             }
           }
         }
-        
+
         // PRIORIDAD 2: Solo usar otros estados si NO hay información en MultipleDownloadsState
         // o si el estado específico corresponde a este video y es más reciente
         if (!hasStateFromMultipleDownloads) {
@@ -860,20 +866,23 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
         // Verificar estado inicial solo si no se ha verificado antes y no está descargando
         // Esto evita verificaciones repetidas que causan el cambio intermitente
-        if (needsStatusCheck && !isDownloading && !_checkedVideos.contains(videoId)) {
+        if (needsStatusCheck &&
+            !isDownloading &&
+            !_checkedVideos.contains(videoId)) {
           _checkedVideos.add(videoId);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               final currentState = context.read<VideoDownloadBloc>().state;
               // Solo verificar si el estado actual no corresponde a este video
               // y no está en proceso de descarga para este video
-              final shouldCheck = !(currentState is VideoDownloadInProgress &&
+              final shouldCheck =
+                  !(currentState is VideoDownloadInProgress &&
                       currentState.videoId == videoId) &&
                   !(currentState is VideoDownloadProgress &&
                       currentState.videoId == videoId) &&
                   !(currentState is VideoDownloadStatusChecked &&
                       currentState.videoId == videoId);
-              
+
               if (shouldCheck) {
                 context.read<VideoDownloadBloc>().add(
                   CheckVideoDownloadStatus(videoId),
@@ -941,23 +950,23 @@ class _UserVideosPageState extends State<UserVideosPage> {
             const SizedBox(width: 8),
             // Botón de reproducir
             Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF4FD1C7).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4FD1C7).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: const Icon(
                 Icons.play_arrow,
                 color: Colors.white,
@@ -992,6 +1001,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
     return video_entity.Video(
       id: videoIdString, // Usar el videoId original (String) en modo offline
       title: video.title,
+      titleEn: video.titleEn,
       videoUrl: video.videoURL,
       imageUrl: video.imageName,
       imageName: imageName,
@@ -1017,11 +1027,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          'Eliminar descarga',
+          'history.deleteDownload'.tr(),
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          '¿Estás seguro de que quieres eliminar la descarga de "${video.title}"?',
+          '${'history.deleteDownloadConfirm'.tr()} "${video.getLocalizedTitle(context.locale.languageCode)}"?',
           style: GoogleFonts.quicksand(),
         ),
         actions: [
@@ -1055,20 +1065,20 @@ class _UserVideosPageState extends State<UserVideosPage> {
   /// Verifica el estado de descarga de todos los videos al cargar la página
   void _checkAllVideosDownloadStatus(BuildContext context) {
     if (_videos.isEmpty) return;
-    
+
     // Esperar un momento para que el BlocProvider esté completamente listo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       try {
         final downloadBloc = context.read<VideoDownloadBloc>();
-        
+
         // Verificar estado de cada video desbloqueado
         for (final video in _videos) {
           if (_isVideoCompleted(video.videoId)) {
             final videoEntity = _convertToVideoEntity(video);
             final videoId = videoEntity.id;
-            
+
             // Solo verificar si no se ha verificado antes
             if (!_checkedVideos.contains(videoId)) {
               _checkedVideos.add(videoId);
@@ -1076,7 +1086,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             }
           }
         }
-        
+
         // Forzar reconstrucción para actualizar los botones con los estados verificados
         if (mounted) {
           setState(() {});
@@ -1125,7 +1135,9 @@ class _UserVideosPageState extends State<UserVideosPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al reproducir video: $e'),
+          content: Text(
+            'videos.playError'.tr(namedArgs: {'error': e.toString()}),
+          ),
           backgroundColor: AppColors.error,
         ),
       );

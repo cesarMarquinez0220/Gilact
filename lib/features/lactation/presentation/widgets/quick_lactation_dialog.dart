@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import '../../domain/services/lactation_decision_tree.dart';
 
@@ -180,7 +181,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Registro de Lactancia',
+                  'lactation.quickDialog.title'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -332,7 +333,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
     );
   }
 
-Widget _buildActionButtons() {
+  Widget _buildActionButtons() {
     return Row(
       children: [
         // Botón atrás
@@ -348,7 +349,9 @@ Widget _buildActionButtons() {
             ),
             child: Text(
               // UX Mejora: Cambia a "Cancelar" en el primer paso
-              _currentStep == LactationStep.initial ? 'Cancelar' : 'Atrás',
+              _currentStep == LactationStep.initial
+                  ? 'lactation.quickDialog.cancel'.tr()
+                  : 'lactation.quickDialog.back'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -360,6 +363,7 @@ Widget _buildActionButtons() {
       ],
     );
   }
+
   void _selectOption(LactationOption option) {
     setState(() {
       print(
@@ -393,9 +397,7 @@ Widget _buildActionButtons() {
     });
   }
 
-
   void _goToPreviousStep() {
-
     print('🔍 DEBUG: Navegando hacia atrás desde: ${_currentStep.name}');
     print('🔍 DEBUG: Historial (antes): $_history');
     print('🔍 DEBUG: Datos (antes): $_data');
@@ -432,7 +434,6 @@ Widget _buildActionButtons() {
       print('🔍 DEBUG: Nuevo paso: ${_currentStep.name}');
       print('🔍 DEBUG: Historial (después): $_history');
       print('🔍 DEBUG: Datos (después): $_data');
-      
     } else {
       // No hay historial, así que ya estamos en el inicio
       print('🔍 DEBUG: No hay historial, volviendo a initial');
@@ -453,7 +454,6 @@ Widget _buildActionButtons() {
       }
     });
   }
-
 
   double _getProgress() {
     switch (_currentStep) {
@@ -494,7 +494,7 @@ class QuickLactationButton extends StatelessWidget {
       onPressed: () => _showQuickDialog(context),
       icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
-        'Registro Rápido',
+        'lactation.quickDialog.quickRegisterButton'.tr(),
         style: GoogleFonts.quicksand(
           fontSize: 14,
           fontWeight: FontWeight.w600,

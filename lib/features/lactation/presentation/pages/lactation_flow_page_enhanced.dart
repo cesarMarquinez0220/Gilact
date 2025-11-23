@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
@@ -228,7 +229,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Text(
-                '¿Qué tipo de alimentación?',
+                'lactation.flow.feedingTypeQuestion'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -288,7 +289,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Text(
-                '¿Qué lado del pecho?',
+                'lactation.flow.breastSideQuestion'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -327,8 +328,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       ...predefinedOptions,
       LactationOption(
         id: 'otro',
-        title: 'Otro',
-        description: 'Ingresar tiempo personalizado',
+        title: 'common.other'.tr(),
+        description: 'lactation.flow.customTimeHint'.tr(),
         icon: '✏️',
         color: 0xFF9E9E9E,
       ),
@@ -403,7 +404,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       ...predefinedOptions,
       LactationOption(
         id: 'otro',
-        title: 'Otro',
+        title: 'common.other'.tr(),
         description: 'Ingresar volumen personalizado',
         icon: '✏️',
         color: 0xFF9E9E9E,
@@ -870,7 +871,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ],
           ),
           child: Text(
-            'Confirmar registro',
+            'lactation.flow.confirmRecord'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -1024,7 +1025,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Atrás',
+                        'lactation.flow.back'.tr(),
                         // 5. Copiamos el estilo de texto de "Cancelar"
                         style: const TextStyle(
                           color: Colors.white70,
@@ -1456,8 +1457,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             app_init.AppInitializationService.navigationKey.currentContext;
         if (homeContext != null) {
           ScaffoldMessenger.of(homeContext).showSnackBar(
-            const SnackBar(
-              content: Text('Registro de lactancia guardado exitosamente'),
+            SnackBar(
+              content: Text('lactation.flow.recordSavedSuccessEnhanced'.tr()),
               backgroundColor: Colors.green,
             ),
           );
@@ -1472,7 +1473,11 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             context;
         ScaffoldMessenger.of(errorContext).showSnackBar(
           SnackBar(
-            content: Text('Error al guardar el registro: $e'),
+            content: Text(
+              'lactation.flow.saveErrorEnhanced'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

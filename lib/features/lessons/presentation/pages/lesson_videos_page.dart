@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
 
 import '../../domain/entities/video.dart';
@@ -278,10 +279,10 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Camino de Lactancia',
-              style: TextStyle(
+              'lessons.pathTitle'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -295,13 +296,13 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text("Camino de Lactancia"),
-                    content: const Text(
+                    title: Text('lessons.pathTitle'.tr()),
+                    content: Text(
                       "Sigue el camino paso a paso para aprender sobre lactancia materna.",
                     ),
                     actions: <Widget>[
                       TextButton(
-                        child: const Text("Cerrar"),
+                        child: Text('common.close'.tr()),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -372,7 +373,7 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Lección $lessonId',
+                  '${'lessons.lesson'.tr()} $lessonId',
                   style: GoogleFonts.quicksand(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -678,33 +679,33 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   String _getSubtitleForLesson(int lessonNumber) {
     switch (lessonNumber) {
       case 1:
-        return 'Lactancia materna y sus beneficios';
+        return 'lessons.subtitles.lesson1'.tr();
       case 2:
-        return 'Calostro, leche de transición y leche madura';
+        return 'lessons.subtitles.lesson2'.tr();
       case 3:
-        return "Cosas en tomar en cuenta al momento de amamantar";
+        return 'lessons.subtitles.lesson3'.tr();
       case 4:
-        return "Composición Nutricional de la Leche Materna";
+        return 'lessons.subtitles.lesson4'.tr();
       case 5:
-        return '¿Cómo saber que el bebé se alimentó lo suficiente?';
+        return 'lessons.subtitles.lesson5'.tr();
       case 6:
-        return "Hitos de peso a vigilar";
+        return 'lessons.subtitles.lesson6'.tr();
       case 7:
-        return "Higiene de manos y técnicas de lactancia materna";
+        return 'lessons.subtitles.lesson7'.tr();
       case 8:
-        return 'Medicamentos durante la lactancia materna';
+        return 'lessons.subtitles.lesson8'.tr();
       case 9:
-        return 'Signos o Complicaciones en la Lactancia';
+        return 'lessons.subtitles.lesson9'.tr();
       case 10:
-        return 'Masajes al seno antes de iniciar la lactancia';
+        return 'lessons.subtitles.lesson10'.tr();
       case 11:
-        return 'Mi banco de leche en casa y su preservacion';
+        return 'lessons.subtitles.lesson11'.tr();
       case 12:
-        return 'Leyes en Panamá que apoyan la lactancia materna';
+        return 'lessons.subtitles.lesson12'.tr();
       case 13:
-        return 'Diferencias entre la leche materna y la leche de vaca';
+        return 'lessons.subtitles.lesson13'.tr();
       case 14:
-        return 'Mitos de la lactancia materna';
+        return 'lessons.subtitles.lesson14'.tr();
       default:
         return '';
     }

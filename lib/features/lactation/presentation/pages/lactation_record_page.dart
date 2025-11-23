@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart'; // Assuming this provides DialogExample
@@ -251,7 +252,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('¿Cómo alimentaste a tu bebé esta vez?'),
+        _buildSectionTitle('lactation.recordForm.feedingTypeQuestion'.tr()),
         const SizedBox(height: 16),
 
         // --- Show all options OR only the selected one ---
@@ -259,22 +260,22 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         // Initial state: Show all three options
         ...[
           _buildFeedingTypeOption(
-            title: 'Pecho',
-            description: 'Lactancia directamente del pecho.',
+            title: 'lactation.recordForm.breast'.tr(),
+            description: 'lactation.recordForm.breastDescription'.tr(),
             icon: Icons.accessibility_new,
             value: 'pecho',
           ),
           const SizedBox(height: 12),
           _buildFeedingTypeOption(
-            title: 'Biberón',
-            description: 'Leche materna extraída o fórmula.',
+            title: 'lactation.recordForm.bottle'.tr(),
+            description: 'lactation.recordForm.bottleDescription'.tr(),
             icon: Icons.baby_changing_station,
             value: 'biberon',
           ),
           const SizedBox(height: 12),
           _buildFeedingTypeOption(
-            title: 'Mixto',
-            description: 'Combinación de pecho y biberón.',
+            title: 'lactation.recordForm.mixed'.tr(),
+            description: 'lactation.recordForm.mixedDescription'.tr(),
             icon: Icons.all_inclusive,
             value: 'mixto',
           ),
@@ -392,23 +393,23 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
     switch (selectedType) {
       case 'pecho':
-        title = 'Pecho';
-        description = 'Lactancia directamente del pecho.';
+        title = 'lactation.recordForm.breast'.tr();
+        description = 'lactation.recordForm.breastDescription'.tr();
         icon = Icons.accessibility_new;
         break;
       case 'biberon':
-        title = 'Biberón';
-        description = 'Leche materna extraída o fórmula.';
+        title = 'lactation.recordForm.bottle'.tr();
+        description = 'lactation.recordForm.bottleDescription'.tr();
         icon = Icons.baby_changing_station;
         break;
       case 'mixto':
-        title = 'Mixto';
-        description = 'Combinación de pecho y biberón.';
+        title = 'lactation.recordForm.mixed'.tr();
+        description = 'lactation.recordForm.mixedDescription'.tr();
         icon = Icons.all_inclusive;
         break;
       default:
-        title = 'Seleccionar tipo';
-        description = 'Elige el tipo de alimentación.';
+        title = 'lactation.recordForm.selectType'.tr();
+        description = 'lactation.recordForm.selectTypeHint'.tr();
         icon = Icons.help_outline;
     }
 
@@ -576,7 +577,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle(
-          '¿Qué pecho le diste?',
+          'lactation.recordForm.breastSideQuestion'.tr(),
         ), // Use consistent title style
         const SizedBox(height: 12),
         Row(
@@ -585,7 +586,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           children: [
             Expanded(
               child: _buildChoiceChip(
-                label: 'Izquierdo',
+                label: 'lactation.recordForm.left'.tr(),
                 value: 'izquierdo',
                 groupValue: _flowData['breastSide'],
                 icon: Icons.keyboard_arrow_left,
@@ -594,7 +595,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             const SizedBox(width: 8),
             Expanded(
               child: _buildChoiceChip(
-                label: 'Derecho',
+                label: 'lactation.recordForm.right'.tr(),
                 value: 'derecho',
                 groupValue: _flowData['breastSide'],
                 icon: Icons.keyboard_arrow_right,
@@ -603,7 +604,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             const SizedBox(width: 8),
             Expanded(
               child: _buildChoiceChip(
-                label: 'Ambos',
+                label: 'lactation.recordForm.both'.tr(),
                 value: 'ambos',
                 groupValue: _flowData['breastSide'],
                 icon: Icons.sync_alt,
@@ -752,7 +753,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('¿Cuánto tiempo duró?'),
+        _buildSectionTitle('lactation.recordForm.breastDurationQuestion'.tr()),
         const SizedBox(height: 8),
         Row(
           // Unit Selector
@@ -795,7 +796,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _buildManualInputSection(
           controller: _manualBreastDurationController,
           dataKey: 'duration',
-          hintText: 'Tiempo personalizado',
+          hintText: 'lactation.recordForm.customTime'.tr(),
           unit: _durationUnit,
         ),
       ],
@@ -812,7 +813,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('¿Cuánta leche tomó?'),
+        _buildSectionTitle('lactation.recordForm.bottleVolumeQuestion'.tr()),
         const SizedBox(height: 8),
         Row(
           // Unit Selector
@@ -855,7 +856,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _buildManualInputSection(
           controller: _manualBottleVolumeController,
           dataKey: 'volume',
-          hintText: 'Volumen personalizado',
+          hintText: 'lactation.recordForm.customVolume'.tr(),
           unit: _volumeUnit,
         ),
       ],
@@ -872,7 +873,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('¿Cuánto tiempo durmió después?'),
+        _buildSectionTitle('lactation.recordForm.sleepTimeQuestion'.tr()),
         const SizedBox(height: 8),
         Row(
           // Unit Selector
@@ -915,7 +916,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _buildManualInputSection(
           controller: _manualSleepTimeController,
           dataKey: 'sleep',
-          hintText: 'Tiempo personalizado',
+          hintText: 'lactation.recordForm.customTime'.tr(),
           unit: _sleepUnit,
         ),
       ],
@@ -1115,8 +1116,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   )
                 : Text(
                     widget.existingRecord != null
-                        ? 'Actualizar Registro'
-                        : 'Guardar Registro',
+                        ? 'lactation.recordForm.updateRecord'.tr()
+                        : 'lactation.recordForm.saveRecord'.tr(),
                     style: const TextStyle(
                       /* ... Style ... */
                       fontSize: 18,
@@ -1147,8 +1148,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 color: Colors.white.withValues(alpha: 0.2),
               ), // Subtle border
             ),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              'lactation.recordForm.cancel'.tr(),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -1203,7 +1204,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
       // --- Prepare data directly from _flowData ---
       final tipoAlimentacion =
-          _flowData['alimentacion'] as String? ?? 'No especificado';
+          _flowData['alimentacion'] as String? ??
+          'lactation.recordForm.notSpecified'.tr();
       final pechoDado =
           _flowData['breastSide'] as String? ??
           'Ninguna'; // Ensure 'Ninguna' if not breastfed
@@ -1296,8 +1298,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             app_init.AppInitializationService.navigationKey.currentContext;
         if (homeContext != null) {
           ScaffoldMessenger.of(homeContext).showSnackBar(
-            const SnackBar(
-              content: Text('Registro de lactancia guardado exitosamente'),
+            SnackBar(
+              content: Text('lactation.recordForm.saved'.tr()),
               backgroundColor: Colors.green,
             ),
           );
@@ -1308,8 +1310,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       if (mounted) {
         DialogExample.showErrorDialog(
           context,
-          'Error al Guardar',
-          'No se pudieron guardar los datos...\n\nError: ${e.toString()}',
+          'lactation.recordForm.error'.tr(),
+          'lactation.recordForm.errorMessage'.tr(),
         );
       }
     } finally {
@@ -1375,8 +1377,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
       DialogExample.showSuccessDialog(
         context,
-        'Registro Eliminado',
-        'Eliminado correctamente.',
+        'lactation.recordForm.deleted'.tr(),
+        'lactation.recordForm.deletedMessage'.tr(),
         () {
           Navigator.of(context).pop(true); // Indicate success
         },
@@ -1386,8 +1388,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       if (mounted) {
         DialogExample.showErrorDialog(
           context,
-          'Error al Eliminar',
-          'No se pudo eliminar...\n\nError: ${e.toString()}',
+          'lactation.recordForm.deleteError'.tr(),
+          'lactation.recordForm.deleteErrorMessage'.tr(),
         );
       }
     } finally {
@@ -1482,9 +1484,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.existingRecord != null
-                          ? 'Editar Registro de Lactancia'
-                          : 'Nuevo Registro de Lactancia',
+                      'lactation.recordForm.title'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

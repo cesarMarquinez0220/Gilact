@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
@@ -19,36 +20,33 @@ class PosturaAgarreInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1000),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Consejos para una Buena Postura y Agarre',
+        child: Text(
+          'tips.content.postureLatch.title'.tr(),
           textAlign: TextAlign.center,
           style: TipTypography.headingLarge,
         ),
       ),
       body: [
         const SizedBox(height: 8),
-        const CompactTextContent(
-          text:
-              '- Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.',
+        CompactTextContent(
+          text: '- ${'tips.content.postureLatch.items.0'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
-        const CompactTextContent(
-          text:
-              '- La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.',
-          style: TipTypography.paragraph,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        const CompactTextContent(
-          text: 'El Agarre Apropiado es Importante:',
+        CompactTextContent(
+          text: '- ${'tips.content.postureLatch.items.1'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        const CompactTextContent(
-          text:
-              '- La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón).',
+        CompactTextContent(
+          text: 'tips.content.postureLatch.items.2'.tr(),
+          style: TipTypography.paragraph,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        CompactTextContent(
+          text: '- ${'tips.content.postureLatch.items.3'.tr()}',
           style: TipTypography.paragraph,
           textAlign: TextAlign.center,
         ),

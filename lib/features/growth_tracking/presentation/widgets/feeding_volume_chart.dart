@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import '../../domain/entities/weight_trend_data.dart';
 
@@ -128,7 +129,7 @@ class FeedingVolumeChart extends StatelessWidget {
               children: [
                 const SizedBox(height: 8),
                 Text(
-                  'Total de Leche Extraída',
+                  'feeding.totalExtractedMilk'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -137,7 +138,7 @@ class FeedingVolumeChart extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Volumen diario de leche extraída y medida',
+                  'feeding.dailyVolumeSubtitle'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -166,7 +167,7 @@ class FeedingVolumeChart extends StatelessWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'Solo incluye leche extraída. No incluye lactancia directa al pecho.',
+                          'feeding.extractedOnlyNote'.tr(),
                           style: GoogleFonts.quicksand(
                             fontSize: 9,
                             fontStyle: FontStyle.italic,
@@ -226,18 +227,18 @@ class FeedingVolumeChart extends StatelessWidget {
           // Promedio
           Expanded(
             child: _buildStatItem(
-              'Promedio diario',
+              'feeding.dailyAverage'.tr(),
               '${averageVolume.toStringAsFixed(0)} ml',
               Icons.analytics_outlined,
               Colors.blue,
-              subtitle: 'Solo extraída',
+              subtitle: 'feeding.extractedOnly'.tr(),
             ),
           ),
           Container(width: 1, height: 30, color: Colors.grey[300]),
           // Último registro
           Expanded(
             child: _buildStatItem(
-              'Último registro',
+              'feeding.lastRecord'.tr(),
               '${latestVolume.toStringAsFixed(0)} ml',
               Icons.local_drink,
               const Color(0xFF03A696),
@@ -438,7 +439,7 @@ class FeedingVolumeChart extends StatelessWidget {
               Icon(Icons.info_outline, color: Colors.orange[700], size: 24),
               const SizedBox(width: 8),
               Text(
-                'Importante',
+                'growth.important'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -448,9 +449,7 @@ class FeedingVolumeChart extends StatelessWidget {
             ],
           ),
           content: Text(
-            'Esta información es solo orientativa y no reemplaza el consejo médico profesional. '
-            'Cualquier preocupación sobre el peso o la alimentación de tu bebé debe ser consultada '
-            'con un pediatra o nutricionista.',
+            'growth.disclaimerFull'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 14,
               color: Colors.grey[700],
@@ -461,7 +460,7 @@ class FeedingVolumeChart extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Entendido',
+                'dialogs.understood'.tr(),
                 style: GoogleFonts.quicksand(
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF03A696),

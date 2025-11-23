@@ -1,6 +1,7 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:animate_do/animate_do.dart';
 import '../constants/tip_assets.dart';
@@ -22,8 +23,8 @@ class SuplementoHierroInfo extends StatelessWidget {
       title: FadeInDown(
         duration: const Duration(milliseconds: 1400),
         delay: const Duration(milliseconds: 500),
-        child: const Text(
-          'Suplementación con Hierro:',
+        child: Text(
+          '${'tips.titles.ironSupplementation'.tr()}:',
           textAlign: TextAlign.center,
           style: TipTypography.headingXL,
         ),
@@ -32,9 +33,8 @@ class SuplementoHierroInfo extends StatelessWidget {
         FadeInDown(
           duration: const Duration(milliseconds: 1600),
           delay: const Duration(milliseconds: 500),
-          child: const AdaptiveTextContent(
-            text:
-                'Si tu bebé tuvo bajo peso al nacer y/o es prematuro, se suplementará con hierro.\n\n*Según indicación del personal de salud.',
+          child: AdaptiveTextContent(
+            text: 'tips.content.ironSupplementation'.tr(),
             style: TipTypography.paragraph,
             textAlign: TextAlign.left,
           ),

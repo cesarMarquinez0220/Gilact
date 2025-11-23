@@ -233,3 +233,56 @@ class UpdateFeedbackStatusParams {
     required this.status,
   });
 }
+
+// Casos de uso para configuraciones locales
+@injectable
+class GetLocalSettingsUseCase
+    implements UseCase<Map<String, dynamic>, NoParams> {
+  final SettingsRepository repository;
+
+  GetLocalSettingsUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> call(NoParams params) async {
+    return await repository.getLocalSettings();
+  }
+}
+
+@injectable
+class UpdateLocalSettingUseCase
+    implements UseCase<void, UpdateLocalSettingParams> {
+  final SettingsRepository repository;
+
+  UpdateLocalSettingUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, void>> call(UpdateLocalSettingParams params) async {
+    return await repository.updateLocalSetting(params.key, params.value);
+  }
+}
+
+@injectable
+class UpdateLocalSettingsUseCase
+    implements UseCase<void, UpdateLocalSettingsParams> {
+  final SettingsRepository repository;
+
+  UpdateLocalSettingsUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, void>> call(UpdateLocalSettingsParams params) async {
+    return await repository.updateLocalSettings(params.settings);
+  }
+}
+
+class UpdateLocalSettingParams {
+  final String key;
+  final dynamic value;
+
+  UpdateLocalSettingParams({required this.key, required this.value});
+}
+
+class UpdateLocalSettingsParams {
+  final Map<String, dynamic> settings;
+
+  UpdateLocalSettingsParams({required this.settings});
+}

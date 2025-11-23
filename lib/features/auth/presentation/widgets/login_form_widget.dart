@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginFormWidget extends StatefulWidget {
   final TextEditingController emailController;
@@ -66,9 +67,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       width: 140,
                     ),
                     const SizedBox(height: 32),
-                    const Text(
-                      'Bienvenido de vuelta',
-                      style: TextStyle(
+                    Text(
+                      'auth.login.welcomeBack'.tr(),
+                      style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -83,9 +84,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Inicia sesión para continuar',
-                      style: TextStyle(
+                    Text(
+                      'auth.login.loginToContinue'.tr(),
+                      style: const TextStyle(
                         fontSize: 17,
                         color: Colors.white70,
                         fontWeight: FontWeight.w400,
@@ -140,7 +141,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           fontWeight: FontWeight.w500,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Email',
+                          hintText: 'auth.login.email'.tr(),
                           hintStyle: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
@@ -198,7 +199,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
-                                hintText: 'Contraseña',
+                                hintText: 'auth.login.password'.tr(),
                                 hintStyle: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 16,
@@ -311,9 +312,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Text(
-                              'Recordar',
-                              style: TextStyle(
+                            Text(
+                              'auth.login.remember'.tr(),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -334,9 +335,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            '¿Olvidaste tu contraseña?',
-                            style: TextStyle(
+                          child: Text(
+                            'auth.login.forgotPassword'.tr(),
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -399,9 +400,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                                   strokeWidth: 2.5,
                                 ),
                               )
-                            : const Text(
-                                'Iniciar Sesión',
-                                style: TextStyle(
+                            : Text(
+                                'auth.login.login'.tr(),
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -429,9 +430,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            '¿No tienes una cuenta? ',
-                            style: TextStyle(
+                          Text(
+                            'auth.login.noAccount'.tr(),
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
@@ -450,9 +451,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Regístrate',
-                              style: TextStyle(
+                            child: Text(
+                              'auth.login.signUp'.tr(),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,

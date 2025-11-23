@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gilact/features/lactation/presentation/pages/daily_sleep_form_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../chatbot/presentation/pages/chatbot_page.dart';
 import '../../../chatbot/presentation/bloc/chatbot_bloc.dart';
 import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
@@ -70,7 +71,7 @@ class _HealthPageState extends State<HealthPage> {
             child: Row(
               children: [
                 Text(
-                  'Salud del Bebé',
+                  'health.title'.tr(),
                   style: GoogleFonts.quicksand(
                     color: Colors.white,
                     fontSize: 24,
@@ -81,7 +82,7 @@ class _HealthPageState extends State<HealthPage> {
                 IconButton(
                   onPressed: () => _loadRecentData(),
                   icon: const Icon(Icons.refresh, color: Colors.white),
-                  tooltip: 'Actualizar',
+                  tooltip: 'health.refresh'.tr(),
                 ),
               ],
             ),
@@ -95,32 +96,32 @@ class _HealthPageState extends State<HealthPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Sección: Seguimiento de Crecimiento
-                    _buildSectionTitle('Seguimiento de Crecimiento'),
+                    _buildSectionTitle('health.growthTracking'.tr()),
                     const SizedBox(height: 12),
                     _buildEnhancedHealthCard(
                       context,
-                      title: 'Peso del Bebé',
-                      subtitle: 'Registra y monitorea el peso',
+                      title: 'health.babyWeight'.tr(),
+                      subtitle: 'health.babyWeightDescription'.tr(),
                       icon: Icons.monitor_weight_rounded,
                       color: const Color(0xFF4CAF50),
                       onTap: () {
                         Navigator.of(context).pushNamed('/baby-weight-form');
                       },
                       lastRecord: _lastWeightRecord != null
-                          ? 'Último: ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
-                          : 'Sin registros',
+                          ? '${'health.last'.tr()} ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                          : 'lactation.calendar.noRecordsText'.tr(),
                       recordDate: _lastWeightRecord?.recordedAt,
-                      badge: _lastWeightRecord != null ? 'Activo' : null,
+                      badge: _lastWeightRecord != null ? 'health.active'.tr() : null,
                     ),
                     const SizedBox(height: 16),
 
                     // Sección: Bienestar Diario
-                    _buildSectionTitle('Bienestar Diario'),
+                    _buildSectionTitle('health.dailyWellness'.tr()),
                     const SizedBox(height: 12),
                     _buildEnhancedHealthCard(
                       context,
-                      title: 'Registro de Sueño',
-                      subtitle: 'Controla las horas de sueño',
+                      title: 'health.sleep'.tr(),
+                      subtitle: 'health.sleepDescription'.tr(),
                       icon: Icons.bedtime_rounded,
                       color: const Color(0xFFFF9800),
                       onTap: () {
@@ -132,20 +133,20 @@ class _HealthPageState extends State<HealthPage> {
                         );
                       },
                       lastRecord: _lastSleepRecord != null
-                          ? 'Último: ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
-                          : 'Sin registros',
+                          ? '${'health.last'.tr()} ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                          : 'lactation.calendar.noRecordsText'.tr(),
                       recordDate: _lastSleepRecord?.sleepStartTime,
-                      badge: _lastSleepRecord != null ? 'Activo' : null,
+                      badge: _lastSleepRecord != null ? 'health.active'.tr() : null,
                     ),
                     const SizedBox(height: 16),
 
                     // Sección: Asistencia
-                    _buildSectionTitle('Asistencia y Ayuda'),
+                    _buildSectionTitle('health.assistanceHelp'.tr()),
                     const SizedBox(height: 12),
                     _buildEnhancedHealthCard(
                       context,
-                      title: 'Asistente Virtual',
-                      subtitle: 'Pregunta sobre salud y cuidados',
+                      title: 'health.assistant'.tr(),
+                      subtitle: 'health.assistantDescription'.tr(),
                       icon: Icons.smart_toy_rounded,
                       color: const Color(0xFF03A696),
                       onTap: () {
@@ -160,26 +161,26 @@ class _HealthPageState extends State<HealthPage> {
                           ),
                         );
                       },
-                      lastRecord: 'Disponible 24/7',
-                      badge: 'Nuevo',
+                      lastRecord: 'health.available247'.tr(),
+                      badge: 'health.new'.tr(),
                       badgeColor: Colors.blue,
                     ),
                     const SizedBox(height: 16),
 
                     // Sección: Emergencias
-                    _buildSectionTitle('Emergencias'),
+                    _buildSectionTitle('health.emergencies'.tr()),
                     const SizedBox(height: 12),
                     _buildEnhancedHealthCard(
                       context,
-                      title: 'Contactos de Emergencia',
-                      subtitle: 'Acceso rápido a ayuda médica',
+                      title: 'health.emergencyContacts'.tr(),
+                      subtitle: 'health.emergencyContactsDescription'.tr(),
                       icon: Icons.emergency_rounded,
                       color: const Color(0xFFF44336),
                       onTap: () {
                         _showEmergencyContacts(context);
                       },
-                      lastRecord: 'Siempre disponible',
-                      badge: 'Importante',
+                      lastRecord: 'health.alwaysAvailable'.tr(),
+                      badge: 'health.important'.tr(),
                       badgeColor: Colors.red,
                     ),
                     const SizedBox(height: 100), // Espacio para el bottom bar
@@ -384,11 +385,11 @@ class _HealthPageState extends State<HealthPage> {
     final difference = today.difference(recordDay).inDays;
 
     if (difference == 0) {
-      return 'Hoy';
+      return 'health.today'.tr();
     } else if (difference == 1) {
-      return 'Ayer';
+      return 'health.yesterday'.tr();
     } else if (difference < 7) {
-      return 'Hace $difference días';
+      return 'health.daysAgo'.tr(namedArgs: {'days': difference.toString()});
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -404,7 +405,7 @@ class _HealthPageState extends State<HealthPage> {
             Icon(Icons.emergency_rounded, color: Colors.red[700], size: 28),
             const SizedBox(width: 12),
             Text(
-              'Contactos de Emergencia',
+              'health.emergencyContactsTitle'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -418,7 +419,7 @@ class _HealthPageState extends State<HealthPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'En caso de emergencia, contacta inmediatamente:',
+              'health.emergencyContactMessage'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 14,
                 color: const Color(0xFF7F8C8D),
@@ -426,7 +427,7 @@ class _HealthPageState extends State<HealthPage> {
             ),
             const SizedBox(height: 20),
             _buildEmergencyContactItem(
-              'Emergencias',
+              'health.emergenciesLabel'.tr(),
               '911',
               Icons.phone,
               Colors.red,
@@ -436,8 +437,8 @@ class _HealthPageState extends State<HealthPage> {
             ),
             const SizedBox(height: 12),
             _buildEmergencyContactItem(
-              'Pediatra',
-              'Contacta a tu pediatra',
+              'health.pediatrician'.tr(),
+              'health.contactPediatrician'.tr(),
               Icons.local_hospital,
               const Color(0xFF03A696),
               () {
@@ -446,7 +447,7 @@ class _HealthPageState extends State<HealthPage> {
             ),
             const SizedBox(height: 12),
             _buildEmergencyContactItem(
-              'Línea de Lactancia',
+              'health.breastfeedingLine'.tr(),
               '0800-LACTANCIA',
               Icons.support_agent,
               Colors.blue,
@@ -460,7 +461,7 @@ class _HealthPageState extends State<HealthPage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              'Cerrar',
+              'common.close'.tr(),
               style: GoogleFonts.quicksand(
                 color: const Color(0xFF03A696),
                 fontWeight: FontWeight.w600,

@@ -19,7 +19,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'home_page_wrapper.dart';
 import 'companion_page.dart';
 import 'health_page.dart';
-import 'profile_page.dart';
+import '../../../settings/presentation/pages/profile_settings_page.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../../core/di/injection.dart';
 
 // Widgets refactorizados
 import '../widgets/modern_bottom_navigation_bar.dart';
@@ -94,11 +96,14 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                   _currentIndex = index;
                 });
               },
-              children: const [
-                HomePageWrapper(),
-                CompanionPage(),
-                HealthPage(),
-                ProfilePage(),
+              children: [
+                const HomePageWrapper(),
+                const CompanionPage(),
+                const HealthPage(),
+                BlocProvider<SettingsBloc>(
+                  create: (context) => getIt<SettingsBloc>(),
+                  child: const ProfileSettingsPage(),
+                ),
               ],
             ),
           ),
