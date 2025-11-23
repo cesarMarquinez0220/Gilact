@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// Servicio para calcular percentiles de peso según estándares de la OMS (WHO)
 /// Basado en las curvas de crecimiento de la OMS para bebés de 0-6 meses

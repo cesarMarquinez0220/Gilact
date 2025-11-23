@@ -341,7 +341,7 @@ class LactationService {
           userId: userId,
           recordId: record.id,
           timestamp: record.timestamp,
-          includesSleep: record.incluyeSueno ?? false,
+          includesSleep: record.incluyeSueno,
           isFirstOfDay: isFirstOfDay,
         );
       } else {

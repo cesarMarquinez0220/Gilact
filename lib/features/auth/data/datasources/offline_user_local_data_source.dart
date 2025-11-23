@@ -2,7 +2,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'dart:typed_data';
 
 /// Data source local para almacenar información de usuarios offline
 class OfflineUserLocalDataSource {

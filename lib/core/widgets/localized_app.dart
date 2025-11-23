@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/localization_service.dart';
 import '../../features/settings/presentation/bloc/settings_bloc.dart';
-import '../../features/settings/presentation/bloc/settings_state.dart';
 
 /// Widget que envuelve MaterialApp y maneja el cambio de idioma dinámicamente
 class LocalizedApp extends StatefulWidget {
@@ -20,7 +19,7 @@ class LocalizedApp extends StatefulWidget {
 }
 
 class _LocalizedAppState extends State<LocalizedApp> {
-  late Locale _currentLocale;
+  Locale? _currentLocale;
 
   @override
   void initState() {
@@ -51,7 +50,7 @@ class _LocalizedAppState extends State<LocalizedApp> {
         }
       },
       child: MaterialApp(
-        locale: _currentLocale,
+        locale: _currentLocale ?? const Locale('es'),
         supportedLocales: widget.localizationService.getSupportedLocales(),
         // Aquí puedes agregar localizationsDelegates si usas paquetes de localización
         // localizationsDelegates: [
@@ -62,14 +61,14 @@ class _LocalizedAppState extends State<LocalizedApp> {
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(1.0), // Prevenir escalado automático
+              textScaler: TextScaler.linear(
+                1.0,
+              ), // Prevenir escalado automático
             ),
-            child: child!,
+            child: child ?? widget.child,
           );
         },
-        child: widget.child,
       ),
     );
   }
 }
-

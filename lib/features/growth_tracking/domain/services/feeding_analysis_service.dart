@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../lactation/domain/entities/lactation_record.dart';
 import '../../../../core/services/connectivity_service.dart';
-import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
-import '../../../lactation/domain/entities/baby_weight_record.dart';
 import '../../../lactation/data/datasources/lactation_database.dart';
 
 /// Datos de alimentación diaria
@@ -36,8 +34,6 @@ class FeedingAnalysisService {
 
   // Instancia compartida de LactationService para evitar crear múltiples instancias
   LactationService? _lactationService;
-  final BabyWeightOfflineLocalDataSource _weightDataSource =
-      BabyWeightOfflineLocalDataSource();
   final ConnectivityService _connectivityService = ConnectivityService();
   
   /// Obtiene o crea la instancia compartida de LactationService

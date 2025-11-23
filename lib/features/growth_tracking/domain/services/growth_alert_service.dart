@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../entities/weight_trend_data.dart';
 
 /// Servicio para detectar alertas de crecimiento

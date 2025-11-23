@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,8 +12,6 @@ import '../../presentation/providers/lactation_provider.dart';
 import 'dart:ui';
 import '../../../../alerta_dialoge.dart';
 import '../../../../main.dart';
-import '../../../user/presentation/bloc/user_profile_bloc.dart';
-import '../../../../core/services/app_initialization_service.dart';
 // Eliminado import de app_logger inexistente
 
 /// Página de registro diario de sueño del bebé (llamada desde notificación 8 AM)

@@ -34,7 +34,6 @@ import 'core/services/app_initialization_service.dart';
 import 'core/services/localization_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'features/gamification/presentation/bloc/gamification_bloc.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';

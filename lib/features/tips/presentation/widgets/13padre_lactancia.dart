@@ -1,7 +1,6 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
 import 'package:animate_do/animate_do.dart';
-import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';

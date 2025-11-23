@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Servicio para manejar la localización e idioma de la aplicación
 @singleton
