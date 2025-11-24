@@ -3,12 +3,16 @@ import 'package:dartz/dartz.dart';
 import '../repositories/gamification_repository.dart';
 import '../entities/user_gamification_profile.dart';
 import '../entities/xp_transaction.dart';
+import '../entities/xp_transaction.dart' show XPSource;
 import '../entities/daily_streak.dart';
 import '../entities/achievement.dart';
 import 'xp_calculation_service.dart';
 import 'level_service.dart';
 import 'streak_service.dart';
 import 'achievement_service.dart';
+import '../../../lessons/domain/repositories/lesson_repository.dart';
+import '../../../lactation/data/services/lactation_service.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio principal de gamificación
 /// Facilita la integración con otras funcionalidades de la app
@@ -103,6 +107,133 @@ class GamificationService {
     );
 
     return await _addXPAndUpdateProfile(userId, transaction);
+  }
+
+  /// Agrega XP por completar un desafío diario
+  /// Verifica si ya se completó hoy para evitar recompensas duplicadas
+  Future<Either<String, UserGamificationProfile>> addXPForDailyChallenge({
+    required String userId,
+    required String challengeId,
+    required int xpReward,
+    required DateTime timestamp,
+  }) async {
+    try {
+      // Verificar si ya se completó este desafío hoy
+      final profileResult = await _repository.getProfile(userId);
+      return await profileResult.fold((error) => Left(error), (profile) async {
+        if (profile == null) {
+          return Left('Perfil no encontrado');
+        }
+
+        // Verificar si ya se completó hoy
+        final today = DateTime(timestamp.year, timestamp.month, timestamp.day);
+        final completedDate = profile.completedDailyChallenges[challengeId];
+
+        if (completedDate != null) {
+          final completedDay = DateTime(
+            completedDate.year,
+            completedDate.month,
+            completedDate.day,
+          );
+
+          // Si ya se completó hoy, no otorgar XP de nuevo
+          if (completedDay.year == today.year &&
+              completedDay.month == today.month &&
+              completedDay.day == today.day) {
+            return Right(
+              profile,
+            ); // Ya completado hoy, retornar perfil sin cambios
+          }
+        }
+
+        // Otorgar XP
+        final transaction = _xpService.calculateXPForDailyChallenge(
+          userId: userId,
+          challengeId: challengeId,
+          xpReward: xpReward,
+          timestamp: timestamp,
+        );
+
+        // Actualizar perfil con el desafío completado
+        final updatedCompletedChallenges = Map<String, DateTime>.from(
+          profile.completedDailyChallenges,
+        );
+        updatedCompletedChallenges[challengeId] = timestamp;
+
+        // Agregar XP y actualizar perfil
+        final result = await _addXPAndUpdateProfile(userId, transaction);
+
+        // Asegurar que el desafío completado se guarde
+        return result.fold((error) => Left(error), (updatedProfile) async {
+          final finalProfile = updatedProfile.copyWith(
+            completedDailyChallenges: updatedCompletedChallenges,
+          );
+          await _repository.saveProfile(finalProfile);
+          return Right(finalProfile);
+        });
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error agregando XP por desafío diario: $e');
+      }
+      return Left('Error agregando XP por desafío diario: $e');
+    }
+  }
+
+  /// Agrega XP por completar trivia después de una lección
+  Future<Either<String, UserGamificationProfile>> addXPForTriviaCompleted({
+    required String userId,
+    required String lessonId,
+    required int correctAnswers,
+    required int totalQuestions,
+    required DateTime timestamp,
+  }) async {
+    final transaction = _xpService.calculateXPForTrivia(
+      userId: userId,
+      lessonId: lessonId,
+      correctAnswers: correctAnswers,
+      totalQuestions: totalQuestions,
+      timestamp: timestamp,
+    );
+
+    return await _addXPAndUpdateProfile(userId, transaction);
+  }
+
+  /// Verifica y otorga bonus por milestone de registros
+  Future<Either<String, UserGamificationProfile?>>
+  checkAndAwardRecordMilestone({
+    required String userId,
+    required int totalRecords,
+    required DateTime timestamp,
+  }) async {
+    final milestoneBonus = _xpService.calculateRecordMilestoneBonus(
+      userId: userId,
+      totalRecords: totalRecords,
+      timestamp: timestamp,
+    );
+
+    if (milestoneBonus == null) {
+      return Right(null); // No hay milestone alcanzado
+    }
+
+    return await _addXPAndUpdateProfile(userId, milestoneBonus);
+  }
+
+  /// Verifica si la trivia de una lección está completada
+  Future<bool> isTriviaCompleted(String userId, String lessonId) async {
+    try {
+      final transactionsResult = await _repository.getXPTransactions(userId);
+      return transactionsResult.fold((error) => false, (transactions) {
+        // Buscar si hay alguna transacción de trivia completada para esta lección
+        return transactions.any(
+          (transaction) =>
+              transaction.source == XPSource.triviaCompleted &&
+              transaction.sourceId == lessonId,
+        );
+      });
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Agrega XP y actualiza el perfil
@@ -201,7 +332,7 @@ class GamificationService {
     }
   }
 
-  /// Detecta y desbloquea logros nuevos
+  /// Detecta y desbloquea logros nuevos (versión mejorada con estadísticas reales)
   Future<Either<String, List<Achievement>>> detectAndUnlockAchievements({
     required String userId,
     required int totalLactationRecords,
@@ -210,6 +341,10 @@ class GamificationService {
     required int babyWeightRecords,
     required bool hasNocturnalRecord,
     required int dailyRecordsToday,
+    int babySleepRecords = 0,
+    int perfectTrivias = 0,
+    int nocturnalRecordsCount = 0,
+    int daysUsingApp = 0,
   }) async {
     try {
       final profileResult = await _repository.getProfile(userId);
@@ -224,6 +359,10 @@ class GamificationService {
           babyWeightRecords: babyWeightRecords,
           hasNocturnalRecord: hasNocturnalRecord,
           dailyRecordsToday: dailyRecordsToday,
+          babySleepRecords: babySleepRecords,
+          perfectTrivias: perfectTrivias,
+          nocturnalRecordsCount: nocturnalRecordsCount,
+          daysUsingApp: daysUsingApp,
         );
 
         if (newAchievements.isNotEmpty) {
@@ -244,8 +383,16 @@ class GamificationService {
             ...newAchievements.map((a) => a.id),
           ];
 
+          // Agregar logros nuevos a la lista de no vistos (para notificación roja)
+          final newAchievementIds = newAchievements.map((a) => a.id).toList();
+          final updatedNewAchievements = [
+            ...profile.newAchievements,
+            ...newAchievementIds,
+          ];
+
           final updatedProfile = profile.copyWith(
             unlockedAchievements: updatedAchievementIds,
+            newAchievements: updatedNewAchievements,
             mascotState: 'celebrating',
             updatedAt: DateTime.now(),
           );
@@ -284,6 +431,68 @@ class GamificationService {
         return 'supporting';
       case StreakStatus.noActivity:
         return 'sleeping';
+    }
+  }
+
+  /// Obtiene el conteo de registros de hoy
+  Future<int> getTodayRecordsCount(String userId) async {
+    try {
+      final lactationService = getIt<LactationService>();
+      final stats = await lactationService.getStats();
+      return stats.feedsToday;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Obtiene el conteo de registros completos de hoy
+  Future<int> getTodayCompleteRecordsCount(String userId) async {
+    try {
+      final today = DateTime.now();
+      final lactationService = getIt<LactationService>();
+      final todayRecords = await lactationService.getRecordsForDate(today);
+      return todayRecords.where((record) {
+        return record.vecesPecho > 0 || record.vecesBiberon > 0;
+      }).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Obtiene el conteo de trivias pendientes
+  Future<int> getPendingTriviasCount(String userId) async {
+    try {
+      final lessonRepository = getIt<LessonRepository>();
+      final lessonsResult = await lessonRepository.getAllLessons();
+      int pendingCount = 0;
+
+      lessonsResult.fold((failure) => null, (lessons) {
+        for (final lesson in lessons) {
+          // Verificar si la trivia está completada
+          // Por ahora, asumimos que si no hay transacción XP de trivia para esta lección, está pendiente
+          // TODO: Implementar verificación real de trivias completadas por lección
+          pendingCount++;
+        }
+      });
+
+      return pendingCount;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Verifica si una lección tiene trivias completadas
+  Future<bool> isLessonTriviaCompleted(String userId, String lessonId) async {
+    try {
+      final profileResult = await _repository.getProfile(userId);
+      return profileResult.fold((error) => false, (profile) {
+        if (profile == null) return false;
+        // Verificar si hay trivias completadas para esta lección
+        // Por ahora, asumimos que si no está en la lista de logros, no está completada
+        return false; // TODO: Implementar lógica real
+      });
+    } catch (e) {
+      return false;
     }
   }
 }

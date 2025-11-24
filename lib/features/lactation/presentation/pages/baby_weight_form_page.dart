@@ -30,9 +30,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
   late AnimationController _fadeController;
   late AnimationController _pulseController;
 
-  late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _pulseAnimation;
 
   bool _isLoading = false;
   double _weight = 3.5; // Valor inicial del peso en kg
@@ -61,16 +59,8 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
       vsync: this,
     );
 
-    _slideAnimation = Tween<double>(begin: 80.0, end: 0.0).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-    );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
-
-    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     // Iniciar animaciones con delays escalonados

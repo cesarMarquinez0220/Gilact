@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import '../entities/daily_streak.dart';
-import '../entities/user_gamification_profile.dart';
 
 /// Servicio para gestionar rachas diarias
 /// Diseñado con enfoque empático y offline-first

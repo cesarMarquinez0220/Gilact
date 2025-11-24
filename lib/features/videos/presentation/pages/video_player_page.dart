@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/video.dart';
 import '../widgets/advanced_video_player.dart';
 import '../../data/services/video_cache_service.dart';
 import '../../data/services/video_preload_service.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
+import '../../../gamification/domain/services/gamification_service.dart';
+import 'package:get_it/get_it.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final Video video;
@@ -28,7 +33,6 @@ class VideoPlayerPage extends StatefulWidget {
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   bool _isVideoPreloaded = false;
-  bool _shouldAutoRotate = false;
   final GlobalKey _playerKey = GlobalKey();
   bool _isNavigatingToNext =
       false; // Flag para saber si estamos navegando al siguiente video
@@ -56,8 +60,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       if (mounted) {
         setState(() {
           _isVideoPreloaded = isPreloaded || hasPreloadedController;
-          _shouldAutoRotate =
-              true; // Siempre auto-rotar para experiencia fluida
         });
 
         print(
@@ -124,7 +126,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     );
   }
 
-  void _showCompletionDialog() {
+  Future<void> _showCompletionDialog() async {
+    // La trivia ahora se muestra como requisito antes de avanzar, no después del video
+    _showFinalCompletionDialog();
+  }
+
+  void _showFinalCompletionDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,

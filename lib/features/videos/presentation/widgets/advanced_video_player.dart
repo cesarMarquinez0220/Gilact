@@ -613,37 +613,55 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       final duration = _controller!.value.metaData.duration;
       final progress = position.inSeconds / duration.inSeconds;
 
+      // Si el video se está viendo desde historial y ya estaba completado,
+      // preservar el estado de completado para no afectar el progreso en lecciones
+      final shouldPreserveCompleted =
+          widget.isFromHistory && _wasAlreadyCompleted;
+
+      // Si el video ya estaba completado, preservar el progreso al 100%
+      final finalProgress = shouldPreserveCompleted ? 1.0 : progress;
+
       await _progressService.saveVideoProgress(
         videoId: widget.video.videoId,
         pauseCount: _pauseCount,
         forwardCount: _forwardCount,
         lastPosition: position.inSeconds,
         totalDuration: duration.inSeconds,
-        progress: progress,
-        isCompleted: false,
+        progress: finalProgress,
+        isCompleted: shouldPreserveCompleted ? true : false,
       );
 
-      // Actualizar el LeccionesProvider con el progreso actualizado
-      // El progreso viene como valor entre 0 y 1, necesitamos convertirlo a porcentaje (0-100)
-      final progressPercentage = progress * 100.0;
-      try {
-        final leccionesProvider = Provider.of<LeccionesProvider>(
-          context,
-          listen: false,
-        );
-        leccionesProvider.actualizarProgresoVideo(
-          widget.video.videoId,
-          progressPercentage,
-        );
+      // Si el video se está viendo desde historial y ya estaba completado,
+      // NO actualizar el LeccionesProvider para no afectar el estado de completado
+      if (shouldPreserveCompleted) {
         if (kDebugMode) {
           print(
-            '📊 Progreso actualizado en LeccionesProvider: ${progressPercentage.toStringAsFixed(1)}%',
+            '📚 Video desde historial ya estaba completado - preservando estado, no actualizando LeccionesProvider',
           );
         }
-      } catch (e) {
-        // Si no hay provider disponible (puede pasar en algunos contextos), ignorar
-        if (kDebugMode) {
-          print('⚠️ No se pudo actualizar LeccionesProvider: $e');
+      } else {
+        // Actualizar el LeccionesProvider con el progreso actualizado
+        // El progreso viene como valor entre 0 y 1, necesitamos convertirlo a porcentaje (0-100)
+        final progressPercentage = progress * 100.0;
+        try {
+          final leccionesProvider = Provider.of<LeccionesProvider>(
+            context,
+            listen: false,
+          );
+          leccionesProvider.actualizarProgresoVideo(
+            widget.video.videoId,
+            progressPercentage,
+          );
+          if (kDebugMode) {
+            print(
+              '📊 Progreso actualizado en LeccionesProvider: ${progressPercentage.toStringAsFixed(1)}%',
+            );
+          }
+        } catch (e) {
+          // Si no hay provider disponible (puede pasar en algunos contextos), ignorar
+          if (kDebugMode) {
+            print('⚠️ No se pudo actualizar LeccionesProvider: $e');
+          }
         }
       }
 

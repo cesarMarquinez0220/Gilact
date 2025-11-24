@@ -8,6 +8,7 @@ import '../../../../core/services/sync_queue_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../main.dart' as app_main;
 import '../../../gamification/domain/services/gamification_service.dart';
+import '../../../gamification/domain/services/user_statistics_service.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
 import 'package:flutter/widgets.dart';
 import 'lactation_notification_service.dart';
@@ -29,8 +30,9 @@ class LactationService {
 
   // Servicio de gamificación
   GamificationService? _gamificationService;
+  final UserStatisticsService? _userStatisticsService;
 
-  LactationService(this._firestore, this._auth) {
+  LactationService(this._firestore, this._auth, [this._userStatisticsService]) {
     // Inicializar servicio de gamificación (puede fallar si no está registrado)
     try {
       _gamificationService = getIt<GamificationService>();
@@ -194,7 +196,10 @@ class LactationService {
         try {
           final userDocId = await getUserDocumentId();
           if (userDocId != null) {
-            final userDoc = await _firestore.collection('Users').doc(userDocId).get();
+            final userDoc = await _firestore
+                .collection('Users')
+                .doc(userDocId)
+                .get();
             if (userDoc.exists) {
               final situationData = userDoc.data();
               if (situationData != null && situationData['situacion'] != null) {
@@ -221,10 +226,13 @@ class LactationService {
                     }
                     // Si no se encontró birthDate, intentar con fecha nacimiento bebe
                     if (babyBirthDate == null) {
-                      final fechaNacimientoBebe = situacionData['fecha nacimiento bebe'];
+                      final fechaNacimientoBebe =
+                          situacionData['fecha nacimiento bebe'];
                       if (fechaNacimientoBebe != null) {
                         if (fechaNacimientoBebe is String) {
-                          babyBirthDate = DateTime.tryParse(fechaNacimientoBebe);
+                          babyBirthDate = DateTime.tryParse(
+                            fechaNacimientoBebe,
+                          );
                         }
                       }
                     }
@@ -238,26 +246,33 @@ class LactationService {
             print('⚠️ Error obteniendo información del bebé (no crítico): $e');
           }
         }
-        
+
         // Calcular intervalo basado en la edad del bebé
-        final interval = LactationNotificationService.calculateLactationInterval(babyBirthDate);
+        final interval =
+            LactationNotificationService.calculateLactationInterval(
+              babyBirthDate,
+            );
         final intervalHours = interval.inHours;
         final intervalMinutes = interval.inMinutes.remainder(60);
-        final intervalText = intervalMinutes > 0 
+        final intervalText = intervalMinutes > 0
             ? '${intervalHours}h ${intervalMinutes}m'
             : '${intervalHours}h';
-        
+
         await notificationService.scheduleLactationReminder(
           lastFeedTime: record.timestamp,
           babyName: babyName,
           babyBirthDate: babyBirthDate,
         );
         if (kDebugMode) {
-          print('✅ Notificación de lactancia programada para $intervalText después');
+          print(
+            '✅ Notificación de lactancia programada para $intervalText después',
+          );
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ Error programando notificación de lactancia (no crítico): $e');
+          print(
+            '⚠️ Error programando notificación de lactancia (no crítico): $e',
+          );
         }
       }
 
@@ -328,7 +343,11 @@ class LactationService {
       final today = DateTime.now();
       final todayRecords = allRecords.where((r) {
         final recordDate = r.timestamp;
-        final recordDateOnly = DateTime(recordDate.year, recordDate.month, recordDate.day);
+        final recordDateOnly = DateTime(
+          recordDate.year,
+          recordDate.month,
+          recordDate.day,
+        );
         final todayOnly = DateTime(today.year, today.month, today.day);
         return recordDateOnly == todayOnly;
       }).length;
@@ -353,23 +372,70 @@ class LactationService {
         );
       }
 
-      // Detectar badges progresivos
-      final achievements = await _gamificationService!.detectAndUnlockAchievements(
-        userId: userId,
-        totalLactationRecords: totalRecords,
-        completeLactationRecords: allRecords
-            .where((r) => r.tipoRegistro == 'completo')
-            .length,
-        totalLessonsCompleted: 0, // Por ahora 0
-        babyWeightRecords: 0, // Por ahora 0
-        hasNocturnalRecord: _hasNocturnalRecord(record),
-        dailyRecordsToday: todayRecords,
+      // Verificar y otorgar bonus por milestone de registros
+      final milestoneResult = await _gamificationService!
+          .checkAndAwardRecordMilestone(
+            userId: userId,
+            totalRecords: totalRecords,
+            timestamp: record.timestamp,
+          );
+
+      milestoneResult.fold(
+        (error) {
+          if (kDebugMode) {
+            print('⚠️ Error verificando milestone: $error');
+          }
+        },
+        (milestoneProfile) {
+          if (milestoneProfile != null &&
+              app_main.navigatorKey.currentContext != null) {
+            // Mostrar notificación de milestone alcanzado
+            if (kDebugMode) {
+              print(
+                '🎉 ¡Milestone alcanzado! $totalRecords registros - Bonus de XP otorgado',
+              );
+            }
+            // El XP ya fue agregado por el servicio, solo mostramos mensaje
+          }
+        },
       );
+
+      // Obtener estadísticas reales del usuario para detección de logros
+      UserStatistics? userStats;
+      if (_userStatisticsService != null) {
+        try {
+          userStats = await _userStatisticsService!.getUserStatistics(userId);
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Error obteniendo estadísticas del usuario: $e');
+          }
+        }
+      }
+
+      // Detectar badges progresivos con estadísticas reales
+      final achievements = await _gamificationService!
+          .detectAndUnlockAchievements(
+            userId: userId,
+            totalLactationRecords:
+                userStats?.totalLactationRecords ?? totalRecords,
+            completeLactationRecords:
+                userStats?.completeLactationRecords ??
+                allRecords.where((r) => r.tipoRegistro == 'completo').length,
+            totalLessonsCompleted: userStats?.totalLessonsCompleted ?? 0,
+            babyWeightRecords: userStats?.babyWeightRecords ?? 0,
+            hasNocturnalRecord: _hasNocturnalRecord(record),
+            dailyRecordsToday: todayRecords,
+            babySleepRecords: userStats?.babySleepRecords ?? 0,
+            perfectTrivias: userStats?.perfectTrivias ?? 0,
+            nocturnalRecordsCount: userStats?.nocturnalRecordsCount ?? 0,
+            daysUsingApp: userStats?.daysUsingApp ?? 0,
+          );
 
       // Mostrar diálogo si hay badges nuevos
       if (achievements.isRight()) {
         final newAchievements = achievements.getOrElse(() => []);
-        if (newAchievements.isNotEmpty && app_main.navigatorKey.currentContext != null) {
+        if (newAchievements.isNotEmpty &&
+            app_main.navigatorKey.currentContext != null) {
           // Mostrar el primer badge desbloqueado
           final firstAchievement = newAchievements.first;
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -711,14 +777,12 @@ class LactationService {
   Future<String?> getUserDocumentId() async {
     return _getUserDocumentId();
   }
-  
+
   /// Método privado que implementa la lógica
   Future<String?> _getUserDocumentId() async {
     // Verificar caché primero
     if (_isCacheValid && _cachedUserDocId != null) {
-      print(
-        '✅ LactationService: Usando caché para getUserDocumentId: $_cachedUserDocId',
-      );
+      // Caché válido, retornar sin log (evitar spam en consola)
       return _cachedUserDocId;
     }
 

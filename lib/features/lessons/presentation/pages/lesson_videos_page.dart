@@ -15,6 +15,9 @@ import '../providers/video_images_provider.dart';
 import '../../../videos/presentation/pages/video_player_page.dart';
 import '../../../videos/domain/entities/video.dart' as video_entity;
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
+import '../../../gamification/domain/services/gamification_service.dart';
+import 'package:get_it/get_it.dart';
 
 class LessonVideosPage extends StatefulWidget {
   final List<Video> videos;
@@ -30,16 +33,49 @@ class LessonVideosPage extends StatefulWidget {
   State<LessonVideosPage> createState() => _LessonVideosPageState();
 }
 
-class _LessonVideosPageState extends State<LessonVideosPage> {
+class _LessonVideosPageState extends State<LessonVideosPage>
+    with WidgetsBindingObserver {
   List<Video>? _videos;
   int lastCompletedLesson = 0;
+  DateTime? _lastProgressLoad;
+  bool _isInitialLoad = true;
+  bool _isLoadingProgress = false;
+  static const _progressLoadCooldown = Duration(seconds: 3);
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeProviders();
     _loadVideos();
+    // Cargar progreso solo si no se ha cargado antes (verificar si el provider ya tiene datos)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _isInitialLoad) {
+        _loadProgressIfNeeded();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Recargar progreso cuando la app vuelve al foreground
+    if (state == AppLifecycleState.resumed) {
     _loadProgressFromFirestore();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // NO recargar automáticamente aquí - solo cuando realmente se regresa desde otra página
+    // La recarga se hará cuando se regrese del reproductor de video o desde historial
   }
 
   Future<void> _initializeProviders() async {
@@ -51,22 +87,89 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     await videoImagesProvider.initialize();
   }
 
-  /// Carga el progreso desde Firestore al entrar a la página
-  Future<void> _loadProgressFromFirestore() async {
+  /// Verifica si el progreso ya está cargado y lo carga si es necesario
+  Future<void> _loadProgressIfNeeded() async {
     try {
+      final leccionesProvider = context.read<LeccionesProvider>();
+
+      // Verificar si ya hay progreso cargado (videos completados o progreso guardado)
+      final hasProgress =
+          leccionesProvider.ultimaLeccionCompletada > 0 ||
+          leccionesProvider.getProgresoVideo(1) > 0;
+
+      if (hasProgress) {
+        if (kDebugMode) {
+          print('✅ Progreso de lecciones ya está cargado, omitiendo carga');
+        }
+        return;
+      }
+
+      // Si no hay progreso, cargarlo desde Firestore
+      await _loadProgressFromFirestore(force: true);
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error verificando progreso: $e');
+      }
+      // Si hay error, intentar cargar de todas formas
+      await _loadProgressFromFirestore(force: true);
+    }
+  }
+
+  /// Carga el progreso desde Firestore al entrar a la página
+  Future<void> _loadProgressFromFirestore({bool force = false}) async {
+    // Evitar múltiples llamadas simultáneas
+    if (_isLoadingProgress && !force) {
+      if (kDebugMode) {
+        print('⏸️ Carga de progreso ya en curso, omitiendo...');
+      }
+      return;
+    }
+
+    try {
+      final now = DateTime.now();
+
+      // Si no es forzado, verificar cooldown
+      if (!force) {
+        if (_lastProgressLoad != null &&
+            now.difference(_lastProgressLoad!) < _progressLoadCooldown) {
+          if (kDebugMode) {
+            print(
+              '⏸️ Recarga de progreso omitida (cooldown activo: ${now.difference(_lastProgressLoad!).inSeconds}s)',
+            );
+          }
+          return;
+        }
+      }
+
+      _isLoadingProgress = true;
       final authState = context.read<AuthBloc>().state;
       if (authState is AuthAuthenticated) {
         final userId = authState.user.id;
         final leccionesProvider = context.read<LeccionesProvider>();
-        await leccionesProvider.loadProgressFromFirestore(userId);
+
         if (kDebugMode) {
-          print('📊 Progreso cargado desde Firestore al entrar a lecciones');
+          print('📊 Iniciando carga de progreso desde Firestore...');
+        }
+
+        await leccionesProvider.loadProgressFromFirestore(userId);
+        _lastProgressLoad = now;
+        _isInitialLoad = false;
+
+        if (mounted) {
+          setState(() {}); // Forzar actualización de la UI
+        }
+        if (kDebugMode) {
+          print(
+            '✅ Progreso cargado desde Firestore (${force ? "forzado" : "normal"})',
+          );
         }
       }
     } catch (e) {
       if (kDebugMode) {
         print('⚠️ Error cargando progreso al entrar a lecciones: $e');
       }
+    } finally {
+      _isLoadingProgress = false;
     }
   }
 
@@ -128,12 +231,16 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
     // Determinar si es el último video de la lección
     final isLastVideoInLesson = _isLastVideoInLesson(videoId, duracionId);
 
+    // Obtener userId del AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is AuthAuthenticated ? authState.user.id : '';
+
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => VideoPlayerPage(
           video: video,
-          userId: 'current_user', // TODO: Obtener ID del usuario actual
+          userId: userId,
           isLastVideoInLesson:
               isLastVideoInLesson, // Pasar flag de último video
         ),
@@ -197,20 +304,10 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
 
   /// Recarga el progreso del video desde Firestore para actualizar el indicador
   Future<void> _refreshVideoProgress() async {
-    try {
-      final authState = context.read<AuthBloc>().state;
-      if (authState is AuthAuthenticated) {
-        final userId = authState.user.id;
-        final leccionesProvider = context.read<LeccionesProvider>();
-        await leccionesProvider.loadProgressFromFirestore(userId);
+    // Recargar el progreso completo desde Firestore cuando se regresa del reproductor
+    await _loadProgressFromFirestore(force: true);
         if (kDebugMode) {
           print('🔄 Progreso recargado desde Firestore después de ver video');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error recargando progreso: $e');
-      }
     }
   }
 
@@ -356,6 +453,11 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
   }
 
   Widget _buildLessonSection(int lessonId, List<Video> videos) {
+    return FutureBuilder<bool>(
+      future: _isPreviousLessonTriviaCompleted(lessonId),
+      builder: (context, snapshot) {
+        final isLocked = lessonId > 1 && (snapshot.data ?? false) == false;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 40),
       child: Column(
@@ -363,42 +465,94 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
         children: [
           // Título de la lección
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+                  color: isLocked
+                      ? Colors.grey.withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: isLocked
+                        ? Colors.grey.withValues(alpha: 0.5)
+                        : Colors.white.withValues(alpha: 0.3),
+                  ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
                   '${'lessons.lesson'.tr()} $lessonId',
                   style: GoogleFonts.quicksand(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                              color: isLocked ? Colors.grey[300] : Colors.white,
                   ),
+                          ),
+                        ),
+                        if (isLocked)
+                          const Icon(Icons.lock, color: Colors.grey, size: 20),
+                      ],
                 ),
                 const SizedBox(height: 5),
                 Text(
                   _getSubtitleForLesson(lessonId),
                   style: GoogleFonts.quicksand(
                     fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.8),
+                        color: isLocked
+                            ? Colors.grey[400]
+                            : Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
+                    if (isLocked) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Completa la trivia de la lección anterior para desbloquear',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          color: Colors.orange[300],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
               ],
             ),
           ),
 
           const SizedBox(height: 20),
 
-          // Camino de videos
-          _buildVideoPath(videos),
+              // Camino de videos (bloqueado si la lección está bloqueada)
+              Opacity(
+                opacity: isLocked ? 0.5 : 1.0,
+                child: IgnorePointer(
+                  ignoring: isLocked,
+                  child: _buildVideoPath(videos),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Botón de trivia (requisito antes de avanzar)
+              if (!isLocked) _buildTriviaButton(lessonId, videos),
         ],
       ),
     );
+      },
+    );
+  }
+
+  Future<bool> _isPreviousLessonTriviaCompleted(int currentLessonId) async {
+    // La primera lección siempre está disponible
+    if (currentLessonId == 1) return true;
+
+    // Verificar si la trivia de la lección anterior está completada
+    final previousLessonId = currentLessonId - 1;
+    return await _isTriviaCompleted(previousLessonId);
   }
 
   Widget _buildVideoPath(List<Video> videos) {
@@ -674,6 +828,98 @@ class _LessonVideosPageState extends State<LessonVideosPage> {
       default:
         return Icons.play_circle_filled;
     }
+  }
+
+  Widget _buildTriviaButton(int lessonId, List<Video> videos) {
+    return FutureBuilder<bool>(
+      future: _isTriviaCompleted(lessonId),
+      builder: (context, snapshot) {
+        final isCompleted = snapshot.data ?? false;
+        final allVideosCompleted = videos.every(
+          (video) => _isVideoCompletedFromFirestore(video.videoId),
+        );
+
+        // Solo mostrar el botón si todos los videos están completados
+        if (!allVideosCompleted) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          child: ElevatedButton.icon(
+            onPressed: () => _showTrivia(lessonId),
+            icon: Icon(
+              isCompleted ? Icons.check_circle : Icons.quiz,
+              color: Colors.white,
+            ),
+            label: Text(
+              isCompleted
+                  ? 'Trivia Completada ✓'
+                  : 'Completar Trivia para Avanzar',
+              style: GoogleFonts.quicksand(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isCompleted
+                  ? Colors.green.withValues(alpha: 0.8)
+                  : const Color(0xFF3498DB),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> _isTriviaCompleted(int lessonId) async {
+    try {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is! AuthAuthenticated) return false;
+
+      final gamificationService = GetIt.instance<GamificationService>();
+      return await gamificationService.isTriviaCompleted(
+        authState.user.id,
+        lessonId.toString(),
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> _showTrivia(int lessonId) async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) return;
+
+    final userId = authState.user.id;
+    final lessonIdStr = lessonId.toString();
+
+    // Verificar si ya está completada
+    final isCompleted = await _isTriviaCompleted(lessonId);
+    if (isCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Ya completaste esta trivia!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      return;
+    }
+
+    await LessonTriviaWidget.show(
+      context,
+      lessonId: lessonIdStr,
+      userId: userId,
+      onComplete: () {
+        // Refrescar la UI después de completar
+        setState(() {});
+      },
+    );
   }
 
   String _getSubtitleForLesson(int lessonNumber) {

@@ -10,6 +10,9 @@ enum XPSource {
   streakBonus, // Bonus por racha
   achievementUnlocked, // Bonus por logro desbloqueado
   restDayUsed, // Bonus por usar día de descanso (positivo, no negativo)
+  recordMilestone, // Bonus por alcanzar milestone de registros (10, 25, 50, 100, etc.)
+  triviaCompleted, // Bonus por completar trivia después de lección
+  dailyChallenge, // Bonus por completar desafío diario
 }
 
 /// Transacción de XP - Permite historial, depuración y análisis

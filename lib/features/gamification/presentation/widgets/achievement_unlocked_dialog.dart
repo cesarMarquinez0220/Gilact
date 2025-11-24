@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../domain/entities/achievement.dart';
@@ -167,7 +168,17 @@ class AchievementUnlockedDialog extends StatelessWidget {
   }
 
   /// Muestra el diálogo
-  static void show(BuildContext context, Achievement achievement, int xpReward) {
+  static void show(
+    BuildContext context,
+    Achievement achievement,
+    int xpReward, {
+    bool withVibration = true,
+  }) {
+    // Vibración de éxito al mostrar el logro
+    if (withVibration) {
+      HapticFeedback.mediumImpact();
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,

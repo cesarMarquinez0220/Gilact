@@ -6,10 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 import '../../domain/services/credentials_cache_service.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
 import '../../../lactation/data/services/sleep_notification_service.dart';
+import '../../../lessons/presentation/providers/lecciones_provider.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -459,7 +461,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         );
       }
 
-      // 4. Navegar a home con toda la información cargada
+      // 4. Cargar progreso de lecciones desde Firestore
+      await _loadLessonsProgress(userId);
+
+      // 5. Navegar a home con toda la información cargada
       print('🚀 WelcomeScreen: Navegando a home con datos completos...');
       _navigateToHome();
     } catch (e) {
@@ -576,6 +581,32 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       print('✅ WelcomeScreen: Notificación diaria programada exitosamente');
     } catch (e) {
       print('❌ WelcomeScreen: Error programando notificación: $e');
+    }
+  }
+
+  /// Carga el progreso de lecciones desde Firestore
+  Future<void> _loadLessonsProgress(String userId) async {
+    try {
+      print(
+        '📚 WelcomeScreen: Cargando progreso de lecciones desde Firestore...',
+      );
+
+      // Verificar que el LeccionesProvider esté disponible
+      if (!mounted) return;
+
+      final leccionesProvider = Provider.of<LeccionesProvider>(
+        context,
+        listen: false,
+      );
+
+      // Cargar el progreso desde Firestore
+      await leccionesProvider.loadProgressFromFirestore(userId);
+
+      print('✅ WelcomeScreen: Progreso de lecciones cargado exitosamente');
+    } catch (e) {
+      // No bloquear la navegación si falla la carga del progreso
+      print('⚠️ WelcomeScreen: Error cargando progreso de lecciones: $e');
+      print('🔄 Continuando con la navegación...');
     }
   }
 

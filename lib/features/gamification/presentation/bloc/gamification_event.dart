@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/xp_transaction.dart';
+import '../../domain/entities/user_gamification_profile.dart';
 
 /// Eventos del BLoC de gamificación
 abstract class GamificationEvent extends Equatable {
@@ -91,5 +92,15 @@ class DetectAchievements extends GamificationEvent {
         hasNocturnalRecord,
         dailyRecordsToday,
       ];
+}
+
+/// Actualiza el perfil de gamificación
+class UpdateGamificationProfile extends GamificationEvent {
+  final UserGamificationProfile profile;
+
+  const UpdateGamificationProfile(this.profile);
+
+  @override
+  List<Object?> get props => [profile];
 }
 

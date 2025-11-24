@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:ui';
+import '../../../gamification/presentation/bloc/gamification_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_state.dart';
 
 /// Widget para la barra de navegación inferior moderna que se adapta a la navegación nativa del sistema
 class ModernBottomNavigationBar extends StatelessWidget {
@@ -100,7 +103,7 @@ class ModernBottomNavigationBar extends StatelessWidget {
                   Icons.home,
                   'navigation.home'.tr(),
                 ),
-                _buildNavItem(
+                _buildNavItemWithBadge(
                   context,
                   1,
                   Icons.pets_outlined,
@@ -203,6 +206,57 @@ class ModernBottomNavigationBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Construye un item de navegación con badge rojo para logros nuevos
+  Widget _buildNavItemWithBadge(
+    BuildContext context,
+    int index,
+    IconData inactiveIcon,
+    IconData activeIcon,
+    String label,
+  ) {
+    return BlocBuilder<GamificationBloc, GamificationState>(
+      builder: (context, state) {
+        int newAchievementsCount = 0;
+        if (state is GamificationLoaded) {
+          newAchievementsCount = state.profile.newAchievements.length;
+        }
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _buildNavItem(context, index, inactiveIcon, activeIcon, label),
+            // Badge rojo si hay logros nuevos
+            if (newAchievementsCount > 0 && currentIndex != index)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    newAchievementsCount > 9 ? '9+' : '$newAchievementsCount',
+                    style: GoogleFonts.quicksand(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

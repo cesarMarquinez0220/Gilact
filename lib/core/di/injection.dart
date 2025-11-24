@@ -67,7 +67,13 @@ import '../../features/gamification/data/datasources/gamification_remote_data_so
 import '../../features/gamification/data/repositories/gamification_repository_impl.dart';
 import '../../features/gamification/domain/repositories/gamification_repository.dart';
 import '../../features/gamification/domain/services/gamification_service.dart';
+import '../../features/gamification/domain/services/user_statistics_service.dart';
+import '../../features/gamification/domain/services/daily_challenge_service.dart';
 import '../../features/gamification/presentation/bloc/gamification_bloc.dart';
+
+// Growth Tracking Data Sources
+import '../../features/lactation/data/datasources/baby_weight_offline_local_data_source.dart';
+import '../../features/lactation/data/datasources/sleep_offline_local_data_source.dart';
 
 // Providers
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
@@ -101,8 +107,44 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<VideoInteractionService>(
     () => VideoInteractionService(getIt<FirebaseFirestore>()),
   );
+  // Gamification Repository (debe estar antes de UserStatisticsService)
+  getIt.registerLazySingleton<GamificationLocalDataSource>(
+    () => GamificationLocalDataSource(),
+  );
+  getIt.registerLazySingleton<GamificationRemoteDataSource>(
+    () => GamificationRemoteDataSource(),
+  );
+  getIt.registerLazySingleton<GamificationRepository>(
+    () => GamificationRepositoryImpl(
+      localDataSource: getIt<GamificationLocalDataSource>(),
+      remoteDataSource: getIt<GamificationRemoteDataSource>(),
+      connectivityService: getIt<ConnectivityService>(),
+    ),
+  );
+
+  // LactationService (sin UserStatisticsService inicialmente)
   getIt.registerLazySingleton<LactationService>(
     () => LactationService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
+  );
+
+  // User Statistics Service (después de LactationService, pero obtiene LactationService de forma lazy)
+  getIt.registerLazySingleton<UserStatisticsService>(
+    () => UserStatisticsService(
+      lessonRepository: getIt<LessonRepositoryImpl>(),
+      weightDataSource: getIt<BabyWeightOfflineLocalDataSource>(),
+      sleepDataSource: getIt<SleepOfflineLocalDataSource>(),
+      gamificationRepository: getIt<GamificationRepository>(),
+    ),
+  );
+  
+  // Actualizar LactationService para incluir UserStatisticsService
+  getIt.unregister<LactationService>();
+  getIt.registerLazySingleton<LactationService>(
+    () => LactationService(
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseAuth>(),
+      getIt<UserStatisticsService>(),
+    ),
   );
   getIt.registerLazySingleton<LactationFlowService>(
     () =>
@@ -115,6 +157,14 @@ Future<void> configureDependencies() async {
     () => OfflineSessionService(),
   );
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
+
+  // Growth Tracking Data Sources (deben registrarse antes de UserStatisticsService)
+  getIt.registerLazySingleton<BabyWeightOfflineLocalDataSource>(
+    () => BabyWeightOfflineLocalDataSource(),
+  );
+  getIt.registerLazySingleton<SleepOfflineLocalDataSource>(
+    () => SleepOfflineLocalDataSource(),
+  );
 
   // Settings Services
   getIt.registerLazySingleton<LocalizationService>(
@@ -157,23 +207,21 @@ Future<void> configureDependencies() async {
     () => UserProfileOfflineLocalDataSource(),
   );
 
-  // Gamification
-  getIt.registerLazySingleton<GamificationLocalDataSource>(
-    () => GamificationLocalDataSource(),
-  );
-  getIt.registerLazySingleton<GamificationRemoteDataSource>(
-    () => GamificationRemoteDataSource(),
-  );
-  getIt.registerLazySingleton<GamificationRepository>(
-    () => GamificationRepositoryImpl(
-      localDataSource: getIt<GamificationLocalDataSource>(),
-      remoteDataSource: getIt<GamificationRemoteDataSource>(),
-      connectivityService: getIt<ConnectivityService>(),
-    ),
-  );
+  // Gamification Service (después de GamificationRepository)
   getIt.registerLazySingleton<GamificationService>(
     () => GamificationService(
       repository: getIt<GamificationRepository>(),
+    ),
+  );
+  
+  // Daily Challenge Service
+  getIt.registerLazySingleton<DailyChallengeService>(
+    () => DailyChallengeService(
+      getIt<LactationService>(),
+      getIt<LessonRepositoryImpl>(),
+      getIt<BabyWeightOfflineLocalDataSource>(),
+      getIt<SleepOfflineLocalDataSource>(),
+      getIt<GamificationService>(),
     ),
   );
 

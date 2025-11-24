@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/user_gamification_profile.dart';
 import '../../domain/entities/xp_transaction.dart';
 import '../../domain/entities/daily_streak.dart';
-import 'dart:convert';
 
 /// Data source remoto para gamificación (Firestore)
 /// Sincroniza datos locales con la nube
@@ -257,9 +256,13 @@ class GamificationRemoteDataSource {
           ? Timestamp.fromDate(profile.streakStartDate!)
           : null,
       'unlockedAchievements': profile.unlockedAchievements,
+      'newAchievements': profile.newAchievements,
       'mascotState': profile.mascotState,
       'mascotLevel': profile.mascotLevel,
       'dailyXP': profile.dailyXP.map((key, value) => MapEntry(key, value)),
+      'completedDailyChallenges': profile.completedDailyChallenges.map(
+        (key, value) => MapEntry(key, Timestamp.fromDate(value)),
+      ),
       'restDaysUsed': profile.restDaysUsed,
       'restDaysAvailable': profile.restDaysAvailable,
       'isPauseModeActive': profile.isPauseModeActive,
@@ -294,11 +297,22 @@ class GamificationRemoteDataSource {
                   ?.map((e) => e.toString())
                   .toList() ??
               [],
+      newAchievements:
+          (data['newAchievements'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              [],
       mascotState: data['mascotState'] as String? ?? 'happy',
       mascotLevel: data['mascotLevel'] as int? ?? 1,
       dailyXP: (data['dailyXP'] as Map<String, dynamic>?)
               ?.map((key, value) => MapEntry(key, value as int)) ??
           {},
+      completedDailyChallenges: (data['completedDailyChallenges'] as Map<String, dynamic>?)
+              ?.map((key, value) => MapEntry(
+                    key,
+                    (value as Timestamp).toDate(),
+                  )) ??
+          const {},
       restDaysUsed: data['restDaysUsed'] as int? ?? 0,
       restDaysAvailable: data['restDaysAvailable'] as int? ?? 3,
       isPauseModeActive: data['isPauseModeActive'] as bool? ?? false,

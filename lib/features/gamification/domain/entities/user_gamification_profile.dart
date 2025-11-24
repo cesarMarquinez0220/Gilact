@@ -12,9 +12,11 @@ class UserGamificationProfile extends Equatable {
   final DateTime? lastActivityDate; // Última fecha de actividad (CRÍTICO para offline)
   final DateTime? streakStartDate; // Fecha de inicio de racha
   final List<String> unlockedAchievements; // IDs de logros desbloqueados
+  final List<String> newAchievements; // IDs de logros nuevos no vistos (para notificación roja)
   final String mascotState; // Estado actual del muñequito
   final int mascotLevel; // Nivel del muñequito (crece con el usuario)
   final Map<String, int> dailyXP; // XP ganado por día (últimos 30 días)
+  final Map<String, DateTime> completedDailyChallenges; // Desafíos diarios completados (challengeId -> fecha de completado)
 
   // CAMPOS EMPÁTICOS - Protección contra ansiedad
   final int restDaysUsed; // Días de descanso usados esta semana
@@ -40,9 +42,11 @@ class UserGamificationProfile extends Equatable {
     this.lastActivityDate,
     this.streakStartDate,
     this.unlockedAchievements = const [],
+    this.newAchievements = const [],
     this.mascotState = 'happy',
     this.mascotLevel = 1,
     this.dailyXP = const {},
+    this.completedDailyChallenges = const {},
     this.restDaysUsed = 0,
     this.restDaysAvailable = 3,
     this.isPauseModeActive = false,
@@ -65,9 +69,11 @@ class UserGamificationProfile extends Equatable {
         lastActivityDate,
         streakStartDate,
         unlockedAchievements,
+        newAchievements,
         mascotState,
         mascotLevel,
         dailyXP,
+        completedDailyChallenges,
         restDaysUsed,
         restDaysAvailable,
         isPauseModeActive,
@@ -89,9 +95,11 @@ class UserGamificationProfile extends Equatable {
     DateTime? lastActivityDate,
     DateTime? streakStartDate,
     List<String>? unlockedAchievements,
+    List<String>? newAchievements,
     String? mascotState,
     int? mascotLevel,
     Map<String, int>? dailyXP,
+    Map<String, DateTime>? completedDailyChallenges,
     int? restDaysUsed,
     int? restDaysAvailable,
     bool? isPauseModeActive,
@@ -112,9 +120,11 @@ class UserGamificationProfile extends Equatable {
       lastActivityDate: lastActivityDate ?? this.lastActivityDate,
       streakStartDate: streakStartDate ?? this.streakStartDate,
       unlockedAchievements: unlockedAchievements ?? this.unlockedAchievements,
+      newAchievements: newAchievements ?? this.newAchievements,
       mascotState: mascotState ?? this.mascotState,
       mascotLevel: mascotLevel ?? this.mascotLevel,
       dailyXP: dailyXP ?? this.dailyXP,
+      completedDailyChallenges: completedDailyChallenges ?? this.completedDailyChallenges,
       restDaysUsed: restDaysUsed ?? this.restDaysUsed,
       restDaysAvailable: restDaysAvailable ?? this.restDaysAvailable,
       isPauseModeActive: isPauseModeActive ?? this.isPauseModeActive,

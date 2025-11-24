@@ -1,10 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
 import '../../domain/entities/user_gamification_profile.dart';
 import '../../domain/entities/xp_transaction.dart';
-import '../../domain/entities/achievement.dart';
 import '../../domain/entities/daily_streak.dart';
 
 /// Data source local para gamificación (SQLite)
@@ -29,7 +28,7 @@ class GamificationLocalDataSource {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (db, version) async {
         // Tabla de perfil de gamificación
         await db.execute('''
@@ -43,9 +42,11 @@ class GamificationLocalDataSource {
             last_activity_date INTEGER,
             streak_start_date INTEGER,
             unlocked_achievements TEXT NOT NULL DEFAULT '[]',
+            new_achievements TEXT NOT NULL DEFAULT '[]',
             mascot_state TEXT NOT NULL DEFAULT 'happy',
             mascot_level INTEGER NOT NULL DEFAULT 1,
             daily_xp TEXT NOT NULL DEFAULT '{}',
+            completed_daily_challenges TEXT NOT NULL DEFAULT '{}',
             rest_days_used INTEGER NOT NULL DEFAULT 0,
             rest_days_available INTEGER NOT NULL DEFAULT 3,
             is_pause_mode_active INTEGER NOT NULL DEFAULT 0,
@@ -96,6 +97,41 @@ class GamificationLocalDataSource {
         await db.execute(
           'CREATE INDEX idx_xp_synced ON xp_transactions(is_synced)',
         );
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Agregar columna new_achievements
+          try {
+            await db.execute(
+              'ALTER TABLE user_gamification_profile ADD COLUMN new_achievements TEXT NOT NULL DEFAULT \'[]\'',
+            );
+          } catch (e) {
+            // Si la columna ya existe, ignorar el error
+            if (kDebugMode) {
+              print('⚠️ Columna new_achievements ya existe o error: $e');
+            }
+          }
+        }
+        if (oldVersion < 3) {
+          // Agregar columna completed_daily_challenges
+          try {
+            await db.execute(
+              'ALTER TABLE user_gamification_profile ADD COLUMN completed_daily_challenges TEXT NOT NULL DEFAULT \'{}\'',
+            );
+            if (kDebugMode) {
+              print(
+                '✅ Migración v3: Columna completed_daily_challenges agregada',
+              );
+            }
+          } catch (e) {
+            // Si la columna ya existe, ignorar el error
+            if (kDebugMode) {
+              print(
+                '⚠️ Columna completed_daily_challenges ya existe o error: $e',
+              );
+            }
+          }
+        }
       },
     );
   }
@@ -208,11 +244,17 @@ class GamificationLocalDataSource {
       'last_activity_date': profile.lastActivityDate?.millisecondsSinceEpoch,
       'streak_start_date': profile.streakStartDate?.millisecondsSinceEpoch,
       'unlocked_achievements': jsonEncode(profile.unlockedAchievements),
+      'new_achievements': jsonEncode(profile.newAchievements),
       'mascot_state': profile.mascotState,
       'mascot_level': profile.mascotLevel,
-      'daily_xp': jsonEncode(profile.dailyXP.map(
-        (key, value) => MapEntry(key, value),
-      )),
+      'daily_xp': jsonEncode(
+        profile.dailyXP.map((key, value) => MapEntry(key, value)),
+      ),
+      'completed_daily_challenges': jsonEncode(
+        profile.completedDailyChallenges.map(
+          (key, value) => MapEntry(key, value.millisecondsSinceEpoch),
+        ),
+      ),
       'rest_days_used': profile.restDaysUsed,
       'rest_days_available': profile.restDaysAvailable,
       'is_pause_mode_active': profile.isPauseModeActive ? 1 : 0,
@@ -235,29 +277,48 @@ class GamificationLocalDataSource {
       nextLevelXP: map['next_level_xp'] as int,
       currentStreak: map['current_streak'] as int,
       lastActivityDate: map['last_activity_date'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['last_activity_date'] as int)
+          ? DateTime.fromMillisecondsSinceEpoch(
+              map['last_activity_date'] as int,
+            )
           : null,
       streakStartDate: map['streak_start_date'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['streak_start_date'] as int)
           : null,
-      unlockedAchievements: (jsonDecode(map['unlocked_achievements'] as String)
-              as List)
-          .map((e) => e.toString())
-          .toList(),
+      unlockedAchievements:
+          (jsonDecode(map['unlocked_achievements'] as String) as List)
+              .map((e) => e.toString())
+              .toList(),
+      newAchievements: map['new_achievements'] != null
+          ? (jsonDecode(map['new_achievements'] as String) as List)
+                .map((e) => e.toString())
+                .toList()
+          : [],
       mascotState: map['mascot_state'] as String,
       mascotLevel: map['mascot_level'] as int,
       dailyXP: (jsonDecode(map['daily_xp'] as String) as Map<String, dynamic>)
           .map((key, value) => MapEntry(key, value as int)),
+      completedDailyChallenges: map['completed_daily_challenges'] != null
+          ? (jsonDecode(map['completed_daily_challenges'] as String)
+                    as Map<String, dynamic>)
+                .map(
+                  (key, value) => MapEntry(
+                    key,
+                    DateTime.fromMillisecondsSinceEpoch(value as int),
+                  ),
+                )
+          : const {},
       restDaysUsed: map['rest_days_used'] as int,
       restDaysAvailable: map['rest_days_available'] as int,
       isPauseModeActive: (map['is_pause_mode_active'] as int) == 1,
       pauseModeStartDate: map['pause_mode_start_date'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
-              map['pause_mode_start_date'] as int)
+              map['pause_mode_start_date'] as int,
+            )
           : null,
       lastRestDayUsed: map['last_rest_day_used'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
-              map['last_rest_day_used'] as int)
+              map['last_rest_day_used'] as int,
+            )
           : null,
       isSynced: (map['is_synced'] as int) == 1,
       lastSyncAt: map['last_sync_at'] != null
@@ -316,8 +377,8 @@ class GamificationLocalDataSource {
   }
 
   DailyStreak _streakFromMap(Map<String, dynamic> map) {
-    final activityDatesList = jsonDecode(map['activity_dates'] as String)
-        as List<dynamic>;
+    final activityDatesList =
+        jsonDecode(map['activity_dates'] as String) as List<dynamic>;
     return DailyStreak(
       userId: map['user_id'] as String,
       currentStreak: map['current_streak'] as int,
@@ -326,7 +387,8 @@ class GamificationLocalDataSource {
           : null,
       lastActivityDate: map['last_activity_date'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
-              map['last_activity_date'] as int)
+              map['last_activity_date'] as int,
+            )
           : null,
       activityDates: activityDatesList
           .map((d) => DateTime.fromMillisecondsSinceEpoch(d as int))
@@ -338,9 +400,9 @@ class GamificationLocalDataSource {
       isPauseModeActive: (map['is_pause_mode_active'] as int) == 1,
       pauseModeStartDate: map['pause_mode_start_date'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
-              map['pause_mode_start_date'] as int)
+              map['pause_mode_start_date'] as int,
+            )
           : null,
     );
   }
 }
-

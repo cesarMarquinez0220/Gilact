@@ -31,6 +31,7 @@ class GamificationBloc
     on<DeactivatePauseMode>(_onDeactivatePauseMode);
     on<SyncWithFirestore>(_onSyncWithFirestore);
     on<DetectAchievements>(_onDetectAchievements);
+    on<UpdateGamificationProfile>(_onUpdateGamificationProfile);
   }
 
   Future<void> _onLoadGamificationProfile(
@@ -396,6 +397,35 @@ class GamificationBloc
   }
 
   /// Determina el estado de la mascota basándose en el perfil y la racha
+  Future<void> _onUpdateGamificationProfile(
+    UpdateGamificationProfile event,
+    Emitter<GamificationState> emit,
+  ) async {
+    try {
+      await _repository.saveProfile(event.profile);
+      
+      if (state is GamificationLoaded) {
+        final currentState = state as GamificationLoaded;
+        final achievements = _achievementService.getUnlockedAchievements(event.profile);
+        emit(currentState.copyWith(
+          profile: event.profile,
+          unlockedAchievements: achievements,
+        ));
+      } else {
+        final achievements = _achievementService.getUnlockedAchievements(event.profile);
+        emit(GamificationLoaded(
+          profile: event.profile,
+          unlockedAchievements: achievements,
+        ));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error actualizando perfil: $e');
+      }
+      emit(GamificationError('Error actualizando perfil: $e'));
+    }
+  }
+
   String _determineMascotState(
     UserGamificationProfile profile,
     DailyStreak streak,

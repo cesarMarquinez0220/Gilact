@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../entities/xp_transaction.dart';
 
 /// Servicio para calcular XP según diferentes acciones
@@ -26,6 +25,18 @@ class XPCalculationService {
   static const int _bonusStreak30Days = 500;
   static const int _bonusStreak60Days = 1000;
   static const int _bonusStreak100Days = 2000;
+
+  // BONUSES POR MILESTONES DE REGISTROS
+  static const int _bonusMilestone10 = 25;
+  static const int _bonusMilestone25 = 50;
+  static const int _bonusMilestone50 = 100;
+  static const int _bonusMilestone100 = 200;
+  static const int _bonusMilestone250 = 500;
+  static const int _bonusMilestone500 = 1000;
+
+  // BONUSES POR TRIVIA
+  static const int _bonusTriviaPerQuestion = 5; // XP por pregunta correcta
+  static const int _bonusTriviaPerfect = 20; // Bonus adicional si todas correctas
 
   /// Calcula XP para un registro rápido de lactancia
   XPTransaction calculateXPForQuickLactation({
@@ -203,6 +214,101 @@ class XPCalculationService {
       source: XPSource.achievementUnlocked,
       sourceId: achievementId,
       bonusReason: 'achievement_unlocked',
+      timestamp: timestamp,
+    );
+  }
+
+  /// Calcula bonus de XP por alcanzar un milestone de registros
+  /// Retorna null si no hay milestone alcanzado
+  XPTransaction? calculateRecordMilestoneBonus({
+    required String userId,
+    required int totalRecords,
+    required DateTime timestamp,
+  }) {
+    int? bonusXP;
+    String? bonusReason;
+
+    switch (totalRecords) {
+      case 10:
+        bonusXP = _bonusMilestone10;
+        bonusReason = 'milestone_10_records';
+        break;
+      case 25:
+        bonusXP = _bonusMilestone25;
+        bonusReason = 'milestone_25_records';
+        break;
+      case 50:
+        bonusXP = _bonusMilestone50;
+        bonusReason = 'milestone_50_records';
+        break;
+      case 100:
+        bonusXP = _bonusMilestone100;
+        bonusReason = 'milestone_100_records';
+        break;
+      case 250:
+        bonusXP = _bonusMilestone250;
+        bonusReason = 'milestone_250_records';
+        break;
+      case 500:
+        bonusXP = _bonusMilestone500;
+        bonusReason = 'milestone_500_records';
+        break;
+      default:
+        return null; // No hay milestone para este número
+    }
+
+    return XPTransaction(
+      id: _generateTransactionId(),
+      userId: userId,
+      amount: bonusXP,
+      source: XPSource.recordMilestone,
+      bonusReason: bonusReason,
+      timestamp: timestamp,
+    );
+  }
+
+  /// Calcula XP por completar un desafío diario
+  XPTransaction calculateXPForDailyChallenge({
+    required String userId,
+    required String challengeId,
+    required int xpReward,
+    required DateTime timestamp,
+  }) {
+    return XPTransaction(
+      id: _generateTransactionId(),
+      userId: userId,
+      amount: xpReward,
+      source: XPSource.dailyChallenge,
+      sourceId: challengeId,
+      bonusReason: 'daily_challenge_completed',
+      timestamp: timestamp,
+    );
+  }
+
+  /// Calcula XP por completar trivia después de una lección
+  XPTransaction calculateXPForTrivia({
+    required String userId,
+    required String lessonId,
+    required int correctAnswers,
+    required int totalQuestions,
+    required DateTime timestamp,
+  }) {
+    int xp = correctAnswers * _bonusTriviaPerQuestion;
+    
+    // Bonus adicional si todas las respuestas son correctas
+    if (correctAnswers == totalQuestions) {
+      xp += _bonusTriviaPerfect;
+    }
+
+    return XPTransaction(
+      id: _generateTransactionId(),
+      userId: userId,
+      amount: xp,
+      source: XPSource.triviaCompleted,
+      sourceId: lessonId,
+      bonusReason: correctAnswers == totalQuestions 
+          ? 'trivia_perfect' 
+          : 'trivia_$correctAnswers/$totalQuestions',
       timestamp: timestamp,
     );
   }
