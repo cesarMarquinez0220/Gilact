@@ -512,7 +512,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                     if (isLocked) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Completa la trivia de la lección anterior para desbloquear',
+                        'trivia.completePrevious'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           color: Colors.orange[300],
@@ -854,8 +854,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
             ),
             label: Text(
               isCompleted
-                  ? 'Trivia Completada ✓'
-                  : 'Completar Trivia para Avanzar',
+                  ? 'trivia.completed'.tr()
+                  : 'trivia.completeToAdvance'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -904,7 +904,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     if (isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('¡Ya completaste esta trivia!'),
+          content: Text('trivia.alreadyCompleted'.tr()),
           backgroundColor: Colors.green,
         ),
       );

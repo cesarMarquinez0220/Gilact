@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../user/presentation/bloc/user_profile_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../gamification/domain/entities/achievement.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
-import 'companion_achievement_dialog.dart';
+import 'companion_achievement_badge.dart';
 
 /// Sección de logros/badges de la página de compañera
 class CompanionAchievementsSection extends StatelessWidget {
@@ -54,7 +53,7 @@ class CompanionAchievementsSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Logros',
+                        'companion.achievements'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -62,7 +61,7 @@ class CompanionAchievementsSection extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Comienza a desbloquear logros',
+                        'companion.startUnlocking'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -75,7 +74,7 @@ class CompanionAchievementsSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '¡Comienza tu viaje! Cada acción te acerca a nuevos logros 🎯',
+              'companion.startJourney'.tr(),
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
                 fontSize: 14,
@@ -116,7 +115,7 @@ class CompanionAchievementsSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Logros Desbloqueados',
+                        'companion.unlockedAchievements'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -124,7 +123,7 @@ class CompanionAchievementsSection extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '$unlockedCount de $totalAchievements',
+                        '$unlockedCount ${'companion.of'.tr()} $totalAchievements',
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -178,9 +177,9 @@ class CompanionAchievementsSection extends StatelessWidget {
                   labelColor: const Color(0xFF03A696),
                   unselectedLabelColor: Colors.grey[600],
                   indicatorColor: const Color(0xFF03A696),
-                  tabs: const [
-                    Tab(text: 'Desbloqueados'),
-                    Tab(text: 'Todos'),
+                  tabs: [
+                    Tab(text: 'companion.unlocked'.tr()),
+                    Tab(text: 'companion.all'.tr()),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -230,15 +229,11 @@ class _XPInfoButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: const Color(0xFF03A696),
-              size: 20,
-            ),
+            Icon(Icons.info_outline, color: const Color(0xFF03A696), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                '¿Cómo ganar XP?',
+                'companion.howToEarnXP'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -269,11 +264,7 @@ class _XPInfoButton extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF03A696),
-                Color(0xFF26A69A),
-                Color(0xFF4DB6AC),
-              ],
+              colors: [Color(0xFF03A696), Color(0xFF26A69A), Color(0xFF4DB6AC)],
             ),
           ),
           child: Column(
@@ -285,7 +276,7 @@ class _XPInfoButton extends StatelessWidget {
                   const Icon(Icons.star, color: Colors.white, size: 28),
                   const SizedBox(width: 12),
                   Text(
-                    '¿Cómo ganar XP?',
+                    'companion.howToEarnXP'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -295,12 +286,36 @@ class _XPInfoButton extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              _XPInfoItem('Registro rápido', '10 XP', '+5 XP si es primero del día'),
-              _XPInfoItem('Registro completo', '20 XP', '+5 XP primero del día, +10 XP si incluye sueño'),
-              _XPInfoItem('Completar lección', '30 XP', '+15 XP si es primera del día'),
-              _XPInfoItem('Completar trivia', '5 XP por pregunta', '+20 XP si todas correctas'),
-              _XPInfoItem('Registro de peso', '15 XP', ''),
-              _XPInfoItem('Registro de sueño', '10 XP', ''),
+              _XPInfoItem(
+                'companion.quickRecord'.tr(),
+                'companion.baseXP'.tr(namedArgs: {'xp': '10'}),
+                'companion.firstOfDay'.tr(),
+              ),
+              _XPInfoItem(
+                'companion.fullRecord'.tr(),
+                'companion.baseXP'.tr(namedArgs: {'xp': '20'}),
+                'companion.firstOfDaySleep'.tr(),
+              ),
+              _XPInfoItem(
+                'companion.completeLesson'.tr(),
+                'companion.baseXP'.tr(namedArgs: {'xp': '30'}),
+                'companion.firstLessonOfDay'.tr(),
+              ),
+              _XPInfoItem(
+                'companion.completeTrivia'.tr(),
+                'companion.perQuestion'.tr(),
+                'companion.allCorrect'.tr(),
+              ),
+              _XPInfoItem(
+                'companion.weightRecord'.tr(),
+                'companion.baseXP'.tr(namedArgs: {'xp': '15'}),
+                '',
+              ),
+              _XPInfoItem(
+                'companion.sleepRecord'.tr(),
+                'companion.baseXP'.tr(namedArgs: {'xp': '10'}),
+                '',
+              ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -312,7 +327,7 @@ class _XPInfoButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bonuses Especiales:',
+                      'companion.specialBonuses'.tr() + ':',
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -321,9 +336,9 @@ class _XPInfoButton extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Milestones de registros: +25 a +1000 XP\n'
-                      '• Rachas: +50 a +2000 XP\n'
-                      '• Logros desbloqueados: +20 a +3000 XP',
+                      '• ${'companion.milestones'.tr()}\n'
+                      '• ${'companion.streaks'.tr()}\n'
+                      '• ${'companion.unlockedAchievementsBonus'.tr()}',
                       style: GoogleFonts.quicksand(
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.9),
@@ -337,11 +352,9 @@ class _XPInfoButton extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: Text(
-                    'Entendido',
+                    'companion.understood'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -533,4 +546,3 @@ class _AllAchievementsGrid extends StatelessWidget {
     );
   }
 }
-

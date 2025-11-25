@@ -404,7 +404,7 @@ class LactationService {
       UserStatistics? userStats;
       if (_userStatisticsService != null) {
         try {
-          userStats = await _userStatisticsService!.getUserStatistics(userId);
+          userStats = await _userStatisticsService.getUserStatistics(userId);
         } catch (e) {
           if (kDebugMode) {
             print('⚠️ Error obteniendo estadísticas del usuario: $e');

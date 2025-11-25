@@ -62,13 +62,86 @@ class VibrationService {
   }
 
   /// Vibra cuando se completa una acción exitosa
+  /// Patrón: vibración ligera seguida de una pausa y otra ligera (suave y celebratorio)
   Future<void> vibrateOnSuccess() async {
-    await lightImpact();
+    if (!isVibrationEnabled()) return;
+    try {
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 80));
+      await lightImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de éxito: $e');
+    }
+  }
+
+  /// Vibra cuando se desbloquea un logro
+  /// Patrón: ligera-mediana-ligera (patrón de celebración)
+  Future<void> vibrateOnAchievement() async {
+    if (!isVibrationEnabled()) return;
+    try {
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 60));
+      await mediumImpact();
+      await Future.delayed(const Duration(milliseconds: 80));
+      await lightImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de logro: $e');
+    }
+  }
+
+  /// Vibra cuando se gana XP
+  /// Patrón: ligera-ligera (doble toque suave)
+  Future<void> vibrateOnXP() async {
+    if (!isVibrationEnabled()) return;
+    try {
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await lightImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de XP: $e');
+    }
+  }
+
+  /// Vibra cuando se sube de nivel
+  /// Patrón: ligera-mediana-ligera-mediana (patrón especial de celebración)
+  Future<void> vibrateOnLevelUp() async {
+    if (!isVibrationEnabled()) return;
+    try {
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await mediumImpact();
+      await Future.delayed(const Duration(milliseconds: 70));
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 60));
+      await mediumImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de nivel: $e');
+    }
+  }
+
+  /// Vibra cuando se completa una trivia correctamente
+  /// Patrón: ligera-ligera-ligera (triple toque suave)
+  Future<void> vibrateOnTriviaCorrect() async {
+    if (!isVibrationEnabled()) return;
+    try {
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 40));
+      await lightImpact();
+      await Future.delayed(const Duration(milliseconds: 40));
+      await lightImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de trivia: $e');
+    }
   }
 
   /// Vibra cuando hay un error
   Future<void> vibrateOnError() async {
-    await mediumImpact();
+    if (!isVibrationEnabled()) return;
+    try {
+      await mediumImpact();
+    } catch (e) {
+      print('⚠️ Error en vibración de error: $e');
+    }
   }
 
   /// Vibra cuando se presiona un botón

@@ -1055,6 +1055,45 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
+  /// Maneja la transición automática de preparto a postparto cuando el timer llega a 0
+  void _handleCountdownReached(BuildContext context, UserProfileState state) {
+    // Solo procesar una vez
+    if (state is UserProfileLoaded || state is UserProfileUpdated) {
+      final profile = (state as dynamic).profile;
+      
+      // Solo hacer la transición si aún está en preparto
+      if (profile.isPrePartum && !profile.isPostPartum) {
+        print('🎉 HomePage: Timer llegó a 0, transicionando a postparto...');
+        
+        // Actualizar situación del usuario
+        context.read<UserProfileBloc>().add(
+          UpdateUserSituationRequested(
+            userId: profile.id,
+            isPrePartum: false,
+            isPostPartum: true,
+            situationData: {
+              ...?profile.situationData,
+              'transitionDate': DateTime.now().toIso8601String(),
+            },
+          ),
+        );
+
+        // Mostrar mensaje de felicitación
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'gamification.messages.congratulations'.tr(),
+              style: GoogleFonts.quicksand(),
+            ),
+            backgroundColor: const Color(0xFF03A696),
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   /// Construye la sección del contador con manejo de casos
   Widget _buildCountdownSection(BuildContext context, UserProfileState state) {
     // Evitar "flash" del mensaje de Información Pendiente:
@@ -1128,8 +1167,13 @@ class _HomePageState extends State<HomePage> {
     final expectedBirthDate = _getExpectedBirthDate(state);
 
     if (expectedBirthDate != null) {
-      // Mostrar CountdownCard con fecha real
-      return CountdownCard(expectedBirthDate: expectedBirthDate);
+      // Mostrar CountdownCard con fecha real y callback para transición
+      return CountdownCard(
+        expectedBirthDate: expectedBirthDate,
+        onCountdownReached: () {
+          _handleCountdownReached(context, state);
+        },
+      );
     } else {
       // Mostrar mensaje informativo cuando no hay fecha
       return Container(

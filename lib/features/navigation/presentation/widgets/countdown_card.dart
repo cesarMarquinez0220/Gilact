@@ -1,15 +1,68 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// Widget para el contador de cuenta regresiva del embarazo
-class CountdownCard extends StatelessWidget {
+class CountdownCard extends StatefulWidget {
   final String expectedBirthDate;
+  final VoidCallback? onCountdownReached;
 
   const CountdownCard({
     super.key,
     this.expectedBirthDate = '2026-01-12T00:00:00.000',
+    this.onCountdownReached,
   });
+
+  @override
+  State<CountdownCard> createState() => _CountdownCardState();
+}
+
+class _CountdownCardState extends State<CountdownCard> {
+  Timer? _timer;
+  Duration? _currentDifference;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateCountdown();
+    // Actualizar cada segundo para que el contador sea funcional
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        _updateCountdown();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _updateCountdown() {
+    try {
+      final birthDate = DateTime.parse(widget.expectedBirthDate);
+      final now = DateTime.now();
+      final difference = birthDate.difference(now);
+      
+      setState(() {
+        _currentDifference = difference;
+      });
+
+      // Si el contador llegó a 0 o pasó, llamar al callback
+      if (difference.isNegative || difference.inSeconds <= 0) {
+        if (widget.onCountdownReached != null) {
+          widget.onCountdownReached!();
+        }
+      }
+    } catch (e) {
+      // Error al parsear fecha
+      setState(() {
+        _currentDifference = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,21 +141,19 @@ class CountdownCard extends StatelessWidget {
   }
 
   Widget _buildCountdownDisplay() {
-    try {
-      final birthDate = DateTime.parse(expectedBirthDate);
-      final now = DateTime.now();
-      final difference = birthDate.difference(now);
-      final daysLeft = difference.inDays;
-
-      if (daysLeft < 0) {
-        return _buildPastDueDisplay();
-      } else if (daysLeft == 0) {
-        return _buildTodayDisplay();
-      } else {
-        return _buildActiveCountdown(difference);
-      }
-    } catch (e) {
+    if (_currentDifference == null) {
       return _buildErrorDisplay();
+    }
+
+    final daysLeft = _currentDifference!.inDays;
+    final hoursLeft = _currentDifference!.inHours;
+
+    if (daysLeft < 0) {
+      return _buildPastDueDisplay();
+    } else if (daysLeft == 0 && hoursLeft <= 0) {
+      return _buildTodayDisplay();
+    } else {
+      return _buildActiveCountdown(_currentDifference!);
     }
   }
 
@@ -284,7 +335,7 @@ class CountdownCard extends StatelessWidget {
 
   Widget _buildProgressBar() {
     try {
-      final birthDate = DateTime.parse(expectedBirthDate);
+      final birthDate = DateTime.parse(widget.expectedBirthDate);
       final now = DateTime.now();
       final totalDays = 280; // 40 semanas promedio
       final daysPassed = now
@@ -376,25 +427,22 @@ class CountdownCard extends StatelessWidget {
   }
 
   String _getMotivationalMessage() {
-    try {
-      final birthDate = DateTime.parse(expectedBirthDate);
-      final now = DateTime.now();
-      final difference = birthDate.difference(now);
-      final daysLeft = difference.inDays;
-
-      if (daysLeft < 0) {
-        return 'countdown.newAdventure'.tr();
-      } else if (daysLeft == 0) {
-        return 'countdown.greatDayArrived'.tr();
-      } else if (daysLeft <= 7) {
-        return 'countdown.verySoon'.tr();
-      } else if (daysLeft <= 30) {
-        return 'countdown.oneMonthLeft'.tr();
-      } else {
-        return 'countdown.motivationalMessage'.tr();
-      }
-    } catch (e) {
+    if (_currentDifference == null) {
       return 'countdown.stayStrong'.tr();
+    }
+
+    final daysLeft = _currentDifference!.inDays;
+
+    if (daysLeft < 0) {
+      return 'countdown.newAdventure'.tr();
+    } else if (daysLeft == 0) {
+      return 'countdown.greatDayArrived'.tr();
+    } else if (daysLeft <= 7) {
+      return 'countdown.verySoon'.tr();
+    } else if (daysLeft <= 30) {
+      return 'countdown.oneMonthLeft'.tr();
+    } else {
+      return 'countdown.motivationalMessage'.tr();
     }
   }
 }

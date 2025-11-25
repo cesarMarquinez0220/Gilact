@@ -467,12 +467,11 @@ class GamificationService {
       int pendingCount = 0;
 
       lessonsResult.fold((failure) => null, (lessons) {
-        for (final lesson in lessons) {
-          // Verificar si la trivia está completada
-          // Por ahora, asumimos que si no hay transacción XP de trivia para esta lección, está pendiente
-          // TODO: Implementar verificación real de trivias completadas por lección
-          pendingCount++;
-        }
+        // Contar lecciones que tienen trivias pendientes
+        // Por ahora, asumimos que todas las lecciones tienen trivias pendientes si no hay transacción XP
+        // TODO: Implementar verificación real de trivias completadas por lección
+        pendingCount = lessons.length;
+        return null;
       });
 
       return pendingCount;

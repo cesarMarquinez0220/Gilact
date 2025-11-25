@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../gamification/domain/entities/achievement.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
-import '../../../gamification/domain/services/user_statistics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../lactation/data/datasources/lactation_database.dart';
@@ -63,37 +63,35 @@ class CompanionAchievementDialog extends StatelessWidget {
     switch (achievement.type) {
       case AchievementType.lactation:
         if (achievement.id.startsWith('milestone_')) {
-          return 'Completa ${achievement.requiredValue} registros de lactancia en total.';
+          return 'gamification.messages.achievementDescriptions.milestone'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id.startsWith('complete_')) {
-          return 'Completa ${achievement.requiredValue} registros completos (con todos los detalles).';
+          return 'gamification.messages.achievementDescriptions.complete'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id.startsWith('daily_')) {
-          return 'Realiza ${achievement.requiredValue} registros en un solo día.';
+          return 'gamification.messages.achievementDescriptions.daily'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id == 'nocturnal_10') {
-          return 'Realiza 10 registros entre las 12am y las 6am.';
+          return 'gamification.messages.achievementDescriptions.nocturnal'.tr();
         }
-        return 'Completa ${achievement.requiredValue} registros de lactancia.';
+        return 'gamification.messages.achievementDescriptions.lactation'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
       case AchievementType.lesson:
         if (achievement.id == 'trivia_perfect_5') {
-          return 'Completa 5 trivias con 100% de respuestas correctas.';
+          return 'gamification.messages.achievementDescriptions.triviaPerfect'.tr();
         }
-        return 'Completa ${achievement.requiredValue} lecciones.';
+        return 'gamification.messages.achievementDescriptions.lesson'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
       case AchievementType.streak:
-        return 'Mantén una racha de ${achievement.requiredValue} días consecutivos registrando actividad.';
+        return 'gamification.messages.achievementDescriptions.streak'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
       case AchievementType.special:
         if (achievement.id.startsWith('level_')) {
-          return 'Alcanza el nivel ${achievement.requiredValue} ganando XP.';
+          return 'gamification.messages.achievementDescriptions.level'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id == 'weight_10') {
-          return 'Registra el peso de tu bebé ${achievement.requiredValue} veces.';
+          return 'gamification.messages.achievementDescriptions.weight'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id == 'sleep_20') {
-          return 'Registra el sueño de tu bebé ${achievement.requiredValue} veces.';
+          return 'gamification.messages.achievementDescriptions.sleep'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         } else if (achievement.id.startsWith('first_') ||
             achievement.id.startsWith('three_') ||
             achievement.id.startsWith('six_')) {
-          return 'Usa la app durante ${achievement.requiredValue} días.';
+          return 'gamification.messages.achievementDescriptions.appUsage'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
         }
-        return 'Completa el objetivo requerido.';
-      default:
-        return 'Completa el objetivo requerido.';
+        return 'gamification.messages.achievementDescriptions.default'.tr();
     }
   }
 }
@@ -241,9 +239,8 @@ class _AchievementDetailsDialogContentState
               widget.achievement.id.startsWith('three_') ||
               widget.achievement.id.startsWith('six_')) {
             // Solo necesitamos días usando la app
-            if (widget.profile.createdAt != null) {
-              final daysUsingApp =
-                  DateTime.now().difference(widget.profile.createdAt).inDays;
+            final daysUsingApp =
+                DateTime.now().difference(widget.profile.createdAt).inDays;
               progressText =
                   '$daysUsingApp/${widget.achievement.requiredValue} días usando la app.';
             }
@@ -463,7 +460,7 @@ class _AchievementDetailsDialogContentState
               backgroundColor: Colors.amber[700],
             ),
             child: Text(
-              '¡Genial!',
+              'gamification.messages.great'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

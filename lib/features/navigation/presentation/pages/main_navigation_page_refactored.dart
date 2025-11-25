@@ -218,8 +218,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       }
 
       // Validación defensiva: userId debería estar asignado aquí
-      if (userId == null) {
-        print('❌ MainNavigationPage: Error crítico - userId es null');
+      if (userId.isEmpty) {
+        print('❌ MainNavigationPage: Error crítico - userId es vacío');
         return;
       }
 

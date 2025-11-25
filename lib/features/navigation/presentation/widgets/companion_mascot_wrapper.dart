@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 
@@ -29,15 +30,15 @@ class _CompanionMascotWrapperState extends State<CompanionMascotWrapper>
   late Animation<double> _scaleAnimation;
   String? _currentMessage;
 
-  // Mensajes rotativos para la mascota
-  final List<String> _messages = [
-    '¡Hola! ¿Cómo estás hoy? 💙',
-    '¡Sigue así, lo estás haciendo genial! 🌟',
-    'Cada registro cuenta, estás haciendo un gran trabajo 👏',
-    'Recuerda: tu bienestar es lo más importante 💕',
-    '¡Estás avanzando increíblemente! 🎉',
-    'Tómate tu tiempo, no hay prisa ⏰',
-    'Eres una super mamá, sigue así! 💪',
+  // Mensajes rotativos para la mascota (se traducirán dinámicamente)
+  List<String> get _messages => [
+    'gamification.messages.helloHowAreYou'.tr(),
+    'companion.mascotMessages.keepGoing'.tr(),
+    'companion.mascotMessages.everyRecordCounts'.tr(),
+    'companion.mascotMessages.yourWellbeing'.tr(),
+    'companion.mascotMessages.youAreAdvancing'.tr(),
+    'companion.mascotMessages.takeYourTime'.tr(),
+    'companion.mascotMessages.youAreSuperMom'.tr(),
   ];
 
   @override
@@ -90,23 +91,23 @@ class _CompanionMascotWrapperState extends State<CompanionMascotWrapper>
     String defaultMessage;
     switch (widget.profile.mascotState) {
       case 'celebrating':
-        defaultMessage = '¡Excelente trabajo! 🎉';
+        defaultMessage = 'gamification.messages.excellentWork'.tr();
         break;
       case 'thinking':
-        defaultMessage = 'Estás muy cerca de subir de nivel';
+        defaultMessage = 'gamification.messages.closeToLevelUp'.tr();
         break;
       case 'worried':
-        defaultMessage = 'Tu racha está en riesgo...';
+        defaultMessage = 'gamification.messages.streakAtRisk'.tr();
         break;
       case 'supporting':
-        defaultMessage = 'Tómate el tiempo que necesites, estaremos aquí 💙';
+        defaultMessage = 'gamification.messages.takeYourTime'.tr();
         break;
       case 'sleeping':
-        defaultMessage = 'Descansa bien, te esperamos mañana';
+        defaultMessage = 'gamification.messages.restWell'.tr();
         break;
       case 'happy':
       default:
-        defaultMessage = '¡Hola! ¿Cómo estás hoy?';
+        defaultMessage = 'gamification.messages.helloHowAreYou'.tr();
         break;
     }
 

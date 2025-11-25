@@ -480,10 +480,99 @@
     "historyDescription": "Videos vistos recientemente"
   },
   "companion": {
+    "mascotMessages": {
+      "keepGoing": "¡Sigue así, lo estás haciendo genial! 🌟",
+      "everyRecordCounts": "Cada registro cuenta, estás haciendo un gran trabajo 👏",
+      "yourWellbeing": "Recuerda: tu bienestar es lo más importante 💕",
+      "youAreAdvancing": "¡Estás avanzando increíblemente! 🎉",
+      "takeYourTime": "Tómate tu tiempo, no hay prisa ⏰",
+      "youAreSuperMom": "Eres una super mamá, sigue así! 💪"
+    },
     "title": "Compañera",
     "level": "Nivel",
     "streak": "Racha",
-    "achievements": "Logros"
+    "achievements": "Logros",
+    "headerTitle": "Tu Compañera",
+    "headerSubtitle": "Tu apoyo en este viaje",
+    "errorLoadingCompanion": "Error cargando compañera",
+    "dailyChallenge": "Desafío del Día",
+    "completed": "¡Completado!",
+    "progress": "Progreso",
+    "reward": "Recompensa",
+    "youWonXP": "¡Ganaste {xp} XP!",
+    "@youWonXP": {
+      "placeholders": {
+        "xp": {
+          "type": "int"
+        }
+      }
+    },
+    "achievements": "Logros",
+    "startUnlocking": "Comienza a desbloquear logros",
+    "startJourney": "¡Comienza tu viaje! Cada acción te acerca a nuevos logros 🎯",
+    "unlockedAchievements": "Logros Desbloqueados",
+    "of": "de",
+    "howToEarnXP": "¿Cómo ganar XP?",
+    "unlocked": "Desbloqueados",
+    "all": "Todos",
+    "summary": "Resumen",
+    "totalXP": "XP Total",
+    "level": "Nivel",
+    "streak": "Racha",
+    "days": "días",
+    "quickRecord": "Registro rápido",
+    "fullRecord": "Registro completo",
+    "completeLesson": "Completar lección",
+    "completeTrivia": "Completar trivia",
+    "weightRecord": "Registro de peso",
+    "sleepRecord": "Registro de sueño",
+    "specialBonuses": "Bonuses Especiales",
+    "milestones": "Milestones de registros: +25 a +1000 XP",
+    "streaks": "Rachas: +50 a +2000 XP",
+    "unlockedAchievementsBonus": "Logros desbloqueados: +20 a +3000 XP",
+    "understood": "Entendido",
+    "baseXP": "{xp} XP",
+    "@baseXP": {
+      "placeholders": {
+        "xp": {
+          "type": "String"
+        }
+      }
+    },
+    "firstOfDay": "+5 XP si es primero del día",
+    "firstOfDaySleep": "+5 XP primero del día, +10 XP si incluye sueño",
+    "firstLessonOfDay": "+15 XP si es primera del día",
+    "perQuestion": "5 XP por pregunta",
+    "allCorrect": "+20 XP si todas correctas"
+  },
+  "trivia": {
+    "title": "Trivia",
+    "question": "Pregunta",
+    "of": "de",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "perfect": "¡Perfecto!",
+    "wellDone": "¡Bien hecho!",
+    "youGot": "Obtuviste {correct} de {total} correctas",
+    "@youGot": {
+      "placeholders": {
+        "correct": {
+          "type": "int"
+        },
+        "total": {
+          "type": "int"
+        }
+      }
+    },
+    "completed": "Trivia Completada ✓",
+    "completeToAdvance": "Completar Trivia para Avanzar",
+    "alreadyCompleted": "¡Ya completaste esta trivia!",
+    "completePrevious": "Completa la trivia de la lección anterior para desbloquear",
+    "selectAnswer": "Selecciona una respuesta",
+    "xpEarned": "XP Ganados",
+    "totalXP": "Total XP",
+    "continue": "Continuar"
   },
   "health": {
     "title": "Salud",
@@ -1033,7 +1122,118 @@
       "streakAtRisk": "Tu racha está en riesgo, pero puedes usar un día de descanso",
       "takeYourTime": "Tómate el tiempo que necesites, estaremos aquí 💙",
       "restWell": "Descansa bien, te esperamos mañana",
-      "helloHowAreYou": "¡Hola! ¿Cómo estás hoy?"
+      "helloHowAreYou": "¡Hola! ¿Cómo estás hoy?",
+      "great": "¡Genial!",
+      "congratulations": "¡Felicidades! Es hora de comenzar tu nueva aventura con tu bebé 🎉",
+      "errorSavingXP": "Error al guardar XP: {error}",
+      "@errorSavingXP": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "videoCompleted": "¡Video Completado!",
+      "achievementDescriptions": {
+        "milestone": "Completa {value} registros de lactancia en total.",
+        "@milestone": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "complete": "Completa {value} registros completos (con todos los detalles).",
+        "@complete": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "daily": "Realiza {value} registros en un solo día.",
+        "@daily": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "nocturnal": "Realiza 10 registros entre las 12am y las 6am.",
+        "lactation": "Completa {value} registros de lactancia.",
+        "@lactation": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "triviaPerfect": "Completa 5 trivias con 100% de respuestas correctas.",
+        "lesson": "Completa {value} lecciones.",
+        "@lesson": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "streak": "Mantén una racha de {value} días consecutivos registrando actividad.",
+        "@streak": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "level": "Alcanza el nivel {value} ganando XP.",
+        "@level": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "weight": "Registra el peso de tu bebé {value} veces.",
+        "@weight": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "sleep": "Registra el sueño de tu bebé {value} veces.",
+        "@sleep": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "appUsage": "Usa la app durante {value} días.",
+        "@appUsage": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "default": "Completa el objetivo requerido."
+      },
+      "streakMessages": {
+        "atRisk": "Tu racha está en riesgo, pero puedes usar un día de descanso si lo necesitas",
+        "pauseMode": "Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙",
+        "pauseActive": "Modo pausa activo. Tómate el tiempo que necesites",
+        "active": "¡Excelente! Llevas {days} días consecutivos 🔥",
+        "@active": {
+          "placeholders": {
+            "days": {
+              "type": "int"
+            }
+          }
+        },
+        "lost": "Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙",
+        "noActivity": "¡Comienza tu primera racha hoy!"
+      }
     }
   },
   "sync": {

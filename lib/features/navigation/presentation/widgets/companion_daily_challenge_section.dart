@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../gamification/domain/entities/daily_challenge.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
@@ -93,7 +94,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Desafío del Día',
+                      'companion.dailyChallenge'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -127,7 +128,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                       const Icon(Icons.check_circle, color: Colors.white, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        '¡Completado!',
+                        'companion.completed'.tr(),
                         style: GoogleFonts.quicksand(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -157,7 +158,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Progreso',
+                    'companion.progress'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -207,8 +208,8 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   isCompleted
-                      ? '¡Ganaste ${challenge.xpReward} XP!'
-                      : 'Recompensa: ${challenge.xpReward} XP',
+                      ? 'companion.youWonXP'.tr(namedArgs: {'xp': challenge.xpReward.toString()})
+                      : 'companion.reward'.tr() + ': ${challenge.xpReward} XP',
                   style: GoogleFonts.quicksand(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,

@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../domain/entities/video.dart';
 import '../widgets/advanced_video_player.dart';
 import '../../data/services/video_cache_service.dart';
 import '../../data/services/video_preload_service.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
-import '../../../gamification/domain/services/gamification_service.dart';
-import 'package:get_it/get_it.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final Video video;
@@ -154,7 +150,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '¡Video Completado!',
+                    'gamification.messages.videoCompleted'.tr(),
                     style: GoogleFonts.quicksand(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,

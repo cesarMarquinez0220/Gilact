@@ -87,6 +87,7 @@ dependencies:
   path_provider: ^2.1.1
   youtube_explode_dart: ^2.0.0
   local_auth: ^2.3.0
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -224,6 +225,11 @@ flutter:
    - assets/images/badges/racha.png
    # Translation files
    - assets/translations/
+   # Sound files
+   - assets/sounds/achivement.wav
+   - assets/sounds/level_up.wav
+   - assets/sounds/success.mp3
+   - assets/sounds/trivia_correct.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

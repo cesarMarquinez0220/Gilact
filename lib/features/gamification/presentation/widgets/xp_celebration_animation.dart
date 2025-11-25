@@ -4,7 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/sound_service.dart';
+import '../../../../core/services/vibration_service.dart';
+import '../../../../core/di/injection.dart';
 
 /// Widget que muestra una animación de celebración cuando se gana XP
 class XPCelebrationAnimation extends StatefulWidget {
@@ -32,10 +36,12 @@ class XPCelebrationAnimation extends StatefulWidget {
       '⭐ XPCelebrationAnimation.show: xpAmount=$xpAmount, showStars=$showStars',
     );
 
-    // Vibración al mostrar
+    // Vibración y sonido al mostrar (usando servicios)
     if (withVibration) {
-      HapticFeedback.mediumImpact();
-      SystemSound.play(SystemSoundType.alert);
+      final soundService = getIt<SoundService>();
+      final vibrationService = getIt<VibrationService>();
+      soundService.playSuccessSound();
+      vibrationService.vibrateOnXP(); // Usar vibración específica para XP
     }
 
     final overlay = Overlay.of(context);
@@ -306,7 +312,7 @@ class _XPCelebrationAnimationState extends State<XPCelebrationAnimation>
                               duration: const Duration(milliseconds: 500),
                               delay: const Duration(milliseconds: 300),
                               child: Text(
-                                '¡Excelente trabajo!',
+                                'gamification.messages.excellentWork'.tr(),
                                 style: GoogleFonts.quicksand(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,

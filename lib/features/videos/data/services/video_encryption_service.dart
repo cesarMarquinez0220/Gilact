@@ -253,7 +253,7 @@ class VideoEncryptionService {
           if (lastEncryptedBlock != null) {
             final decrypted = _encrypter!.decryptBytes(
               Encrypted(lastBlockBytes),
-              iv: IV(lastEncryptedBlock!),
+              iv: IV(lastEncryptedBlock),
             );
             decryptedBlock = decrypted is Uint8List
                 ? decrypted

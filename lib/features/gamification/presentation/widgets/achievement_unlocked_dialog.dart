@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../domain/entities/achievement.dart';
+import '../../../../core/services/sound_service.dart';
+import '../../../../core/services/vibration_service.dart';
+import '../../../../core/di/injection.dart';
 
 /// Diálogo que muestra cuando se desbloquea un logro
 class AchievementUnlockedDialog extends StatelessWidget {
@@ -153,7 +156,7 @@ class AchievementUnlockedDialog extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  '¡Genial!',
+                  'gamification.messages.great'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -174,9 +177,12 @@ class AchievementUnlockedDialog extends StatelessWidget {
     int xpReward, {
     bool withVibration = true,
   }) {
-    // Vibración de éxito al mostrar el logro
+    // Vibración y sonido de éxito al mostrar el logro (usando servicios)
     if (withVibration) {
-      HapticFeedback.mediumImpact();
+      final soundService = getIt<SoundService>();
+      final vibrationService = getIt<VibrationService>();
+      soundService.playAchievementSound(); // Usar sonido específico de logro
+      vibrationService.vibrateOnAchievement(); // Usar vibración especial para logros
     }
 
     showDialog(

@@ -3,11 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/trivia_question.dart';
 import '../../domain/services/trivia_service.dart';
+import '../../../../core/services/vibration_service.dart';
+import '../../../../core/services/sound_service.dart';
+import '../../../../core/di/injection.dart';
 import '../../domain/services/gamification_service.dart';
 import '../../domain/services/xp_calculation_service.dart';
-import '../../domain/repositories/gamification_repository.dart';
 import '../../presentation/bloc/gamification_bloc.dart';
 import '../../presentation/bloc/gamification_event.dart';
 import 'package:get_it/get_it.dart';
@@ -93,7 +96,6 @@ class LessonTriviaWidget extends StatefulWidget {
 
 class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
   final TriviaService _triviaService = TriviaService();
-  final GamificationService _gamificationService = GetIt.instance<GamificationService>();
   final XPCalculationService _xpCalculationService = XPCalculationService();
   
   List<TriviaQuestion> _questions = [];
@@ -127,8 +129,9 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
       _selectedAnswers[_currentQuestionIndex] = answerIndex;
     });
 
-    // Vibración suave al seleccionar
-    HapticFeedback.selectionClick();
+    // Vibración suave al seleccionar usando el servicio
+    final vibrationService = getIt<VibrationService>();
+    vibrationService.selectionClick();
   }
 
   void _nextQuestion() {
@@ -201,14 +204,23 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
       await Future.delayed(const Duration(milliseconds: 200));
       gamificationBloc.add(LoadGamificationProfile(widget.userId));
 
-      // Vibración de éxito
-      HapticFeedback.mediumImpact();
+      // Vibración y sonido de éxito usando los servicios mejorados
+      final vibrationService = getIt<VibrationService>();
+      final soundService = getIt<SoundService>();
+      if (_correctAnswers == _questions.length) {
+        // Trivia perfecta - vibración y sonido especiales
+        vibrationService.vibrateOnTriviaCorrect();
+        soundService.playTriviaCorrectSound();
+      } else {
+        vibrationService.vibrateOnSuccess();
+        soundService.playSuccessSound(); // Sonido de éxito general
+      }
       
       // NO mostrar la animación de XP aquí - se mostrará cuando el usuario presione "Continuar"
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar XP: $e')),
+          SnackBar(content: Text('gamification.messages.errorSavingXP'.tr(namedArgs: {'error': e.toString()}))),
         );
       }
     }
@@ -248,7 +260,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           Row(
             children: [
               Text(
-                'Pregunta ${_currentQuestionIndex + 1} de ${_questions.length}',
+                'trivia.question'.tr() + ' ${_currentQuestionIndex + 1} ${'trivia.of'.tr()} ${_questions.length}',
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.8),
@@ -317,7 +329,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                     ),
                   ),
                   child: Text(
-                    'Anterior',
+                    'trivia.previous'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -343,7 +355,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                   ),
                 ),
                 child: Text(
-                  isLastQuestion ? 'Finalizar' : 'Siguiente',
+                  isLastQuestion ? 'trivia.finish'.tr() : 'trivia.next'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -435,7 +447,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           children: [
             FadeInDown(
               child: Text(
-                isPerfect ? '🎉 ¡Perfecto!' : '¡Bien hecho!',
+                isPerfect ? '🎉 ${'trivia.perfect'.tr()}' : 'trivia.wellDone'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -447,7 +459,10 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
             FadeInUp(
               delay: const Duration(milliseconds: 200),
               child: Text(
-                'Obtuviste $_correctAnswers de ${_questions.length} correctas',
+                'trivia.youGot'.tr(namedArgs: {
+                  'correct': _correctAnswers.toString(),
+                  'total': _questions.length.toString(),
+                }),
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -480,7 +495,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'de aciertos',
+                      'trivia.continue'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 16,
                         color: Colors.white.withValues(alpha: 0.8),
@@ -538,7 +553,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                           ),
                         ),
                         Text(
-                          'Ganados',
+                          'trivia.xpEarned'.tr(),
                           style: GoogleFonts.quicksand(
                             fontSize: 12,
                             color: Colors.white.withValues(alpha: 0.9),

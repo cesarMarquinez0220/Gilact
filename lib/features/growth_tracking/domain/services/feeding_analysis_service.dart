@@ -174,7 +174,7 @@ class FeedingAnalysisService {
           
           final firestoreRecords = querySnapshot.docs
               .map((doc) => LactationRecord.fromMap(
-                  doc.data() as Map<String, dynamic>,
+                  Map<String, dynamic>.from(doc.data()),
                   doc.id,
                 ))
               .toList();

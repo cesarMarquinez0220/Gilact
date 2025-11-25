@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 
 /// Resumen de estadísticas de la página de compañera
@@ -30,7 +31,7 @@ class CompanionStatsSummary extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Resumen',
+            'companion.summary'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -41,9 +42,9 @@ class CompanionStatsSummary extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _StatItem(label: 'XP Total', value: '${profile.totalXP}'),
-              _StatItem(label: 'Nivel', value: '${profile.currentLevel}'),
-              _StatItem(label: 'Racha', value: '${profile.currentStreak} días'),
+              _StatItem(label: 'companion.totalXP'.tr(), value: '${profile.totalXP}'),
+              _StatItem(label: 'companion.level'.tr(), value: '${profile.currentLevel}'),
+              _StatItem(label: 'companion.streak'.tr(), value: '${profile.currentStreak} ${'companion.days'.tr()}'),
             ],
           ),
         ],

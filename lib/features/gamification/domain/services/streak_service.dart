@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../entities/daily_streak.dart';
 
 /// Servicio para gestionar rachas diarias
@@ -180,17 +181,18 @@ class StreakService {
 
   /// Obtiene mensaje empático según el estado de la racha
   String getEmpatheticMessage(StreakStatus status, int currentStreak) {
+    // Importar easy_localization en el archivo que use este método
     switch (status) {
       case StreakStatus.active:
-        return '¡Excelente! Llevas $currentStreak días consecutivos 🔥';
+        return 'gamification.messages.streakMessages.active'.tr(namedArgs: {'days': currentStreak.toString()});
       case StreakStatus.atRisk:
-        return 'Tu racha está en riesgo, pero puedes usar un día de descanso si lo necesitas';
+        return 'gamification.messages.streakMessages.atRisk'.tr();
       case StreakStatus.lost:
-        return 'Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙';
+        return 'gamification.messages.streakMessages.lost'.tr();
       case StreakStatus.paused:
-        return 'Modo pausa activo. Tómate el tiempo que necesites';
+        return 'gamification.messages.streakMessages.pauseActive'.tr();
       case StreakStatus.noActivity:
-        return '¡Comienza tu primera racha hoy!';
+        return 'gamification.messages.streakMessages.noActivity'.tr();
     }
   }
 

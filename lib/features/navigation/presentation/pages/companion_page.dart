@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_event.dart';
@@ -14,6 +15,8 @@ import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import '../../../gamification/domain/services/daily_challenge_service.dart';
 import '../../../gamification/domain/entities/daily_challenge.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/sound_service.dart';
+import '../../../../core/services/vibration_service.dart';
 import '../widgets/companion_achievements_section.dart';
 import '../widgets/companion_daily_challenge_section.dart';
 import '../widgets/companion_stats_summary.dart';
@@ -126,6 +129,16 @@ class CompanionPage extends StatelessWidget {
                             gamificationState.profile,
                             validUserId,
                           );
+                        });
+                      }
+
+                      // Manejar level up con vibración y sonido mejorados
+                      if (gamificationState.leveledUp) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          final vibrationService = getIt<VibrationService>();
+                          final soundService = getIt<SoundService>();
+                          vibrationService.vibrateOnLevelUp();
+                          soundService.playLevelUpSound(); // Usar sonido específico de level up
                         });
                       }
 
@@ -252,7 +265,7 @@ class CompanionPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tu Compañera',
+                  'companion.headerTitle'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: isSmallScreen ? 24 : 28,
                     fontWeight: FontWeight.bold,
@@ -268,7 +281,7 @@ class CompanionPage extends StatelessWidget {
                 ),
                 SizedBox(height: isShortScreen ? 4 : 6),
                 Text(
-                  'Tu apoyo en este viaje',
+                  'companion.headerSubtitle'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: isSmallScreen ? 14 : 16,
                     fontWeight: FontWeight.w500,
@@ -356,7 +369,7 @@ class CompanionPage extends StatelessWidget {
           Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
           const SizedBox(height: 16),
           Text(
-            'Error cargando compañera',
+            'companion.errorLoadingCompanion'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 18,
               fontWeight: FontWeight.bold,

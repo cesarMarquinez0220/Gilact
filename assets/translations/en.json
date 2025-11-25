@@ -462,10 +462,99 @@
     "historyDescription": "Recently watched videos"
   },
   "companion": {
+    "mascotMessages": {
+      "keepGoing": "Keep it up, you're doing great! 🌟",
+      "everyRecordCounts": "Every record counts, you're doing a great job 👏",
+      "yourWellbeing": "Remember: your wellbeing is the most important 💕",
+      "youAreAdvancing": "You're advancing incredibly! 🎉",
+      "takeYourTime": "Take your time, there's no rush ⏰",
+      "youAreSuperMom": "You're a super mom, keep it up! 💪"
+    },
     "title": "Companion",
     "level": "Level",
     "streak": "Streak",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "headerTitle": "Your Companion",
+    "headerSubtitle": "Your support on this journey",
+    "errorLoadingCompanion": "Error loading companion",
+    "dailyChallenge": "Daily Challenge",
+    "completed": "Completed!",
+    "progress": "Progress",
+    "reward": "Reward",
+    "youWonXP": "You won {xp} XP!",
+    "@youWonXP": {
+      "placeholders": {
+        "xp": {
+          "type": "int"
+        }
+      }
+    },
+    "achievements": "Achievements",
+    "startUnlocking": "Start unlocking achievements",
+    "startJourney": "Start your journey! Every action brings you closer to new achievements 🎯",
+    "unlockedAchievements": "Unlocked Achievements",
+    "of": "of",
+    "howToEarnXP": "How to earn XP?",
+    "unlocked": "Unlocked",
+    "all": "All",
+    "summary": "Summary",
+    "totalXP": "Total XP",
+    "level": "Level",
+    "streak": "Streak",
+    "days": "days",
+    "quickRecord": "Quick record",
+    "fullRecord": "Full record",
+    "completeLesson": "Complete lesson",
+    "completeTrivia": "Complete trivia",
+    "weightRecord": "Weight record",
+    "sleepRecord": "Sleep record",
+    "specialBonuses": "Special Bonuses",
+    "milestones": "Record milestones: +25 to +1000 XP",
+    "streaks": "Streaks: +50 to +2000 XP",
+    "unlockedAchievementsBonus": "Unlocked achievements: +20 to +3000 XP",
+    "understood": "Understood",
+    "baseXP": "{xp} XP",
+    "@baseXP": {
+      "placeholders": {
+        "xp": {
+          "type": "String"
+        }
+      }
+    },
+    "firstOfDay": "+5 XP if first of the day",
+    "firstOfDaySleep": "+5 XP first of day, +10 XP if includes sleep",
+    "firstLessonOfDay": "+15 XP if first of the day",
+    "perQuestion": "5 XP per question",
+    "allCorrect": "+20 XP if all correct"
+  },
+  "trivia": {
+    "title": "Trivia",
+    "question": "Question",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "perfect": "Perfect!",
+    "wellDone": "Well done!",
+    "youGot": "You got {correct} out of {total} correct",
+    "@youGot": {
+      "placeholders": {
+        "correct": {
+          "type": "int"
+        },
+        "total": {
+          "type": "int"
+        }
+      }
+    },
+    "completed": "Trivia Completed ✓",
+    "completeToAdvance": "Complete Trivia to Advance",
+    "alreadyCompleted": "You already completed this trivia!",
+    "completePrevious": "Complete the previous lesson's trivia to unlock",
+    "selectAnswer": "Select an answer",
+    "xpEarned": "XP Earned",
+    "totalXP": "Total XP",
+    "continue": "Continue"
   },
   "health": {
     "title": "Health",
@@ -1021,7 +1110,118 @@
       "streakAtRisk": "Your streak is at risk, but you can use a rest day",
       "takeYourTime": "Take your time, we'll be here 💙",
       "restWell": "Rest well, we'll see you tomorrow",
-      "helloHowAreYou": "Hello! How are you today?"
+      "helloHowAreYou": "Hello! How are you today?",
+      "great": "Great!",
+      "congratulations": "Congratulations! It's time to start your new adventure with your baby 🎉",
+      "errorSavingXP": "Error saving XP: {error}",
+      "@errorSavingXP": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "videoCompleted": "Video Completed!",
+      "achievementDescriptions": {
+        "milestone": "Complete {value} lactation records in total.",
+        "@milestone": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "complete": "Complete {value} full records (with all details).",
+        "@complete": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "daily": "Make {value} records in a single day.",
+        "@daily": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "nocturnal": "Make 10 records between 12am and 6am.",
+        "lactation": "Complete {value} lactation records.",
+        "@lactation": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "triviaPerfect": "Complete 5 trivias with 100% correct answers.",
+        "lesson": "Complete {value} lessons.",
+        "@lesson": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "streak": "Maintain a streak of {value} consecutive days recording activity.",
+        "@streak": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "level": "Reach level {value} by earning XP.",
+        "@level": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "weight": "Record your baby's weight {value} times.",
+        "@weight": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "sleep": "Record your baby's sleep {value} times.",
+        "@sleep": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "appUsage": "Use the app for {value} days.",
+        "@appUsage": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "default": "Complete the required objective."
+      },
+      "streakMessages": {
+        "atRisk": "Your streak is at risk, but you can use a rest day if you need it",
+        "pauseMode": "Take your time. We'll be here when you return 💙",
+        "pauseActive": "Pause mode active. Take your time",
+        "active": "Excellent! You've been going for {days} consecutive days 🔥",
+        "@active": {
+          "placeholders": {
+            "days": {
+              "type": "int"
+            }
+          }
+        },
+        "lost": "Take your time. We'll be here when you return 💙",
+        "noActivity": "Start your first streak today!"
+      }
     }
   },
   "sync": {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/user_gamification_profile.dart';
 
 /// Widget mejorado que muestra el muñequito animado con información de gamificación
@@ -29,36 +30,35 @@ class MascotWidget extends StatelessWidget {
     switch (profile.mascotState) {
       case 'celebrating':
         animationPath = 'assets/animations/Happy_Dog.json';
-        message = '¡Excelente trabajo! 🎉';
+        message = 'gamification.messages.excellentWork'.tr();
         messageColor = const Color(0xFFE74C3C);
         cardGradientStart = const Color(0xFFFFE5E5);
         cardGradientEnd = Colors.white;
         break;
       case 'thinking':
         animationPath = 'assets/animations/Happy_Dog.json';
-        message = 'Estás muy cerca de subir de nivel';
+        message = 'gamification.messages.closeToLevelUp'.tr();
         messageColor = const Color(0xFF3498DB);
         cardGradientStart = const Color(0xFFE3F2FD);
         cardGradientEnd = Colors.white;
         break;
       case 'worried':
         animationPath = 'assets/animations/Happy_Dog.json';
-        message =
-            'Tu racha está en riesgo, pero puedes usar un día de descanso';
+        message = 'gamification.messages.streakAtRisk'.tr();
         messageColor = const Color(0xFFF39C12);
         cardGradientStart = const Color(0xFFFFF3E0);
         cardGradientEnd = Colors.white;
         break;
       case 'supporting':
         animationPath = 'assets/animations/Happy_Dog.json';
-        message = 'Tómate el tiempo que necesites, estaremos aquí 💙';
+        message = 'gamification.messages.takeYourTime'.tr();
         messageColor = const Color(0xFF3498DB);
         cardGradientStart = const Color(0xFFE3F2FD);
         cardGradientEnd = Colors.white;
         break;
       case 'sleeping':
         animationPath = 'assets/animations/Happy_Dog.json';
-        message = 'Descansa bien, te esperamos mañana';
+        message = 'gamification.messages.restWell'.tr();
         messageColor = Colors.grey;
         cardGradientStart = const Color(0xFFF5F5F5);
         cardGradientEnd = Colors.white;
@@ -66,7 +66,7 @@ class MascotWidget extends StatelessWidget {
       case 'happy':
       default:
         animationPath = 'assets/animations/Happy_Dog.json';
-        message = '¡Hola! ¿Cómo estás hoy?';
+        message = 'gamification.messages.helloHowAreYou'.tr();
         messageColor = const Color(0xFF2ECC71);
         cardGradientStart = const Color(0xFFE8F5E9);
         cardGradientEnd = Colors.white;
