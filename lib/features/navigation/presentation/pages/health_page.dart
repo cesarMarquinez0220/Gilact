@@ -67,7 +67,7 @@ class _HealthPageState extends State<HealthPage> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Row(
               children: [
                 Text(

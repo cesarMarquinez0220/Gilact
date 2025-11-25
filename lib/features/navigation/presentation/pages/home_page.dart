@@ -1551,7 +1551,7 @@ class _HomePageState extends State<HomePage> {
               const Icon(
                 Icons.info_outline,
                 size: 16,
-                color: const Color(0xFF03A696),
+                color:  Color(0xFF03A696),
               ),
               const SizedBox(width: 4),
               Text(

@@ -348,8 +348,8 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
       double? actualWeight;
       if (i % 3 == 0 || i == 0) {
         // Peso inicial aproximado: 3.2 kg + crecimiento diario
-        final baseWeight = 3.2;
-        final growthPerDay = 0.020; // 20g por día
+        const baseWeight = 3.2;
+        const growthPerDay = 0.020; // 20g por día
         actualWeight = baseWeight + (ageInDays * growthPerDay);
         // Asegurar que esté dentro de un rango razonable
         actualWeight = actualWeight.clamp(2.5, 8.0);
@@ -423,9 +423,9 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
         ),
         child: const Center(
           child: CircularProgressIndicator(color: Colors.white),

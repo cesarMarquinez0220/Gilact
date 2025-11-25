@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -208,15 +207,15 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   width: 100,
                                   height: 100,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.15),
+                                    color: Colors.white.withValues(alpha: 0.15),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.3),
+                                      color: Colors.white.withValues(alpha: 0.3),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
+                                        color: Colors.black.withValues(alpha: 0.1),
                                         blurRadius: 20,
                                         offset: const Offset(0, 8),
                                       ),
@@ -249,7 +248,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                 const SizedBox(height: 12),
                                 Text(
                                   'onboarding.prepartoInfoDescription'.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 17,
                                     color: Colors.white70,
                                     fontWeight: FontWeight.w400,
@@ -265,20 +264,20 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                             // Campo de fecha esperada
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
                                   BoxShadow(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: Colors.white.withValues(alpha: 0.1),
                                     blurRadius: 20,
                                     offset: const Offset(0, -2),
                                   ),
@@ -344,12 +343,12 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   BoxShadow(
                                     color: const Color(
                                       0xFF4FD1C7,
-                                    ).withOpacity(0.4),
+                                    ).withValues(alpha: 0.4),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -392,10 +391,10 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                             // Botón de cancelar
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: TextButton(
@@ -459,10 +458,10 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                       colors: [
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.15), // Azul teal oscuro (secundario)
+                        ).withValues(alpha: 0.15), // Azul teal oscuro (secundario)
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.05), // Azul teal oscuro (secundario)
+                        ).withValues(alpha: 0.05), // Azul teal oscuro (secundario)
                         Colors.transparent,
                       ],
                     ),
@@ -487,12 +486,10 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        const Color(0xFF4FD1C7).withOpacity(
-                          0.1,
-                        ), // Verde azulado medio vibrante (primario)
-                        const Color(0xFF4FD1C7).withOpacity(
-                          0.03,
-                        ), // Verde azulado medio vibrante (primario)
+                        const Color(0xFF4FD1C7).withValues(alpha: 0.1),
+                        // Verde azulado medio vibrante (primario)
+                        const Color(0xFF4FD1C7).withValues(alpha: 0.03),
+                        // Verde azulado medio vibrante (primario)
                         Colors.transparent,
                       ],
                     ),
@@ -515,7 +512,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                 colors: [
                   const Color(
                     0xFFE2E8F0,
-                  ).withOpacity(0.08), // Gris muy claro (secundario)
+                  ).withValues(alpha: 0.08), // Gris muy claro (secundario)
                   Colors.transparent,
                 ],
               ),
@@ -534,7 +531,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                 colors: [
                   const Color(
                     0xFFB794F6,
-                  ).withOpacity(0.06), // Lavanda suave (primario)
+                  ).withValues(alpha: 0.06), // Lavanda suave (primario)
                   Colors.transparent,
                 ],
               ),
@@ -545,7 +542,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
         Positioned(
           top: 120,
           right: 30,
-          child: Container(
+          child: SizedBox(
             width: 80,
             height: 80,
             child: CustomPaint(painter: DotsPainter()),
@@ -566,7 +563,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                   Colors.transparent,
                   const Color(
                     0xFF4FD1C7,
-                  ).withOpacity(0.1), // Verde azulado medio vibrante (primario)
+                  ).withValues(alpha: 0.1), // Verde azulado medio vibrante (primario)
                   Colors.transparent,
                 ],
               ),
@@ -583,7 +580,7 @@ class DotsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color(0xFFE2E8F0)
-          .withOpacity(0.4) // Gris muy claro (secundario)
+          .withValues(alpha: 0.4) // Gris muy claro (secundario)
       ..style = PaintingStyle.fill;
 
     // Crear un patrón de puntos más elegante

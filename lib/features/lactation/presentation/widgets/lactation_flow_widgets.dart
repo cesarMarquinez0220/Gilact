@@ -10,11 +10,11 @@ class LactationOptionCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const LactationOptionCard({
-    Key? key,
+    super.key,
     required this.option,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +127,11 @@ class LactationProgressIndicator extends StatelessWidget {
   final int totalSteps;
 
   const LactationProgressIndicator({
-    Key? key,
+    super.key,
     required this.progress,
     required this.currentStep,
     required this.totalSteps,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

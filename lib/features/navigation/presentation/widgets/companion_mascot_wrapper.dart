@@ -126,7 +126,7 @@ class _CompanionMascotWrapperState extends State<CompanionMascotWrapper>
               padding: const EdgeInsets.only(top: 35),
               child: ScaleTransition(
                 scale: _scaleAnimation,
-                child: Container(
+                child: SizedBox(
                   width: widget.size,
                   height: widget.size,
                   child: Lottie.asset(
@@ -228,8 +228,8 @@ class _SpeechBubblePainter extends CustomPainter {
 
     // Dibujar el triángulo apuntando hacia abajo-izquierda
     final trianglePath = Path();
-    final triangleWidth = 18.0;
-    final triangleX = 25.0;
+    const triangleWidth = 18.0;
+    const triangleX = 25.0;
     final bottomY = size.height;
 
     trianglePath.moveTo(triangleX, size.height - 12);

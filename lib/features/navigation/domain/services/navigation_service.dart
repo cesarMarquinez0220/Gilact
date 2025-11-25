@@ -119,9 +119,9 @@ class CountdownService {
     try {
       final birthDate = DateTime.parse(expectedBirthDate);
       final now = DateTime.now();
-      final totalDays = 280; // 40 semanas promedio
+      const totalDays = 280; // 40 semanas promedio
       final daysPassed = now
-          .difference(birthDate.subtract(Duration(days: totalDays)))
+          .difference(birthDate.subtract(const Duration(days: totalDays)))
           .inDays;
       return (daysPassed / totalDays).clamp(0.0, 1.0);
     } catch (e) {

@@ -330,7 +330,7 @@ class LactationSuggestions extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb, color: _AppColors.primary, size: 20),
+              const Icon(Icons.lightbulb, color: _AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Sugerencias Inteligentes',
@@ -364,7 +364,7 @@ class LactationSuggestions extends StatelessWidget {
       onPressed: () => onSuggestionSelected(suggestion),
       backgroundColor: Colors.white,
       side: BorderSide(color: _AppColors.primary.withValues(alpha: 0.3)),
-      labelStyle: TextStyle(color: _AppColors.primary),
+      labelStyle: const TextStyle(color: _AppColors.primary),
     );
   }
 

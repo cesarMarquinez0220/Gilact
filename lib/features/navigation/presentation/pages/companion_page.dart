@@ -416,7 +416,7 @@ Future<DailyChallenge> _getDailyChallenge(
     return await dailyChallengeService.getDailyChallenge(profile, userId);
   } catch (e) {
     // Fallback: desafío por defecto
-    return DailyChallenge(
+    return const DailyChallenge(
       id: 'default',
       title: 'Objetivo Diario',
       description: 'Completa 3 registros de lactancia hoy',

@@ -229,7 +229,7 @@ class _XPInfoButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.info_outline, color: const Color(0xFF03A696), size: 20),
+            const Icon(Icons.info_outline, color:  Color(0xFF03A696), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -241,9 +241,9 @@ class _XPInfoButton extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(
+            const Icon(
               Icons.arrow_forward_ios,
-              color: const Color(0xFF03A696),
+              color:  Color(0xFF03A696),
               size: 16,
             ),
           ],
@@ -327,7 +327,7 @@ class _XPInfoButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'companion.specialBonuses'.tr() + ':',
+                      '${'companion.specialBonuses'.tr()}:',
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

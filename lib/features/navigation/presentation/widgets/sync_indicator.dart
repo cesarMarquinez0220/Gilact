@@ -95,8 +95,8 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     // Espacio entre badges: 8px
     final topPadding = MediaQuery.of(context).padding.top;
     final offlineBadgeTop = topPadding + 8;
-    final offlineBadgeHeight = 30.0; // Altura aproximada del badge offline
-    final spacing = 8.0; // Espacio entre badges
+    const offlineBadgeHeight = 30.0; // Altura aproximada del badge offline
+    const spacing = 8.0; // Espacio entre badges
     final syncIndicatorTop = !_isConnected
         ? offlineBadgeTop + offlineBadgeHeight + spacing
         : topPadding + 8; // Si está online, usar la posición original
@@ -120,7 +120,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 spreadRadius: 1,
                 blurRadius: 3,
                 offset: const Offset(0, 2),

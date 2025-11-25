@@ -56,7 +56,7 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   spreadRadius: 5,
                   offset: const Offset(0, 10),
@@ -84,13 +84,13 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient:  LinearGradient(
           colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
         ),
@@ -101,7 +101,7 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(25),
             ),
             child: const Icon(
@@ -199,7 +199,7 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: _getTypeColor(record.tipo).withOpacity(0.2),
+                  color: _getTypeColor(record.tipo).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Icon(
@@ -352,9 +352,9 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF667eea).withOpacity(0.1),
+        color: const Color(0xFF667eea).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF667eea).withOpacity(0.3)),
+        border: Border.all(color: const Color(0xFF667eea).withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

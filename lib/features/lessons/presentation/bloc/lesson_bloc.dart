@@ -36,7 +36,7 @@ class LessonBloc extends Bloc<LessonEvent, LessonState> {
         _getLessonProgressUseCase = getLessonProgressUseCase,
         _getUserProgressUseCase = getUserProgressUseCase,
         _getUserStatisticsUseCase = getUserStatisticsUseCase,
-        super(LessonInitial()) {
+        super(const LessonInitial()) {
     on<GetAllLessonsRequested>(_onGetAllLessonsRequested);
     on<GetLessonByIdRequested>(_onGetLessonByIdRequested);
     on<GetLessonsByCategoryRequested>(_onGetLessonsByCategoryRequested);
@@ -51,7 +51,7 @@ class LessonBloc extends Bloc<LessonEvent, LessonState> {
     GetAllLessonsRequested event,
     Emitter<LessonState> emit,
   ) async {
-    emit(LessonLoading());
+    emit(const LessonLoading());
     
     final result = await _getAllLessonsUseCase();
 
@@ -65,7 +65,7 @@ class LessonBloc extends Bloc<LessonEvent, LessonState> {
     GetLessonByIdRequested event,
     Emitter<LessonState> emit,
   ) async {
-    emit(LessonLoading());
+    emit(const LessonLoading());
     
     final result = await _getLessonByIdUseCase(GetLessonByIdParams(id: event.id));
 
@@ -79,7 +79,7 @@ class LessonBloc extends Bloc<LessonEvent, LessonState> {
     GetLessonsByCategoryRequested event,
     Emitter<LessonState> emit,
   ) async {
-    emit(LessonLoading());
+    emit(const LessonLoading());
     
     final result = await _getLessonsByCategoryUseCase(
       GetLessonsByCategoryParams(category: event.category),
@@ -95,7 +95,7 @@ class LessonBloc extends Bloc<LessonEvent, LessonState> {
     SearchLessonsRequested event,
     Emitter<LessonState> emit,
   ) async {
-    emit(LessonLoading());
+    emit(const LessonLoading());
     
     final result = await _searchLessonsUseCase(SearchLessonsParams(query: event.query));
 

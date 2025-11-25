@@ -332,7 +332,7 @@ class LeccionesProvider extends ChangeNotifier {
       'leccionesCompletadas': _leccionesCompletadas.length,
       'videosConProgreso': _progresoVideos.length,
       'ultimaLeccionCompletada': ultimaLeccionCompletada,
-      'progresoTotal': _progresoVideos.length > 0
+      'progresoTotal': _progresoVideos.isNotEmpty
           ? _progresoVideos.values.fold(0.0, (a, b) => a + b) /
                 (_progresoVideos.length * 100)
           : 0.0,

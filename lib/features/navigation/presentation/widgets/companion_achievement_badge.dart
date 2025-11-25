@@ -104,8 +104,8 @@ class CompanionAchievementBadge extends StatelessWidget {
                         color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Center(
-                        child: Icon(Icons.lock, color: Colors.white, size: 24),
+                      child: const Center(
+                        child:  Icon(Icons.lock, color: Colors.white, size: 24),
                       ),
                     ),
                 ],

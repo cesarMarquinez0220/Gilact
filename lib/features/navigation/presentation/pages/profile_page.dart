@@ -374,15 +374,15 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         children: [
           Icon(
             Icons.info_outline,
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -402,7 +402,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   'Versión $_appVersion',
                   style: GoogleFonts.quicksand(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 12,
                   ),
                 ),
@@ -440,7 +440,7 @@ class _ProfilePageState extends State<ProfilePage> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF03A696),
+        activeThumbColor: const Color(0xFF03A696),
       ),
     );
   }

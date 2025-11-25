@@ -490,8 +490,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient:  LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Color(0xFF667eea), Color(0xFF764ba2)],
@@ -1383,7 +1383,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                 borderRadius: lactationCount > 1
                     ? BorderRadius.circular(8)
                     : null,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
               ),
               child: lactationCount > 1
                   ? Text(
@@ -1558,7 +1558,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   }
 
   Widget _buildWeekDaysHeader(List<DateTime> weekDays) {
-    return Container(
+    return SizedBox(
       height: 60, // Altura fija para evitar overflow
       child: Row(
         children: weekDays.map((day) {
@@ -1730,8 +1730,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   // Header
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                    decoration: const BoxDecoration(
+                      gradient:  LinearGradient(
                         colors: [Color(0xFF667eea), Color(0xFF764ba2)],
                       ),
                     ),

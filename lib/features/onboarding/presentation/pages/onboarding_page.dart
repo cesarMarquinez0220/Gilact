@@ -103,7 +103,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                         height: 4,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(2),
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                         ),
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
@@ -158,10 +158,10 @@ class _OnboardingPageState extends State<OnboardingPage>
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -170,14 +170,14 @@ class _OnboardingPageState extends State<OnboardingPage>
                       children: [
                         Icon(
                           Icons.swipe_left,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           size: 14,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'onboarding.swipe'.tr(),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
@@ -196,10 +196,10 @@ class _OnboardingPageState extends State<OnboardingPage>
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -212,7 +212,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withOpacity(0.8),
+                              Colors.white.withValues(alpha: 0.8),
                             ),
                           ),
                         ),
@@ -220,7 +220,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                         Text(
                           'onboarding.continuingAutomatically'.tr(),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),

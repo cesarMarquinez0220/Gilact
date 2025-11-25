@@ -23,7 +23,7 @@ class LessonRepositoryImpl implements LessonRepository {
           updatedAt: DateTime.now().subtract(const Duration(days: 5)),
           progress: 0.0,
           isCompleted: false,
-          videoIds: ['1', '2'],
+          videoIds: const ['1', '2'],
         ),
         Lesson(
           id: '2',
@@ -36,7 +36,7 @@ class LessonRepositoryImpl implements LessonRepository {
           updatedAt: DateTime.now().subtract(const Duration(days: 3)),
           progress: 0.3,
           isCompleted: false,
-          videoIds: ['3', '4'],
+          videoIds: const ['3', '4'],
         ),
         Lesson(
           id: '3',
@@ -49,7 +49,7 @@ class LessonRepositoryImpl implements LessonRepository {
           updatedAt: DateTime.now().subtract(const Duration(days: 1)),
           progress: 0.8,
           isCompleted: false,
-          videoIds: ['5', '6'],
+          videoIds: const ['5', '6'],
         ),
         Lesson(
           id: '4',
@@ -62,7 +62,7 @@ class LessonRepositoryImpl implements LessonRepository {
           updatedAt: DateTime.now(),
           progress: 1.0,
           isCompleted: true,
-          videoIds: ['7', '8'],
+          videoIds: const ['7', '8'],
         ),
       ];
 
@@ -83,7 +83,7 @@ class LessonRepositoryImpl implements LessonRepository {
         return Right(lesson);
       });
     } catch (e) {
-      return Left(NotFoundFailure(message: 'Lección no encontrada'));
+      return const Left(NotFoundFailure(message: 'Lección no encontrada'));
     }
   }
 

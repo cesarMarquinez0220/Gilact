@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
 
@@ -566,7 +565,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
           return Column(
             children: [
               // Nodo del video con posición personalizada
-              Container(
+              SizedBox(
                 height: 100,
                 child: Center(child: _buildVideoNode(video, index)),
               ),
@@ -631,8 +630,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                     100.0, // El progreso ya viene como porcentaje del provider
                 strokeWidth: 4,
                 backgroundColor: Colors.transparent,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  const Color(
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                   Color(
                     0xFFFF9800,
                   ), // Naranja vibrante para mejor visibilidad
                 ),
@@ -979,7 +978,7 @@ class LessonPathPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final centerX = size.width / 2;
-    final nodeSpacing = 100.0; // Espaciado entre nodos
+    const nodeSpacing = 100.0; // Espaciado entre nodos
 
     // Dibujar el camino curvo
     for (int i = 0; i < nodeCount - 1; i++) {
@@ -1026,7 +1025,7 @@ class LessonPathPainter extends CustomPainter {
     final pathMetrics = path.computeMetrics();
     for (final pathMetric in pathMetrics) {
       final length = pathMetric.length;
-      final dotCount = 3;
+      const dotCount = 3;
 
       for (int i = 1; i < dotCount; i++) {
         final distance = (length * i) / dotCount;

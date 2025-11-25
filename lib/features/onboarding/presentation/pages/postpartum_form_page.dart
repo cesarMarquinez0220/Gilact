@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -280,15 +279,15 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                     width: 60,
                                     height: 60,
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
+                                      color: Colors.white.withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white.withOpacity(0.3),
+                                        color: Colors.white.withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
+                                          color: Colors.black.withValues(alpha: 0.1),
                                           blurRadius: 20,
                                           offset: const Offset(0, 8),
                                         ),
@@ -321,7 +320,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                   const SizedBox(height: 6),
                                   Text(
                                     'onboarding.completeBabyInfo'.tr(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w400,
@@ -470,12 +469,12 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                     BoxShadow(
                                       color: const Color(
                                         0xFF4FD1C7,
-                                      ).withOpacity(0.4),
+                                      ).withValues(alpha: 0.4),
                                       blurRadius: 20,
                                       offset: const Offset(0, 8),
                                     ),
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -518,10 +517,10 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                               // Botón de cancelar
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: TextButton(
@@ -589,20 +588,20 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
         Container(
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -2),
               ),
@@ -629,7 +628,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 20),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
               // Reduce el padding interno del TextField
             ),
           ),
@@ -661,20 +660,20 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
         Container(
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -2),
               ),
@@ -732,20 +731,20 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
         Container(
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -2),
               ),
@@ -772,7 +771,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
               ),
               prefixIcon: Icon(icon, color: Colors.white70, size: 22),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 20),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
               // Reduce el padding interno del TextField
             ),
           ),
@@ -808,22 +807,22 @@ class PostpartumBackgroundPainter extends CustomPainter {
       {
         'center': Offset(size.width * 0.15, size.height * 0.2),
         'radius': 80.0 + (animationValue * 20),
-        'color': const Color(0xFF4FD1C7).withOpacity(0.1),
+        'color': const Color(0xFF4FD1C7).withValues(alpha: 0.1),
       },
       {
         'center': Offset(size.width * 0.85, size.height * 0.3),
         'radius': 60.0 + (animationValue * 15),
-        'color': const Color(0xFF1A365D).withOpacity(0.15),
+        'color': const Color(0xFF1A365D).withValues(alpha: 0.15),
       },
       {
         'center': Offset(size.width * 0.2, size.height * 0.7),
         'radius': 100.0 + (animationValue * 25),
-        'color': const Color(0xFF2C5F5D).withOpacity(0.08),
+        'color': const Color(0xFF2C5F5D).withValues(alpha: 0.08),
       },
       {
         'center': Offset(size.width * 0.8, size.height * 0.8),
         'radius': 70.0 + (animationValue * 18),
-        'color': const Color(0xFF4FD1C7).withOpacity(0.12),
+        'color': const Color(0xFF4FD1C7).withValues(alpha: 0.12),
       },
     ];
 
@@ -837,19 +836,19 @@ class PostpartumBackgroundPainter extends CustomPainter {
     }
 
     // Partículas flotantes distribuidas por toda la pantalla
-    paint.color = Colors.white.withOpacity(0.05);
+    paint.color = Colors.white.withValues(alpha: 0.05);
     for (int i = 0; i < 15; i++) {
       final x = (size.width * (i / 15.0) + animationValue * 50) % size.width;
       final y =
           size.height * 0.1 + (i * 60.0) + (animationValue * 30 * math.sin(i));
 
       final radius = 2.0 + (i % 3);
-      paint.color = Colors.white.withOpacity(0.05 + (animationValue * 0.1));
+      paint.color = Colors.white.withValues(alpha: 0.05 + (animationValue * 0.1));
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
     // Ondas decorativas centradas
-    paint.color = const Color(0xFF4FD1C7).withOpacity(0.03);
+    paint.color = const Color(0xFF4FD1C7).withValues(alpha: 0.03);
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2.0;
 
@@ -870,7 +869,7 @@ class DotsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color(0xFFE2E8F0)
-          .withOpacity(0.4) // Gris muy claro (secundario)
+          .withValues(alpha: 0.4) // Gris muy claro (secundario)
       ..style = PaintingStyle.fill;
 
     // Crear un patrón de puntos más elegante
@@ -887,7 +886,7 @@ class DotsPainter extends CustomPainter {
     // Agregar algunos puntos más pequeños para mayor detalle
     final smallPaint = Paint()
       ..color = const Color(0xFF4FD1C7)
-          .withOpacity(0.2) // Verde azulado medio vibrante (primario)
+          .withValues(alpha: 0.2) // Verde azulado medio vibrante (primario)
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 3; i++) {

@@ -197,7 +197,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
               children: [
                 const Icon(Icons.error, color: Colors.red, size: 48),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   'Error reproduciendo video',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),

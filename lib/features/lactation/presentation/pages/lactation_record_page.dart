@@ -684,20 +684,20 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               }
 
               // Actualizar la unidad
-              if (unitType == 'volume')
+              if (unitType == 'volume') {
                 _volumeUnit = newUnit;
-              else if (unitType == 'duration')
-                _durationUnit = newUnit;
+              } else if (unitType == 'duration')
+                {_durationUnit = newUnit;}
               else if (unitType == 'sleep')
-                _sleepUnit = newUnit;
+                {_sleepUnit = newUnit;}
             } else {
               // Si no hay valor, solo actualizar la unidad
               if (unitType == 'volume')
-                _volumeUnit = newUnit;
+                {_volumeUnit = newUnit;}
               else if (unitType == 'duration')
-                _durationUnit = newUnit;
+                {_durationUnit = newUnit;}
               else if (unitType == 'sleep')
-                _sleepUnit = newUnit;
+                {_sleepUnit = newUnit;}
             }
           } else {
             // No es selector de unidad, solo actualizar el valor
@@ -709,11 +709,11 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withOpacity(0.6)
-              : Colors.white.withOpacity(0.15),
+              ? Colors.white.withValues(alpha: 0.6)
+              : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -724,7 +724,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             if (icon != null) ...[
               Icon(
                 icon,
-                color: Colors.white.withOpacity(isSelected ? 1.0 : 0.7),
+                color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.7),
                 size: 16,
               ),
               const SizedBox(width: 6),
@@ -952,16 +952,16 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withOpacity(0.6) // Más notorio manteniendo blanco
-              : Colors.white.withOpacity(0.15),
+              ? Colors.white.withValues(alpha: 0.6) // Más notorio manteniendo blanco
+              : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         child: Text(
-          value + " " + unit, // Display value and unit
+          "$value $unit", // Display value and unit
           style: GoogleFonts.quicksand(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -1150,7 +1150,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             ),
             child: Text(
               'lactation.recordForm.cancel'.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
@@ -1340,9 +1340,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(/* ... */)],
+            boxShadow: const [BoxShadow(/* ... */)],
           ),
-          child: Column(
+          child: const Column(
             /* ... Icon, Text, Buttons ... */
             mainAxisSize: MainAxisSize.min,
             children: [/* ... Warning Icon, Title, Message, Buttons ... */],
@@ -1458,7 +1458,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.25), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),

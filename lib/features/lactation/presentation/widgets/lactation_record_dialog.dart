@@ -121,8 +121,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
                     // Header con título y botón de cerrar
                     Container(
                       padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
+                      decoration: const BoxDecoration(
+                        borderRadius:  BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
                         ),
@@ -452,7 +452,7 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
         ),
       ),
       child: DropdownButtonFormField<String>(
-        value: selectedValue,
+        initialValue: selectedValue,
         items: options.map((String value) {
           return DropdownMenuItem<String>(
             value: value,

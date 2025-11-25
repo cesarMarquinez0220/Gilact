@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'dart:ui';
 
 // Colores de la aplicación
 class _AppColors {
@@ -84,7 +83,7 @@ class _BottleVolumeInputWidgetState extends State<BottleVolumeInputWidget> {
           // Header
           Row(
             children: [
-              Icon(Icons.local_drink, color: _AppColors.primary, size: 28),
+              const Icon(Icons.local_drink, color: _AppColors.primary, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -108,7 +107,7 @@ class _BottleVolumeInputWidgetState extends State<BottleVolumeInputWidget> {
                 flex: 2,
                 child: TextField(
                   controller: _volumeController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                     labelText: 'Cantidad',
                     hintText: 'Ej: 120',
@@ -117,7 +116,7 @@ class _BottleVolumeInputWidgetState extends State<BottleVolumeInputWidget> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: _AppColors.primary,
                         width: 2,
                       ),
@@ -125,7 +124,7 @@ class _BottleVolumeInputWidgetState extends State<BottleVolumeInputWidget> {
                     errorText: _volumeController.text.isNotEmpty && !_isValid
                         ? 'Ingresa un valor válido (1-500)'
                         : null,
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.straighten,
                       color: _AppColors.primary,
                     ),
@@ -173,7 +172,7 @@ class _BottleVolumeInputWidgetState extends State<BottleVolumeInputWidget> {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: _AppColors.primary, size: 16),
+                const Icon(Icons.info_outline, color: _AppColors.primary, size: 16),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -295,7 +294,7 @@ class _BreastfeedingDurationInputWidgetState
           // Header
           Row(
             children: [
-              Icon(Icons.access_time, color: _AppColors.primary, size: 28),
+              const Icon(Icons.access_time, color: _AppColors.primary, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -324,9 +323,9 @@ class _BreastfeedingDurationInputWidgetState
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _AppColors.primary, width: 2),
+                borderSide: const BorderSide(color: _AppColors.primary, width: 2),
               ),
-              prefixIcon: Icon(Icons.timer, color: _AppColors.primary),
+              prefixIcon: const Icon(Icons.timer, color: _AppColors.primary),
             ),
           ),
 
@@ -365,7 +364,7 @@ class _BreastfeedingDurationInputWidgetState
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: _AppColors.primary, size: 16),
+                const Icon(Icons.info_outline, color: _AppColors.primary, size: 16),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -422,7 +421,7 @@ class _BreastfeedingDurationInputWidgetState
       },
       backgroundColor: _AppColors.primary.withValues(alpha: 0.1),
       side: BorderSide(color: _AppColors.primary.withValues(alpha: 0.3)),
-      labelStyle: TextStyle(color: _AppColors.primary),
+      labelStyle: const TextStyle(color: _AppColors.primary),
     );
   }
 
@@ -494,7 +493,7 @@ class _NotesInputWidgetState extends State<NotesInputWidget> {
           // Header
           Row(
             children: [
-              Icon(Icons.note_add, color: _AppColors.primary, size: 28),
+              const Icon(Icons.note_add, color: _AppColors.primary, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -523,9 +522,9 @@ class _NotesInputWidgetState extends State<NotesInputWidget> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _AppColors.primary, width: 2),
+                borderSide: const BorderSide(color: _AppColors.primary, width: 2),
               ),
-              prefixIcon: Icon(Icons.edit_note, color: _AppColors.primary),
+              prefixIcon: const Icon(Icons.edit_note, color: _AppColors.primary),
             ),
           ),
 
@@ -564,7 +563,7 @@ class _NotesInputWidgetState extends State<NotesInputWidget> {
                 side: BorderSide(
                   color: _AppColors.primary.withValues(alpha: 0.3),
                 ),
-                labelStyle: TextStyle(color: _AppColors.primary),
+                labelStyle: const TextStyle(color: _AppColors.primary),
               );
             }).toList(),
           ),
@@ -582,7 +581,7 @@ class _NotesInputWidgetState extends State<NotesInputWidget> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: _AppColors.textSecondary),
+                    side: const BorderSide(color: _AppColors.textSecondary),
                   ),
                   child: Text(
                     'Saltar',
@@ -665,7 +664,7 @@ class LactationSummaryWidget extends StatelessWidget {
           // Header
           Row(
             children: [
-              Icon(Icons.check_circle, color: _AppColors.success, size: 28),
+              const Icon(Icons.check_circle, color: _AppColors.success, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -702,7 +701,7 @@ class LactationSummaryWidget extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: _AppColors.textSecondary),
+                    side: const BorderSide(color: _AppColors.textSecondary),
                   ),
                   child: Text(
                     'Editar',

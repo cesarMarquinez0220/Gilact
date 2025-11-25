@@ -36,8 +36,8 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
   late Animation<double> _fadeAnimation;
 
   LactationStep _currentStep = LactationStep.initial;
-  Map<String, dynamic> _data = {};
-  List<String> _history = [];
+  final Map<String, dynamic> _data = {};
+  final List<String> _history = [];
 
   @override
   void initState() {
@@ -177,7 +177,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
         children: [
           Row(
             children: [
-              Icon(Icons.child_care, color: _AppColors.primary, size: 24),
+              const Icon(Icons.child_care, color: _AppColors.primary, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -201,7 +201,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
           LinearProgressIndicator(
             value: progress,
             backgroundColor: _AppColors.primary.withValues(alpha: 0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(_AppColors.primary),
+            valueColor: const AlwaysStoppedAnimation<Color>(_AppColors.primary),
             minHeight: 4,
           ),
         ],
@@ -222,7 +222,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
       ),
       child: Row(
         children: [
-          Icon(Icons.help_outline, color: _AppColors.primary, size: 20),
+          const Icon(Icons.help_outline, color: _AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -321,7 +321,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
               ),
 
               // Flecha
-              Icon(
+              const Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
                 color: _AppColors.textSecondary,
@@ -345,7 +345,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              side: BorderSide(color: _AppColors.textSecondary),
+              side: const BorderSide(color: _AppColors.textSecondary),
             ),
             child: Text(
               // UX Mejora: Cambia a "Cancelar" en el primer paso

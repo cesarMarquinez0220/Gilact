@@ -81,7 +81,7 @@ class _OfflineBadgeState extends State<OfflineBadge> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.cloud_off,
               size: 16,
               color: Colors.white,
