@@ -36,7 +36,7 @@ class CompanionAchievementsSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -94,7 +94,7 @@ class CompanionAchievementsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -220,10 +220,10 @@ class _XPInfoButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF03A696).withOpacity(0.1),
+          color: const Color(0xFF03A696).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF03A696).withOpacity(0.3),
+            color: const Color(0xFF03A696).withValues(alpha: 0.3),
             width: 1.5,
           ),
         ),
@@ -320,7 +320,7 @@ class _XPInfoButton extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -341,7 +341,7 @@ class _XPInfoButton extends StatelessWidget {
                       '• ${'companion.unlockedAchievementsBonus'.tr()}',
                       style: GoogleFonts.quicksand(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -425,7 +425,7 @@ class _XPInfoItem extends StatelessWidget {
                       bonus,
                       style: GoogleFonts.quicksand(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontStyle: FontStyle.italic,
                       ),
                     ),

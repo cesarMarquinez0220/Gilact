@@ -40,8 +40,8 @@ class CompanionAchievementBadge extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isUnlocked
-                      ? Colors.amber.withOpacity(0.3)
-                      : Colors.grey.withOpacity(0.5),
+                      ? Colors.amber.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.5),
                   width: 2,
                 ),
               ),
@@ -101,15 +101,11 @@ class CompanionAchievementBadge extends StatelessWidget {
                   if (!isUnlocked)
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
-                        child: Icon(
-                          Icons.lock,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                        child: Icon(Icons.lock, color: Colors.white, size: 24),
                       ),
                     ),
                 ],
@@ -121,4 +117,3 @@ class CompanionAchievementBadge extends StatelessWidget {
     );
   }
 }
-

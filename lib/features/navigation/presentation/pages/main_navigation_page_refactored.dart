@@ -218,19 +218,22 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       }
 
       // Validación defensiva: userId debería estar asignado aquí
-      if (userId.isEmpty) {
+      // El linter indica que userId no puede ser null en este punto debido al flujo anterior
+      // Usar ! para indicar que sabemos que no es null
+      final finalUserId = userId;
+      if (finalUserId.isEmpty) {
         print('❌ MainNavigationPage: Error crítico - userId es vacío');
         return;
       }
 
       // Cargar perfil del usuario si no está cargado (importante cuando se navega desde notificación)
-      await _ensureUserProfileLoaded(userId);
+      await _ensureUserProfileLoaded(finalUserId);
 
       // Inicializar providers con datos limpios para cuenta nueva
       await _initializeProvidersForNewUser();
 
       // Limpiar documentos duplicados en subcolección videos (solo si existen)
-      await _cleanupDuplicateDocumentsIfNeeded(userId);
+      await _cleanupDuplicateDocumentsIfNeeded(finalUserId);
 
       // Precargar videos en cache
       await _preloadVideosInCache();

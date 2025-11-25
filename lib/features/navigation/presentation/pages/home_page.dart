@@ -293,7 +293,7 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -330,7 +330,7 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -474,7 +474,7 @@ class _HomePageState extends State<HomePage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: streakColor.withOpacity(0.1),
+            color: streakColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -529,7 +529,7 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF3498DB).withOpacity(0.1),
+              color: const Color(0xFF3498DB).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -1060,11 +1060,11 @@ class _HomePageState extends State<HomePage> {
     // Solo procesar una vez
     if (state is UserProfileLoaded || state is UserProfileUpdated) {
       final profile = (state as dynamic).profile;
-      
+
       // Solo hacer la transición si aún está en preparto
       if (profile.isPrePartum && !profile.isPostPartum) {
         print('🎉 HomePage: Timer llegó a 0, transicionando a postparto...');
-        
+
         // Actualizar situación del usuario
         context.read<UserProfileBloc>().add(
           UpdateUserSituationRequested(
@@ -1498,8 +1498,8 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF03A696),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF03A696),
                     shape: BoxShape.circle,
                   ),
                 )
@@ -1548,7 +1548,7 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline,
                 size: 16,
                 color: const Color(0xFF03A696),

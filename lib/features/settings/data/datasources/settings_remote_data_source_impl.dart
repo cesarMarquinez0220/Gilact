@@ -19,7 +19,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (doc.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Configuración no encontrada para el usuario',
         );
       }
@@ -60,7 +60,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (query.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Configuración no encontrada para el usuario',
         );
       }
@@ -89,7 +89,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (query.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Configuración no encontrada para el usuario',
         );
       }
@@ -116,7 +116,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (doc.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Estadísticas no encontradas para el usuario',
         );
       }
@@ -157,7 +157,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (query.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Estadísticas no encontradas para el usuario',
         );
       }
@@ -189,7 +189,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (query.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Estadísticas no encontradas para el usuario',
         );
       }
@@ -230,9 +230,9 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (query.docs.isEmpty) {
-        throw NotFoundException(
+        throw const NotFoundException(
           message: 'Estadísticas no encontradas para el usuario',
-        );
+        );  
       }
 
       await firestore
@@ -277,7 +277,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
           .get();
 
       if (!doc.exists) {
-        throw NotFoundException(message: 'Mensaje de feedback no encontrado');
+        throw const NotFoundException(message: 'Mensaje de feedback no encontrado');
       }
 
       return FeedbackMessageModel.fromDocument(doc);

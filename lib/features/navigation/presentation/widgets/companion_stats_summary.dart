@@ -7,10 +7,7 @@ import '../../../gamification/domain/entities/user_gamification_profile.dart';
 class CompanionStatsSummary extends StatelessWidget {
   final UserGamificationProfile profile;
 
-  const CompanionStatsSummary({
-    required this.profile,
-    super.key,
-  });
+  const CompanionStatsSummary({required this.profile, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +18,7 @@ class CompanionStatsSummary extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -42,9 +39,18 @@ class CompanionStatsSummary extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _StatItem(label: 'companion.totalXP'.tr(), value: '${profile.totalXP}'),
-              _StatItem(label: 'companion.level'.tr(), value: '${profile.currentLevel}'),
-              _StatItem(label: 'companion.streak'.tr(), value: '${profile.currentStreak} ${'companion.days'.tr()}'),
+              _StatItem(
+                label: 'companion.totalXP'.tr(),
+                value: '${profile.totalXP}',
+              ),
+              _StatItem(
+                label: 'companion.level'.tr(),
+                value: '${profile.currentLevel}',
+              ),
+              _StatItem(
+                label: 'companion.streak'.tr(),
+                value: '${profile.currentStreak} ${'companion.days'.tr()}',
+              ),
             ],
           ),
         ],
@@ -74,13 +80,9 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: GoogleFonts.quicksand(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
+          style: GoogleFonts.quicksand(fontSize: 12, color: Colors.grey[600]),
         ),
       ],
     );
   }
 }
-

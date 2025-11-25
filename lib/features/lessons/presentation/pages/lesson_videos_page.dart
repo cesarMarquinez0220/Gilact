@@ -394,7 +394,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text('lessons.pathTitle'.tr()),
-                    content: Text(
+                    content: const Text(
                       "Sigue el camino paso a paso para aprender sobre lactancia materna.",
                     ),
                     actions: <Widget>[
@@ -903,7 +903,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final isCompleted = await _isTriviaCompleted(lessonId);
     if (isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: Text('trivia.alreadyCompleted'.tr()),
           backgroundColor: Colors.green,
         ),

@@ -221,7 +221,7 @@ class VideoPreloadService {
 
       // Simular precarga de metadata
       // En una implementación real, aquí se obtendría la información del video
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       print('✅ Metadata del video $videoId precargada');
     } catch (e) {

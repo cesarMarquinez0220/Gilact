@@ -34,7 +34,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
        _getLocalSettingsUseCase = getLocalSettingsUseCase,
        _updateLocalSettingUseCase = updateLocalSettingUseCase,
        _updateLocalSettingsUseCase = updateLocalSettingsUseCase,
-       super(SettingsInitial()) {
+       super(const SettingsInitial()) {
     on<GetAppConfigurationRequested>(_onGetAppConfigurationRequested);
     on<UpdateAppConfigurationRequested>(_onUpdateAppConfigurationRequested);
     on<GetUserStatisticsRequested>(_onGetUserStatisticsRequested);
@@ -49,7 +49,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     GetAppConfigurationRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     final result = await _getAppConfigurationUseCase(
       GetAppConfigurationParams(userId: event.userId),
@@ -65,7 +65,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     UpdateAppConfigurationRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     // Crear un AppConfiguration con los datos del evento
     final configuration = AppConfiguration(
@@ -92,7 +92,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
-      (_) => emit(AppConfigurationUpdated()),
+      (_) => emit(const AppConfigurationUpdated()),
     );
   }
 
@@ -100,7 +100,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     GetUserStatisticsRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     final result = await _getUserStatisticsUseCase(
       GetUserStatisticsParams(userId: event.userId),
@@ -116,7 +116,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     UpdateUserStatisticsRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     // Crear un UserStatistics con los datos del evento
     final statistics = UserStatistics(
@@ -143,7 +143,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
-      (_) => emit(UserStatisticsUpdated()),
+      (_) => emit(const UserStatisticsUpdated()),
     );
   }
 
@@ -151,7 +151,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     SaveFeedbackMessageRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     final result = await _submitFeedbackUseCase(
       SubmitFeedbackParams(feedback: event.message),
@@ -159,7 +159,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
-      (_) => emit(FeedbackMessageSaved()),
+      (_) => emit(const FeedbackMessageSaved()),
     );
   }
 
@@ -167,7 +167,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     GetLocalSettingsRequested event,
     Emitter<SettingsState> emit,
   ) async {
-    emit(SettingsLoading());
+    emit(const SettingsLoading());
 
     final result = await _getLocalSettingsUseCase(const NoParams());
 
@@ -187,7 +187,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
-      (_) => emit(LocalSettingUpdated()),
+      (_) => emit(const LocalSettingUpdated()),
     );
   }
 
@@ -201,7 +201,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     result.fold(
       (failure) => emit(SettingsFailure(failure.message)),
-      (_) => emit(LocalSettingsUpdated()),
+      (_) => emit(const LocalSettingsUpdated()),
     );
   }
 }

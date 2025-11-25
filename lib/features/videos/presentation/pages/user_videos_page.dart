@@ -492,9 +492,9 @@ class _UserVideosPageState extends State<UserVideosPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +524,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           Container(
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
             ),
             child: FractionallySizedBox(
@@ -543,7 +543,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             '${(progress * 100).toInt()}${'history.percentCompleted'.tr()}',
             style: GoogleFonts.quicksand(
               fontSize: 12,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -581,7 +581,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
           Icon(
             Icons.video_library_outlined,
             size: 80,
-            color: AppColors.textSecondary.withOpacity(0.5),
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -597,7 +597,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             'history.videosWillAppear'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 14,
-              color: AppColors.textSecondary.withOpacity(0.7),
+              color: AppColors.textSecondary.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -614,7 +614,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -663,7 +663,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             height: 70,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black.withValues(alpha: 0.6),
             ),
             child: const Center(
               child: Icon(Icons.lock, color: Colors.white, size: 24),
@@ -739,7 +739,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.textSecondary.withOpacity(0.2),
+          color: AppColors.textSecondary.withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.lock, color: AppColors.textSecondary, size: 20),
@@ -913,10 +913,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 height: 40,
                 decoration: BoxDecoration(
                   color: isDownloaded
-                      ? AppColors.success.withOpacity(0.2)
+                      ? AppColors.success.withValues(alpha:0.2)
                       : isDownloading
-                      ? AppColors.warning.withOpacity(0.2)
-                      : AppColors.primary.withOpacity(0.2),
+                      ? AppColors.warning.withValues(alpha:0.2)
+                      : AppColors.primary.withValues(alpha:0.2),
                   shape: BoxShape.circle,
                 ),
                 child: isDownloading
@@ -931,7 +931,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
                                   ? downloadProgress
                                   : null,
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
+                              valueColor: const AlwaysStoppedAnimation<Color>(
                                 AppColors.primary,
                               ),
                             ),
@@ -961,7 +961,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4FD1C7).withOpacity(0.3),
+                    color: const Color(0xFF4FD1C7).withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

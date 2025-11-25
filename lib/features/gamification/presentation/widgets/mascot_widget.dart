@@ -93,7 +93,7 @@ class MascotWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: messageColor.withOpacity(0.15),
+                color: messageColor.withValues(alpha: 0.15),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
                 spreadRadius: 1,
@@ -109,7 +109,7 @@ class MascotWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: messageColor.withOpacity(0.1),
+                    color: messageColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -135,7 +135,7 @@ class MascotWidget extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: messageColor.withOpacity(0.2),
+                              color: messageColor.withValues(alpha: 0.2),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -277,7 +277,7 @@ class MascotWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 20),

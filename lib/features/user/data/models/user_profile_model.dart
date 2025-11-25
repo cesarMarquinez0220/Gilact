@@ -55,6 +55,7 @@ class UserProfileModel extends UserProfile {
     };
   }
 
+  @override
   UserProfileModel copyWith({
     String? id,
     String? userId,

@@ -32,7 +32,7 @@ class SituationOptionWidget extends StatelessWidget {
           border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -90,12 +90,12 @@ class SituationOptionWidget extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                             side: BorderSide(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
                           elevation: 2,
-                          shadowColor: Colors.black.withOpacity(0.1),
+                          shadowColor: Colors.black.withValues(alpha: 0.1),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -122,7 +122,7 @@ class SituationOptionWidget extends StatelessWidget {
               // Ilustración (derecha)
               Expanded(
                 flex: 2,
-                child: Container(
+                child: SizedBox(
                   height: double.infinity,
                   child: Image.asset(
                     illustrationPath,
@@ -131,7 +131,7 @@ class SituationOptionWidget extends StatelessWidget {
                       // Fallback icon si la imagen no existe
                       return Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(

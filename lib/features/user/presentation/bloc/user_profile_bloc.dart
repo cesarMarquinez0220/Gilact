@@ -28,7 +28,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   }) : _getUserProfileUseCase = getUserProfileUseCase,
        _updateUserProfileUseCase = updateUserProfileUseCase,
        _signOutUseCase = signOutUseCase,
-       super(UserProfileInitial()) {
+       super(const UserProfileInitial()) {
     on<GetUserProfileRequested>(_onGetUserProfileRequested);
     on<UpdateUserProfileRequested>(_onUpdateUserProfileRequested);
     on<UpdateUserSituationRequested>(_onUpdateUserSituationRequested);
@@ -43,7 +43,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     GetUserProfileRequested event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(UserProfileLoading());
+    emit(const UserProfileLoading());
 
     try {
       final isConnected = await _connectivityService.isConnected();
@@ -132,7 +132,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
           print('⚠️ UserProfileBloc: No hay perfil en cache');
         }
         emit(
-          UserProfileFailure(
+          const UserProfileFailure(
             'No hay conexión y no hay datos en cache. Por favor, conecta a internet para cargar tu perfil.',
           ),
         );
@@ -149,7 +149,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     UpdateUserProfileRequested event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(UserProfileLoading());
+    emit(const UserProfileLoading());
 
     // Crear un UserProfile con los datos del evento
     final userProfile = UserProfile(
@@ -275,13 +275,13 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     SignOutRequested event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(UserProfileLoading());
+    emit(const UserProfileLoading());
 
-    final result = await _signOutUseCase(NoParams());
+    final result = await _signOutUseCase(const NoParams());
 
     result.fold(
       (failure) => emit(UserProfileFailure(failure.message)),
-      (_) => emit(UserProfileSignedOut()),
+      (_) => emit(const UserProfileSignedOut()),
     );
   }
 
@@ -291,7 +291,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   ) async {
     // Solo resetea el estado sin desconectar al usuario
     print('🔄 UserProfileBloc: Reseteando estado del perfil...');
-    emit(UserProfileInitial());
+    emit(const UserProfileInitial());
     print('✅ UserProfileBloc: Estado del perfil reseteado');
   }
 

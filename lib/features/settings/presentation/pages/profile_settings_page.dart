@@ -223,7 +223,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 // Sección: Ayuda y Soporte
                 _buildSectionTitle('help.title'.tr(), constraints),
                 const SizedBox(height: 12),
-                HelpSupportCardWidget(),
+                const HelpSupportCardWidget(),
 
                 const SizedBox(height: 20),
 

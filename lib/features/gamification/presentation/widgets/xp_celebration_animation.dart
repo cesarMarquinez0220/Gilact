@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -38,8 +36,8 @@ class XPCelebrationAnimation extends StatefulWidget {
 
     // Vibración y sonido al mostrar (usando servicios)
     if (withVibration) {
-      final soundService = getIt<SoundService>();
-      final vibrationService = getIt<VibrationService>();
+      final SoundService soundService = getIt<SoundService>();
+      final VibrationService vibrationService = getIt<VibrationService>();
       soundService.playSuccessSound();
       vibrationService.vibrateOnXP(); // Usar vibración específica para XP
     }
@@ -197,7 +195,7 @@ class _XPCelebrationAnimationState extends State<XPCelebrationAnimation>
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
-          decoration: BoxDecoration(color: Colors.black.withOpacity(0.4)),
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4)),
           child: Center(
             child: Stack(
               alignment: Alignment.center,
@@ -247,7 +245,9 @@ class _XPCelebrationAnimationState extends State<XPCelebrationAnimation>
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.5),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.5,
+                                    ),
                                     blurRadius: 30,
                                     offset: const Offset(0, 15),
                                     spreadRadius: 5,
@@ -297,7 +297,9 @@ class _XPCelebrationAnimationState extends State<XPCelebrationAnimation>
                                         style: GoogleFonts.quicksand(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.9,
+                                          ),
                                           decoration: TextDecoration.none,
                                         ),
                                       ),
@@ -320,7 +322,9 @@ class _XPCelebrationAnimationState extends State<XPCelebrationAnimation>
                                   decoration: TextDecoration.none,
                                   shadows: [
                                     Shadow(
-                                      color: Colors.black.withOpacity(0.3),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     ),
@@ -418,17 +422,17 @@ class _StarsPainter extends CustomPainter {
 
       // Brillo exterior (más grande y semi-transparente)
       final outerGlowPaint = Paint()
-        ..color = Colors.white.withOpacity(opacity * 0.2)
+        ..color = Colors.white.withValues(alpha: opacity * 0.2)
         ..style = PaintingStyle.fill;
 
       // Brillo medio
       final midGlowPaint = Paint()
-        ..color = Colors.white.withOpacity(opacity * 0.4)
+        ..color = Colors.white.withValues(alpha: opacity * 0.4)
         ..style = PaintingStyle.fill;
 
       // Estrella principal (blanca brillante)
       final mainPaint = Paint()
-        ..color = Colors.white.withOpacity(opacity)
+        ..color = Colors.white.withValues(alpha: opacity)
         ..style = PaintingStyle.fill;
 
       // Dibujar brillos desde afuera hacia adentro para efecto de resplandor
@@ -444,7 +448,7 @@ class _StarsPainter extends CustomPainter {
     final path = Path();
     final outerRadius = size;
     final innerRadius = size * 0.4;
-    final spikes = 5;
+    const spikes = 5;
 
     for (int i = 0; i < spikes * 2; i++) {
       final radius = i.isEven ? outerRadius : innerRadius;
@@ -464,8 +468,8 @@ class _StarsPainter extends CustomPainter {
     // Agregar un pequeño círculo brillante en el centro para más visibilidad
     if (size > 5) {
       final centerPaint = Paint()
-        ..color = paint.color.withOpacity(
-          math.min(1.0, paint.color.opacity * 1.3),
+        ..color = paint.color.withValues(
+          alpha: math.min(1.0, paint.color.opacity * 1.3),
         )
         ..style = PaintingStyle.fill;
       canvas.drawCircle(center, size * 0.15, centerPaint);

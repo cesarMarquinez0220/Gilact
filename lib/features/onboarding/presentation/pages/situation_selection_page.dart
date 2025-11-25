@@ -143,7 +143,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -172,7 +172,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                         // Subtítulo
                         Text(
                           'onboarding.selectSituationDescription'.tr(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.white70,
                             height: 1.4,
@@ -260,7 +260,7 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..color = Colors.white.withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
 
     // Crear partículas flotantes más pequeñas y dispersas
@@ -274,7 +274,7 @@ class ParticlePainter extends CustomPainter {
       final radius = 1.5 + (i % 2);
       final opacity = 0.1 + (animationValue * 0.2);
 
-      paint.color = Colors.white.withOpacity(opacity);
+      paint.color = Colors.white.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
@@ -286,7 +286,7 @@ class ParticlePainter extends CustomPainter {
       final radius = 2.5 + (i % 2);
       final opacity = 0.05 + (animationValue * 0.15);
 
-      paint.color = Colors.white.withOpacity(opacity);
+      paint.color = Colors.white.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
@@ -299,7 +299,7 @@ class ParticlePainter extends CustomPainter {
       final radius = 1.0 + (i % 3) * 0.5;
       final opacity = 0.08 + (animationValue * 0.12);
 
-      paint.color = Colors.white.withOpacity(opacity);
+      paint.color = Colors.white.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
   }

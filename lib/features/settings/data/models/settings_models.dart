@@ -83,6 +83,7 @@ class AppConfigurationModel extends AppConfiguration {
     };
   }
 
+  @override
   AppConfigurationModel copyWith({
     String? id,
     String? userId,
@@ -177,6 +178,7 @@ class UserStatisticsModel extends UserStatistics {
     };
   }
 
+  @override
   UserStatisticsModel copyWith({
     String? id,
     String? userId,
@@ -251,6 +253,7 @@ class FeedbackMessageModel extends FeedbackMessage {
     };
   }
 
+  @override
   FeedbackMessageModel copyWith({
     String? id,
     String? userId,

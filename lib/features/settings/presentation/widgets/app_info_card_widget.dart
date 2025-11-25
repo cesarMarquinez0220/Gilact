@@ -26,15 +26,15 @@ class AppInfoCardWidget extends StatelessWidget {
           ),
           padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.info_outline,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 size: isSmallScreen ? 18 : 20,
               ),
               SizedBox(width: isSmallScreen ? 10 : 12),
@@ -54,7 +54,7 @@ class AppInfoCardWidget extends StatelessWidget {
                     Text(
                       '${'account.version'.tr()} $appVersion',
                       style: GoogleFonts.quicksand(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: isSmallScreen ? 11 : 12,
                       ),
                     ),

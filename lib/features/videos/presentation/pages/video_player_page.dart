@@ -170,7 +170,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   textAlign: TextAlign.center, // Centrado se ve mejor
                   style: GoogleFonts.quicksand(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
                 const SizedBox(height: 24), // Espacio antes del botón
@@ -212,8 +212,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   Navigator.of(context).pop(true); // Volver
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white.withOpacity(
-                    0.7,
+                  foregroundColor: Colors.white.withValues(
+                    alpha: 0.7,
                   ), // Menos énfasis
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,

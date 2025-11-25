@@ -35,7 +35,7 @@ class FeedingAnalysisService {
   // Instancia compartida de LactationService para evitar crear múltiples instancias
   LactationService? _lactationService;
   final ConnectivityService _connectivityService = ConnectivityService();
-  
+
   /// Obtiene o crea la instancia compartida de LactationService
   LactationService _getLactationService() {
     _lactationService ??= LactationService(
@@ -56,24 +56,32 @@ class FeedingAnalysisService {
   ) async {
     try {
       // OPTIMIZACIÓN: Obtener todos los registros de una vez en lugar de día por día
-      final allRecords = await _getAllLactationRecordsForRange(startDate, endDate);
-      
+      final allRecords = await _getAllLactationRecordsForRange(
+        startDate,
+        endDate,
+      );
+
       // Crear mapa de registros por fecha para acceso rápido
       final recordsByDate = <String, List<LactationRecord>>{};
       for (final record in allRecords) {
-        final dateKey = '${record.fechaRegistro.year}-${record.fechaRegistro.month}-${record.fechaRegistro.day}';
+        final dateKey =
+            '${record.fechaRegistro.year}-${record.fechaRegistro.month}-${record.fechaRegistro.day}';
         recordsByDate.putIfAbsent(dateKey, () => []).add(record);
       }
-      
+
       // Generar datos diarios
       final days = endDate.difference(startDate).inDays + 1;
       final dailyData = <DailyFeedingData>[];
 
       for (int i = 0; i < days; i++) {
         final currentDate = startDate.add(Duration(days: i));
-        final dayStart = DateTime(currentDate.year, currentDate.month, currentDate.day);
+        final dayStart = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day,
+        );
         final dateKey = '${dayStart.year}-${dayStart.month}-${dayStart.day}';
-        
+
         // Obtener registros del día desde el mapa
         final dayRecords = recordsByDate[dateKey] ?? [];
 
@@ -98,7 +106,7 @@ class FeedingAnalysisService {
       return [];
     }
   }
-  
+
   /// Obtiene todos los registros de lactancia para un rango de fechas
   /// OPTIMIZACIÓN: Una sola consulta a Firestore en lugar de 31 consultas separadas
   Future<List<LactationRecord>> _getAllLactationRecordsForRange(
@@ -108,17 +116,25 @@ class FeedingAnalysisService {
     try {
       final lactationService = _getLactationService();
       final allRecords = <LactationRecord>[];
-      
+
       // Obtener registros locales para el rango completo usando la base de datos local directamente
       try {
         final localDatabase = LactationDatabase();
-        final startOfRange = DateTime(startDate.year, startDate.month, startDate.day);
-        final endOfRange = DateTime(endDate.year, endDate.month, endDate.day).add(const Duration(days: 1));
-        
+        final startOfRange = DateTime(
+          startDate.year,
+          startDate.month,
+          startDate.day,
+        );
+        final endOfRange = DateTime(
+          endDate.year,
+          endDate.month,
+          endDate.day,
+        ).add(const Duration(days: 1));
+
         // Obtener todos los registros locales y filtrar por rango
         // Usar getRecordsForDate en un loop optimizado o getAllRecords si existe
         final allLocalRecords = <LactationRecord>[];
-        
+
         // Obtener registros día por día desde la base de datos local (más eficiente que getAllRecords)
         final days = endDate.difference(startDate).inDays + 1;
         for (int i = 0; i < days; i++) {
@@ -128,28 +144,42 @@ class FeedingAnalysisService {
         }
         final localRecordsInRange = allLocalRecords.where((r) {
           final recordDate = r.fechaRegistro;
-          return recordDate.isAfter(startOfRange.subtract(const Duration(days: 1))) &&
-                 recordDate.isBefore(endOfRange);
+          return recordDate.isAfter(
+                startOfRange.subtract(const Duration(days: 1)),
+              ) &&
+              recordDate.isBefore(endOfRange);
         }).toList();
-        
+
         allRecords.addAll(localRecordsInRange);
-        
+
         if (kDebugMode) {
-          print('📦 FeedingAnalysisService: ${localRecordsInRange.length} registros locales encontrados');
+          print(
+            '📦 FeedingAnalysisService: ${localRecordsInRange.length} registros locales encontrados',
+          );
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ FeedingAnalysisService: Error obteniendo registros locales: $e');
+          print(
+            '⚠️ FeedingAnalysisService: Error obteniendo registros locales: $e',
+          );
         }
       }
-      
+
       // Si hay conexión, obtener también de Firestore (UNA SOLA CONSULTA)
       final isConnected = await _connectivityService.isConnected();
       if (isConnected) {
         try {
-          final startOfRange = DateTime(startDate.year, startDate.month, startDate.day);
-          final endOfRange = DateTime(endDate.year, endDate.month, endDate.day).add(const Duration(days: 1));
-          
+          final startOfRange = DateTime(
+            startDate.year,
+            startDate.month,
+            startDate.day,
+          );
+          final endOfRange = DateTime(
+            endDate.year,
+            endDate.month,
+            endDate.day,
+          ).add(const Duration(days: 1));
+
           // OPTIMIZACIÓN: Una sola consulta a Firestore para todo el rango
           // Obtener userId primero para construir la colección
           final userDocId = await lactationService.getUserDocumentId();
@@ -157,9 +187,10 @@ class FeedingAnalysisService {
             if (kDebugMode) {
               print('⚠️ FeedingAnalysisService: No se pudo obtener userId');
             }
-            return allRecords..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+            return allRecords
+              ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
           }
-          
+
           final collection = FirebaseFirestore.instance
               .collection('Users')
               .doc(userDocId)
@@ -167,46 +198,51 @@ class FeedingAnalysisService {
               .doc('seleccion')
               .collection('lactancia');
           final querySnapshot = await collection
-              .where('fecha_registro', isGreaterThanOrEqualTo: startOfRange.toIso8601String())
+              .where(
+                'fecha_registro',
+                isGreaterThanOrEqualTo: startOfRange.toIso8601String(),
+              )
               .where('fecha_registro', isLessThan: endOfRange.toIso8601String())
               .orderBy('fecha_registro', descending: true)
               .get();
-          
+
           final firestoreRecords = querySnapshot.docs
-              .map((doc) => LactationRecord.fromMap(
-                  Map<String, dynamic>.from(doc.data()),
-                  doc.id,
-                ))
+              .where((doc) => doc.data() != null)
+              .map((doc) => LactationRecord.fromMap(doc.data(), doc.id))
               .toList();
-          
+
           if (kDebugMode) {
-            print('☁️ FeedingAnalysisService: ${firestoreRecords.length} registros de Firestore encontrados');
+            print(
+              '☁️ FeedingAnalysisService: ${firestoreRecords.length} registros de Firestore encontrados',
+            );
           }
-          
+
           // Combinar: usar Firestore como fuente de verdad, agregar locales no sincronizados
           final Map<String, LactationRecord> combined = {};
-          
+
           // Primero agregar de Firestore
           for (final record in firestoreRecords) {
             combined[record.id] = record;
           }
-          
+
           // Luego agregar locales que no estén en Firestore
           for (final record in allRecords) {
             if (!combined.containsKey(record.id)) {
               combined[record.id] = record;
             }
           }
-          
+
           return combined.values.toList()
             ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ FeedingAnalysisService: Error obteniendo desde Firestore: $e');
+            print(
+              '⚠️ FeedingAnalysisService: Error obteniendo desde Firestore: $e',
+            );
           }
         }
       }
-      
+
       // Si no hay conexión o falló Firestore, retornar solo locales
       return allRecords..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
@@ -216,7 +252,6 @@ class FeedingAnalysisService {
       return [];
     }
   }
-
 
   /// Agrega datos de un día
   /// IMPORTANTE: Solo cuenta volumen REAL de biberón, NO estima volumen de pecho
@@ -250,7 +285,7 @@ class FeedingAnalysisService {
           totalVolume += record.volumenExtraccion.toDouble();
         }
       }
-      
+
       // NOTA: No estimamos volumen de pecho porque:
       // 1. El flujo de leche no es constante
       // 2. Los bebés se vuelven más eficientes con el tiempo
@@ -305,26 +340,30 @@ class FeedingAnalysisService {
   double calculateFeedingScore(DailyFeedingData feedingData, int ageInDays) {
     // Score de frecuencia (0-60 puntos)
     // Frecuencia esperada según edad
-    final expectedFrequency = ageInDays <= 30 ? 8.0 : 
-                             ageInDays <= 60 ? 7.0 :
-                             ageInDays <= 90 ? 6.0 :
-                             ageInDays <= 120 ? 5.5 : 5.0;
+    final expectedFrequency = ageInDays <= 30
+        ? 8.0
+        : ageInDays <= 60
+        ? 7.0
+        : ageInDays <= 90
+        ? 6.0
+        : ageInDays <= 120
+        ? 5.5
+        : 5.0;
     final frequencyRatio = feedingData.feedingFrequency / expectedFrequency;
     final frequencyScore = (frequencyRatio.clamp(0.0, 1.5)) * 60.0;
-    
+
     // Score de duración (0-40 puntos)
     // Duración esperada: al menos 10 min por toma
     final expectedDuration = expectedFrequency * 10.0;
     final durationRatio = feedingData.totalDuration / expectedDuration;
     final durationScore = (durationRatio.clamp(0.0, 1.5)) * 40.0;
-    
+
     // NOTA: No usamos volumen porque:
     // - El volumen de pecho no puede estimarse de forma confiable
     // - Solo contamos volumen real de biberón
     // - El peso es el indicador real de buena alimentación
-    
+
     final totalScore = frequencyScore + durationScore;
     return totalScore.clamp(0.0, 100.0);
   }
 }
-

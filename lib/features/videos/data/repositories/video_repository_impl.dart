@@ -135,7 +135,7 @@ class VideoRepositoryImpl implements VideoRepository {
   ) async {
     try {
       // TODO: Implementar obtención de progreso de video
-      return Left(ServerFailure(message: 'Método no implementado'));
+      return const Left(ServerFailure(message: 'Método no implementado'));
     } catch (e) {
       return Left(ServerFailure(message: 'Error inesperado: ${e.toString()}'));
     }
@@ -148,7 +148,7 @@ class VideoRepositoryImpl implements VideoRepository {
   ) async {
     try {
       // TODO: Implementar obtención de estadísticas de video
-      return Left(ServerFailure(message: 'Método no implementado'));
+      return const Left(ServerFailure(message: 'Método no implementado'));
     } catch (e) {
       return Left(ServerFailure(message: 'Error inesperado: ${e.toString()}'));
     }
@@ -160,7 +160,7 @@ class VideoRepositoryImpl implements VideoRepository {
   ) async {
     try {
       // TODO: Implementar creación de sesión de video
-      return Left(ServerFailure(message: 'Método no implementado'));
+      return const Left(ServerFailure(message: 'Método no implementado'));
     } catch (e) {
       return Left(ServerFailure(message: 'Error inesperado: ${e.toString()}'));
     }
@@ -193,7 +193,7 @@ class VideoRepositoryImpl implements VideoRepository {
   ) async {
     try {
       // TODO: Implementar obtención de sesiones de video
-      return Left(ServerFailure(message: 'Método no implementado'));
+      return const Left(ServerFailure(message: 'Método no implementado'));
     } catch (e) {
       return Left(ServerFailure(message: 'Error inesperado: ${e.toString()}'));
     }

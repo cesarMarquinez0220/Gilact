@@ -11,7 +11,6 @@ import '../../../lactation/data/datasources/lactation_database.dart';
 import '../../../lessons/data/repositories/lesson_repository_impl.dart';
 import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
 import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
-import '../../../gamification/domain/repositories/gamification_repository.dart';
 
 /// Diálogo de detalles de logro con carga optimizada de estadísticas
 class CompanionAchievementDialog extends StatelessWidget {
@@ -63,33 +62,54 @@ class CompanionAchievementDialog extends StatelessWidget {
     switch (achievement.type) {
       case AchievementType.lactation:
         if (achievement.id.startsWith('milestone_')) {
-          return 'gamification.messages.achievementDescriptions.milestone'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.milestone'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id.startsWith('complete_')) {
-          return 'gamification.messages.achievementDescriptions.complete'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.complete'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id.startsWith('daily_')) {
-          return 'gamification.messages.achievementDescriptions.daily'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.daily'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id == 'nocturnal_10') {
           return 'gamification.messages.achievementDescriptions.nocturnal'.tr();
         }
-        return 'gamification.messages.achievementDescriptions.lactation'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+        return 'gamification.messages.achievementDescriptions.lactation'.tr(
+          namedArgs: {'value': achievement.requiredValue.toString()},
+        );
       case AchievementType.lesson:
         if (achievement.id == 'trivia_perfect_5') {
-          return 'gamification.messages.achievementDescriptions.triviaPerfect'.tr();
+          return 'gamification.messages.achievementDescriptions.triviaPerfect'
+              .tr();
         }
-        return 'gamification.messages.achievementDescriptions.lesson'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+        return 'gamification.messages.achievementDescriptions.lesson'.tr(
+          namedArgs: {'value': achievement.requiredValue.toString()},
+        );
       case AchievementType.streak:
-        return 'gamification.messages.achievementDescriptions.streak'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+        return 'gamification.messages.achievementDescriptions.streak'.tr(
+          namedArgs: {'value': achievement.requiredValue.toString()},
+        );
       case AchievementType.special:
         if (achievement.id.startsWith('level_')) {
-          return 'gamification.messages.achievementDescriptions.level'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.level'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id == 'weight_10') {
-          return 'gamification.messages.achievementDescriptions.weight'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.weight'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id == 'sleep_20') {
-          return 'gamification.messages.achievementDescriptions.sleep'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.sleep'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         } else if (achievement.id.startsWith('first_') ||
             achievement.id.startsWith('three_') ||
             achievement.id.startsWith('six_')) {
-          return 'gamification.messages.achievementDescriptions.appUsage'.tr(namedArgs: {'value': achievement.requiredValue.toString()});
+          return 'gamification.messages.achievementDescriptions.appUsage'.tr(
+            namedArgs: {'value': achievement.requiredValue.toString()},
+          );
         }
         return 'gamification.messages.achievementDescriptions.default'.tr();
     }
@@ -170,56 +190,42 @@ class _AchievementDetailsDialogContentState
             // Solo necesitamos los registros de hoy
             final today = DateTime.now();
             final lactationService = getIt<LactationService>();
-            final todayRecords = await lactationService.getRecordsForDate(today);
+            final todayRecords = await lactationService.getRecordsForDate(
+              today,
+            );
             progressText =
                 '${todayRecords.length}/${widget.achievement.requiredValue} registros en un solo día.';
           } else if (widget.achievement.id == 'nocturnal_10') {
             // Solo necesitamos registros nocturnos
             final localDb = LactationDatabase();
             final allRecords = await localDb.getAllRecords();
-            final nocturnalRecords = allRecords
-                .where((r) {
-                  final hour = r.timestamp.hour;
-                  return hour >= 0 && hour < 6;
-                })
-                .length;
-            progressText = '$nocturnalRecords/10 registros entre las 12am y las 6am.';
+            final nocturnalRecords = allRecords.where((r) {
+              final hour = r.timestamp.hour;
+              return hour >= 0 && hour < 6;
+            }).length;
+            progressText =
+                '$nocturnalRecords/10 registros entre las 12am y las 6am.';
           }
           break;
 
         case AchievementType.lesson:
           if (widget.achievement.id == 'trivia_perfect_5') {
-            // Solo necesitamos trivias perfectas
-            final gamificationRepo = getIt<GamificationRepository>();
-            final userId = _getUserId();
-            if (userId != null) {
-              final transactionsResult =
-                  await gamificationRepo.getXPTransactions(userId);
-              transactionsResult.fold(
-                (error) => null,
-                (transactions) {
-                  // Por ahora, contar todas las trivias como perfectas
-                  // (mejorar después con lógica específica)
-                  final triviaCount = transactions
-                      .where((t) => t.source.toString().contains('trivia'))
-                      .length;
-                  progressText = '$triviaCount/5 trivias con 100% de respuestas correctas.';
-                },
-              );
-            }
+            // TODO: Implementar lógica para trivias perfectas
+            // Por ahora, usar descripción por defecto
           } else {
             // Solo necesitamos lecciones completadas
             final lessonRepo = getIt<LessonRepositoryImpl>();
             final lessonsResult = await lessonRepo.getAllLessons();
-            lessonsResult.fold(
-              (failure) => null,
-              (lessons) {
-                final completed = lessons.where((l) => l.isCompleted).length;
-                progressText =
-                    '$completed/${widget.achievement.requiredValue} lecciones completadas.';
-              },
-            );
+            lessonsResult.fold((failure) => null, (lessons) {
+              final completed = lessons.where((l) => l.isCompleted).length;
+              progressText =
+                  '$completed/${widget.achievement.requiredValue} lecciones completadas.';
+            });
           }
+          break;
+
+        case AchievementType.streak:
+          // Los logros de racha no necesitan estadísticas adicionales
           break;
 
         case AchievementType.special:
@@ -239,15 +245,12 @@ class _AchievementDetailsDialogContentState
               widget.achievement.id.startsWith('three_') ||
               widget.achievement.id.startsWith('six_')) {
             // Solo necesitamos días usando la app
-            final daysUsingApp =
-                DateTime.now().difference(widget.profile.createdAt).inDays;
-              progressText =
-                  '$daysUsingApp/${widget.achievement.requiredValue} días usando la app.';
-            }
+            final daysUsingApp = DateTime.now()
+                .difference(widget.profile.createdAt)
+                .inDays;
+            progressText =
+                '$daysUsingApp/${widget.achievement.requiredValue} días usando la app.';
           }
-          break;
-
-        default:
           break;
       }
 
@@ -342,10 +345,7 @@ class _AchievementDetailsDialogContentState
           Text(
             widget.achievement.description,
             textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+            style: GoogleFonts.quicksand(fontSize: 14, color: Colors.grey[700]),
           ),
           const SizedBox(height: 16),
           // Si está bloqueado, mostrar objetivos
@@ -411,14 +411,9 @@ class _AchievementDetailsDialogContentState
           ],
           // Recompensa XP
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: widget.isUnlocked
-                  ? Colors.amber[100]
-                  : Colors.grey[200],
+              color: widget.isUnlocked ? Colors.amber[100] : Colors.grey[200],
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -450,10 +445,7 @@ class _AchievementDetailsDialogContentState
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -473,4 +465,3 @@ class _AchievementDetailsDialogContentState
     );
   }
 }
-

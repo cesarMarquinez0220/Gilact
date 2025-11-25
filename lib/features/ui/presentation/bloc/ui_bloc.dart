@@ -40,7 +40,7 @@ class UIBloc extends Bloc<UIEvent, UIState> {
   ) async {
     emit(UILoading());
 
-    final result = await getSplashPagesUseCase(NoParams());
+    final result = await getSplashPagesUseCase(const NoParams());
 
     result.fold(
       (failure) => emit(UIFailure(failure.message)),
@@ -54,7 +54,7 @@ class UIBloc extends Bloc<UIEvent, UIState> {
   ) async {
     emit(UILoading());
 
-    final result = await getLessonProgressStateUseCase(NoParams());
+    final result = await getLessonProgressStateUseCase(const NoParams());
 
     result.fold(
       (failure) => emit(UIFailure(failure.message)),

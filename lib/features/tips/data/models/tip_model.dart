@@ -63,6 +63,7 @@ class TipModel extends Tip {
     };
   }
 
+  @override
   TipModel copyWith({
     String? id,
     String? title,

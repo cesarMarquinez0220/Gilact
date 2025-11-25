@@ -64,7 +64,7 @@ class VideoEvent extends Equatable {
       eventType: 'play',
       timestamp: Duration(milliseconds: DateTime.now().millisecondsSinceEpoch),
       position: position,
-      metadata: {},
+      metadata: const {},
     );
   }
 
@@ -80,7 +80,7 @@ class VideoEvent extends Equatable {
       eventType: 'pause',
       timestamp: Duration(milliseconds: DateTime.now().millisecondsSinceEpoch),
       position: position,
-      metadata: {},
+      metadata: const {},
     );
   }
 

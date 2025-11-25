@@ -33,7 +33,8 @@ class CompanionDailyChallengeSection extends StatelessWidget {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
     final completedDate = profile.completedDailyChallenges[challenge.id];
-    final wasCompletedToday = completedDate != null &&
+    final wasCompletedToday =
+        completedDate != null &&
         completedDate.year == todayStart.year &&
         completedDate.month == todayStart.month &&
         completedDate.day == todayStart.day;
@@ -62,7 +63,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -125,7 +126,11 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle, color: Colors.white, size: 16),
+                      const Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'companion.completed'.tr(),
@@ -144,10 +149,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
           // Descripción
           Text(
             challenge.description,
-            style: GoogleFonts.quicksand(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+            style: GoogleFonts.quicksand(fontSize: 14, color: Colors.grey[700]),
           ),
           const SizedBox(height: 16),
           // Barra de progreso
@@ -170,7 +172,9 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                     style: GoogleFonts.quicksand(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isCompleted ? Colors.green[700] : Colors.amber[800],
+                      color: isCompleted
+                          ? Colors.green[700]
+                          : Colors.amber[800],
                     ),
                   ),
                 ],
@@ -194,21 +198,19 @@ class CompanionDailyChallengeSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.star,
-                  color: Colors.amber[700],
-                  size: 20,
-                ),
+                Icon(Icons.star, color: Colors.amber[700], size: 20),
                 const SizedBox(width: 8),
                 Text(
                   isCompleted
-                      ? 'companion.youWonXP'.tr(namedArgs: {'xp': challenge.xpReward.toString()})
+                      ? 'companion.youWonXP'.tr(
+                          namedArgs: {'xp': challenge.xpReward.toString()},
+                        )
                       : 'companion.reward'.tr() + ': ${challenge.xpReward} XP',
                   style: GoogleFonts.quicksand(
                     fontSize: 14,
@@ -248,8 +250,8 @@ class CompanionDailyChallengeSection extends StatelessWidget {
         (updatedProfile) {
           // Actualizar el BLoC con el nuevo perfil
           context.read<GamificationBloc>().add(
-                UpdateGamificationProfile(updatedProfile),
-              );
+            UpdateGamificationProfile(updatedProfile),
+          );
 
           // Mostrar animación de XP
           if (context.mounted) {
@@ -268,4 +270,3 @@ class CompanionDailyChallengeSection extends StatelessWidget {
     }
   }
 }
-

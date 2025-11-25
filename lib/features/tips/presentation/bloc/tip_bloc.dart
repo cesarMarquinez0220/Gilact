@@ -33,7 +33,7 @@ class TipBloc extends Bloc<TipEvent, TipState> {
        _markTipAsFavoriteUseCase = markTipAsFavoriteUseCase,
        _unmarkTipAsFavoriteUseCase = unmarkTipAsFavoriteUseCase,
        _getFavoriteTipsUseCase = getFavoriteTipsUseCase,
-       super(TipInitial()) {
+       super(const TipInitial()) {
     on<GetAllTipsRequested>(_onGetAllTipsRequested);
     on<GetTipByIdRequested>(_onGetTipByIdRequested);
     on<GetTipsByCategoryRequested>(_onGetTipsByCategoryRequested);
@@ -47,7 +47,7 @@ class TipBloc extends Bloc<TipEvent, TipState> {
     GetAllTipsRequested event,
     Emitter<TipState> emit,
   ) async {
-    emit(TipLoading());
+    emit(const TipLoading());
 
     final result = await _getAllTipsUseCase();
 
@@ -61,7 +61,7 @@ class TipBloc extends Bloc<TipEvent, TipState> {
     GetTipByIdRequested event,
     Emitter<TipState> emit,
   ) async {
-    emit(TipLoading());
+    emit(const TipLoading());
 
     final result = await _getTipByIdUseCase(GetTipByIdParams(id: event.id));
 
@@ -75,7 +75,7 @@ class TipBloc extends Bloc<TipEvent, TipState> {
     GetTipsByCategoryRequested event,
     Emitter<TipState> emit,
   ) async {
-    emit(TipLoading());
+    emit(const TipLoading());
 
     final result = await _getTipsByCategoryUseCase(
       GetTipsByCategoryParams(category: event.category),
@@ -91,7 +91,7 @@ class TipBloc extends Bloc<TipEvent, TipState> {
     SearchTipsRequested event,
     Emitter<TipState> emit,
   ) async {
-    emit(TipLoading());
+    emit(const TipLoading());
 
     final result = await _searchTipsUseCase(
       SearchTipsParams(query: event.query),

@@ -63,6 +63,7 @@ class UserProfileModel extends UserProfile {
     return toJson();
   }
 
+  @override
   UserProfileModel copyWith({
     String? id,
     String? username,
@@ -145,6 +146,7 @@ class BabyInfoModel extends BabyInfo {
     return toJson();
   }
 
+  @override
   BabyInfoModel copyWith({
     String? name,
     int? gestationalAge,
@@ -221,6 +223,7 @@ class LessonProgressModel extends LessonProgress {
     return toJson();
   }
 
+  @override
   LessonProgressModel copyWith({
     String? lessonId,
     String? title,

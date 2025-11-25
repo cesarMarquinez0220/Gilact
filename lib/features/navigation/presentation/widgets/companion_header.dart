@@ -31,7 +31,7 @@ class CompanionHeader extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF667eea).withOpacity(0.3),
+            color: const Color(0xFF667eea).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: 2,
@@ -52,7 +52,7 @@ class CompanionHeader extends StatelessWidget {
                     color: Colors.white,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         offset: const Offset(1, 1),
                         blurRadius: 3,
                       ),
@@ -65,7 +65,7 @@ class CompanionHeader extends StatelessWidget {
                   style: GoogleFonts.quicksand(
                     fontSize: isSmallScreen ? 14 : 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                   ),
                 ),
               ],
@@ -76,14 +76,14 @@ class CompanionHeader extends StatelessWidget {
             height: isSmallScreen ? 56 : 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               border: Border.all(
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -100,4 +100,3 @@ class CompanionHeader extends StatelessWidget {
     );
   }
 }
-

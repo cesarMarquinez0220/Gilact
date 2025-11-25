@@ -600,7 +600,7 @@ class DotsPainter extends CustomPainter {
     // Agregar algunos puntos más pequeños para mayor detalle
     final smallPaint = Paint()
       ..color = const Color(0xFF4FD1C7)
-          .withOpacity(0.2) // Verde azulado medio vibrante (primario)
+          .withValues(alpha: 0.2) // Verde azulado medio vibrante (primario)
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 3; i++) {

@@ -83,7 +83,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -112,7 +112,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                                     size: 50,
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
+                                  const Text(
                                     'Imagen no encontrada',
                                     style: TextStyle(
                                       color: Colors.white70,
@@ -121,7 +121,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                                   ),
                                   Text(
                                     widget.thumbnailUrl.split('/').last,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white54,
                                       fontSize: 10,
                                     ),
@@ -148,8 +148,8 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF4FD1C7).withOpacity(0.3),
-                      const Color(0xFF1A365D).withOpacity(0.3),
+                      const Color(0xFF4FD1C7).withValues(alpha: 0.3),
+                      const Color(0xFF1A365D).withValues(alpha: 0.3),
                     ],
                   ),
                 ),

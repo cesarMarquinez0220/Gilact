@@ -38,6 +38,7 @@ class SplashPageModel extends SplashPage {
     };
   }
 
+  @override
   SplashPageModel copyWith({
     int? id,
     String? title,
@@ -84,6 +85,7 @@ class LessonProgressStateModel extends LessonProgressState {
     };
   }
 
+  @override
   LessonProgressStateModel copyWith({
     Map<int, bool>? lessonsStatus,
     int? lastCompletedLesson,
@@ -97,7 +99,7 @@ class LessonProgressStateModel extends LessonProgressState {
   }
 
   static LessonProgressStateModel getInitialState() {
-    return LessonProgressStateModel(
+    return const LessonProgressStateModel(
       lessonsStatus: {
         1: true, // video 1
         2: false, // video 2.1

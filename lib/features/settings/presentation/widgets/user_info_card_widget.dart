@@ -25,7 +25,7 @@ class UserInfoCardWidget extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             maxWidth: 600, // Limitar ancho máximo para tablets
           ),
           margin: EdgeInsets.symmetric(

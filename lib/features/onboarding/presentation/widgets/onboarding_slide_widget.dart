@@ -133,8 +133,8 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.2),
-                Colors.white.withOpacity(0.1),
+                Colors.white.withValues(alpha: 0.2),
+                Colors.white.withValues(alpha: 0.1),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -160,8 +160,8 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.2),
-                Colors.white.withOpacity(0.1),
+                Colors.white.withValues(alpha: 0.2),
+                Colors.white.withValues(alpha: 0.1),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -183,8 +183,8 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.2),
-                Colors.white.withOpacity(0.1),
+                Colors.white.withValues(alpha: 0.2),
+                Colors.white.withValues(alpha: 0.1),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -301,7 +301,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: subtitleSize,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             height: 1.3,
             fontWeight: FontWeight.w500,
           ),
@@ -388,7 +388,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: subtitleSize,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             height: 1.3,
             fontWeight: FontWeight.w500,
           ),
@@ -509,15 +509,15 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
         Container(
           padding: EdgeInsets.all(spacing * 1.2),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -542,20 +542,20 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF4FD1C7).withOpacity(0.25),
-                const Color(0xFF4FD1C7).withOpacity(0.15),
+                const Color(0xFF4FD1C7).withValues(alpha: 0.25),
+                const Color(0xFF4FD1C7).withValues(alpha: 0.15),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF4FD1C7).withOpacity(0.4),
+              color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF4FD1C7).withOpacity(0.3),
+                color: const Color(0xFF4FD1C7).withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -618,7 +618,7 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
                       benefit,
                       style: TextStyle(
                         fontSize: fontSize,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w500,
                         height: 1.3,
                       ),
@@ -642,7 +642,7 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     // Solo 8 partículas para optimizar rendimiento

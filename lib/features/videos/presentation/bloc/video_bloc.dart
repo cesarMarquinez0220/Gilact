@@ -36,7 +36,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
        _markVideoAsCompletedUseCase = markVideoAsCompletedUseCase,
        _getCompletedVideoIdsUseCase = getCompletedVideoIdsUseCase,
        _updateVideoProgressUseCase = updateVideoProgressUseCase,
-       super(VideoInitial()) {
+       super(const VideoInitial()) {
     on<GetAllVideosRequested>(_onGetAllVideosRequested);
     on<GetVideoByIdRequested>(_onGetVideoByIdRequested);
     on<GetVideosByLessonIdRequested>(_onGetVideosByLessonIdRequested);
@@ -50,7 +50,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     GetAllVideosRequested event,
     Emitter<VideoState> emit,
   ) async {
-    emit(VideoLoading());
+    emit(const VideoLoading());
 
     final result = await _getAllVideosUseCase();
 
@@ -64,7 +64,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     GetVideoByIdRequested event,
     Emitter<VideoState> emit,
   ) async {
-    emit(VideoLoading());
+    emit(const VideoLoading());
 
     final result = await _getVideoByIdUseCase(GetVideoByIdParams(id: event.id));
 
@@ -78,7 +78,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     GetVideosByLessonIdRequested event,
     Emitter<VideoState> emit,
   ) async {
-    emit(VideoLoading());
+    emit(const VideoLoading());
 
     final result = await _getVideosByLessonIdUseCase(
       GetVideosByLessonIdParams(lessonId: event.lessonId),
@@ -94,7 +94,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     SearchVideosRequested event,
     Emitter<VideoState> emit,
   ) async {
-    emit(VideoLoading());
+    emit(const VideoLoading());
 
     final result = await _searchVideosUseCase(
       SearchVideosParams(query: event.query),

@@ -25,7 +25,7 @@ class VideoModel extends Video {
     return VideoModel(
       id: doc.id,
       title: data['title'] ?? '',
-      titleEn: data['title_en'] ?? data['titleEn'] ?? null,
+      titleEn: data['title_en'] ?? data['titleEn'] ?? '',
       videoUrl: data['url'] ?? '',
       imageUrl: data['imgVideos'] ?? '',
       imageName: data['imgVideos'] ?? '',
@@ -46,7 +46,7 @@ class VideoModel extends Video {
     return VideoModel(
       id: doc.id,
       title: data['title'] ?? '',
-      titleEn: data['title_en'] ?? data['titleEn'] ?? null,
+      titleEn: data['title_en'] ?? data['titleEn'] ?? '',
       videoUrl: data['url'] ?? '',
       imageUrl: data['imgVideos'] ?? '',
       imageName: data['imgVideos'] ?? '',

@@ -19,8 +19,7 @@ class CompanionMascotWrapper extends StatefulWidget {
   });
 
   @override
-  State<CompanionMascotWrapper> createState() =>
-      _CompanionMascotWrapperState();
+  State<CompanionMascotWrapper> createState() => _CompanionMascotWrapperState();
 }
 
 class _CompanionMascotWrapperState extends State<CompanionMascotWrapper>
@@ -243,7 +242,7 @@ class _SpeechBubblePainter extends CustomPainter {
 
     // Sombra
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.15)
+      ..color = Colors.black.withValues(alpha: 0.15)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
     canvas.drawRRect(
@@ -258,4 +257,3 @@ class _SpeechBubblePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/achievement.dart';
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/services/vibration_service.dart';
@@ -21,20 +21,15 @@ class AchievementUnlockedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF3498DB),
-              const Color(0xFF2ECC71),
-            ],
+            colors: [Color(0xFF3498DB), Color(0xFF2ECC71)],
           ),
         ),
         child: Column(
@@ -63,7 +58,7 @@ class AchievementUnlockedDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(50),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -106,7 +101,7 @@ class AchievementUnlockedDialog extends StatelessWidget {
                 achievement.description,
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -116,9 +111,12 @@ class AchievementUnlockedDialog extends StatelessWidget {
               duration: const Duration(milliseconds: 700),
               delay: const Duration(milliseconds: 600),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -179,10 +177,11 @@ class AchievementUnlockedDialog extends StatelessWidget {
   }) {
     // Vibración y sonido de éxito al mostrar el logro (usando servicios)
     if (withVibration) {
-      final soundService = getIt<SoundService>();
-      final vibrationService = getIt<VibrationService>();
+      final SoundService soundService = getIt<SoundService>();
+      final VibrationService vibrationService = getIt<VibrationService>();
       soundService.playAchievementSound(); // Usar sonido específico de logro
-      vibrationService.vibrateOnAchievement(); // Usar vibración especial para logros
+      vibrationService
+          .vibrateOnAchievement(); // Usar vibración especial para logros
     }
 
     showDialog(
@@ -195,4 +194,3 @@ class AchievementUnlockedDialog extends StatelessWidget {
     );
   }
 }
-
