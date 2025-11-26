@@ -208,7 +208,7 @@ class VideoOfflineLocalDataSource {
         try {
           await db.execute('ALTER TABLE offline_videos ADD COLUMN $columnName $columnType');
           _logger.success('Columna $columnNameWithoutQuotes agregada en migración');
-        } catch (e, stackTrace) {
+        } catch (e) {
           // La columna ya existe, ignorar el error
           _logger.d('Columna $columnNameWithoutQuotes ya existe o error al agregarla: $e');
         }
@@ -273,7 +273,7 @@ class VideoOfflineLocalDataSource {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       _logger.success('Video insertado exitosamente');
-    } catch (e, stackTrace) {
+    } catch (e) {
       // Si falla por restricción NOT NULL en file_size, agregar el valor y reintentar
       if (e.toString().contains('NOT NULL constraint failed') && e.toString().contains('file_size')) {
         _logger.w('Error detectado: file_size NOT NULL. Agregando valor y reintentando...');
