@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
+import 'app_logger.dart';
 
 /// Servicio para prevenir grabación de pantalla y capturas de pantalla
 /// Implementa protección similar a Netflix para Android e iOS
@@ -15,6 +16,8 @@ class ScreenRecordingPreventionService {
   static StreamController<bool>? _recordingStatusController;
   static StreamSubscription? _recordingStatusSubscription;
 
+  static AppLogger get _logger => GetIt.instance<AppLogger>();
+
   /// Activa la prevención de grabación de pantalla
   /// En Android: establece FLAG_SECURE en la ventana
   /// En iOS: activa protección nativa
@@ -23,20 +26,18 @@ class ScreenRecordingPreventionService {
       if (Platform.isAndroid) {
         // Android: usar FLAG_SECURE para prevenir capturas y grabaciones
         await _channel.invokeMethod('enableSecureFlag');
-        if (kDebugMode) {
-          print('🔒 Protección de pantalla activada (Android)');
-        }
+        _logger.success('Protección de pantalla activada (Android)');
       } else if (Platform.isIOS) {
         // iOS: usar métodos nativos para prevenir grabación
         await _channel.invokeMethod('enableScreenProtection');
-        if (kDebugMode) {
-          print('🔒 Protección de pantalla activada (iOS)');
-        }
+        _logger.success('Protección de pantalla activada (iOS)');
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error activando protección de pantalla: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error activando protección de pantalla',
+        e,
+        stackTrace,
+      );
       // En caso de error, intentar método alternativo para Android
       if (Platform.isAndroid) {
         _enableSecureFlagAndroid();
@@ -49,19 +50,17 @@ class ScreenRecordingPreventionService {
     try {
       if (Platform.isAndroid) {
         await _channel.invokeMethod('disableSecureFlag');
-        if (kDebugMode) {
-          print('🔓 Protección de pantalla desactivada (Android)');
-        }
+        _logger.d('Protección de pantalla desactivada (Android)');
       } else if (Platform.isIOS) {
         await _channel.invokeMethod('disableScreenProtection');
-        if (kDebugMode) {
-          print('🔓 Protección de pantalla desactivada (iOS)');
-        }
+        _logger.d('Protección de pantalla desactivada (iOS)');
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error desactivando protección de pantalla: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error desactivando protección de pantalla',
+        e,
+        stackTrace,
+      );
       // En caso de error, intentar método alternativo para Android
       if (Platform.isAndroid) {
         _disableSecureFlagAndroid();
@@ -75,26 +74,18 @@ class ScreenRecordingPreventionService {
     try {
       // Este método requiere implementación nativa para ser completamente efectivo
       // Por ahora, solo registramos el intento
-      if (kDebugMode) {
-        print('🔒 Intentando activar FLAG_SECURE (método alternativo)');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error en método alternativo: $e');
-      }
+      _logger.d('Intentando activar FLAG_SECURE (método alternativo)');
+    } catch (e, stackTrace) {
+      _logger.e('Error en método alternativo', e, stackTrace);
     }
   }
 
   /// Método alternativo para desactivar en Android
   static void _disableSecureFlagAndroid() {
     try {
-      if (kDebugMode) {
-        print('🔓 Desactivando FLAG_SECURE (método alternativo)');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error desactivando método alternativo: $e');
-      }
+      _logger.d('Desactivando FLAG_SECURE (método alternativo)');
+    } catch (e, stackTrace) {
+      _logger.e('Error desactivando método alternativo', e, stackTrace);
     }
   }
 
@@ -110,10 +101,8 @@ class ScreenRecordingPreventionService {
       }
       // iOS no permite detectar grabación de pantalla directamente
       return false;
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error verificando estado de grabación: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando estado de grabación', e, stackTrace);
       return false;
     }
   }
@@ -136,9 +125,11 @@ class ScreenRecordingPreventionService {
               return false;
             })
             .handleError((error) {
-              if (kDebugMode) {
-                print('⚠️ Error en stream de grabación (Android): $error');
-              }
+              _logger.e(
+                'Error en stream de grabación (Android)',
+                error,
+                StackTrace.current,
+              );
             });
       } else if (Platform.isIOS) {
         // iOS: usar MethodChannel con handler para recibir notificaciones
@@ -155,10 +146,8 @@ class ScreenRecordingPreventionService {
         return _recordingStatusController!.stream;
       }
       return Stream.value(false);
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error creando stream de estado de grabación: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error creando stream de estado de grabación', e, stackTrace);
       return Stream.value(false);
     }
   }

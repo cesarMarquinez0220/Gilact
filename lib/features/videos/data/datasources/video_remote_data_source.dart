@@ -89,7 +89,7 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
       final querySnapshot = await _firestore
           .collection('videos')
           .where('title', isGreaterThanOrEqualTo: query)
-          .where('title', isLessThan: query + 'z')
+          .where('title', isLessThan: '${query}z')
           .get();
 
       return querySnapshot.docs

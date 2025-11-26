@@ -511,7 +511,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 ),
               ),
               Text(
-                '${completedCount}/${totalVideos}',
+                '$completedCount/$totalVideos',
                 style: GoogleFonts.quicksand(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

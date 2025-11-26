@@ -14,8 +14,7 @@ class LactationFlowPage extends StatefulWidget {
   final DateTime? selectedDate;
   final LactationRecord? existingRecord;
 
-  const LactationFlowPage({Key? key, this.selectedDate, this.existingRecord})
-    : super(key: key);
+  const LactationFlowPage({super.key, this.selectedDate, this.existingRecord});
 
   @override
   State<LactationFlowPage> createState() => _LactationFlowPageState();

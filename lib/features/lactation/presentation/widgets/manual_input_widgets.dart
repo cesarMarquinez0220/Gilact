@@ -797,9 +797,9 @@ class LactationSummaryWidget extends StatelessWidget {
       final minutes = duration.inMinutes;
       final seconds = duration.inSeconds % 60;
       if (minutes > 0) {
-        return seconds > 0 ? '${minutes}m ${seconds}s' : '${minutes} minutos';
+        return seconds > 0 ? '${minutes}m ${seconds}s' : '$minutes minutos';
       } else {
-        return '${seconds} segundos';
+        return '$seconds segundos';
       }
     }
 

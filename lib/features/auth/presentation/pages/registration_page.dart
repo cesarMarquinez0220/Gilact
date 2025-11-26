@@ -461,7 +461,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                   // Título
                   Text(
                     'auth.register.confirmRegistration'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1A365D),
@@ -523,7 +523,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                   Text(
                     'auth.register.confirmRegistrationMessage'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
                       height: 1.4,
@@ -546,7 +546,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                           ),
                           child: Text(
                             'common.cancel'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.grey,
                               fontWeight: FontWeight.w600,
                             ),
@@ -567,7 +567,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                           ),
                           child: Text(
                             'auth.register.confirm'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),

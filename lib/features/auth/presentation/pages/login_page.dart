@@ -244,39 +244,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   CredentialsCacheService.saveLastLogin();
 
                   // Verificar si es un registro nuevo
-                  SharedPreferences.getInstance().then((prefs) async {
-                    final isNewRegistration =
-                        prefs.getBool('is_new_registration') ?? false;
-
-                    if (isNewRegistration) {
-                      // Es un registro nuevo, no navegar desde aquí
-                      // El RegistrationPage ya se encarga de la navegación
-                      _logger.d(
-                        'LoginPage: Detectado registro nuevo, no navegando desde aquí',
-                      );
-                      await prefs.remove('is_new_registration');
-                    } else {
-                      // Es un login normal, verificar notificación pendiente primero
-                      _logger.d(
-                        'LoginPage: Login normal, verificando notificación pendiente...',
-                      );
-
-                      // Verificar si hay notificación pendiente
-                      await PushNotificationService.handlePendingNotification(
-                        context,
-                      );
-
-                      // Si no había notificación pendiente o ya fue manejada, navegar a welcome
-                      Future.delayed(const Duration(milliseconds: 800), () {
-                        if (Navigator.of(context).canPop() == false) {
-                          // Solo navegar si no hay una navegación pendiente de la notificación
-                          Navigator.of(
-                            context,
-                          ).pushReplacementNamed('/welcome');
-                        }
-                      });
-                    }
-                  });
+                  _handlePostLoginNavigation();
                 } else if (state is AuthLoading) {
                   setState(() {
                     _isLoading = true;
@@ -315,6 +283,48 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  Future<void> _handlePostLoginNavigation() async {
+    try {
+      if (!mounted) return;
+      final currentContext = context;
+      final navigator = Navigator.of(currentContext);
+
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final isNewRegistration = prefs.getBool('is_new_registration') ?? false;
+
+      if (isNewRegistration) {
+        // Es un registro nuevo, no navegar desde aquí
+        // El RegistrationPage ya se encarga de la navegación
+        _logger.d(
+          'LoginPage: Detectado registro nuevo, no navegando desde aquí',
+        );
+        await prefs.remove('is_new_registration');
+        if (!mounted) return;
+      } else {
+        // Es un login normal, verificar notificación pendiente primero
+        _logger.d(
+          'LoginPage: Login normal, verificando notificación pendiente...',
+        );
+
+        // Verificar si hay notificación pendiente
+        await PushNotificationService.handlePendingNotification(currentContext);
+
+        // Si no había notificación pendiente o ya fue manejada, navegar a welcome
+        if (!mounted) return;
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (!mounted) return;
+          if (navigator.canPop() == false) {
+            // Solo navegar si no hay una navegación pendiente de la notificación
+            navigator.pushReplacementNamed('/welcome');
+          }
+        });
+      }
+    } catch (e, stackTrace) {
+      _logger.e('LoginPage: Error en navegación post-login', e, stackTrace);
+    }
   }
 
   Future<void> _signIn() async {
@@ -371,6 +381,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
       final email = credentials['email'] ?? '';
       if (email.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
@@ -389,8 +400,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
       // Usar el AuthBloc para manejar el login biométrico
       // El bloc verificará la sesión offline y autenticará al usuario
+      if (!mounted) return;
       context.read<AuthBloc>().add(BiometricSignInRequested(email: email));
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -444,7 +457,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content:  Text('Funcionalidad en desarrollo'),
+                  content: Text('Funcionalidad en desarrollo'),
                   backgroundColor: AppColors.warning,
                   behavior: SnackBarBehavior.floating,
                 ),

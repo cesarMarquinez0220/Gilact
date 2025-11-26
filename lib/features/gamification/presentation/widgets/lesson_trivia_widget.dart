@@ -258,7 +258,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           Row(
             children: [
               Text(
-                'trivia.question'.tr() + ' ${_currentQuestionIndex + 1} ${'trivia.of'.tr()} ${_questions.length}',
+                '${'trivia.question'.tr()} ${_currentQuestionIndex + 1} ${'trivia.of'.tr()} ${_questions.length}',
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.8),

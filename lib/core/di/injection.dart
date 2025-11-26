@@ -208,9 +208,11 @@ Future<void> configureDependencies() async {
 
   // Offline sync services
   getIt.registerLazySingleton<SyncQueueService>(() => SyncQueueService());
-  getIt.registerLazySingleton<OfflineSyncService>(() => OfflineSyncService());
+  getIt.registerLazySingleton<OfflineSyncService>(
+    () => OfflineSyncService(getIt<AppLogger>()),
+  );
   getIt.registerLazySingleton<ConflictResolutionService>(
-    () => ConflictResolutionService(),
+    () => ConflictResolutionService(getIt<AppLogger>()),
   );
 
   // User profile offline
@@ -250,6 +252,7 @@ Future<void> configureDependencies() async {
     () => AuthRemoteDataSourceImpl(
       getIt<FirebaseAuth>(),
       getIt<FirebaseFirestore>(),
+      getIt<AppLogger>(),
     ),
   );
   getIt.registerLazySingleton<VideoRemoteDataSource>(

@@ -505,7 +505,7 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
               Expanded(
                 flex: 1,
                 child: DropdownButtonFormField<String>(
-                  value: _seleccionVolumenUnidad,
+                  initialValue: _seleccionVolumenUnidad,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -564,7 +564,7 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _seleccionPecho,
+                  initialValue: _seleccionPecho,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -665,7 +665,7 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
               Expanded(
                 flex: 1,
                 child: DropdownButtonFormField<String>(
-                  value: _seleccionSuenoUnidad,
+                  initialValue: _seleccionSuenoUnidad,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -753,7 +753,7 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
                 icon: const Icon(Icons.remove),
                 iconSize: 20,
               ),
-              Container(
+              SizedBox(
                 width: 40,
                 child: Text(
                   value.toString(),

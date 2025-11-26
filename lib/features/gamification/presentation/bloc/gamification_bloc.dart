@@ -223,7 +223,7 @@ class GamificationBloc
     final currentProfile = currentState.profile;
 
     if (!currentProfile.canUseRestDay) {
-      emit(GamificationError('No puedes usar más días de descanso esta semana'));
+      emit(const GamificationError('No puedes usar más días de descanso esta semana'));
       return;
     }
 

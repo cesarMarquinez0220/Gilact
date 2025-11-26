@@ -1,6 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/services/app_logger.dart';
 
 class CredentialsCacheService {
+  static AppLogger get _logger => GetIt.instance<AppLogger>();
   static const String _emailKey = 'cached_email';
   static const String _saveCredentialsKey = 'save_credentials';
   static const String _lastLoginKey = 'last_login';
@@ -8,23 +11,31 @@ class CredentialsCacheService {
   // Cargar credenciales desde caché
   static Future<String> loadCredentialsFromCache() async {
     try {
-      print('🔍 CredentialsCacheService: Cargando credenciales desde caché...');
+      _logger.d(
+        'CredentialsCacheService: Cargando credenciales desde caché...',
+      );
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final email = prefs.getString(_emailKey) ?? '';
       final saveCredentials = prefs.getBool(_saveCredentialsKey) ?? false;
 
-      print('🔍 CredentialsCacheService: Email desde caché: "$email"');
-      print('🔍 CredentialsCacheService: save_credentials: $saveCredentials');
+      _logger.d('CredentialsCacheService: Email desde caché: "$email"');
+      _logger.d('CredentialsCacheService: save_credentials: $saveCredentials');
 
       if (email.isEmpty) {
-        print('⚠️ CredentialsCacheService: Email vacío en caché');
+        _logger.w('CredentialsCacheService: Email vacío en caché');
       } else {
-        print('✅ CredentialsCacheService: Email encontrado en caché: "$email"');
+        _logger.success(
+          'CredentialsCacheService: Email encontrado en caché: "$email"',
+        );
       }
 
       return email;
-    } catch (e) {
-      print('❌ ERROR CredentialsCacheService: Error cargando credenciales: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'CredentialsCacheService: Error cargando credenciales',
+        e,
+        stackTrace,
+      );
       return '';
     }
   }
@@ -35,23 +46,27 @@ class CredentialsCacheService {
     bool saveCredentials,
   ) async {
     try {
-      print('🔍 CredentialsCacheService: Guardando credenciales en caché...');
-      print('🔍 CredentialsCacheService: Email a guardar: "$email"');
-      print('🔍 CredentialsCacheService: saveCredentials: $saveCredentials');
+      _logger.d('CredentialsCacheService: Guardando credenciales en caché...');
+      _logger.d('CredentialsCacheService: Email a guardar: "$email"');
+      _logger.d('CredentialsCacheService: saveCredentials: $saveCredentials');
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       if (saveCredentials) {
         await prefs.setString(_emailKey, email);
         await prefs.setBool(_saveCredentialsKey, true);
-        print('✅ CredentialsCacheService: Credenciales guardadas exitosamente');
+        _logger.success(
+          'CredentialsCacheService: Credenciales guardadas exitosamente',
+        );
       } else {
         await prefs.remove(_emailKey);
         await prefs.setBool(_saveCredentialsKey, false);
-        print('🔍 CredentialsCacheService: Credenciales removidas del caché');
+        _logger.d('CredentialsCacheService: Credenciales removidas del caché');
       }
-    } catch (e) {
-      print(
-        '❌ ERROR CredentialsCacheService: Error guardando credenciales: $e',
+    } catch (e, stackTrace) {
+      _logger.e(
+        'CredentialsCacheService: Error guardando credenciales',
+        e,
+        stackTrace,
       );
     }
   }
@@ -61,8 +76,12 @@ class CredentialsCacheService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_saveCredentialsKey) ?? false;
-    } catch (e) {
-      print('Error verificando preferencia de guardar credenciales: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error verificando preferencia de guardar credenciales',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -73,8 +92,8 @@ class CredentialsCacheService {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove(_emailKey);
       await prefs.remove(_saveCredentialsKey);
-    } catch (e) {
-      print('Error limpiando credenciales: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error limpiando credenciales', e, stackTrace);
     }
   }
 
@@ -83,8 +102,8 @@ class CredentialsCacheService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(_lastLoginKey, DateTime.now().toIso8601String());
-    } catch (e) {
-      print('Error guardando última vez de login: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando última vez de login', e, stackTrace);
     }
   }
 
@@ -97,8 +116,8 @@ class CredentialsCacheService {
         return DateTime.tryParse(lastLoginString);
       }
       return null;
-    } catch (e) {
-      print('Error obteniendo última vez de login: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo última vez de login', e, stackTrace);
       return null;
     }
   }
@@ -108,8 +127,8 @@ class CredentialsCacheService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       return prefs.getString(_lastLoginKey) == null;
-    } catch (e) {
-      print('Error verificando primera vez: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando primera vez', e, stackTrace);
       return true;
     }
   }
@@ -125,8 +144,8 @@ class CredentialsCacheService {
       await prefs.setBool(_saveCredentialsKey, rememberCredentials);
       await prefs.setBool('biometric_login', biometricLogin);
       await prefs.setString('language', language);
-    } catch (e) {
-      print('Error guardando preferencias de usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando preferencias de usuario', e, stackTrace);
     }
   }
 
@@ -139,8 +158,8 @@ class CredentialsCacheService {
         'biometricLogin': prefs.getBool('biometric_login') ?? false,
         'language': prefs.getString('language') ?? 'es',
       };
-    } catch (e) {
-      print('Error cargando preferencias de usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error cargando preferencias de usuario', e, stackTrace);
       return {
         'rememberCredentials': false,
         'biometricLogin': false,

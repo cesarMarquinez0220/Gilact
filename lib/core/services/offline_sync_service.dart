@@ -1,20 +1,18 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 import 'connectivity_service.dart';
 import 'sync_queue_service.dart';
 import 'conflict_resolution_service.dart';
+import 'app_logger.dart';
 import '../../features/lactation/data/datasources/lactation_database.dart';
 import '../../features/lactation/data/datasources/sleep_offline_local_data_source.dart';
 import '../../features/lactation/data/datasources/baby_weight_offline_local_data_source.dart';
 
 /// Servicio centralizado para sincronización automática de datos offline
 class OfflineSyncService {
-  static final OfflineSyncService _instance = OfflineSyncService._internal();
-  factory OfflineSyncService() => _instance;
-  OfflineSyncService._internal();
-
+  final AppLogger _logger;
   final ConnectivityService _connectivityService = ConnectivityService();
   final SyncQueueService _syncQueueService = SyncQueueService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -24,8 +22,11 @@ class OfflineSyncService {
       SleepOfflineLocalDataSource();
   final BabyWeightOfflineLocalDataSource _babyWeightOfflineDataSource =
       BabyWeightOfflineLocalDataSource();
-  final ConflictResolutionService _conflictResolver =
-      ConflictResolutionService();
+  late final ConflictResolutionService _conflictResolver;
+
+  OfflineSyncService(this._logger) {
+    _conflictResolver = GetIt.instance<ConflictResolutionService>();
+  }
 
   StreamSubscription<bool>? _connectivitySubscription;
   bool _isSyncing = false;
@@ -43,20 +44,16 @@ class OfflineSyncService {
     _onSyncCompleted = onSyncCompleted;
     _onSyncFailed = onSyncFailed;
 
-    if (kDebugMode) {
-      print('🔄 OfflineSyncService: Iniciando sincronización automática');
-    }
+    _logger.d('OfflineSyncService: Iniciando sincronización automática');
 
     // Escuchar cambios de conectividad
     _connectivitySubscription = _connectivityService.connectivityStream.listen((
       isConnected,
     ) {
       if (isConnected && !_isSyncing) {
-        if (kDebugMode) {
-          print(
-            '🌐 OfflineSyncService: Conexión detectada, iniciando sincronización',
-          );
-        }
+        _logger.d(
+          'OfflineSyncService: Conexión detectada, iniciando sincronización',
+        );
         processSyncQueue();
       }
     });
@@ -65,9 +62,7 @@ class OfflineSyncService {
     _periodicSyncTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
       final isConnected = await _connectivityService.isConnected();
       if (isConnected && !_isSyncing) {
-        if (kDebugMode) {
-          print('⏰ OfflineSyncService: Sincronización periódica');
-        }
+        _logger.d('OfflineSyncService: Sincronización periódica');
         processSyncQueue();
       }
     });
@@ -75,9 +70,7 @@ class OfflineSyncService {
     // Sincronización inicial si hay conexión
     _connectivityService.isConnected().then((isConnected) {
       if (isConnected && !_isSyncing) {
-        if (kDebugMode) {
-          print('🚀 OfflineSyncService: Sincronización inicial');
-        }
+        _logger.d('OfflineSyncService: Sincronización inicial');
         processSyncQueue();
       }
     });
@@ -85,9 +78,7 @@ class OfflineSyncService {
 
   /// Detiene el servicio de sincronización
   void stopAutoSync() {
-    if (kDebugMode) {
-      print('🛑 OfflineSyncService: Deteniendo sincronización automática');
-    }
+    _logger.d('OfflineSyncService: Deteniendo sincronización automática');
     _connectivitySubscription?.cancel();
     _periodicSyncTimer?.cancel();
     _connectivitySubscription = null;
@@ -97,17 +88,13 @@ class OfflineSyncService {
   /// Procesa la cola de sincronización
   Future<void> processSyncQueue() async {
     if (_isSyncing) {
-      if (kDebugMode) {
-        print('⏸️ OfflineSyncService: Sincronización ya en progreso');
-      }
+      _logger.d('OfflineSyncService: Sincronización ya en progreso');
       return;
     }
 
     final isConnected = await _connectivityService.isConnected();
     if (!isConnected) {
-      if (kDebugMode) {
-        print('📴 OfflineSyncService: Sin conexión, no se puede sincronizar');
-      }
+      _logger.w('OfflineSyncService: Sin conexión, no se puede sincronizar');
       return;
     }
 
@@ -118,18 +105,14 @@ class OfflineSyncService {
       final pendingOperations = await _syncQueueService.getPendingOperations();
 
       if (pendingOperations.isEmpty) {
-        if (kDebugMode) {
-          print('✅ OfflineSyncService: No hay operaciones pendientes');
-        }
+        _logger.d('OfflineSyncService: No hay operaciones pendientes');
         _isSyncing = false;
         return;
       }
 
-      if (kDebugMode) {
-        print(
-          '🔄 OfflineSyncService: Procesando ${pendingOperations.length} operaciones pendientes',
-        );
-      }
+      _logger.d(
+        'OfflineSyncService: Procesando ${pendingOperations.length} operaciones pendientes',
+      );
 
       int successCount = 0;
       int failedCount = 0;
@@ -164,11 +147,9 @@ class OfflineSyncService {
           // Si hay conflicto, resolverlo
           Map<String, dynamic> dataToSync = operation.data;
           if (conflict != null) {
-            if (kDebugMode) {
-              print(
-                '⚠️ OfflineSyncService: Conflicto detectado, resolviendo...',
-              );
-            }
+            _logger.w(
+              'OfflineSyncService: Conflicto detectado, resolviendo...',
+            );
             dataToSync = await _conflictResolver.resolveConflict(conflict);
           }
 
@@ -231,21 +212,19 @@ class OfflineSyncService {
             });
 
             successCount++;
-            if (kDebugMode) {
-              print(
-                '✅ OfflineSyncService: Operación ${operation.id} sincronizada exitosamente',
-              );
-            }
+            _logger.success(
+              'OfflineSyncService: Operación ${operation.id} sincronizada exitosamente',
+            );
           } else {
             throw Exception('Error sincronizando operación');
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           failedCount++;
-          if (kDebugMode) {
-            print(
-              '❌ OfflineSyncService: Error sincronizando operación ${operation.id}: $e',
-            );
-          }
+          _logger.e(
+            'OfflineSyncService: Error sincronizando operación ${operation.id}',
+            e,
+            stackTrace,
+          );
 
           // Verificar si se puede reintentar
           if (_syncQueueService.canRetry(operation)) {
@@ -261,11 +240,9 @@ class OfflineSyncService {
               SyncStatus.failed,
               errorMessage: 'Máximo de reintentos alcanzado: $e',
             );
-            if (kDebugMode) {
-              print(
-                '⚠️ OfflineSyncService: Operación ${operation.id} alcanzó máximo de reintentos',
-              );
-            }
+            _logger.w(
+              'OfflineSyncService: Operación ${operation.id} alcanzó máximo de reintentos',
+            );
           }
         }
       }
@@ -273,27 +250,23 @@ class OfflineSyncService {
       // Notificar resultados
       if (successCount > 0) {
         _onSyncCompleted?.call(successCount);
-        if (kDebugMode) {
-          print(
-            '✅ OfflineSyncService: $successCount operaciones sincronizadas exitosamente',
-          );
-        }
+        _logger.success(
+          'OfflineSyncService: $successCount operaciones sincronizadas exitosamente',
+        );
       }
 
       if (failedCount > 0) {
         _onSyncFailed?.call(failedCount);
-        if (kDebugMode) {
-          print('⚠️ OfflineSyncService: $failedCount operaciones fallaron');
-        }
+        _logger.w('OfflineSyncService: $failedCount operaciones fallaron');
       }
 
-      if (kDebugMode) {
-        print('✅ OfflineSyncService: Sincronización completada');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ OfflineSyncService: Error en proceso de sincronización: $e');
-      }
+      _logger.success('OfflineSyncService: Sincronización completada');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'OfflineSyncService: Error en proceso de sincronización',
+        e,
+        stackTrace,
+      );
     } finally {
       _isSyncing = false;
     }
@@ -341,12 +314,12 @@ class OfflineSyncService {
       }
 
       return {'success': false, 'documentId': null};
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ OfflineSyncService: Error sincronizando registro de lactancia: $e',
-        );
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'OfflineSyncService: Error sincronizando registro de lactancia',
+        e,
+        stackTrace,
+      );
       return {'success': false, 'documentId': null, 'error': e.toString()};
     }
   }
@@ -396,12 +369,12 @@ class OfflineSyncService {
       }
 
       return {'success': false, 'documentId': null};
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ OfflineSyncService: Error sincronizando registro de sueño: $e',
-        );
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'OfflineSyncService: Error sincronizando registro de sueño',
+        e,
+        stackTrace,
+      );
       return {'success': false, 'documentId': null, 'error': e.toString()};
     }
   }
@@ -451,12 +424,12 @@ class OfflineSyncService {
       }
 
       return {'success': false, 'documentId': null};
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ OfflineSyncService: Error sincronizando registro de peso: $e',
-        );
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'OfflineSyncService: Error sincronizando registro de peso',
+        e,
+        stackTrace,
+      );
       return {'success': false, 'documentId': null, 'error': e.toString()};
     }
   }
@@ -526,10 +499,12 @@ class OfflineSyncService {
       }
 
       return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ OfflineSyncService: Error obteniendo ID del usuario: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'OfflineSyncService: Error obteniendo ID del usuario',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -541,9 +516,7 @@ class OfflineSyncService {
 
   /// Fuerza una sincronización manual
   Future<void> forceSync() async {
-    if (kDebugMode) {
-      print('🔄 OfflineSyncService: Sincronización forzada');
-    }
+    _logger.d('OfflineSyncService: Sincronización forzada');
     await processSyncQueue();
   }
 }

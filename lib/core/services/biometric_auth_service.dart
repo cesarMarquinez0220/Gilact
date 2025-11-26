@@ -1,9 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
 import '../../features/auth/data/services/offline_session_service.dart';
 import '../../features/auth/domain/services/credentials_cache_service.dart';
+import 'app_logger.dart';
 
 /// Servicio para manejar autenticación biométrica (huella dactilar/Face ID)
 class BiometricAuthService {
@@ -13,7 +14,9 @@ class BiometricAuthService {
   BiometricAuthService._internal();
 
   final LocalAuthentication _localAuth = LocalAuthentication();
-  final OfflineSessionService _offlineSessionService = OfflineSessionService();
+  final AppLogger _logger = GetIt.instance<AppLogger>();
+  final OfflineSessionService _offlineSessionService =
+      GetIt.instance<OfflineSessionService>();
 
   /// Verifica si el dispositivo soporta autenticación biométrica
   Future<bool> isBiometricAvailable() async {
@@ -21,17 +24,17 @@ class BiometricAuthService {
       final isAvailable = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
 
-      if (kDebugMode) {
-        print(
-          '🔐 BiometricAuthService: isAvailable: $isAvailable, isDeviceSupported: $isDeviceSupported',
-        );
-      }
+      _logger.d(
+        'BiometricAuthService: isAvailable: $isAvailable, isDeviceSupported: $isDeviceSupported',
+      );
 
       return isAvailable && isDeviceSupported;
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ BiometricAuthService: Error verificando disponibilidad: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error verificando disponibilidad',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -40,10 +43,12 @@ class BiometricAuthService {
   Future<List<BiometricType>> getAvailableBiometrics() async {
     try {
       return await _localAuth.getAvailableBiometrics();
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ BiometricAuthService: Error obteniendo tipos biométricos: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error obteniendo tipos biométricos',
+        e,
+        stackTrace,
+      );
       return [];
     }
   }
@@ -81,12 +86,12 @@ class BiometricAuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool('biometric_login_enabled') ?? false;
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ BiometricAuthService: Error verificando si está habilitada: $e',
-        );
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error verificando si está habilitada',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -96,15 +101,15 @@ class BiometricAuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('biometric_login_enabled', enabled);
-      if (kDebugMode) {
-        print(
-          '✅ BiometricAuthService: Autenticación biométrica ${enabled ? "habilitada" : "deshabilitada"}',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ BiometricAuthService: Error guardando preferencia: $e');
-      }
+      _logger.success(
+        'BiometricAuthService: Autenticación biométrica ${enabled ? "habilitada" : "deshabilitada"}',
+      );
+    } catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error guardando preferencia',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -114,22 +119,18 @@ class BiometricAuthService {
       // 1. Verificar si está disponible
       final isAvailable = await isBiometricAvailable();
       if (!isAvailable) {
-        if (kDebugMode) {
-          print(
-            '⚠️ BiometricAuthService: Autenticación biométrica no disponible',
-          );
-        }
+        _logger.w(
+          'BiometricAuthService: Autenticación biométrica no disponible',
+        );
         return null;
       }
 
       // 2. Verificar si está habilitada (si no lo está, la habilitamos automáticamente)
       final isEnabled = await isBiometricEnabled();
       if (!isEnabled) {
-        if (kDebugMode) {
-          print(
-            'ℹ️ BiometricAuthService: Autenticación biométrica no habilitada, habilitándola automáticamente',
-          );
-        }
+        _logger.d(
+          'BiometricAuthService: Autenticación biométrica no habilitada, habilitándola automáticamente',
+        );
         await setBiometricEnabled(true);
       }
 
@@ -147,61 +148,47 @@ class BiometricAuthService {
       );
 
       if (!didAuthenticate) {
-        if (kDebugMode) {
-          print(
-            '❌ BiometricAuthService: Autenticación biométrica fallida o cancelada',
-          );
-        }
+        _logger.w(
+          'BiometricAuthService: Autenticación biométrica fallida o cancelada',
+        );
         return null;
       }
 
       // 5. Obtener credenciales guardadas
       final email = await CredentialsCacheService.loadCredentialsFromCache();
       if (email.isEmpty) {
-        if (kDebugMode) {
-          print('⚠️ BiometricAuthService: No hay email guardado en caché');
-        }
+        _logger.w('BiometricAuthService: No hay email guardado en caché');
         return null;
       }
 
       // 6. Verificar que hay una sesión válida
       final hasSession = await _offlineSessionService.hasValidSession();
       if (!hasSession) {
-        if (kDebugMode) {
-          print('⚠️ BiometricAuthService: No hay sesión válida');
-        }
+        _logger.w('BiometricAuthService: No hay sesión válida');
         return null;
       }
 
       // 7. Obtener usuario de sesión
       final user = await _offlineSessionService.getOfflineUser();
       if (user == null) {
-        if (kDebugMode) {
-          print(
-            '⚠️ BiometricAuthService: No se pudo obtener usuario de sesión',
-          );
-        }
+        _logger.w('BiometricAuthService: No se pudo obtener usuario de sesión');
         return null;
       }
 
-      if (kDebugMode) {
-        print(
-          '✅ BiometricAuthService: Autenticación biométrica exitosa para: $email',
-        );
-      }
+      _logger.success(
+        'BiometricAuthService: Autenticación biométrica exitosa para: $email',
+      );
 
       return {'email': email, 'userId': user.id};
-    } on PlatformException catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ BiometricAuthService: Error de plataforma: ${e.code} - ${e.message}',
-        );
-      }
+    } on PlatformException catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error de plataforma: ${e.code} - ${e.message}',
+        e,
+        stackTrace,
+      );
       return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ BiometricAuthService: Error autenticando: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('BiometricAuthService: Error autenticando', e, stackTrace);
       return null;
     }
   }
@@ -214,12 +201,12 @@ class BiometricAuthService {
 
       final hasSession = await _offlineSessionService.hasValidSession();
       return hasSession;
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ BiometricAuthService: Error verificando credenciales guardadas: $e',
-        );
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'BiometricAuthService: Error verificando credenciales guardadas',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }

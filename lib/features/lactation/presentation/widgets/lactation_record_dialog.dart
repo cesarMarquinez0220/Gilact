@@ -9,7 +9,7 @@ import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 
 class LactationRecordDialog extends StatefulWidget {
-  const LactationRecordDialog({Key? key}) : super(key: key);
+  const LactationRecordDialog({super.key});
 
   @override
   State<LactationRecordDialog> createState() => _LactationRecordDialogState();

@@ -2,10 +2,13 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Data source local para almacenar información de usuarios offline
 class OfflineUserLocalDataSource {
   static Database? _database;
+  static AppLogger get _logger => GetIt.instance<AppLogger>();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -32,7 +35,7 @@ class OfflineUserLocalDataSource {
             profile_data TEXT
           )
         ''');
-        
+
         await db.execute('''
           CREATE INDEX idx_email ON offline_users(email)
         ''');
@@ -50,22 +53,18 @@ class OfflineUserLocalDataSource {
   }) async {
     try {
       final db = await database;
-      await db.insert(
-        'offline_users',
-        {
-          'id': id,
-          'email': email,
-          'name': name,
-          'password_hash': passwordHash,
-          'created_at': DateTime.now().millisecondsSinceEpoch,
-          'last_sync': DateTime.now().millisecondsSinceEpoch,
-          'profile_data': profileData != null ? jsonEncode(profileData) : null,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      print('✅ Usuario guardado en base de datos local: $email');
-    } catch (e) {
-      print('❌ Error guardando usuario offline: $e');
+      await db.insert('offline_users', {
+        'id': id,
+        'email': email,
+        'name': name,
+        'password_hash': passwordHash,
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+        'last_sync': DateTime.now().millisecondsSinceEpoch,
+        'profile_data': profileData != null ? jsonEncode(profileData) : null,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      _logger.success('Usuario guardado en base de datos local: $email');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando usuario offline', e, stackTrace);
       rethrow;
     }
   }
@@ -80,8 +79,8 @@ class OfflineUserLocalDataSource {
         whereArgs: [email],
       );
       return results.isNotEmpty ? results.first : null;
-    } catch (e) {
-      print('❌ Error obteniendo usuario por email: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo usuario por email', e, stackTrace);
       return null;
     }
   }
@@ -96,8 +95,8 @@ class OfflineUserLocalDataSource {
         whereArgs: [id],
       );
       return results.isNotEmpty ? results.first : null;
-    } catch (e) {
-      print('❌ Error obteniendo usuario por ID: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo usuario por ID', e, stackTrace);
       return null;
     }
   }
@@ -112,8 +111,8 @@ class OfflineUserLocalDataSource {
       final inputHash = _hashPassword(password);
 
       return storedHash == inputHash;
-    } catch (e) {
-      print('❌ Error validando credenciales: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error validando credenciales', e, stackTrace);
       return false;
     }
   }
@@ -128,8 +127,8 @@ class OfflineUserLocalDataSource {
         where: 'email = ?',
         whereArgs: [email],
       );
-    } catch (e) {
-      print('❌ Error actualizando última sincronización: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error actualizando última sincronización', e, stackTrace);
     }
   }
 
@@ -137,14 +136,10 @@ class OfflineUserLocalDataSource {
   Future<void> deleteOfflineUser(String email) async {
     try {
       final db = await database;
-      await db.delete(
-        'offline_users',
-        where: 'email = ?',
-        whereArgs: [email],
-      );
-      print('✅ Usuario eliminado de base de datos local: $email');
-    } catch (e) {
-      print('❌ Error eliminando usuario offline: $e');
+      await db.delete('offline_users', where: 'email = ?', whereArgs: [email]);
+      _logger.success('Usuario eliminado de base de datos local: $email');
+    } catch (e, stackTrace) {
+      _logger.e('Error eliminando usuario offline', e, stackTrace);
     }
   }
 
@@ -155,4 +150,3 @@ class OfflineUserLocalDataSource {
     return hash.toString();
   }
 }
-

@@ -179,8 +179,7 @@ class LactationStepMessage extends StatelessWidget {
   final String message;
   final String? subtitle;
 
-  const LactationStepMessage({Key? key, required this.message, this.subtitle})
-    : super(key: key);
+  const LactationStepMessage({super.key, required this.message, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -249,12 +248,12 @@ class LactationSummaryCard extends StatelessWidget {
   final bool isLoading;
 
   const LactationSummaryCard({
-    Key? key,
+    super.key,
     required this.data,
     required this.onEdit,
     required this.onSave,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -473,11 +472,11 @@ class LactationSuggestionsWidget extends StatelessWidget {
   final Function(String) onSuggestionTap;
 
   const LactationSuggestionsWidget({
-    Key? key,
+    super.key,
     required this.currentStep,
     required this.context,
     required this.onSuggestionTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -141,7 +141,7 @@ class SleepNotificationService {
       final scheduledTime = now.add(Duration(minutes: (i + 1) * 2));
 
       _logger.d(
-        'DEBUG: Programando notificación ${i + 1} para ${scheduledTime}',
+        'DEBUG: Programando notificación ${i + 1} para $scheduledTime',
       );
 
       const AndroidNotificationDetails androidDetails =
@@ -551,8 +551,8 @@ class SleepNotificationService {
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
-          color: Color(0xFF03A696),
-          ledColor: Color(0xFF03A696),
+          color: const Color(0xFF03A696),
+          ledColor: const Color(0xFF03A696),
           ledOnMs: 1000,
           ledOffMs: 500,
           enableVibration: true,
@@ -850,14 +850,14 @@ class SleepNotificationService {
       _logger.d(
         'Total de notificaciones pendientes: ${pendingNotifications.length}',
       );
-      pendingNotifications.forEach((notification) {
+      for (var notification in pendingNotifications) {
         _logger.d(
           '  📱 ID: ${notification.id}, Título: "${notification.title}"',
         );
         if (notification.body != null) {
           _logger.d('     💬 Cuerpo: "${notification.body}"');
         }
-      });
+      }
 
       // Verificar específicamente nuestra notificación
       final ourNotificationList = pendingNotifications

@@ -12,11 +12,11 @@ class LactationFlowButton extends StatelessWidget {
   final VoidCallback? onRecordSaved;
 
   const LactationFlowButton({
-    Key? key,
+    super.key,
     this.selectedDate,
     this.existingRecord,
     this.onRecordSaved,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +97,7 @@ class LactationFlowButton extends StatelessWidget {
 
 /// Widget para mostrar estadísticas del nuevo flujo
 class LactationFlowStats extends StatelessWidget {
-  const LactationFlowStats({Key? key}) : super(key: key);
+  const LactationFlowStats({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +217,7 @@ class LactationFlowStats extends StatelessWidget {
 
 /// Widget para mostrar sugerencias basadas en el historial
 class LactationFlowSuggestions extends StatelessWidget {
-  const LactationFlowSuggestions({Key? key}) : super(key: key);
+  const LactationFlowSuggestions({super.key});
 
   @override
   Widget build(BuildContext context) {

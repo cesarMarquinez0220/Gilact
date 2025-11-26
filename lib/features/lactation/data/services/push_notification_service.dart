@@ -388,7 +388,7 @@ class PushNotificationService {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
-            LessonVideosPage(videos: const [], fromNotification: true),
+            const LessonVideosPage(videos: [], fromNotification: true),
       ),
     );
 

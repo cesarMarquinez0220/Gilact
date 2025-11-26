@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Modelo de datos para video offline
 class OfflineVideoModel {
@@ -74,6 +75,7 @@ class OfflineVideoModel {
 /// Data source local para videos offline usando SQLite
 class VideoOfflineLocalDataSource {
   static Database? _database;
+  static AppLogger get _logger => GetIt.instance<AppLogger>();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -114,11 +116,9 @@ class VideoOfflineLocalDataSource {
       final tableInfo = await db.rawQuery('PRAGMA table_info(offline_videos)');
       final existingColumns = tableInfo.map((col) => col['name'] as String).toSet();
       
-      if (kDebugMode) {
-        print('🔍 Verificando columnas de offline_videos:');
-        for (final column in tableInfo) {
-          print('  - ${column['name']} (${column['type']})');
-        }
+      _logger.d('Verificando columnas de offline_videos:');
+      for (final column in tableInfo) {
+        _logger.d('  - ${column['name']} (${column['type']})');
       }
       
       // Lista de todas las columnas requeridas según el modelo OfflineVideoModel
@@ -140,30 +140,24 @@ class VideoOfflineLocalDataSource {
         final columnNameWithoutQuotes = columnName.replaceAll('"', '');
         
         if (!existingColumns.contains(columnNameWithoutQuotes)) {
-          if (kDebugMode) {
-            print('⚠️ Columna $columnNameWithoutQuotes NO existe. Agregándola...');
-          }
+          _logger.w('Columna $columnNameWithoutQuotes NO existe. Agregándola...');
           try {
             // Usar el nombre con comillas en el ALTER TABLE
             await db.execute('ALTER TABLE offline_videos ADD COLUMN $columnName $columnType');
-            if (kDebugMode) {
-              print('✅ Columna $columnNameWithoutQuotes agregada exitosamente');
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('⚠️ Error agregando columna $columnNameWithoutQuotes: $e');
-            }
+            _logger.success('Columna $columnNameWithoutQuotes agregada exitosamente');
+          } catch (e, stackTrace) {
+            _logger.e(
+              'Error agregando columna $columnNameWithoutQuotes',
+              e,
+              stackTrace,
+            );
           }
         } else {
-          if (kDebugMode) {
-            print('ℹ️ Columna $columnNameWithoutQuotes ya existe');
-          }
+          _logger.d('Columna $columnNameWithoutQuotes ya existe');
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error verificando/agregando columnas: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando/agregando columnas', e, stackTrace);
       // No re-lanzar el error, solo loguear
     }
   }
@@ -193,9 +187,7 @@ class VideoOfflineLocalDataSource {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (kDebugMode) {
-      print('🔄 Actualizando base de datos de versión $oldVersion a $newVersion');
-    }
+    _logger.d('Actualizando base de datos de versión $oldVersion a $newVersion');
     
     if (oldVersion < 2) {
       // Agregar columnas faltantes si no existen
@@ -215,14 +207,10 @@ class VideoOfflineLocalDataSource {
         final columnNameWithoutQuotes = columnName.replaceAll('"', '');
         try {
           await db.execute('ALTER TABLE offline_videos ADD COLUMN $columnName $columnType');
-          if (kDebugMode) {
-            print('✅ Columna $columnNameWithoutQuotes agregada en migración');
-          }
-        } catch (e) {
+          _logger.success('Columna $columnNameWithoutQuotes agregada en migración');
+        } catch (e, stackTrace) {
           // La columna ya existe, ignorar el error
-          if (kDebugMode) {
-            print('ℹ️ Columna $columnNameWithoutQuotes ya existe o error al agregarla: $e');
-          }
+          _logger.d('Columna $columnNameWithoutQuotes ya existe o error al agregarla: $e');
         }
       }
     }
@@ -257,12 +245,10 @@ class VideoOfflineLocalDataSource {
           } else if (colName == 'original_video_url') {
             // Usar el videoUrl proporcionado o un valor por defecto
             notNullColumns[colName] = originalVideoUrl ?? '';
-            if (kDebugMode) {
-              if (originalVideoUrl != null) {
-                print('ℹ️ Usando videoUrl proporcionado para original_video_url: $originalVideoUrl');
-              } else {
-                print('⚠️ Columna original_video_url requiere valor, usando cadena vacía');
-              }
+            if (originalVideoUrl != null) {
+              _logger.d('Usando videoUrl proporcionado para original_video_url: $originalVideoUrl');
+            } else {
+              _logger.w('Columna original_video_url requiere valor, usando cadena vacía');
             }
           }
         }
@@ -271,34 +257,26 @@ class VideoOfflineLocalDataSource {
       // Agregar valores a dataMap
       dataMap.addAll(notNullColumns);
       
-      if (kDebugMode && notNullColumns.isNotEmpty) {
-        print('ℹ️ Agregando valores para columnas NOT NULL: $notNullColumns');
-        print('📋 Columnas en dataMap antes de insertar: ${dataMap.keys.toList()}');
+      if (notNullColumns.isNotEmpty) {
+        _logger.d('Agregando valores para columnas NOT NULL: $notNullColumns');
+        _logger.d('Columnas en dataMap antes de insertar: ${dataMap.keys.toList()}');
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error verificando columnas antes de insertar: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando columnas antes de insertar', e, stackTrace);
     }
     
     try {
-      if (kDebugMode) {
-        print('💾 Intentando insertar video con ${dataMap.length} columnas');
-      }
+      _logger.d('Intentando insertar video con ${dataMap.length} columnas');
       await db.insert(
         'offline_videos',
         dataMap,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      if (kDebugMode) {
-        print('✅ Video insertado exitosamente');
-      }
-    } catch (e) {
+      _logger.success('Video insertado exitosamente');
+    } catch (e, stackTrace) {
       // Si falla por restricción NOT NULL en file_size, agregar el valor y reintentar
       if (e.toString().contains('NOT NULL constraint failed') && e.toString().contains('file_size')) {
-        if (kDebugMode) {
-          print('⚠️ Error detectado: file_size NOT NULL. Agregando valor y reintentando...');
-        }
+        _logger.w('Error detectado: file_size NOT NULL. Agregando valor y reintentando...');
         dataMap['file_size'] = video.fileSizeBytes;
         try {
           await db.insert(
@@ -306,22 +284,16 @@ class VideoOfflineLocalDataSource {
             dataMap,
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
-          if (kDebugMode) {
-            print('✅ Inserción exitosa después de agregar file_size');
-          }
+          _logger.success('Inserción exitosa después de agregar file_size');
           return; // Salir exitosamente
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('❌ Error al reintentar inserción: $retryError');
-          }
+        } catch (retryError, retryStackTrace) {
+          _logger.e('Error al reintentar inserción', retryError, retryStackTrace);
           rethrow;
         }
       }
       // Si falla por falta de columna, intentar agregarla y reintentar
       else if (e.toString().contains('no column named')) {
-        if (kDebugMode) {
-          print('⚠️ Error detectado: columna faltante. Intentando corregir...');
-        }
+        _logger.w('Error detectado: columna faltante. Intentando corregir...');
         await _ensureImageNameColumn(db);
         // Reintentar la inserción
         try {
@@ -330,13 +302,9 @@ class VideoOfflineLocalDataSource {
             dataMap,
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
-          if (kDebugMode) {
-            print('✅ Inserción exitosa después de corregir las columnas');
-          }
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('❌ Error al reintentar inserción: $retryError');
-          }
+          _logger.success('Inserción exitosa después de corregir las columnas');
+        } catch (retryError, retryStackTrace) {
+          _logger.e('Error al reintentar inserción', retryError, retryStackTrace);
           rethrow;
         }
       } else {

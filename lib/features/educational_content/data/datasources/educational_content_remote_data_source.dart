@@ -74,7 +74,7 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
       final querySnapshot = await _firestore
           .collection('educational_content')
           .where('title', isGreaterThanOrEqualTo: query)
-          .where('title', isLessThan: query + 'z')
+          .where('title', isLessThan: '${query}z')
           .get();
 
       return querySnapshot.docs

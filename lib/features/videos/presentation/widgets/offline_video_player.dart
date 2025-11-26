@@ -57,7 +57,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
 
   bool _isInitializing = true;
   // ignore: unused_field
-  bool _isPaused = false;
+  final bool _isPaused = false;
   bool _wasAlreadyCompleted = false;
   double _lastSavedProgress = 0.0;
   Timer? _progressSaveTimer;
@@ -145,7 +145,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       }
 
       final fileSize = await _decryptedVideoFile!.length();
-      _logger.d('Tamaño del archivo desencriptado: ${fileSize} bytes');
+      _logger.d('Tamaño del archivo desencriptado: $fileSize bytes');
 
       // Inicializar video_player con el archivo desencriptado
       _logger.d('Inicializando VideoPlayerController...');
@@ -343,8 +343,9 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
   }
 
   void _onVideoPositionChanged() {
-    if (_videoController == null || !_videoController!.value.isInitialized)
+    if (_videoController == null || !_videoController!.value.isInitialized) {
       return;
+    }
 
     final position = _videoController!.value.position;
     final duration = _videoController!.value.duration;
@@ -361,8 +362,9 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
   }
 
   void _onVideoEnded() {
-    if (_videoController == null || !_videoController!.value.isInitialized)
+    if (_videoController == null || !_videoController!.value.isInitialized) {
       return;
+    }
 
     if (_videoController!.value.position >= _videoController!.value.duration) {
       _handleVideoCompleted();

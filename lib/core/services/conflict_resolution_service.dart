@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'app_logger.dart';
 
 /// Estrategias de resolución de conflictos
 enum ConflictResolutionStrategy {
@@ -33,10 +33,9 @@ class ConflictInfo {
 
 /// Servicio para detectar y resolver conflictos de sincronización
 class ConflictResolutionService {
-  static final ConflictResolutionService _instance =
-      ConflictResolutionService._internal();
-  factory ConflictResolutionService() => _instance;
-  ConflictResolutionService._internal();
+  final AppLogger _logger;
+
+  ConflictResolutionService(this._logger);
 
   /// Detecta si hay un conflicto entre datos locales y remotos
   Future<ConflictInfo?> detectConflict({
@@ -88,17 +87,11 @@ class ConflictResolutionService {
         return null;
       }
 
-      if (kDebugMode) {
-        print(
-          '⚠️ ConflictResolutionService: Conflicto detectado para $localId en $collectionPath',
-        );
-        print(
-          '   Local modificado: $localLastModifiedTimestamp',
-        );
-        print(
-          '   Remoto modificado: $remoteLastModifiedTimestamp',
-        );
-      }
+      _logger.w(
+        'ConflictResolutionService: Conflicto detectado para $localId en $collectionPath',
+      );
+      _logger.d('   Local modificado: $localLastModifiedTimestamp');
+      _logger.d('   Remoto modificado: $remoteLastModifiedTimestamp');
 
       return ConflictInfo(
         localId: localId,
@@ -110,10 +103,12 @@ class ConflictResolutionService {
         remoteLastModified: remoteLastModified,
         strategy: _determineStrategy(collectionPath),
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ ConflictResolutionService: Error detectando conflicto: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'ConflictResolutionService: Error detectando conflicto',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -138,35 +133,25 @@ class ConflictResolutionService {
     final remoteTimestamp =
         conflict.remoteLastModified?.millisecondsSinceEpoch ?? 0;
 
-    if (kDebugMode) {
-      print(
-        '🔄 ConflictResolutionService: Resolviendo conflicto con Last Write Wins',
-      );
-      print(
-        '   Local: $localTimestamp, Remoto: $remoteTimestamp',
-      );
-    }
+    _logger.d(
+      'ConflictResolutionService: Resolviendo conflicto con Last Write Wins',
+    );
+    _logger.d('   Local: $localTimestamp, Remoto: $remoteTimestamp');
 
     // Si la versión local es más reciente, usar local
     if (localTimestamp > remoteTimestamp) {
-      if (kDebugMode) {
-        print('   ✅ Usando versión local (más reciente)');
-      }
+      _logger.success('   Usando versión local (más reciente)');
       return conflict.localData;
     } else {
       // Si la versión remota es más reciente, usar remota
-      if (kDebugMode) {
-        print('   ✅ Usando versión remota (más reciente)');
-      }
+      _logger.success('   Usando versión remota (más reciente)');
       return conflict.remoteData ?? conflict.localData;
     }
   }
 
   /// Resuelve conflicto usando merge inteligente
   Map<String, dynamic> _resolveMerge(ConflictInfo conflict) {
-    if (kDebugMode) {
-      print('🔄 ConflictResolutionService: Resolviendo conflicto con Merge');
-    }
+    _logger.d('ConflictResolutionService: Resolviendo conflicto con Merge');
 
     final merged = Map<String, dynamic>.from(conflict.remoteData ?? {});
     
@@ -234,10 +219,12 @@ class ConflictResolutionService {
       }
 
       return await collection.doc(documentId).get();
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ ConflictResolutionService: Error obteniendo documento remoto: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'ConflictResolutionService: Error obteniendo documento remoto',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -282,10 +269,12 @@ class ConflictResolutionService {
 
       // Si no se encuentra, usar la fecha actual
       return DateTime.now();
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ ConflictResolutionService: Error extrayendo lastModified: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.w(
+        'ConflictResolutionService: Error extrayendo lastModified',
+        e,
+        stackTrace,
+      );
       return DateTime.now();
     }
   }

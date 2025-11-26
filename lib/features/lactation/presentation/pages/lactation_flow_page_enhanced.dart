@@ -16,8 +16,7 @@ class LactationFlowPage extends StatefulWidget {
   final DateTime? selectedDate;
   final dynamic existingRecord;
 
-  const LactationFlowPage({Key? key, this.selectedDate, this.existingRecord})
-    : super(key: key);
+  const LactationFlowPage({super.key, this.selectedDate, this.existingRecord});
 
   @override
   State<LactationFlowPage> createState() => _LactationFlowPageState();
@@ -27,8 +26,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     with TickerProviderStateMixin {
   final AppLogger _logger = getIt<AppLogger>();
   LactationStep _currentStep = LactationStep.initial;
-  Map<String, dynamic> _data = {};
-  List<String> _history = [];
+  final Map<String, dynamic> _data = {};
+  final List<String> _history = [];
   late LactationService _lactationService;
 
   // Controlador de animación de fondo únicamente
@@ -1764,7 +1763,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         Positioned(
           top: 120,
           right: 30,
-          child: Container(
+          child: SizedBox(
             width: 80,
             height: 80,
             child: CustomPaint(painter: DotsPainter()),

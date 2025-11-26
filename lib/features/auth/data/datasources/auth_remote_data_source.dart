@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../models/user_model.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/app_logger.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signIn({required String email, required String password});
@@ -36,8 +37,9 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final AppLogger _logger;
 
-  AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
+  AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore, this._logger);
 
   @override
   Future<UserModel> signIn({
@@ -127,7 +129,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .set(userModel.toDocument());
 
       // Las subcolecciones se crearán cuando el usuario complete el onboarding
-      print('Usuario registrado exitosamente: ${credential.user!.uid}');
+      _logger.success(
+        'Usuario registrado exitosamente: ${credential.user!.uid}',
+      );
 
       return userModel;
     } on FirebaseAuthException catch (e) {
