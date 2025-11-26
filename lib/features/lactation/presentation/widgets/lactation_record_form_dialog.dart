@@ -213,12 +213,12 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        gradient:  LinearGradient(
+        gradient: LinearGradient(
           colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius:  BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
         ),
@@ -839,6 +839,8 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
       lastDate: DateTime.now(),
     );
 
+    if (!mounted) return;
+
     if (date != null) {
       setState(() {
         _fechaHora = DateTime(
@@ -857,6 +859,8 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
       context: context,
       initialTime: TimeOfDay.fromDateTime(_fechaHora),
     );
+
+    if (!mounted) return;
 
     if (time != null) {
       setState(() {
@@ -907,6 +911,8 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
         await _lactationService.saveRecord(record);
       }
 
+      if (!mounted) return;
+
       Navigator.of(context).pop();
       widget.onRecordSaved();
 
@@ -919,13 +925,17 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
         () {},
       );
     } catch (e) {
+      if (!mounted) return;
+
       DialogExample.showErrorDialog(
         context,
         'Error al Guardar',
         'No se pudieron guardar los datos. Por favor, inténtalo nuevamente.\n\nError: ${e.toString()}',
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

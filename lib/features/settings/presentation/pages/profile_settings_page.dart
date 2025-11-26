@@ -15,6 +15,8 @@ import '../widgets/account_card_widget.dart';
 import '../widgets/app_info_card_widget.dart';
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/services/vibration_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/interactive_button.dart';
 
 /// Página de perfil y configuraciones usando clean architecture
@@ -43,19 +45,23 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     // Feedback háptico y sonoro al cambiar configuración
     final soundService = GetIt.instance<SoundService>();
     final vibrationService = GetIt.instance<VibrationService>();
-    
+
     await Future.wait([
       soundService.playClickSound(),
       vibrationService.selectionClick(),
     ]);
-    
+
+    if (!mounted) return;
+
     context.read<SettingsBloc>().add(
-          UpdateLocalSettingRequested(key: key, value: value),
-        );
-    
+      UpdateLocalSettingRequested(key: key, value: value),
+    );
+
     // Si se cambió el idioma, actualizar EasyLocalization
     if (key == 'language') {
       await context.setLocale(Locale(value));
+
+      if (!mounted) return;
     }
   }
 
@@ -75,7 +81,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
       if (mounted) {
         Navigator.of(context).pop(); // Cerrar loading
-        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/login', (route) => false);
 
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
@@ -196,7 +204,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         return SingleChildScrollView(
           child: Container(
             margin: EdgeInsets.symmetric(
-              horizontal: constraints.maxWidth > 600 ? (constraints.maxWidth - 600) / 2 : 20,
+              horizontal: constraints.maxWidth > 600
+                  ? (constraints.maxWidth - 600) / 2
+                  : 20,
               vertical: 20,
             ),
             child: Column(
@@ -230,9 +240,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 // Sección: Cuenta
                 _buildSectionTitle('account.title'.tr(), constraints),
                 const SizedBox(height: 12),
-                AccountCardWidget(
-                  onSignOut: _handleSignOut,
-                ),
+                AccountCardWidget(onSignOut: _handleSignOut),
 
                 const SizedBox(height: 20),
 
@@ -282,6 +290,7 @@ class _EditProfileDialog extends StatefulWidget {
 }
 
 class _EditProfileDialogState extends State<_EditProfileDialog> {
+  final AppLogger _logger = getIt<AppLogger>();
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -308,6 +317,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
           .doc(widget.user.id)
           .get();
 
+      if (!mounted) return;
+
       if (userDoc.exists) {
         final data = userDoc.data() as Map<String, dynamic>;
         _phoneController.text = data['telefono'] ?? '';
@@ -317,6 +328,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         _idNumberController.text = data['cedula'] ?? '';
       }
     } catch (e) {
+      if (!mounted) return;
       // Ignorar errores
     }
   }
@@ -368,13 +380,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: 'profile.name'.tr(),
-                    prefixIcon: const Icon(Icons.person, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.person,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -389,13 +407,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'profile.email'.tr(),
-                    prefixIcon: const Icon(Icons.email, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.email,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -413,13 +437,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _motherNameController,
                   decoration: InputDecoration(
                     labelText: 'profile.motherName'.tr(),
-                    prefixIcon: const Icon(Icons.family_restroom, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.family_restroom,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -434,13 +464,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _idNumberController,
                   decoration: InputDecoration(
                     labelText: 'profile.idNumberOptional'.tr(),
-                    prefixIcon: const Icon(Icons.badge, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.badge,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                   keyboardType: TextInputType.number,
@@ -458,13 +494,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _birthDateController,
                   decoration: InputDecoration(
                     labelText: 'profile.birthDate'.tr(),
-                    prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.calendar_today,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                     hintText: 'YYYY-MM-DD',
                   ),
@@ -482,13 +524,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _phoneController,
                   decoration: InputDecoration(
                     labelText: 'profile.phoneOptional'.tr(),
-                    prefixIcon: const Icon(Icons.phone, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.phone,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -497,13 +545,19 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                   controller: _locationController,
                   decoration: InputDecoration(
                     labelText: 'profile.locationOptional'.tr(),
-                    prefixIcon: const Icon(Icons.location_on, color: Color(0xFF03A696)),
+                    prefixIcon: const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF03A696),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF03A696), width: 2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF03A696),
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -540,7 +594,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(
@@ -569,6 +625,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       lastDate: DateTime.now(),
     );
 
+    if (!mounted) return;
+
     if (date != null) {
       setState(() {
         _birthDateController.text =
@@ -596,6 +654,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
             .where('email', isEqualTo: user.email)
             .limit(1)
             .get();
+
+        if (!mounted) return;
+
         if (userQuery.docs.isNotEmpty) {
           userDocId = userQuery.docs.first.id;
         }
@@ -605,11 +666,15 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       // Actualizar nombre en Firebase Auth
       if (_nameController.text.trim() != user.displayName) {
         await user.updateDisplayName(_nameController.text.trim());
+
+        if (!mounted) return;
       }
 
       // Actualizar email en Firebase Auth si cambió
       if (_emailController.text.trim() != user.email) {
-        await user.updateEmail(_emailController.text.trim());
+        await user.verifyBeforeUpdateEmail(_emailController.text.trim());
+
+        if (!mounted) return;
       }
 
       // Calcular edad si hay fecha de nacimiento
@@ -644,30 +709,32 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         'ubicacion': _locationController.text.trim(),
       });
 
+      if (!mounted) return;
+
       // Actualizar perfil usando UserProfileBloc si está disponible
       try {
         context.read<UserProfileBloc>().add(
-              UpdateUserProfileRequested(
-                userId: user.uid,
-                name: _nameController.text.trim(),
-                phone: _phoneController.text.trim().isEmpty
-                    ? null
-                    : _phoneController.text.trim(),
-                location: _locationController.text.trim().isEmpty
-                    ? null
-                    : _locationController.text.trim(),
-                birthDate: _birthDateController.text.isNotEmpty
-                    ? DateTime.tryParse(_birthDateController.text)
-                    : null,
-                age: age,
-                idNumber: _idNumberController.text.trim().isEmpty
-                    ? null
-                    : _idNumberController.text.trim(),
-              ),
-            );
+          UpdateUserProfileRequested(
+            userId: user.uid,
+            name: _nameController.text.trim(),
+            phone: _phoneController.text.trim().isEmpty
+                ? null
+                : _phoneController.text.trim(),
+            location: _locationController.text.trim().isEmpty
+                ? null
+                : _locationController.text.trim(),
+            birthDate: _birthDateController.text.isNotEmpty
+                ? DateTime.tryParse(_birthDateController.text)
+                : null,
+            age: age,
+            idNumber: _idNumberController.text.trim().isEmpty
+                ? null
+                : _idNumberController.text.trim(),
+          ),
+        );
       } catch (e) {
         // Si no hay UserProfileBloc disponible, continuar sin error
-        print('⚠️ UserProfileBloc no disponible: $e');
+        _logger.w('UserProfileBloc no disponible: $e');
       }
 
       // Feedback de éxito
@@ -737,4 +804,3 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     }
   }
 }
-

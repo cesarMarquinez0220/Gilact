@@ -6,6 +6,8 @@ import '../../data/datasources/video_offline_local_data_source.dart';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 part 'video_download_event.dart';
 part 'video_download_state.dart';
@@ -14,6 +16,7 @@ part 'video_download_state.dart';
 class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
   final VideoDownloadService _downloadService;
   final VideoOfflineLocalDataSource _localDataSource;
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Mapa para mantener estados de múltiples descargas simultáneas
   final Map<String, Map<String, dynamic>> _activeDownloadsMap = {};
@@ -252,7 +255,7 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
         originalVideoUrl: video.videoUrl,
       );
     } catch (e) {
-      print('Error guardando metadata: $e');
+      _logger.e('Error guardando metadata', e);
     }
   }
 
@@ -321,7 +324,7 @@ class VideoDownloadBloc extends Bloc<VideoDownloadEvent, VideoDownloadState> {
       await _localDataSource.updateLastAccessed(event.videoId);
     } catch (e) {
       // No emitir error para esta operación silenciosa
-      print('Error actualizando último acceso: $e');
+      _logger.w('Error actualizando último acceso', e);
     }
   }
 

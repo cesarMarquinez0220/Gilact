@@ -237,6 +237,8 @@ class AppSettingsCardWidget extends StatelessWidget {
         // Cambiar idioma en EasyLocalization
         await context.setLocale(Locale(code));
 
+        if (!context.mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('languageChanged'.tr(namedArgs: {'language': name})),

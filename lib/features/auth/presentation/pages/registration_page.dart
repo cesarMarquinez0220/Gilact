@@ -380,6 +380,8 @@ class _RegistrationPageState extends State<RegistrationPage>
     final connectivityService = ConnectivityService();
     final isConnected = await connectivityService.isConnected();
 
+    if (!mounted) return;
+
     if (!isConnected) {
       DialogExample.showNetworkErrorDialog(context);
       return;
@@ -391,6 +393,8 @@ class _RegistrationPageState extends State<RegistrationPage>
     _logger.d(
       'RegistrationPage: Flag is_new_registration marcado ANTES del registro',
     );
+
+    if (!mounted) return;
 
     // Registrar usuario
     context.read<AuthBloc>().add(
@@ -429,7 +433,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha:0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -442,9 +446,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                   Container(
                     width: 60,
                     height: 60,
-                    decoration:const BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient:  LinearGradient(
+                      gradient: LinearGradient(
                         colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
                       ),
                     ),
@@ -620,6 +624,8 @@ class _RegistrationPageState extends State<RegistrationPage>
 
     // Limpiar datos guardados después del registro exitoso
     await _clearSavedData();
+
+    if (!mounted) return;
 
     // Navegar directamente al onboarding sin mostrar diálogo de éxito
     _logger.d('RegistrationPage: Navegando a onboarding...');

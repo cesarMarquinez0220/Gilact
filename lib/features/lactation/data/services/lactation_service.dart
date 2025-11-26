@@ -764,7 +764,7 @@ class LactationService {
       final totalFeeds = records.length;
       final totalDuration = records.fold<Duration>(
         Duration.zero,
-        (sum, record) => sum + record.duracion,
+        (total, record) => total + record.duracion,
       );
       final averageDuration = totalFeeds > 0
           ? Duration(minutes: totalDuration.inMinutes ~/ totalFeeds)
@@ -776,7 +776,7 @@ class LactationService {
       final feedsToday = todayRecords.length;
       final durationToday = todayRecords.fold<Duration>(
         Duration.zero,
-        (sum, record) => sum + record.duracion,
+        (total, record) => total + record.duracion,
       );
 
       return LactationStats(

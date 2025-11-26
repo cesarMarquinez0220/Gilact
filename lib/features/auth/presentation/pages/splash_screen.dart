@@ -60,6 +60,8 @@ class _SplashScreenState extends State<SplashScreen>
         _logger.d('SplashScreen: Verificando onboarding...');
         // Verificar si el onboarding ya fue completado
         final prefs = await SharedPreferences.getInstance();
+        if (!mounted) return;
+
         final onboardingCompleted =
             prefs.getBool('onboarding_completed') ?? false;
 

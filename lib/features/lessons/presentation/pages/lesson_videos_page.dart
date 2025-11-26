@@ -87,6 +87,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       listen: false,
     );
     await videoImagesProvider.initialize();
+    // No se usa context después del await, así que no se necesita verificación
   }
 
   /// Verifica si el progreso ya está cargado y lo carga si es necesario
@@ -144,6 +145,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
         _logger.d('Iniciando carga de progreso desde Firestore...');
 
         await leccionesProvider.loadProgressFromFirestore(userId);
+
+        if (!mounted) return;
+
         _lastProgressLoad = now;
         _isInitialLoad = false;
 
@@ -244,6 +248,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       ),
     );
 
+    if (!mounted) return;
+
     // Verifica si se completó una lección y actualiza lastCompletedLesson
     if (result != null && result is bool && result) {
       setState(() {
@@ -262,6 +268,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
 
       // Pequeño delay para asegurar que la orientación se establezca
       await Future.delayed(const Duration(milliseconds: 100));
+
+      if (!mounted) return;
 
       // Buscar el siguiente video disponible
       final nextVideo = _findNextVideo(videoId);
@@ -301,13 +309,15 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       avancesProvider.imprimirAvancesMap();
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.fromNotification) {
-          await app_init.AppInitializationService.refreshAndGoHome(context);
-          return false;
+    return PopScope(
+      canPop: !widget.fromNotification,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (widget.fromNotification && !didPop) {
+          final currentContext = context;
+          await app_init.AppInitializationService.refreshAndGoHome(
+            currentContext,
+          );
         }
-        return true;
       },
       child: Scaffold(
         body: Container(
@@ -879,6 +889,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
 
     // Verificar si ya está completada
     final isCompleted = await _isTriviaCompleted(lessonId);
+
+    if (!mounted) return;
+
     if (isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -895,7 +908,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       userId: userId,
       onComplete: () {
         // Refrescar la UI después de completar
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       },
     );
   }

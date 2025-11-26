@@ -134,7 +134,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       builder: (BuildContext dialogContext) {
         return PopScope(
           canPop: false,
-          onPopInvoked: (didPop) {
+          onPopInvokedWithResult: (didPop, result) {
             if (!didPop) {
               Navigator.of(context).pop(true); // Pop "true" (volver)
             }

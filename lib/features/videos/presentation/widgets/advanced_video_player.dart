@@ -623,6 +623,8 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         isCompleted: shouldPreserveCompleted ? true : false,
       );
 
+      if (!mounted) return;
+
       // Si el video se está viendo desde historial y ya estaba completado,
       // NO actualizar el LeccionesProvider para no afectar el estado de completado
       if (shouldPreserveCompleted) {

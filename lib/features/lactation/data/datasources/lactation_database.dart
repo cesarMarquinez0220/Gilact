@@ -1,11 +1,15 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../../domain/entities/lactation_record.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class LactationDatabase {
   static final LactationDatabase _instance = LactationDatabase._internal();
   factory LactationDatabase() => _instance;
   LactationDatabase._internal();
+
+  final AppLogger _logger = getIt<AppLogger>();
 
   static Database? _database;
 
@@ -61,13 +65,13 @@ class LactationDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    print(
-      '🔄 LactationDatabase: Iniciando migración de versión $oldVersion a $newVersion',
+    _logger.d(
+      'LactationDatabase: Iniciando migración de versión $oldVersion a $newVersion',
     );
 
     if (oldVersion < 3) {
       // Agregar campos de sincronización
-      print('📦 LactationDatabase: Agregando campos de sincronización (v3)');
+      _logger.d('LactationDatabase: Agregando campos de sincronización (v3)');
       try {
         await db.execute(
           'ALTER TABLE lactation_records ADD COLUMN firestore_id TEXT',
@@ -96,11 +100,11 @@ class LactationDatabase {
           SET sync_status = 'PENDING', created_at_local = ${DateTime.now().millisecondsSinceEpoch}
           WHERE firestore_id IS NULL
         ''');
-        print(
-          '✅ LactationDatabase: Campos de sincronización agregados correctamente',
+        _logger.d(
+          'LactationDatabase: Campos de sincronización agregados correctamente',
         );
       } catch (e) {
-        print('⚠️ Error en migración de LactationDatabase (v3): $e');
+        _logger.e('Error en migración de LactationDatabase (v3)', e);
         // Si falla, recrear la tabla
         await db.execute('DROP TABLE IF EXISTS lactation_records');
         await _onCreate(db, newVersion);
@@ -109,8 +113,8 @@ class LactationDatabase {
 
     if (oldVersion < 4) {
       // Agregar campos tipo_registro e incluye_sueno
-      print(
-        '📦 LactationDatabase: Agregando tipo_registro e incluye_sueno (v4)',
+      _logger.d(
+        'LactationDatabase: Agregando tipo_registro e incluye_sueno (v4)',
       );
       try {
         // Verificar si las columnas ya existen antes de agregarlas
@@ -125,18 +129,18 @@ class LactationDatabase {
           await db.execute(
             'ALTER TABLE lactation_records ADD COLUMN tipo_registro TEXT DEFAULT \'completo\'',
           );
-          print('✅ LactationDatabase: Columna tipo_registro agregada');
+          _logger.d('LactationDatabase: Columna tipo_registro agregada');
         } else {
-          print('ℹ️ LactationDatabase: Columna tipo_registro ya existe');
+          _logger.d('LactationDatabase: Columna tipo_registro ya existe');
         }
 
         if (!columnNames.contains('incluye_sueno')) {
           await db.execute(
             'ALTER TABLE lactation_records ADD COLUMN incluye_sueno INTEGER DEFAULT 0',
           );
-          print('✅ LactationDatabase: Columna incluye_sueno agregada');
+          _logger.d('LactationDatabase: Columna incluye_sueno agregada');
         } else {
-          print('ℹ️ LactationDatabase: Columna incluye_sueno ya existe');
+          _logger.d('LactationDatabase: Columna incluye_sueno ya existe');
         }
 
         // Actualizar registros existentes sin tipo_registro
@@ -146,23 +150,23 @@ class LactationDatabase {
           WHERE tipo_registro IS NULL OR incluye_sueno IS NULL
         ''');
 
-        print('✅ LactationDatabase: Migración a v4 completada correctamente');
+        _logger.d('LactationDatabase: Migración a v4 completada correctamente');
       } catch (e) {
-        print('⚠️ Error agregando tipo_registro e incluye_sueno: $e');
+        _logger.e('Error agregando tipo_registro e incluye_sueno', e);
         // Si falla, intentar recrear la tabla
         try {
           await db.execute('DROP TABLE IF EXISTS lactation_records');
           await _onCreate(db, newVersion);
-          print('✅ LactationDatabase: Tabla recreada con nuevo esquema');
+          _logger.d('LactationDatabase: Tabla recreada con nuevo esquema');
         } catch (recreateError) {
-          print('❌ Error recreando tabla: $recreateError');
+          _logger.e('Error recreando tabla', recreateError);
           rethrow;
         }
       }
     }
 
-    print(
-      '✅ LactationDatabase: Migración completada de v$oldVersion a v$newVersion',
+    _logger.d(
+      'LactationDatabase: Migración completada de v$oldVersion a v$newVersion',
     );
   }
 

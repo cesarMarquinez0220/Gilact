@@ -16,7 +16,11 @@ class LactationRecordPage extends StatefulWidget {
   final DateTime? selectedDate;
   final LactationRecord? existingRecord;
 
-  const LactationRecordPage({super.key, this.selectedDate, this.existingRecord});
+  const LactationRecordPage({
+    super.key,
+    this.selectedDate,
+    this.existingRecord,
+  });
 
   @override
   State<LactationRecordPage> createState() => _LactationRecordPageState();
@@ -686,18 +690,20 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               // Actualizar la unidad
               if (unitType == 'volume') {
                 _volumeUnit = newUnit;
-              } else if (unitType == 'duration')
-                {_durationUnit = newUnit;}
-              else if (unitType == 'sleep')
-                {_sleepUnit = newUnit;}
+              } else if (unitType == 'duration') {
+                _durationUnit = newUnit;
+              } else if (unitType == 'sleep') {
+                _sleepUnit = newUnit;
+              }
             } else {
               // Si no hay valor, solo actualizar la unidad
-              if (unitType == 'volume')
-                {_volumeUnit = newUnit;}
-              else if (unitType == 'duration')
-                {_durationUnit = newUnit;}
-              else if (unitType == 'sleep')
-                {_sleepUnit = newUnit;}
+              if (unitType == 'volume') {
+                _volumeUnit = newUnit;
+              } else if (unitType == 'duration') {
+                _durationUnit = newUnit;
+              } else if (unitType == 'sleep') {
+                _sleepUnit = newUnit;
+              }
             }
           } else {
             // No es selector de unidad, solo actualizar el valor
@@ -713,7 +719,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
               : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -952,11 +960,15 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withValues(alpha: 0.6) // Más notorio manteniendo blanco
+              ? Colors.white.withValues(
+                  alpha: 0.6,
+                ) // Más notorio manteniendo blanco
               : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -1282,7 +1294,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       final currentContext = context;
 
       // Navegar a Home y refrescar datos de lactancia de forma rápida
-      if (mounted) {
+      if (mounted && currentContext.mounted) {
         // Navegar a Home directamente (más rápido)
         Navigator.of(
           currentContext,
@@ -1296,7 +1308,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         await Future.delayed(const Duration(milliseconds: 100));
         final homeContext =
             app_init.AppInitializationService.navigationKey.currentContext;
-        if (homeContext != null) {
+        if (homeContext != null && homeContext.mounted) {
           ScaffoldMessenger.of(homeContext).showSnackBar(
             SnackBar(
               content: Text('lactation.recordForm.saved'.tr()),
@@ -1352,6 +1364,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     );
     if (confirmed != true) return;
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -1359,6 +1373,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
     try {
       final user = FirebaseAuth.instance.currentUser;
       final userDocId = await _getUserDocumentId(); // Use helper
+      if (!mounted) return;
+
       final situationDocRef = _getUserSituationDocRef(userDocId);
       final lactationCollectionRef = _getLactationCollectionRef(
         situationDocRef,
@@ -1374,6 +1390,8 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       }
 
       await lactationCollectionRef.doc(widget.existingRecord!.id).delete();
+
+      if (!mounted) return;
 
       DialogExample.showSuccessDialog(
         context,
@@ -1464,7 +1482,10 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 2,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),

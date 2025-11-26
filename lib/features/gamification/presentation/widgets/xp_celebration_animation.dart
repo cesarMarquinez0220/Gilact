@@ -469,7 +469,7 @@ class _StarsPainter extends CustomPainter {
     if (size > 5) {
       final centerPaint = Paint()
         ..color = paint.color.withValues(
-          alpha: math.min(1.0, paint.color.opacity * 1.3),
+          alpha: math.min(1.0, (paint.color.a / 255.0) * 1.3),
         )
         ..style = PaintingStyle.fill;
       canvas.drawCircle(center, size * 0.15, centerPaint);

@@ -1,13 +1,16 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../domain/entities/video.dart';
+import '../../../../../core/services/app_logger.dart';
+import '../../../../../core/di/injection.dart';
 
 /// Servicio para precargar videos y mejorar la experiencia del usuario
 class VideoPreloadService {
   static final VideoPreloadService _instance = VideoPreloadService._internal();
   factory VideoPreloadService() => _instance;
   VideoPreloadService._internal();
+
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Cache de controladores precargados
   final Map<int, YoutubePlayerController> _preloadedControllers = {};
@@ -46,15 +49,11 @@ class VideoPreloadService {
       // Precargar el siguiente video
       await _preloadVideo(nextVideo);
 
-      if (kDebugMode) {
-        print(
-          'Video precargado: ${nextVideo.title} (ID: ${nextVideo.videoId})',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error precargando video: $e');
-      }
+      _logger.d(
+        'Video precargado: ${nextVideo.title} (ID: ${nextVideo.videoId})',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error precargando video', e, stackTrace);
     }
   }
 
@@ -80,10 +79,8 @@ class VideoPreloadService {
           ); // Evitar sobrecarga
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error precargando videos próximos: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error precargando videos próximos', e, stackTrace);
     }
   }
 
@@ -138,10 +135,8 @@ class VideoPreloadService {
 
       _preloadedControllers[video.videoId] = controller;
       _preloadTimestamps[video.videoId] = DateTime.now();
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error precargando video ${video.videoId}: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error precargando video ${video.videoId}', e, stackTrace);
     }
   }
 
@@ -185,9 +180,7 @@ class VideoPreloadService {
 
     if (controller != null) {
       controller.dispose();
-      if (kDebugMode) {
-        print('Controlador precargado removido: $videoId');
-      }
+      _logger.d('Controlador precargado removido: $videoId');
     }
   }
 
@@ -199,9 +192,7 @@ class VideoPreloadService {
     _preloadedControllers.clear();
     _preloadTimestamps.clear();
 
-    if (kDebugMode) {
-      print('Todos los controladores precargados han sido limpiados');
-    }
+    _logger.d('Todos los controladores precargados han sido limpiados');
   }
 
   /// Obtener estadísticas de precarga
@@ -217,15 +208,15 @@ class VideoPreloadService {
   /// Precarga metadata de un video específico
   Future<void> preloadVideoMetadata(int videoId) async {
     try {
-      print('📋 Precargando metadata del video $videoId');
+      _logger.d('Precargando metadata del video $videoId');
 
       // Simular precarga de metadata
       // En una implementación real, aquí se obtendría la información del video
       await Future.delayed(const Duration(milliseconds: 300));
 
-      print('✅ Metadata del video $videoId precargada');
-    } catch (e) {
-      print('❌ Error precargando metadata del video $videoId: $e');
+      _logger.success('Metadata del video $videoId precargada');
+    } catch (e, stackTrace) {
+      _logger.e('Error precargando metadata del video $videoId', e, stackTrace);
     }
   }
 

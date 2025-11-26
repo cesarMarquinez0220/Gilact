@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
 import '../widgets/situation_option_widget.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class SituationSelectionPage extends StatefulWidget {
   const SituationSelectionPage({super.key});
@@ -16,6 +18,7 @@ class SituationSelectionPage extends StatefulWidget {
 
 class _SituationSelectionPageState extends State<SituationSelectionPage>
     with TickerProviderStateMixin {
+  final AppLogger _logger = getIt<AppLogger>();
   late AnimationController _animationController;
   late AnimationController _particleController;
   late Animation<double> _fadeAnimation;
@@ -27,7 +30,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
   @override
   void initState() {
     super.initState();
-    print('🔍 SituationSelectionPage: Inicializando...');
+    _logger.d('SituationSelectionPage: Inicializando...');
     _initializeAnimations();
   }
 
@@ -84,8 +87,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
           Navigator.of(context).pushNamed('/postpartum-form');
         }
       }
-    } catch (e) {
-      print('❌ Error en _saveSituation: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error en _saveSituation', e, stackTrace);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -190,7 +193,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                               Expanded(
                                 child: SituationOptionWidget(
                                   title: 'onboarding.preParto'.tr(),
-                                  description: 'onboarding.prePartoDescription'.tr(),
+                                  description: 'onboarding.prePartoDescription'
+                                      .tr(),
                                   illustrationPath: 'assets/images/mamapre.png',
                                   backgroundColor: const Color(0xFF4FD1C7),
                                   isSelected: _selectedSituation == 'preparto',
@@ -209,7 +213,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                               Expanded(
                                 child: SituationOptionWidget(
                                   title: 'onboarding.postParto'.tr(),
-                                  description: 'onboarding.postPartoDescription'.tr(),
+                                  description: 'onboarding.postPartoDescription'
+                                      .tr(),
                                   illustrationPath:
                                       'assets/images/mamapost.png',
                                   backgroundColor: const Color(0xFF1A365D),

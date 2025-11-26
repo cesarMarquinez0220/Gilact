@@ -85,7 +85,7 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        gradient:  LinearGradient(
+        gradient: LinearGradient(
           colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -354,7 +354,9 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
       decoration: BoxDecoration(
         color: const Color(0xFF667eea).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF667eea).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: const Color(0xFF667eea).withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -472,19 +474,24 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              final dialogContext = context;
+              Navigator.of(dialogContext).pop();
               try {
                 await _lactationService.deleteRecord(record.id);
+                if (!mounted || !dialogContext.mounted) return;
+
                 widget.onRecordDeleted();
                 DialogExample.showSuccessDialog(
-                  context,
+                  dialogContext,
                   'Registro Eliminado',
                   'El registro de lactancia ha sido eliminado correctamente.',
                   () {},
                 );
               } catch (e) {
+                if (!mounted || !dialogContext.mounted) return;
+
                 DialogExample.showErrorDialog(
-                  context,
+                  dialogContext,
                   'Error al Eliminar',
                   'No se pudo eliminar el registro. Por favor, inténtalo nuevamente.',
                 );

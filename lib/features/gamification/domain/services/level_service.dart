@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import '../entities/user_gamification_profile.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para calcular niveles basándose en XP
 /// Fórmula: XP requerido para nivel N = 100 * N * (N + 1) / 2
@@ -7,6 +8,8 @@ class LevelService {
   static final LevelService _instance = LevelService._internal();
   factory LevelService() => _instance;
   LevelService._internal();
+
+  final AppLogger _logger = getIt<AppLogger>();
 
   /// Calcula el XP total necesario para alcanzar un nivel específico
   /// Fórmula: 100 * N * (N + 1) / 2
@@ -63,9 +66,9 @@ class LevelService {
     // Verificar si subió de nivel
     final leveledUp = newLevel > profile.currentLevel;
 
-    if (kDebugMode && leveledUp) {
-      print(
-        '🎉 Usuario ${profile.userId} subió de nivel ${profile.currentLevel} a $newLevel!',
+    if (leveledUp) {
+      _logger.d(
+        'LevelService: Usuario ${profile.userId} subió de nivel ${profile.currentLevel} a $newLevel',
       );
     }
 
@@ -102,4 +105,3 @@ class LevelService {
     return (profile.currentLevelXP / profile.nextLevelXP).clamp(0.0, 1.0);
   }
 }
-

@@ -706,6 +706,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
       // Verificar situación Post-Parto
       final userDocId = await _getUserDocumentId();
+      if (!mounted) return;
+
       if (userDocId == null) {
         DialogExample.showErrorDialog(
           context,
@@ -722,6 +724,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           .doc('seleccion');
 
       final situacionSnapshot = await situacionDocRef.get();
+      if (!mounted) return;
+
       if (!situacionSnapshot.exists) {
         DialogExample.showInfoDialog(
           context,
@@ -772,6 +776,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         await situacionDocRef.collection('lactancia').add(datosLactancia);
       }
 
+      if (!mounted) return;
+
       DialogExample.showSuccessDialog(
         context,
         'lactation.flow.recordSuccess'.tr(),
@@ -781,6 +787,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         },
       );
     } catch (e) {
+      if (!mounted) return;
+
       DialogExample.showErrorDialog(
         context,
         'lactation.flow.saveError'.tr(),
@@ -908,6 +916,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
     if (confirmed != true) return;
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -932,6 +942,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           .doc(widget.existingRecord!.id)
           .delete();
 
+      if (!mounted) return;
+
       DialogExample.showSuccessDialog(
         context,
         'Registro Eliminado',
@@ -941,6 +953,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         },
       );
     } catch (e) {
+      if (!mounted) return;
+
       DialogExample.showErrorDialog(
         context,
         'lactation.flow.deleteError'.tr(),

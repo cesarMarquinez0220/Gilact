@@ -310,7 +310,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         );
 
         // Verificar si hay notificación pendiente
-        if (!mounted) return;
+        if (!currentContext.mounted) return;
         await PushNotificationService.handlePendingNotification(currentContext);
 
         // Si no había notificación pendiente o ya fue manejada, navegar a welcome

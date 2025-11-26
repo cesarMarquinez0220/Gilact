@@ -272,10 +272,11 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: !_isEditingWeight,
+      onPopInvokedWithResult: (didPop, result) {
         // Si está en modo edición manual, cerrar edición en lugar de navegar atrás
-        if (_isEditingWeight) {
+        if (_isEditingWeight && !didPop) {
           setState(() {
             // Normalizar valor escrito si quedó algo en el controlador
             final parsed = double.tryParse(
@@ -288,9 +289,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
             _isEditingWeight = false;
           });
           FocusScope.of(context).unfocus();
-          return false; // No salir de la página
         }
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -664,12 +663,12 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF4FD1C7).withValues(alpha:0.4),
+                color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha:0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

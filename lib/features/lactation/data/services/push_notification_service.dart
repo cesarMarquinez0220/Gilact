@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import '../../../../main.dart';
 import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../presentation/pages/lactation_flow_page_enhanced.dart';
@@ -703,13 +704,25 @@ class PushNotificationService {
   }
 }
 
+/// Logger estático para usar en el background handler
+/// (no podemos usar DI en isolates separados)
+final _backgroundLogger = Logger(
+  printer: PrettyPrinter(
+    methodCount: 0,
+    errorMethodCount: 8,
+    lineLength: 120,
+    colors: true,
+    printEmojis: true,
+  ),
+);
+
 /// Handler global para mensajes en background
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // En background handler, no podemos usar DI, así que usamos print
+  // En background handler, no podemos usar DI, así que creamos una instancia del logger directamente
   // ya que este handler se ejecuta en un isolate separado
-  print('🔔 Background: Mensaje recibido en background');
-  print('📋 Título: ${message.notification?.title}');
-  print('💬 Cuerpo: ${message.notification?.body}');
-  print('📦 Data: ${message.data}');
+  _backgroundLogger.d('Background: Mensaje recibido en background');
+  _backgroundLogger.d('Título: ${message.notification?.title}');
+  _backgroundLogger.d('Cuerpo: ${message.notification?.body}');
+  _backgroundLogger.d('Data: ${message.data}');
 }

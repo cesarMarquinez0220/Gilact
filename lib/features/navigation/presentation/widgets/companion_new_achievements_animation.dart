@@ -36,16 +36,18 @@ class CompanionNewAchievementsAnimation {
       if (newAchievements.length > 1) {
         for (int i = 1; i < newAchievements.length; i++) {
           await Future.delayed(const Duration(milliseconds: 1500));
-          if (context.mounted) {
-            AchievementUnlockedDialog.show(
-              context,
-              newAchievements[i],
-              newAchievements[i].xpReward,
-            );
-          }
+          if (!context.mounted) return;
+
+          AchievementUnlockedDialog.show(
+            context,
+            newAchievements[i],
+            newAchievements[i].xpReward,
+          );
         }
       }
     }
+
+    if (!context.mounted) return;
 
     // Limpiar la lista de logros nuevos (marcar como vistos)
     final gamificationBloc = context.read<GamificationBloc>();
@@ -56,4 +58,3 @@ class CompanionNewAchievementsAnimation {
     gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
   }
 }
-

@@ -329,61 +329,67 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
               Row(
                 children: [
                   Expanded(
-                    child: RadioListTile<String>(
-                      title: Text(
-                        'Izquierdo',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      value: 'Izquierdo',
-                      groupValue: _seleccionPecho,
-                      onChanged: (String? value) {
+                    child: GestureDetector(
+                      onTap: () {
                         setState(() {
-                          _seleccionPecho = value!;
+                          _seleccionPecho = 'Izquierdo';
                         });
                       },
-                      activeColor: Colors.white,
+                      child: RadioListTile<String>(
+                        title: Text(
+                          'Izquierdo',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        value: 'Izquierdo',
+                        selected: _seleccionPecho == 'Izquierdo',
+                        activeColor: Colors.white,
+                      ),
                     ),
                   ),
                   Expanded(
-                    child: RadioListTile<String>(
-                      title: Text(
-                        'Derecho',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      value: 'Derecho',
-                      groupValue: _seleccionPecho,
-                      onChanged: (String? value) {
+                    child: GestureDetector(
+                      onTap: () {
                         setState(() {
-                          _seleccionPecho = value!;
+                          _seleccionPecho = 'Derecho';
                         });
                       },
-                      activeColor: Colors.white,
+                      child: RadioListTile<String>(
+                        title: Text(
+                          'Derecho',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        value: 'Derecho',
+                        selected: _seleccionPecho == 'Derecho',
+                        activeColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
-              RadioListTile<String>(
-                title: Text(
-                  'Ninguna',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-                value: 'Ninguna',
-                groupValue: _seleccionPecho,
-                onChanged: (String? value) {
+              GestureDetector(
+                onTap: () {
                   setState(() {
-                    _seleccionPecho = value!;
+                    _seleccionPecho = 'Ninguna';
                   });
                 },
-                activeColor: Colors.white,
+                child: RadioListTile<String>(
+                  title: Text(
+                    'Ninguna',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  value: 'Ninguna',
+                  selected: _seleccionPecho == 'Ninguna',
+                  activeColor: Colors.white,
+                ),
               ),
             ],
           ),
@@ -634,6 +640,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
 
       // Verificar si el usuario tiene situación Post-Parto
       final userDocId = await _getUserDocumentId();
+      if (!mounted) return;
+
       if (userDocId == null) {
         DialogExample.showErrorDialog(
           context,
@@ -650,6 +658,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
           .doc('seleccion');
 
       final situacionSnapshot = await situacionDocRef.get();
+
+      if (!mounted) return;
 
       if (!situacionSnapshot.exists) {
         DialogExample.showInfoDialog(
@@ -689,6 +699,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
       // Guardar en la subcolección de lactancia
       await situacionDocRef.collection('lactancia').add(datosLactancia);
 
+      if (!mounted) return;
+
       // Mostrar mensaje de éxito y cerrar diálogo
       DialogExample.showSuccessDialog(
         context,
@@ -700,6 +712,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
         },
       );
     } catch (e) {
+      if (!mounted) return;
+
       DialogExample.showErrorDialog(
         context,
         'Error al Guardar',

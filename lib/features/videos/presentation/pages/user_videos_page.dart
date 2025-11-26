@@ -76,6 +76,8 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
         final offlineVideos = await _offlineDataSource.getAllOfflineVideos();
 
+        if (!mounted) return;
+
         // Convertir OfflineVideoModel a Video (de lessons)
         // Necesitamos guardar el videoId original (String) para usarlo después
         final videos = offlineVideos.map((offlineVideo) {
@@ -160,6 +162,8 @@ class _UserVideosPageState extends State<UserVideosPage> {
         '', // Se ignora, el servicio obtiene el ID correcto automáticamente
       );
 
+      if (!mounted) return;
+
       // Obtener última lección completada desde el provider
       final leccionesProvider = Provider.of<LeccionesProvider>(
         context,
@@ -185,6 +189,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
       if (kDebugMode) {
         print('❌ Error cargando videos: $e');
       }
+      if (!mounted) return;
       setState(() {
         _error = 'history.errorLoading'.tr();
         _isLoading = false;
@@ -305,11 +310,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
             // para actualizar el botón correctamente
             // Remover del set de verificados para forzar nueva verificación
             _checkedVideos.remove(state.videoId);
+            final downloadBloc = context.read<VideoDownloadBloc>();
             Future.delayed(const Duration(milliseconds: 500), () {
               if (mounted) {
-                context.read<VideoDownloadBloc>().add(
-                  CheckVideoDownloadStatus(state.videoId),
-                );
+                downloadBloc.add(CheckVideoDownloadStatus(state.videoId));
               }
             });
           }
@@ -471,7 +475,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
             '${'history.lastLessonCompleted'.tr()}: $lastCompletedLesson',
             style: GoogleFonts.quicksand(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 16),
@@ -494,7 +498,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -913,10 +920,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
                 height: 40,
                 decoration: BoxDecoration(
                   color: isDownloaded
-                      ? AppColors.success.withValues(alpha:0.2)
+                      ? AppColors.success.withValues(alpha: 0.2)
                       : isDownloading
-                      ? AppColors.warning.withValues(alpha:0.2)
-                      : AppColors.primary.withValues(alpha:0.2),
+                      ? AppColors.warning.withValues(alpha: 0.2)
+                      : AppColors.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: isDownloading
@@ -1128,11 +1135,14 @@ class _UserVideosPageState extends State<UserVideosPage> {
         ),
       );
 
+      if (!mounted) return;
+
       // Si se completó el video, recargar la lista
       if (result != null && result is bool && result) {
         await _loadVideosAndProgress();
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

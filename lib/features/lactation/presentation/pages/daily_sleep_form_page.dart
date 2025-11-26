@@ -128,6 +128,8 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
       }
 
       final userId = await _getUserDocumentId();
+      if (!mounted) return;
+
       if (userId == null) {
         DialogExample.showErrorDialog(
           context,
@@ -239,7 +241,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         // Navegación y refresco igual que en flujos de lactancia
         void showSuccessSnack() {
           final homeCtx = navigatorKey.currentContext;
-          if (homeCtx != null) {
+          if (homeCtx != null && homeCtx.mounted) {
             ScaffoldMessenger.of(homeCtx).showSnackBar(
               SnackBar(
                 content: Text('forms.sleep.saved'.tr()),
@@ -253,7 +255,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         // Intentar refrescar datos de lactancia sin navegar si es posible
         try {
           final homeCtx = navigatorKey.currentContext;
-          if (homeCtx != null) {
+          if (homeCtx != null && homeCtx.mounted) {
             // Si el HomePage ya está montado, refrescar datos sin navegar
             final provider = Provider.of<LactationProvider>(
               homeCtx,
@@ -358,10 +360,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: !_isEditingHours,
+      onPopInvokedWithResult: (didPop, result) {
         // Si está en modo edición manual, cerrar edición en lugar de navegar atrás
-        if (_isEditingHours) {
+        if (_isEditingHours && !didPop) {
           setState(() {
             // Normalizar valor escrito si quedó algo en el controlador
             final parsed = double.tryParse(
@@ -374,9 +377,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
             _isEditingHours = false;
           });
           FocusScope.of(context).unfocus();
-          return false; // No salir de la página
         }
-        return true;
       },
       child: Scaffold(
         body: Container(

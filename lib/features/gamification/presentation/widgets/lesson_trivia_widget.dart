@@ -19,7 +19,8 @@ class LessonTriviaWidget extends StatefulWidget {
   final String lessonId;
   final String userId;
   final VoidCallback? onComplete;
-  final BuildContext? originalContext; // Contexto original con acceso al Overlay
+  final BuildContext?
+  originalContext; // Contexto original con acceso al Overlay
 
   const LessonTriviaWidget({
     super.key,
@@ -42,7 +43,7 @@ class LessonTriviaWidget extends StatefulWidget {
     // Guardar el contexto original antes de mostrar el diálogo
     // Este contexto tiene acceso al Overlay
     final originalContext = context;
-    
+
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -52,10 +53,7 @@ class LessonTriviaWidget extends StatefulWidget {
         elevation: 0,
         insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
         child: Container(
-          constraints: const BoxConstraints(
-            maxWidth: 500,
-            maxHeight: 700,
-          ),
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
@@ -94,7 +92,7 @@ class LessonTriviaWidget extends StatefulWidget {
 class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
   final TriviaService _triviaService = TriviaService();
   final XPCalculationService _xpCalculationService = XPCalculationService();
-  
+
   List<TriviaQuestion> _questions = [];
   List<int> _selectedAnswers = [];
   int _currentQuestionIndex = 0;
@@ -163,7 +161,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
     );
 
     final timestamp = DateTime.now();
-    
+
     // Calcular XP de trivia
     final triviaTransaction = _xpCalculationService.calculateXPForTrivia(
       userId: widget.userId,
@@ -174,29 +172,30 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
     );
 
     // Calcular XP de lección completada
-    final lessonTransaction = _xpCalculationService.calculateXPForLessonCompleted(
-      userId: widget.userId,
-      lessonId: widget.lessonId,
-      timestamp: timestamp,
-      isFirstOfDay: false, // TODO: Verificar si es primera lección del día
-    );
+    final lessonTransaction = _xpCalculationService
+        .calculateXPForLessonCompleted(
+          userId: widget.userId,
+          lessonId: widget.lessonId,
+          timestamp: timestamp,
+          isFirstOfDay: false, // TODO: Verificar si es primera lección del día
+        );
 
     // Calcular XP total para la animación
     _totalXP = triviaTransaction.amount + lessonTransaction.amount;
 
     // Obtener el bloc y agregar XP
     final gamificationBloc = context.read<GamificationBloc>();
-    
+
     try {
       // Agregar XP de trivia al bloc
       gamificationBloc.add(AddXP(triviaTransaction));
-      
+
       // Esperar un poco para que se procese
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       // Agregar XP de lección al bloc
       gamificationBloc.add(AddXP(lessonTransaction));
-      
+
       // Recargar el perfil para actualizar la UI
       await Future.delayed(const Duration(milliseconds: 200));
       gamificationBloc.add(LoadGamificationProfile(widget.userId));
@@ -212,12 +211,18 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
         vibrationService.vibrateOnSuccess();
         soundService.playSuccessSound(); // Sonido de éxito general
       }
-      
+
       // NO mostrar la animación de XP aquí - se mostrará cuando el usuario presione "Continuar"
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('gamification.messages.errorSavingXP'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+            content: Text(
+              'gamification.messages.errorSavingXP'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
         );
       }
     }
@@ -253,114 +258,118 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          // Indicador de progreso
-          Row(
-            children: [
-              Text(
-                '${'trivia.question'.tr()} ${_currentQuestionIndex + 1} ${'trivia.of'.tr()} ${_questions.length}',
-                style: GoogleFonts.quicksand(
-                  fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              ...List.generate(
-                _questions.length,
-                (index) => Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index <= _currentQuestionIndex
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.3),
+            // Indicador de progreso
+            Row(
+              children: [
+                Text(
+                  '${'trivia.question'.tr()} ${_currentQuestionIndex + 1} ${'trivia.of'.tr()} ${_questions.length}',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          
-          // Pregunta
-          FadeInDown(
-            child: Text(
-              question.question,
-              style: GoogleFonts.quicksand(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                height: 1.3,
+                const Spacer(),
+                ...List.generate(
+                  _questions.length,
+                  (index) => Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: index <= _currentQuestionIndex
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Pregunta
+            FadeInDown(
+              child: Text(
+                question.question,
+                style: GoogleFonts.quicksand(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.3,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Opciones
-          ...List.generate(
-            question.options.length,
-            (index) => FadeInUp(
-              delay: Duration(milliseconds: 100 * index),
-              child: _buildOptionButton(
-                question.options[index],
-                index,
-                selectedIndex == index,
+            // Opciones
+            ...List.generate(
+              question.options.length,
+              (index) => FadeInUp(
+                delay: Duration(milliseconds: 100 * index),
+                child: _buildOptionButton(
+                  question.options[index],
+                  index,
+                  selectedIndex == index,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Botones de navegación
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (_currentQuestionIndex > 0)
-                TextButton(
-                  onPressed: _previousQuestion,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white.withValues(alpha: 0.8),
+            // Botones de navegación
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_currentQuestionIndex > 0)
+                  TextButton(
+                    onPressed: _previousQuestion,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white.withValues(alpha: 0.8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'trivia.previous'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
+                ElevatedButton(
+                  onPressed: selectedIndex == -1 ? null : _nextQuestion,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    disabledBackgroundColor: Colors.white.withValues(
+                      alpha: 0.3,
+                    ),
+                    disabledForegroundColor: Colors.white.withValues(
+                      alpha: 0.5,
+                    ),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                      horizontal: 36,
+                      vertical: 16,
+                    ),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   child: Text(
-                    'trivia.previous'.tr(),
+                    isLastQuestion ? 'trivia.finish'.tr() : 'trivia.next'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                )
-              else
-                const SizedBox.shrink(),
-              ElevatedButton(
-                onPressed: selectedIndex == -1 ? null : _nextQuestion,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primary,
-                  disabledBackgroundColor: Colors.white.withValues(alpha: 0.3),
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 36,
-                    vertical: 16,
-                  ),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
                 ),
-                child: Text(
-                  isLastQuestion ? 'trivia.finish'.tr() : 'trivia.next'.tr(),
-                  style: GoogleFonts.quicksand(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ],
         ),
       ),
@@ -396,13 +405,8 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                   height: 26,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: isSelected
                       ? const Icon(
@@ -419,7 +423,9 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       color: Colors.white,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       height: 1.4,
                     ),
                   ),
@@ -444,7 +450,9 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           children: [
             FadeInDown(
               child: Text(
-                isPerfect ? '🎉 ${'trivia.perfect'.tr()}' : 'trivia.wellDone'.tr(),
+                isPerfect
+                    ? '🎉 ${'trivia.perfect'.tr()}'
+                    : 'trivia.wellDone'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -456,10 +464,12 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
             FadeInUp(
               delay: const Duration(milliseconds: 200),
               child: Text(
-                'trivia.youGot'.tr(namedArgs: {
-                  'correct': _correctAnswers.toString(),
-                  'total': _questions.length.toString(),
-                }),
+                'trivia.youGot'.tr(
+                  namedArgs: {
+                    'correct': _correctAnswers.toString(),
+                    'total': _questions.length.toString(),
+                  },
+                ),
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -508,7 +518,10 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
             FadeInUp(
               delay: const Duration(milliseconds: 500),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
@@ -569,19 +582,25 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
               child: ElevatedButton(
                 onPressed: () async {
                   // Calcular porcentaje y determinar si mostrar estrellitas
-                  final percentage = (_correctAnswers / _questions.length * 100).round();
+                  final percentage = (_correctAnswers / _questions.length * 100)
+                      .round();
                   final showStars = percentage >= 75;
-                  
+
                   // Cerrar el diálogo primero
                   Navigator.of(context).pop();
-                  
+
                   // Esperar un momento para que el diálogo se cierre completamente
                   await Future.delayed(const Duration(milliseconds: 300));
-                  
+
+                  if (!mounted) {
+                    widget.onComplete?.call();
+                    return;
+                  }
+
                   // Usar el contexto original que tiene acceso al Overlay
                   final animationContext = widget.originalContext;
-                  
-                  if (animationContext != null) {
+
+                  if (animationContext != null && animationContext.mounted) {
                     // Verificar que el contexto aún sea válido
                     try {
                       // Intentar obtener el overlay para verificar que el contexto es válido
@@ -632,4 +651,3 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
     );
   }
 }
-

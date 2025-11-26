@@ -383,6 +383,8 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         isCompleted: false,
       );
 
+      if (!mounted) return;
+
       // Actualizar el LeccionesProvider con el progreso actualizado
       // El progreso viene como valor entre 0 y 1, necesitamos convertirlo a porcentaje (0-100)
       final progressPercentage = progress * 100.0;

@@ -96,6 +96,8 @@ class _HomePageState extends State<HomePage> {
 
       String? userId = await _getUserDocumentId(user);
 
+      if (!mounted) return;
+
       if (userId == null || userId.isEmpty) {
         _logger.w(
           'HomePage: No se pudo obtener userId, intentando desde estado...',

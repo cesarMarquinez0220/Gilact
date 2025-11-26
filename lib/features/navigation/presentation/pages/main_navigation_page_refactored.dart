@@ -181,6 +181,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
             .doc(uid)
             .get();
 
+        if (!mounted) return;
+
         if (docExists.exists) {
           userId = uid;
           _logger.d('MainNavigationPage: Usuario encontrado con UID: $userId');
@@ -190,11 +192,16 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               currentUser.email ??
               await CredentialsCacheService.loadCredentialsFromCache();
 
+          if (!mounted) return;
+
           if (email.isNotEmpty) {
             _logger.d(
               'MainNavigationPage: UID no coincide, buscando por email...',
             );
             userId = await _findUserByEmail(email);
+
+            if (!mounted) return;
+
             if (userId != null) {
               _logger.d(
                 'MainNavigationPage: Usuario encontrado por email: $userId',
@@ -231,14 +238,22 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Cargar perfil del usuario si no está cargado (importante cuando se navega desde notificación)
       await _ensureUserProfileLoaded(finalUserId);
 
+      if (!mounted) return;
+
       // Inicializar providers con datos limpios para cuenta nueva
       await _initializeProvidersForNewUser();
+
+      if (!mounted) return;
 
       // Limpiar documentos duplicados en subcolección videos (solo si existen)
       await _cleanupDuplicateDocumentsIfNeeded(finalUserId);
 
+      if (!mounted) return;
+
       // Precargar videos en cache
       await _preloadVideosInCache();
+
+      if (!mounted) return;
 
       // Inicializar caché del LactationService para reducir consultas a Firebase
       await _initializeLactationServiceCache();
@@ -309,6 +324,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         await Future.delayed(const Duration(milliseconds: 500));
+
+        if (!mounted) return;
+
         final state = userProfileBloc.state;
         if (state is UserProfileLoaded || state is UserProfileUpdated) {
           _logger.success(
@@ -362,6 +380,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       );
       final situationData = await userSubcollectionsService
           .getUserSituationData(userId);
+
+      if (!mounted) return;
 
       if (situationData != null) {
         final situationType = situationData['situationType'] as String?;

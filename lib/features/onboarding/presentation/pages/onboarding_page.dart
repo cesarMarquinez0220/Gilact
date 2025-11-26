@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets/onboarding_slide_widget.dart';
 import 'situation_selection_page.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -14,6 +16,7 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage>
     with TickerProviderStateMixin {
+  final AppLogger _logger = getIt<AppLogger>();
   late PageController _pageController;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -24,7 +27,7 @@ class _OnboardingPageState extends State<OnboardingPage>
   @override
   void initState() {
     super.initState();
-    print('🔍 OnboardingPage: Inicializando...');
+    _logger.d('OnboardingPage: Inicializando...');
     _pageController = PageController();
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -59,15 +62,15 @@ class _OnboardingPageState extends State<OnboardingPage>
   }
 
   Future<void> _completeOnboarding() async {
-    print('🔍 OnboardingPage: Completando onboarding...');
+    _logger.d('OnboardingPage: Completando onboarding...');
     // Marcar onboarding como completado
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
-    print('🔍 OnboardingPage: onboarding_completed marcado como true');
+    _logger.d('OnboardingPage: onboarding_completed marcado como true');
 
     // Navegar a selección de situación
     if (mounted) {
-      print('🔍 OnboardingPage: Navegando a selección de situación...');
+      _logger.d('OnboardingPage: Navegando a selección de situación...');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const SituationSelectionPage()),
       );

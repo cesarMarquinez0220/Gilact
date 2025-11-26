@@ -598,6 +598,8 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
       },
     );
 
+    if (!mounted) return;
+
     if (date != null) {
       final time = await showTimePicker(
         context: context,
@@ -616,6 +618,8 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
           );
         },
       );
+
+      if (!mounted) return;
 
       if (time != null) {
         setState(() {
@@ -715,9 +719,13 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
 
       await database.insertRecord(record);
 
+      if (!mounted) return;
+
       widget.onRecordAdded(record);
       Navigator.of(context).pop();
     } catch (e) {
+      if (!mounted) return;
+
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

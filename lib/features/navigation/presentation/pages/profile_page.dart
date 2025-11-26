@@ -376,7 +376,10 @@ class _ProfilePageState extends State<ProfilePage> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -537,6 +540,9 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() => _language = code);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('language', code);
+
+        if (!mounted || !context.mounted) return;
+
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -724,10 +730,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
       await FirebaseAuth.instance.signOut();
 
+      if (!mounted || !context.mounted) return;
+
       Navigator.of(context).pop();
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
 
       Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted || !context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -749,6 +758,8 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       });
     } catch (e) {
+      if (!mounted || !context.mounted) return;
+
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -808,6 +819,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
             .doc(authState.user.id)
             .get();
 
+        if (!mounted) return;
+
         if (userDoc.exists) {
           final data = userDoc.data() as Map<String, dynamic>;
           _phoneController.text = data['telefono'] ?? '';
@@ -817,6 +830,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
           _idNumberController.text = data['cedula'] ?? '';
         }
       } catch (e) {
+        if (!mounted) return;
         _phoneController.text = '';
         _locationController.text = '';
         _birthDateController.text = '';
@@ -1118,6 +1132,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       lastDate: DateTime.now(),
     );
 
+    if (!mounted) return;
+
     if (date != null) {
       setState(() {
         _birthDateController.text =
@@ -1133,6 +1149,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
 
     try {
       await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
+
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1154,6 +1173,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -1174,7 +1195,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
         ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

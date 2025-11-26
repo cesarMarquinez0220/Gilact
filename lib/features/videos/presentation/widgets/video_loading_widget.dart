@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class VideoLoadingWidget extends StatefulWidget {
   final String videoTitle;
@@ -22,6 +24,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
   late AnimationController _fadeController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _fadeAnimation;
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   void initState() {
@@ -95,11 +98,12 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                           widget.thumbnailUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            // Debug: imprimir el error para diagnosticar
-                            print(
+                            // Debug: registrar el error para diagnosticar
+                            _logger.e(
                               'Error cargando imagen: ${widget.thumbnailUrl}',
+                              error,
+                              stackTrace,
                             );
-                            print('Error: $error');
 
                             return Container(
                               color: Colors.grey[800],
@@ -200,7 +204,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                 height: 4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(2),
-                  color: Colors.white.withValues(alpha:0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                 ),
                 child: Stack(
                   children: [
