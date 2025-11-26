@@ -16,7 +16,7 @@ class AppLogger {
   void _initializeLogger() {
     // En modo release, solo mostrar errores y warnings
     // En modo debug, mostrar todo
-    final level = kReleaseMode ? Level.warning : Level.debug;
+    const level = kReleaseMode ? Level.warning : Level.debug;
 
     _logger = Logger(
       printer: PrettyPrinter(

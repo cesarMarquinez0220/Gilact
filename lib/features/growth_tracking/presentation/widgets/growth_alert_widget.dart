@@ -43,9 +43,9 @@ class GrowthAlertWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: alertColor.withOpacity(0.2),
+        color: alertColor.withValues(alpha:0.2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: alertColor.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: alertColor.withValues(alpha:0.5), width: 1.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -57,7 +57,7 @@ class GrowthAlertWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: alertColor.withOpacity(0.3),
+                  color: alertColor.withValues(alpha:0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(alertIcon, color: Colors.white, size: 24),
@@ -88,12 +88,12 @@ class GrowthAlertWidget extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha:0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.info_outline,
                             size: 16,
                             color: Colors.white70,

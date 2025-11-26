@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../domain/services/credentials_cache_service.dart';
@@ -173,6 +172,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       String email = await _getUserEmail();
       _logger.d('_checkAndSyncOnboardingStatus: Email obtenido: "$email"');
 
+      if (!mounted) return;
       if (email.isEmpty) {
         _logger.e(
           '_checkAndSyncOnboardingStatus: Email vacío, navegando a onboarding por defecto',
@@ -196,6 +196,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         '_checkAndSyncOnboardingStatus: Query completada. Documentos encontrados: ${userQuery.docs.length}',
       );
 
+      if (!mounted) return;
       if (userQuery.docs.isNotEmpty) {
         final userDocId = userQuery.docs.first.id;
         _logger.success(
@@ -214,6 +215,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           '_checkAndSyncOnboardingStatus: Documento de situación existe: ${situacionDoc.exists}',
         );
 
+        if (!mounted) return;
         if (situacionDoc.exists) {
           final data = situacionDoc.data();
           _logger.d(
@@ -238,6 +240,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             '_checkAndSyncOnboardingStatus: SharedPreferences actualizado con onboarding_completed = $onboardingCompletedInFirestore',
           );
 
+          if (!mounted) return;
           if (onboardingCompletedInFirestore) {
             _logger.success(
               '_checkAndSyncOnboardingStatus: Onboarding completado, verificando situación del usuario...',
@@ -277,6 +280,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         '_checkAndSyncOnboardingStatus: Fallback - onboarding_completed desde SharedPreferences = $onboardingCompleted',
       );
 
+      if (!mounted) return;
       if (onboardingCompleted) {
         _logger.success(
           '_checkAndSyncOnboardingStatus: Fallback - Onboarding completado, verificando situación...',
@@ -357,35 +361,38 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _loadCompleteUserData(String userId, String email) async {
     try {
+      if (!mounted) return;
+      final userProfileBloc = context.read<UserProfileBloc>();
+
       _logger.d('WelcomeScreen: Cargando datos completos del usuario...');
       _logger.d(
-        'WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
+        'WelcomeScreen: Estado inicial del UserProfileBloc: ${userProfileBloc.state.runtimeType}',
       );
 
       // 0. Reinicializar el UserProfileBloc para el nuevo usuario (sin desconectar)
       _logger.d(
         'WelcomeScreen: Reinicializando UserProfileBloc para nuevo usuario...',
       );
-      context.read<UserProfileBloc>().add(ResetUserProfileRequested());
+      userProfileBloc.add(const ResetUserProfileRequested());
 
       // Esperar un momento para que se procese el reinicio
       await Future.delayed(const Duration(milliseconds: 100));
 
+      if (!mounted) return;
       _logger.d(
-        'WelcomeScreen: Estado del UserProfileBloc después de reinicio: ${context.read<UserProfileBloc>().state.runtimeType}',
+        'WelcomeScreen: Estado del UserProfileBloc después de reinicio: ${userProfileBloc.state.runtimeType}',
       );
 
       // 1. Cargar perfil básico del usuario y esperar a que se complete
       _logger.d('WelcomeScreen: Enviando GetUserProfileRequested...');
-      context.read<UserProfileBloc>().add(
-        GetUserProfileRequested(userId: userId),
-      );
+      userProfileBloc.add(GetUserProfileRequested(userId: userId));
 
       // Esperar a que el perfil se cargue completamente
-      await _waitForUserProfileToLoad();
+      await _waitForUserProfileToLoad(userProfileBloc);
 
+      if (!mounted) return;
       _logger.d(
-        'WelcomeScreen: Estado del UserProfileBloc después de cargar perfil: ${context.read<UserProfileBloc>().state.runtimeType}',
+        'WelcomeScreen: Estado del UserProfileBloc después de cargar perfil: ${userProfileBloc.state.runtimeType}',
       );
 
       // 2. Cargar información de situación usando UserSubcollectionsService
@@ -418,7 +425,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           'WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
         );
 
-        context.read<UserProfileBloc>().add(
+        if (!mounted) return;
+        userProfileBloc.add(
           UpdateUserSituationRequested(
             userId: userId,
             isPrePartum: isPrePartum,
@@ -433,7 +441,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Verificar el estado después de la actualización
-        final currentState = context.read<UserProfileBloc>().state;
+        if (!mounted) return;
+        final currentState = userProfileBloc.state;
         _logger.d(
           'WelcomeScreen: Estado del UserProfileBloc después de actualización: ${currentState.runtimeType}',
         );
@@ -478,7 +487,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     }
   }
 
-  Future<void> _waitForUserProfileToLoad() async {
+  Future<void> _waitForUserProfileToLoad(
+    UserProfileBloc userProfileBloc,
+  ) async {
     _logger.d(
       'WelcomeScreen: Esperando a que se cargue el perfil del usuario...',
     );
@@ -488,7 +499,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     const maxAttempts = 20; // Máximo 10 segundos (20 * 500ms)
 
     while (attempts < maxAttempts) {
-      final currentState = context.read<UserProfileBloc>().state;
+      if (!mounted) return;
+      final currentState = userProfileBloc.state;
       _logger.d(
         'WelcomeScreen: Intento $attempts - Estado actual: ${currentState.runtimeType}',
       );
@@ -615,6 +627,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       // Cargar el progreso desde Firestore
       await leccionesProvider.loadProgressFromFirestore(userId);
 
+      // Verificar nuevamente después del await
+      if (!mounted) return;
+
       _logger.success(
         'WelcomeScreen: Progreso de lecciones cargado exitosamente',
       );
@@ -631,6 +646,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   void _navigateToHome() {
     // Navegar a la página principal con toda la información ya cargada
+    if (!mounted) return;
     Navigator.pushReplacementNamed(context, '/home');
     _logger.d('Navegando a Home con datos completos cargados');
   }
@@ -717,19 +733,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.white.withOpacity(0.2),
-                    Colors.white.withOpacity(0.05),
+                    Colors.white.withValues(alpha: 0.2),
+                    Colors.white.withValues(alpha: 0.05),
                     Colors.transparent,
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     blurRadius: 40,
                     spreadRadius: 5,
                   ),
                   BoxShadow(
-                    color: const Color(0xFF4FD1C7).withOpacity(0.2),
+                    color: const Color(0xFF4FD1C7).withValues(alpha: 0.2),
                     blurRadius: 60,
                     spreadRadius: 10,
                   ),
@@ -769,7 +785,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     letterSpacing: 2.0,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         offset: const Offset(0, 3),
                         blurRadius: 6,
                       ),
@@ -784,7 +800,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.5,
                     height: 1.4,
@@ -810,7 +826,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               height: 4,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
               ),
               child: Stack(
                 children: [
@@ -824,7 +840,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF4FD1C7).withOpacity(0.5),
+                          color: const Color(0xFF4FD1C7).withValues(alpha: 0.5),
                           blurRadius: 8,
                           spreadRadius: 1,
                         ),
@@ -842,7 +858,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               'welcome.loading'.tr(),
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w300,
                 letterSpacing: 1.0,
               ),
@@ -862,7 +878,7 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     // Crear partículas flotantes
@@ -876,7 +892,7 @@ class ParticlePainter extends CustomPainter {
       final radius = 2.0 + (i % 3);
       final opacity = 0.3 + (animationValue * 0.4);
 
-      paint.color = Colors.white.withOpacity(opacity);
+      paint.color = Colors.white.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
@@ -888,7 +904,7 @@ class ParticlePainter extends CustomPainter {
       final radius = 4.0 + (i % 2);
       final opacity = 0.1 + (animationValue * 0.2);
 
-      paint.color = const Color(0xFF4FD1C7).withOpacity(opacity);
+      paint.color = const Color(0xFF4FD1C7).withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
   }

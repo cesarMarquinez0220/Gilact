@@ -32,10 +32,10 @@ class LoginBackgroundWidget extends StatelessWidget {
                       colors: [
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.15), // Azul teal oscuro (secundario)
+                        ).withValues(alpha: 0.15), // Azul teal oscuro (secundario)
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.05), // Azul teal oscuro (secundario)
+                        ).withValues(alpha: 0.05), // Azul teal oscuro (secundario)
                         Colors.transparent,
                       ],
                     ),
@@ -60,10 +60,10 @@ class LoginBackgroundWidget extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        const Color(0xFF4FD1C7).withOpacity(
+                        const Color(0xFF4FD1C7).withValues(alpha: 
                           0.1,
                         ), // Verde azulado medio vibrante (primario)
-                        const Color(0xFF4FD1C7).withOpacity(
+                        const Color(0xFF4FD1C7).withValues(alpha: 
                           0.03,
                         ), // Verde azulado medio vibrante (primario)
                         Colors.transparent,
@@ -88,7 +88,7 @@ class LoginBackgroundWidget extends StatelessWidget {
                 colors: [
                   const Color(
                     0xFFE2E8F0,
-                  ).withOpacity(0.08), // Gris muy claro (secundario)
+                  ).withValues(alpha: 0.08), // Gris muy claro (secundario)
                   Colors.transparent,
                 ],
               ),
@@ -107,7 +107,7 @@ class LoginBackgroundWidget extends StatelessWidget {
                 colors: [
                   const Color(
                     0xFFB794F6,
-                  ).withOpacity(0.06), // Lavanda suave (primario)
+                  ).withValues(alpha: 0.06), // Lavanda suave (primario)
                   Colors.transparent,
                 ],
               ),
@@ -118,7 +118,7 @@ class LoginBackgroundWidget extends StatelessWidget {
         Positioned(
           top: 120,
           right: 30,
-          child: Container(
+          child: SizedBox(
             width: 80,
             height: 80,
             child: CustomPaint(painter: DotsPainter()),
@@ -139,7 +139,7 @@ class LoginBackgroundWidget extends StatelessWidget {
                   Colors.transparent,
                   const Color(
                     0xFF4FD1C7,
-                  ).withOpacity(0.1), // Verde azulado medio vibrante (primario)
+                  ).withValues(alpha: 0.1), // Verde azulado medio vibrante (primario)
                   Colors.transparent,
                 ],
               ),
@@ -156,7 +156,7 @@ class DotsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color(0xFFE2E8F0)
-          .withOpacity(0.4) // Gris muy claro (secundario)
+          .withValues(alpha: 0.4) // Gris muy claro (secundario)
       ..style = PaintingStyle.fill;
 
     // Crear un patrón de puntos más elegante
@@ -173,7 +173,7 @@ class DotsPainter extends CustomPainter {
     // Agregar algunos puntos más pequeños para mayor detalle
     final smallPaint = Paint()
       ..color = const Color(0xFF4FD1C7)
-          .withOpacity(0.2) // Verde azulado medio vibrante (primario)
+          .withValues(alpha: 0.2) // Verde azulado medio vibrante (primario)
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 3; i++) {

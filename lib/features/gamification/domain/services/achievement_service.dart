@@ -12,7 +12,6 @@ class AchievementService {
     'assets/images/badges/birrete.png',
     'assets/images/badges/logro.png',
     'assets/images/badges/medalla.png',
-    'assets/images/badges/racha.png',
   ];
 
   /// Obtiene un badge de forma rotativa basado en un índice

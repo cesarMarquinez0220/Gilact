@@ -102,7 +102,7 @@ extension ColorExtension on Color {
     return LinearGradient(
       begin: begin,
       end: end,
-      colors: [this, this.lighten(20)],
+      colors: [this, lighten(20)],
     );
   }
 

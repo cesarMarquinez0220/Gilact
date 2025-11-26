@@ -45,7 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _deleteAccountUseCase = deleteAccountUseCase,
        _offlineSessionService = offlineSessionService,
        _connectivityService = connectivityService,
-       super(AuthInitial()) {
+       super(const AuthInitial()) {
     on<SignInRequested>(_onSignInRequested);
     on<SignUpRequested>(_onSignUpRequested);
     on<SignOutRequested>(_onSignOutRequested);
@@ -83,13 +83,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthAuthenticated(offlineUser));
         } else {
           emit(
-            AuthFailure(
+            const AuthFailure(
               'Sesión no encontrada. Se requiere conexión para iniciar sesión por primera vez.',
             ),
           );
         }
       } else {
-        emit(AuthFailure('Credenciales incorrectas'));
+        emit(const AuthFailure('Credenciales incorrectas'));
       }
       return;
     }
@@ -129,7 +129,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final isConnected = await _connectivityService.isConnected();
     if (!isConnected) {
       emit(
-        AuthFailure(
+        const AuthFailure(
           'Se requiere conexión a internet para crear una cuenta nueva.',
         ),
       );
@@ -297,7 +297,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isConnected) {
         // Intentar obtener usuario de Firebase
         final result = await _getCurrentUserUseCase();
-        result.fold((failure) => emit(AuthUnauthenticated()), (user) {
+        result.fold((failure) => emit(const AuthUnauthenticated()), (user) {
           if (user != null) {
             emit(AuthAuthenticated(user));
           } else {
@@ -369,7 +369,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final hasSession = await _offlineSessionService.hasValidSession();
       if (!hasSession) {
         emit(
-          AuthFailure(
+          const AuthFailure(
             'Sesión expirada. Por favor, inicia sesión con tu contraseña',
           ),
         );
@@ -379,13 +379,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Obtener usuario de sesión offline
       final offlineUser = await _offlineSessionService.getOfflineUser();
       if (offlineUser == null) {
-        emit(AuthFailure('No se pudo obtener información del usuario'));
+        emit(const AuthFailure('No se pudo obtener información del usuario'));
         return;
       }
 
       // Verificar que el email coincide
       if (offlineUser.email != event.email) {
-        emit(AuthFailure('El email no coincide con la sesión guardada'));
+        emit(const AuthFailure('El email no coincide con la sesión guardada'));
         return;
       }
 

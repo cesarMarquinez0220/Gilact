@@ -430,7 +430,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha:0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -443,9 +443,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                   Container(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(
+                    decoration:const BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
+                      gradient:  LinearGradient(
                         colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
                       ),
                     ),

@@ -39,22 +39,22 @@ class RegistrationBackgroundPainter extends CustomPainter {
       {
         'center': Offset(size.width * 0.15, size.height * 0.2),
         'radius': 80.0 + (animationValue * 20),
-        'color': const Color(0xFF4FD1C7).withOpacity(0.1),
+        'color': const Color(0xFF4FD1C7).withValues(alpha: 0.1),
       },
       {
         'center': Offset(size.width * 0.85, size.height * 0.3),
         'radius': 60.0 + (animationValue * 15),
-        'color': const Color(0xFF1A365D).withOpacity(0.15),
+        'color': const Color(0xFF1A365D).withValues(alpha: 0.15),
       },
       {
         'center': Offset(size.width * 0.2, size.height * 0.7),
         'radius': 100.0 + (animationValue * 25),
-        'color': const Color(0xFF2C5F5D).withOpacity(0.08),
+        'color': const Color(0xFF2C5F5D).withValues(alpha: 0.08),
       },
       {
         'center': Offset(size.width * 0.8, size.height * 0.8),
         'radius': 70.0 + (animationValue * 18),
-        'color': const Color(0xFF4FD1C7).withOpacity(0.12),
+        'color': const Color(0xFF4FD1C7).withValues(alpha: 0.12),
       },
     ];
 
@@ -68,19 +68,19 @@ class RegistrationBackgroundPainter extends CustomPainter {
     }
 
     // Partículas flotantes
-    paint.color = Colors.white.withOpacity(0.05);
+    paint.color = Colors.white.withValues(alpha: 0.05);
     for (int i = 0; i < 15; i++) {
       final x = (size.width * (i / 15.0) + animationValue * 50) % size.width;
       final y =
           size.height * 0.1 + (i * 60.0) + (animationValue * 30 * math.sin(i));
 
       final radius = 2.0 + (i % 3);
-      paint.color = Colors.white.withOpacity(0.05 + (animationValue * 0.1));
+      paint.color = Colors.white.withValues(alpha: 0.05 + (animationValue * 0.1));
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
     // Ondas decorativas
-    paint.color = const Color(0xFF4FD1C7).withOpacity(0.03);
+    paint.color = const Color(0xFF4FD1C7).withValues(alpha: 0.03);
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2.0;
 

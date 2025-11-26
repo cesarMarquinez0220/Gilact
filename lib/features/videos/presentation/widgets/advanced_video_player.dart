@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:get_it/get_it.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/video.dart';
 import '../../data/services/video_progress_service.dart';
@@ -77,8 +76,8 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   bool _isOfflineMode = false;
   bool _isCheckingDownload = true;
 
-  int _pauseCount = 0;
-  int _forwardCount = 0;
+  final int _pauseCount = 0;
+  final int _forwardCount = 0;
   bool _duracionImpresa = false;
   Duration _totalDuration = Duration.zero;
 

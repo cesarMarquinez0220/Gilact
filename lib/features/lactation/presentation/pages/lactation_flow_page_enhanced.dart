@@ -568,13 +568,13 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon:  Icon(
                     Icons.timer_outlined,
                     color: Colors.white70,
                     size: 22,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
+                  contentPadding:  EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 18,
                   ),
@@ -773,13 +773,13 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon:  Icon(
                     Icons.water_drop_outlined,
                     color: Colors.white70,
                     size: 22,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
+                  contentPadding:  EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 18,
                   ),
@@ -1682,10 +1682,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       colors: [
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.15), // Azul teal oscuro
+                        ).withValues(alpha:0.15), // Azul teal oscuro
                         const Color(
                           0xFF2C5F5D,
-                        ).withOpacity(0.05), // Azul teal oscuro
+                        ).withValues(alpha:0.05), // Azul teal oscuro
                         Colors.transparent,
                       ],
                     ),
@@ -1712,10 +1712,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       colors: [
                         const Color(
                           0xFF4FD1C7,
-                        ).withOpacity(0.1), // Verde azulado medio
+                        ).withValues(alpha:0.1), // Verde azulado medio
                         const Color(
                           0xFF4FD1C7,
-                        ).withOpacity(0.03), // Verde azulado medio
+                        ).withValues(alpha:0.03), // Verde azulado medio
                         Colors.transparent,
                       ],
                     ),
@@ -1736,7 +1736,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFFE2E8F0).withOpacity(0.08),
+                  const Color(0xFFE2E8F0).withValues(alpha:0.08),
                   Colors.transparent,
                 ],
               ),
@@ -1753,7 +1753,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFFB794F6).withOpacity(0.06),
+                  const Color(0xFFB794F6).withValues(alpha:0.06),
                   Colors.transparent,
                 ],
               ),
@@ -1783,7 +1783,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  const Color(0xFF4FD1C7).withOpacity(0.1),
+                  const Color(0xFF4FD1C7).withValues(alpha:0.1),
                   Colors.transparent,
                 ],
               ),
@@ -1799,7 +1799,7 @@ class DotsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFE2E8F0).withOpacity(0.4)
+      ..color = const Color(0xFFE2E8F0).withValues(alpha:0.4)
       ..style = PaintingStyle.fill;
 
     // Crear un patrón de puntos elegante
@@ -1814,7 +1814,7 @@ class DotsPainter extends CustomPainter {
 
     // Agregar puntos más pequeños para mayor detalle
     final smallPaint = Paint()
-      ..color = const Color(0xFF4FD1C7).withOpacity(0.2)
+      ..color = const Color(0xFF4FD1C7).withValues(alpha:0.2)
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 3; i++) {

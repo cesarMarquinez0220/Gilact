@@ -244,7 +244,7 @@ class _CustomTextFormFieldWidgetState extends State<CustomTextFormFieldWidget>
             ),
             child: Row(
               children: [
-                Icon(Icons.error_outline, size: 16, color: AppColors.error),
+                const Icon(Icons.error_outline, size: 16, color: AppColors.error),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

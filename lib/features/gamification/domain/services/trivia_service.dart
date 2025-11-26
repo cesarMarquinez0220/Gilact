@@ -54,7 +54,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuál es uno de los principales beneficios de la lactancia materna para el bebé?',
-        options: [
+        options: const [
           'Mayor riesgo de infecciones',
           'Fortalece el sistema inmunológico y reduce infecciones',
           'Aumenta el riesgo de alergias',
@@ -68,7 +68,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Qué beneficio tiene la lactancia materna para la madre?',
-        options: [
+        options: const [
           'Aumenta el riesgo de cáncer de mama',
           'Ayuda a la recuperación postparto y reduce el riesgo de ciertos cánceres',
           'No tiene beneficios para la madre',
@@ -83,7 +83,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿La leche materna es suficiente para alimentar al bebé durante los primeros 6 meses?',
-        options: [
+        options: const [
           'No, siempre necesita complementos',
           'Sí, proporciona todos los nutrientes necesarios',
           'Solo para los primeros 3 meses',
@@ -97,7 +97,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Cuál es un beneficio económico de la lactancia materna?',
-        options: [
+        options: const [
           'Es más costosa que la fórmula',
           'Es gratuita y ahorra dinero en fórmula',
           'Requiere equipos costosos',
@@ -117,7 +117,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Qué es el calostro?',
-        options: [
+        options: const [
           'Leche que aparece después de 1 mes',
           'La primera leche rica en anticuerpos que produce la madre',
           'Leche de fórmula especial',
@@ -131,7 +131,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Cuándo aparece la leche de transición?',
-        options: [
+        options: const [
           'Inmediatamente después del parto',
           'Entre el día 3 y 14 después del parto',
           'Después de 1 mes',
@@ -145,7 +145,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Cuándo se establece la leche madura?',
-        options: [
+        options: const [
           'Inmediatamente después del parto',
           'Después de aproximadamente 2 semanas',
           'Después de 3 meses',
@@ -159,7 +159,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Por qué es importante el calostro para el recién nacido?',
-        options: [
+        options: const [
           'No tiene importancia especial',
           'Proporciona la primera inmunización y es rico en nutrientes',
           'Solo hidrata al bebé',
@@ -179,7 +179,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Qué es importante considerar antes de amamantar?',
-        options: [
+        options: const [
           'Nada, solo dar el pecho',
           'Comodidad de la madre, posición del bebé y ambiente tranquilo',
           'Solo la posición del bebé',
@@ -193,7 +193,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Cuál es una posición adecuada para amamantar?',
-        options: [
+        options: const [
           'Solo de pie',
           'Posición cuna, balón de rugby, acostada de lado',
           'Solo sentada',
@@ -207,7 +207,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué indica un buen agarre del pecho?',
-        options: [
+        options: const [
           'El bebé solo toca el pezón',
           'El bebé tiene la boca bien abierta, abarca parte de la areola y no hay dolor',
           'Siempre hay dolor al amamantar',
@@ -221,7 +221,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Es necesario limpiar el pecho antes de cada toma?',
-        options: [
+        options: const [
           'Sí, siempre con jabón',
           'No, la higiene diaria normal es suficiente',
           'Solo con agua caliente',
@@ -241,7 +241,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Qué componente principal contiene la leche materna?',
-        options: [
+        options: const [
           'Solo agua',
           'Agua, proteínas, grasas, carbohidratos, vitaminas y minerales',
           'Solo proteínas',
@@ -255,7 +255,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿La composición de la leche materna cambia?',
-        options: [
+        options: const [
           'No, siempre es igual',
           'Sí, cambia durante la toma, durante el día y según la edad del bebé',
           'Solo cambia una vez',
@@ -269,7 +269,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué tipo de proteínas contiene la leche materna?',
-        options: [
+        options: const [
           'Solo proteínas de origen animal',
           'Proteínas de fácil digestión como la lactoferrina y la inmunoglobulina A',
           'Solo proteínas vegetales',
@@ -283,7 +283,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Por qué es importante la grasa en la leche materna?',
-        options: [
+        options: const [
           'No es importante',
           'Proporciona energía y es esencial para el desarrollo del cerebro',
           'Solo proporciona sabor',
@@ -304,7 +304,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuál es una señal de que el bebé está recibiendo suficiente leche?',
-        options: [
+        options: const [
           'Llora constantemente',
           'Aumenta de peso adecuadamente, moja 6+ pañales al día y está contento',
           'Duerme todo el día',
@@ -319,7 +319,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuántos pañales mojados al día indica que el bebé está bien alimentado?',
-        options: [
+        options: const [
           '1-2 pañales',
           'Al menos 6 pañales mojados',
           'Solo 3 pañales',
@@ -333,7 +333,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué indica un buen aumento de peso en el bebé?',
-        options: [
+        options: const [
           'No aumenta de peso',
           'Aumenta aproximadamente 20-30 gramos por día en los primeros meses',
           'Aumenta 100 gramos por día',
@@ -348,7 +348,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuándo se debe buscar ayuda si hay preocupación sobre la alimentación?',
-        options: [
+        options: const [
           'Nunca',
           'Si el bebé no aumenta de peso, moja menos de 6 pañales o está muy somnoliento',
           'Solo después de 6 meses',
@@ -368,7 +368,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Cuál es un hito de peso esperado en los primeros días?',
-        options: [
+        options: const [
           'El bebé no debe perder peso',
           'Es normal que pierda hasta 10% del peso al nacer en los primeros días',
           'Debe ganar peso inmediatamente',
@@ -382,7 +382,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Cuándo debe recuperar el bebé su peso al nacer?',
-        options: [
+        options: const [
           'Inmediatamente',
           'Alrededor de los 10-14 días de vida',
           'Después de 1 mes',
@@ -396,7 +396,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué indica un crecimiento adecuado del bebé?',
-        options: [
+        options: const [
           'Aumenta de peso de forma irregular',
           'Sigue una curva de crecimiento consistente según su percentil',
           'Aumenta mucho peso de golpe',
@@ -411,7 +411,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Con qué frecuencia se debe pesar al bebé en los primeros meses?',
-        options: [
+        options: const [
           'Todos los días',
           'Según las recomendaciones del pediatra, típicamente en controles regulares',
           'Solo una vez al mes',
@@ -431,7 +431,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Cuándo es importante lavarse las manos antes de amamantar?',
-        options: [
+        options: const [
           'Nunca es necesario',
           'Antes de cada toma, especialmente después de cambiar pañales o tocar objetos',
           'Solo por la mañana',
@@ -446,7 +446,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Es necesario limpiar el pecho con jabón antes de cada toma?',
-        options: [
+        options: const [
           'Sí, siempre con jabón',
           'No, la higiene diaria normal es suficiente',
           'Solo con agua caliente',
@@ -460,7 +460,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué técnica ayuda a facilitar el flujo de leche?',
-        options: [
+        options: const  [
           'Presionar fuerte el pecho',
           'Masajes suaves, compresión del pecho y relajación',
           'Solo esperar',
@@ -475,7 +475,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Qué hacer si el bebé tiene dificultad para agarrar el pecho?',
-        options: [
+        options: const [
           'Forzar el agarre',
           'Buscar ayuda profesional, verificar la posición y ser paciente',
           'Cambiar a biberón inmediatamente',
@@ -495,7 +495,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Se puede tomar medicamentos durante la lactancia?',
-        options: [
+        options: const [
           'Nunca se puede tomar ningún medicamento',
           'Muchos medicamentos son seguros, pero siempre se debe consultar con el médico',
           'Todos los medicamentos son seguros',
@@ -510,7 +510,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Qué hacer si necesitas tomar un medicamento durante la lactancia?',
-        options: [
+        options: const [
           'Tomarlo sin consultar',
           'Consultar con el médico sobre la compatibilidad con la lactancia',
           'Suspender la lactancia automáticamente',
@@ -524,7 +524,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Los medicamentos pasan a la leche materna?',
-        options: [
+        options: const [
           'Nunca pasan',
           'Algunos medicamentos pueden pasar en pequeñas cantidades, por eso es importante consultar',
           'Todos pasan en grandes cantidades',
@@ -539,7 +539,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Dónde se puede consultar sobre la seguridad de medicamentos durante la lactancia?',
-        options: [
+        options: const [
           'Solo en internet',
           'Con el médico, farmacéutico o en bases de datos especializadas como e-lactancia',
           'No hay forma de consultar',
@@ -559,7 +559,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Cuál es un signo de complicación en la lactancia?',
-        options: [
+        options: const [
           'El bebé se alimenta bien',
           'Dolor persistente, grietas en el pezón, mastitis o el bebé no aumenta de peso',
           'Solo si el bebé llora',
@@ -573,7 +573,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Qué es la mastitis?',
-        options: [
+        options: const [
           'Una condición normal',
           'Una inflamación del tejido mamario que puede incluir infección',
           'Solo dolor en el pecho',
@@ -587,7 +587,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué hacer si hay dolor persistente al amamantar?',
-        options: [
+        options: const [
           'Ignorarlo',
           'Buscar ayuda profesional para identificar y tratar la causa',
           'Suspender la lactancia',
@@ -601,7 +601,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Las grietas en el pezón son normales?',
-        options: [
+        options: const [
           'Sí, siempre aparecen',
           'No, generalmente indican un problema de agarre o posición que debe corregirse',
           'Solo aparecen en algunas madres',
@@ -621,7 +621,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Para qué sirven los masajes al seno antes de amamantar?',
-        options: [
+        options: const [
           'No sirven para nada',
           'Ayudan a estimular el flujo de leche y facilitar el agarre',
           'Solo para relajar',
@@ -635,7 +635,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Cómo se realizan los masajes al seno?',
-        options: [
+        options: const [
           'Con mucha fuerza',
           'Con movimientos suaves y circulares desde la base hacia el pezón',
           'Solo presionando el pezón',
@@ -649,7 +649,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Cuándo es especialmente útil masajear el seno?',
-        options: [
+        options: const  [
           'Nunca es útil',
           'Cuando el pecho está muy lleno, antes de amamantar o para aliviar congestión',
           'Solo por la noche',
@@ -663,7 +663,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Los masajes pueden ayudar con la extracción de leche?',
-        options: [
+        options: const [
           'No, no tienen efecto',
           'Sí, pueden mejorar la extracción manual o con bomba',
           'Solo con bomba eléctrica',
@@ -684,7 +684,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuánto tiempo se puede conservar la leche materna extraída a temperatura ambiente?',
-        options: [
+        options: const [
           'Solo 1 hora',
           'Hasta 4 horas a temperatura ambiente (hasta 6-8 horas en condiciones muy limpias)',
           'Todo el día',
@@ -699,7 +699,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuánto tiempo se puede conservar la leche materna en el refrigerador?',
-        options: [
+        options: const [
           'Solo 1 día',
           'Hasta 4 días en el refrigerador (a 4°C o menos)',
           'Solo 2 días',
@@ -713,7 +713,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Cómo se debe almacenar la leche materna extraída?',
-        options: [
+        options: const [
           'En cualquier recipiente',
           'En recipientes limpios y esterilizados, etiquetados con fecha y hora',
           'Solo en biberones',
@@ -727,7 +727,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Cómo se debe descongelar la leche materna congelada?',
-        options: [
+        options: const [
           'En el microondas directamente',
           'En el refrigerador durante la noche o bajo agua tibia, nunca en microondas',
           'Solo a temperatura ambiente',
@@ -747,7 +747,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
         question: '¿Existen leyes en Panamá que protegen la lactancia materna?',
-        options: [
+        options: const [
           'No existen leyes',
           'Sí, existen leyes que protegen y promueven la lactancia materna',
           'Solo en algunos lugares',
@@ -762,7 +762,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Qué derechos tienen las madres trabajadoras en Panamá respecto a la lactancia?',
-        options: [
+        options: const [
           'Ningún derecho especial',
           'Derecho a pausas para amamantar y espacios adecuados',
           'Solo pueden amamantar en casa',
@@ -777,7 +777,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Las leyes panameñas protegen la lactancia en espacios públicos?',
-        options: [
+        options: const [
           'No, está prohibido',
           'Sí, protegen el derecho de amamantar en espacios públicos',
           'Solo en algunos lugares',
@@ -792,7 +792,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Por qué son importantes las leyes que protegen la lactancia?',
-        options: [
+        options: const [
           'No son importantes',
           'Garantizan los derechos de las madres y promueven la salud de los bebés',
           'Solo protegen a algunas madres',
@@ -813,7 +813,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuál es una diferencia clave entre la leche materna y la leche de vaca?',
-        options: [
+        options: const  [
           'Son iguales',
           'La leche materna tiene anticuerpos y se adapta al bebé, la de vaca no',
           'Solo difieren en el sabor',
@@ -828,7 +828,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Por qué la leche materna es más fácil de digerir que la de vaca?',
-        options: [
+        options: const [
           'No hay diferencia',
           'Tiene proteínas de fácil digestión y composición específica para humanos',
           'Solo porque es más líquida',
@@ -842,7 +842,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿La leche materna cambia según las necesidades del bebé?',
-        options: [
+        options: const [
           'No, siempre es igual',
           'Sí, se adapta según la edad del bebé, hora del día y necesidades',
           'Solo cambia una vez',
@@ -856,7 +856,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Qué contiene la leche materna que la de vaca no tiene?',
-        options: [
+        options: const [
           'Nada especial',
           'Anticuerpos, factores de crecimiento, probióticos y componentes inmunológicos',
           'Solo más agua',
@@ -877,7 +877,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Es cierto que algunas mujeres no producen suficiente leche?',
-        options: [
+        options: const [
           'Sí, la mayoría no produce suficiente',
           'Es un mito común; la mayoría de mujeres pueden producir suficiente leche con apoyo adecuado',
           'Solo algunas pueden amamantar',
@@ -892,7 +892,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Es necesario dar agua al bebé además de leche materna en los primeros 6 meses?',
-        options: [
+        options: const [
           'Sí, siempre necesita agua',
           'No, la leche materna proporciona toda la hidratación necesaria',
           'Solo en verano',
@@ -906,7 +906,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Es cierto que amamantar duele siempre?',
-        options: [
+        options: const [
           'Sí, siempre duele',
           'No, el dolor indica un problema (mala posición o agarre) que debe corregirse',
           'Solo duele al principio',
@@ -920,7 +920,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
         question: '¿Se puede amamantar si los senos son pequeños?',
-        options: [
+        options: const [
           'No, se necesita senos grandes',
           'Sí, el tamaño del seno no afecta la capacidad de producir leche',
           'Solo si son medianos',
@@ -941,7 +941,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuál es la frecuencia recomendada de alimentación para un recién nacido?',
-        options: [
+        options: const [
           'Cada 2-3 horas',
           'Cada 4-5 horas',
           'Solo cuando el bebé llora',
@@ -955,7 +955,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
         question: '¿Cuánto tiempo debe durar una sesión de lactancia típica?',
-        options: [
+        options: const [
           '5-10 minutos',
           '10-20 minutos por pecho',
           '30-45 minutos',
@@ -969,7 +969,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué indica que el bebé está recibiendo suficiente leche?',
-        options: [
+        options: const  [
           'Llora constantemente',
           'Aumenta de peso adecuadamente y moja 6+ pañales al día',
           'Duerme todo el día',
@@ -984,7 +984,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuándo se debe buscar ayuda profesional para problemas de lactancia?',
-        options: [
+        options: const  [
           'Nunca, todo se resuelve solo',
           'Solo si hay dolor extremo',
           'Cuando hay dolor persistente, dificultades de agarre o preocupaciones sobre la alimentación',

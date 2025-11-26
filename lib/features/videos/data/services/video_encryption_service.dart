@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:math';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:encrypt/encrypt.dart';

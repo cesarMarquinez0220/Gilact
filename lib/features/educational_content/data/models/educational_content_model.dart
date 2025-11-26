@@ -67,6 +67,7 @@ class EducationalContentModel extends EducationalContent {
     };
   }
 
+  @override
   EducationalContentModel copyWith({
     String? id,
     String? title,

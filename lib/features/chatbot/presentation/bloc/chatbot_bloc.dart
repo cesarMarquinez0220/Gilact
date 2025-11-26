@@ -15,7 +15,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
   ChatbotBloc({required SendMessageUseCase sendMessageUseCase})
     : _sendMessageUseCase = sendMessageUseCase,
-      super(ChatbotInitial()) {
+      super(const ChatbotInitial()) {
     on<SendMessage>(_onSendMessage);
     on<LoadChatHistory>(_onLoadChatHistory);
     on<ClearChat>(_onClearChat);
@@ -70,7 +70,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     emit(ChatbotLoaded(updatedMessages));
 
     // Mostrar estado de carga
-    emit(ChatbotLoading());
+    emit(const ChatbotLoading());
 
     // Obtener respuesta del chatbot
     final result = await _sendMessageUseCase(
@@ -94,7 +94,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
     LoadChatHistory event,
     Emitter<ChatbotState> emit,
   ) async {
-    emit(ChatbotLoading());
+    emit(const ChatbotLoading());
     // El historial se carga desde el repositorio si es necesario
     emit(const ChatbotLoaded([]));
   }

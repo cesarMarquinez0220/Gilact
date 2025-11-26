@@ -34,7 +34,7 @@ class EducationalContentBloc extends Bloc<EducationalContentEvent, EducationalCo
         _markContentAsCompletedUseCase = markContentAsCompletedUseCase,
         _getCompletedContentIdsUseCase = getCompletedContentIdsUseCase,
         _getContentStatisticsUseCase = getContentStatisticsUseCase,
-        super(EducationalContentInitial()) {
+        super(const EducationalContentInitial()) {
     on<GetAllEducationalContentRequested>(_onGetAllContentRequested);
     on<GetEducationalContentByIdRequested>(_onGetContentByIdRequested);
     on<GetEducationalContentByCategoryRequested>(_onGetContentByCategoryRequested);
@@ -48,7 +48,7 @@ class EducationalContentBloc extends Bloc<EducationalContentEvent, EducationalCo
     GetAllEducationalContentRequested event,
     Emitter<EducationalContentState> emit,
   ) async {
-    emit(EducationalContentLoading());
+    emit(const EducationalContentLoading());
     
     final result = await _getAllContentUseCase();
 
@@ -62,7 +62,7 @@ class EducationalContentBloc extends Bloc<EducationalContentEvent, EducationalCo
     GetEducationalContentByIdRequested event,
     Emitter<EducationalContentState> emit,
   ) async {
-    emit(EducationalContentLoading());
+    emit(const EducationalContentLoading());
     
     final result = await _getContentByIdUseCase(GetEducationalContentByIdParams(id: event.id));
 
@@ -76,7 +76,7 @@ class EducationalContentBloc extends Bloc<EducationalContentEvent, EducationalCo
     GetEducationalContentByCategoryRequested event,
     Emitter<EducationalContentState> emit,
   ) async {
-    emit(EducationalContentLoading());
+    emit(const EducationalContentLoading());
     
     final result = await _getContentByCategoryUseCase(
       GetEducationalContentByCategoryParams(category: event.category),
@@ -92,7 +92,7 @@ class EducationalContentBloc extends Bloc<EducationalContentEvent, EducationalCo
     SearchEducationalContentRequested event,
     Emitter<EducationalContentState> emit,
   ) async {
-    emit(EducationalContentLoading());
+    emit(const EducationalContentLoading());
     
     final result = await _searchContentUseCase(SearchEducationalContentParams(query: event.query));
 

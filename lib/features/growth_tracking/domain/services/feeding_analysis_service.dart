@@ -92,7 +92,7 @@ class FeedingAnalysisService {
 
       if (kDebugMode) {
         print(
-          '✅ FeedingAnalysisService: Datos de alimentación obtenidos para ${days} días (${allRecords.length} registros totales)',
+          '✅ FeedingAnalysisService: Datos de alimentación obtenidos para $days días (${allRecords.length} registros totales)',
         );
       }
 

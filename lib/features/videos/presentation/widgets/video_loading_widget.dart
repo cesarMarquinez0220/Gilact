@@ -200,7 +200,7 @@ class _VideoLoadingWidgetState extends State<VideoLoadingWidget>
                 height: 4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(2),
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha:0.2),
                 ),
                 child: Stack(
                   children: [

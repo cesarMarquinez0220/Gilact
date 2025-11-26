@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'dart:ui';
 import '../../domain/entities/weight_trend_data.dart';
 
 /// Widget para mostrar gráfica de tendencia de peso con percentiles OMS
@@ -414,7 +413,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             interval: 0.5,
             getTitlesWidget: (value, meta) {
               return Text(
-                '${value.toStringAsFixed(1)}',
+                value.toStringAsFixed(1),
                 style: GoogleFonts.quicksand(
                   fontSize: 10,
                   color: Colors.grey[600],
@@ -438,7 +437,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p3Spots,
             isCurved: p3Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha:0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -448,7 +447,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p15Spots,
             isCurved: p15Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withOpacity(0.4),
+            color: Colors.grey.withValues(alpha:0.4),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -464,7 +463,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.grey[200]!.withOpacity(0.3),
+              color: Colors.grey[200]!.withValues(alpha:0.3),
             ),
           ),
         // Percentil 50 (mediana) - línea más visible
@@ -492,7 +491,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p97Spots,
             isCurved: p97Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha:0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -525,8 +524,8 @@ class BabyWeightTrendChart extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  const Color(0xFF03A696).withOpacity(0.1),
-                  const Color(0xFF03A696).withOpacity(0.0),
+                  const Color(0xFF03A696).withValues(alpha:0.1),
+                  const Color(0xFF03A696).withValues(alpha:0.0),
                 ],
               ),
             ),

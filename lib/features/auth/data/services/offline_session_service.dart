@@ -2,9 +2,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../../domain/entities/user.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Servicio para gestionar sesiones offline de usuarios
 class OfflineSessionService {
+  final AppLogger _logger;
+
+  OfflineSessionService(this._logger);
   static const String _sessionKey = 'offline_session';
   static const String _sessionTokenKey = 'session_token';
   static const String _sessionExpiryKey = 'session_expiry';
@@ -43,9 +47,9 @@ class OfflineSessionService {
       // 5. Guardar hash de contraseña para validación local
       await prefs.setString('password_hash_$email', passwordHash);
 
-      print('✅ Sesión offline guardada para usuario: $email');
-    } catch (e) {
-      print('❌ Error guardando sesión offline: $e');
+      _logger.serviceSuccess('OfflineSessionService', 'Sesión offline guardada para usuario: $email');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'guardar sesión offline', e, stackTrace);
     }
   }
 
@@ -74,8 +78,8 @@ class OfflineSessionService {
       if (token == null || token.isEmpty) return false;
 
       return true;
-    } catch (e) {
-      print('❌ Error verificando sesión: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'verificar sesión', e, stackTrace);
       return false;
     }
   }
@@ -100,8 +104,8 @@ class OfflineSessionService {
         updatedAt: DateTime.now(),
         isEmailVerified: userData['isEmailVerified'] as bool? ?? false,
       );
-    } catch (e) {
-      print('❌ Error obteniendo usuario offline: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'obtener usuario offline', e, stackTrace);
       return null;
     }
   }
@@ -123,8 +127,8 @@ class OfflineSessionService {
 
       // 3. Comparar hashes
       return storedHash == inputHash;
-    } catch (e) {
-      print('❌ Error validando credenciales offline: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'validar credenciales offline', e, stackTrace);
       return false;
     }
   }
@@ -139,9 +143,9 @@ class OfflineSessionService {
       await prefs.remove(_userDataKey);
 
       // No eliminar password_hash para permitir login offline
-      print('✅ Sesión offline limpiada');
-    } catch (e) {
-      print('❌ Error limpiando sesión: $e');
+      _logger.serviceSuccess('OfflineSessionService', 'Sesión offline limpiada');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'limpiar sesión', e, stackTrace);
     }
   }
 
@@ -167,8 +171,9 @@ class OfflineSessionService {
       final prefs = await SharedPreferences.getInstance();
       final newExpiry = DateTime.now().add(_sessionDuration);
       await prefs.setString(_sessionExpiryKey, newExpiry.toIso8601String());
-    } catch (e) {
-      print('❌ Error extendiendo sesión: $e');
+      _logger.d('Sesión extendida hasta ${newExpiry.toIso8601String()}');
+    } catch (e, stackTrace) {
+      _logger.serviceError('OfflineSessionService', 'extender sesión', e, stackTrace);
     }
   }
 

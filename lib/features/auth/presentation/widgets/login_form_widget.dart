@@ -112,20 +112,20 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                     // Campo de email
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: .15),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha:0.3),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha:0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
                           BoxShadow(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha:0.1),
                             blurRadius: 20,
                             offset: const Offset(0, -2),
                           ),
@@ -170,20 +170,20 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha:0.15),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha:0.3),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha:0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
                                 BoxShadow(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha:0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, -2),
                                 ),
@@ -242,20 +242,20 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
                                   BoxShadow(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: Colors.white.withValues(alpha: 0.1),
                                     blurRadius: 20,
                                     offset: const Offset(0, -2),
                                   ),
@@ -292,10 +292,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Checkbox(
@@ -303,7 +303,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                                 onChanged: widget.isLoading
                                     ? null
                                     : widget.onRememberChanged,
-                                fillColor: MaterialStateProperty.all(
+                                fillColor: WidgetStateProperty.all(
                                   Colors.transparent,
                                 ),
                                 checkColor: Colors.white,
@@ -369,12 +369,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF4FD1C7).withOpacity(0.4),
+                            color: const Color(0xFF4FD1C7).withValues(alpha:0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha:0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -421,10 +421,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha:0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha:0.2),
                         ),
                       ),
                       child: Row(

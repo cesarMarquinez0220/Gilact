@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/domain/services/credentials_cache_service.dart';
 import '../../features/onboarding/data/services/user_subcollections_service.dart';
@@ -28,8 +27,13 @@ class AppInitializationService {
   /// - Navega a `/home` cuando termina
   static Future<void> refreshAndGoHome(BuildContext context) async {
     try {
+      // Guardar referencia al bloc antes de operaciones asíncronas
+      if (!context.mounted) return;
+      final userProfileBloc = context.read<UserProfileBloc>();
+
       // 1) Obtener email
       final email = await _getUserEmail();
+      if (!context.mounted) return;
       if (email.isEmpty) {
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
         return;
@@ -48,6 +52,7 @@ class AppInitializationService {
             },
           );
 
+      if (!context.mounted) return;
       if (userQuery.docs.isEmpty) {
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
         return;
@@ -56,11 +61,11 @@ class AppInitializationService {
       final userId = userQuery.docs.first.id;
 
       // 3) Reiniciar y cargar perfil en el BLoC
-      final userProfileBloc = context.read<UserProfileBloc>();
-      userProfileBloc.add(ResetUserProfileRequested());
+      userProfileBloc.add(const ResetUserProfileRequested());
       await Future.delayed(const Duration(milliseconds: 100));
+      if (!context.mounted) return;
       userProfileBloc.add(GetUserProfileRequested(userId: userId));
-      await _waitForUserProfileToLoad(context);
+      await _waitForUserProfileToLoad(context, userProfileBloc);
 
       // 4) Cargar situación y actualizar BLoC
       final userSubcollectionsService = UserSubcollectionsService(
@@ -70,6 +75,7 @@ class AppInitializationService {
       final situationData = await userSubcollectionsService
           .getUserSituationData(userId);
 
+      if (!context.mounted) return;
       if (situationData != null) {
         final situationType = situationData['situationType'] as String?;
         final isPrePartum = situationType == 'preparto';
@@ -110,6 +116,7 @@ class AppInitializationService {
       }
 
       // 7) Navegar a Home
+      if (!context.mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
     } catch (_) {
       // Fallback defensivo
@@ -119,11 +126,15 @@ class AppInitializationService {
     }
   }
 
-  static Future<void> _waitForUserProfileToLoad(BuildContext context) async {
+  static Future<void> _waitForUserProfileToLoad(
+    BuildContext context,
+    UserProfileBloc userProfileBloc,
+  ) async {
     int attempts = 0;
     const maxAttempts = 20; // ~10s
     while (attempts < maxAttempts) {
-      final state = context.read<UserProfileBloc>().state;
+      if (!context.mounted) return;
+      final state = userProfileBloc.state;
       if (state is UserProfileLoaded || state is UserProfileUpdated) {
         return;
       }
@@ -151,56 +162,65 @@ class AppInitializationService {
   static Future<void> refreshLactationDataOnly() async {
     try {
       final context = navigatorKey.currentContext;
-      if (context != null) {
-        // Esperar un poco para que HomePageWrapper termine de construir el Provider
-        await Future.delayed(const Duration(milliseconds: 200));
+      if (context == null || !context.mounted) return;
 
-        // Intentar obtener el LactationProvider del contexto actual
+      // Esperar un poco para que HomePageWrapper termine de construir el Provider
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // Verificar que el contexto sigue montado después del delay
+      final currentContext = navigatorKey.currentContext;
+      if (currentContext == null || !currentContext.mounted) return;
+
+      // Intentar obtener el LactationProvider del contexto actual
+      try {
+        final lactationProvider = Provider.of<LactationProvider>(
+          currentContext,
+          listen: false,
+        );
+        final logger = getIt<AppLogger>();
+        logger.d(
+          'AppInitializationService: Refrescando datos de lactancia desde contexto...',
+        );
+        await lactationProvider.refreshTodayData();
+        await lactationProvider.loadWeekData();
+        logger.success(
+          'AppInitializationService: Datos de lactancia refrescados',
+        );
+        return;
+      } catch (e, stackTrace) {
+        final logger = getIt<AppLogger>();
+        logger.w(
+          'AppInitializationService: Error obteniendo provider del contexto',
+          e,
+          stackTrace,
+        );
+        // Si no está disponible aún, esperar un poco más e intentar nuevamente
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        // Verificar nuevamente que el contexto sigue montado
+        final retryContext = navigatorKey.currentContext;
+        if (retryContext == null || !retryContext.mounted) return;
+
         try {
           final lactationProvider = Provider.of<LactationProvider>(
-            context,
+            retryContext,
             listen: false,
           );
-          final logger = getIt<AppLogger>();
           logger.d(
-            'AppInitializationService: Refrescando datos de lactancia desde contexto...',
+            'AppInitializationService: Refrescando datos de lactancia (segundo intento)...',
           );
           await lactationProvider.refreshTodayData();
           await lactationProvider.loadWeekData();
           logger.success(
-            'AppInitializationService: Datos de lactancia refrescados',
+            'AppInitializationService: Datos de lactancia refrescados (segundo intento)',
           );
           return;
-        } catch (e, stackTrace) {
-          final logger = getIt<AppLogger>();
+        } catch (e2, stackTrace2) {
           logger.w(
-            'AppInitializationService: Error obteniendo provider del contexto',
-            e,
-            stackTrace,
+            'AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
+            e2,
+            stackTrace2,
           );
-          // Si no está disponible aún, esperar un poco más e intentar nuevamente
-          await Future.delayed(const Duration(milliseconds: 300));
-          try {
-            final lactationProvider = Provider.of<LactationProvider>(
-              context,
-              listen: false,
-            );
-            logger.d(
-              'AppInitializationService: Refrescando datos de lactancia (segundo intento)...',
-            );
-            await lactationProvider.refreshTodayData();
-            await lactationProvider.loadWeekData();
-            logger.success(
-              'AppInitializationService: Datos de lactancia refrescados (segundo intento)',
-            );
-            return;
-          } catch (e2, stackTrace2) {
-            logger.w(
-              'AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
-              e2,
-              stackTrace2,
-            );
-          }
         }
       }
     } catch (e, stackTrace) {

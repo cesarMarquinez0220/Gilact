@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'dart:ui';
 import '../../domain/entities/weight_trend_data.dart';
 
 /// Widget para mostrar gráfica de ingesta de leche diaria
@@ -295,14 +294,14 @@ class FeedingVolumeChart extends StatelessWidget {
       if (expectedVolume != null) {
         final ratio = volume / expectedVolume!;
         if (ratio >= 0.9) {
-          barColor = Colors.green.withOpacity(0.7); // Normal
+          barColor = Colors.green.withValues(alpha:0.7); // Normal
         } else if (ratio >= 0.7) {
-          barColor = Colors.orange.withOpacity(0.7); // Bajo
+          barColor = Colors.orange.withValues(alpha:0.7); // Bajo
         } else {
-          barColor = Colors.red.withOpacity(0.7); // Muy bajo
+          barColor = Colors.red.withValues(alpha:0.7); // Muy bajo
         }
       } else {
-        barColor = const Color(0xFF03A696).withOpacity(0.7);
+        barColor = const Color(0xFF03A696).withValues(alpha:0.7);
       }
 
       barGroups.add(

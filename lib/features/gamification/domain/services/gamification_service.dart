@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 import '../repositories/gamification_repository.dart';
 import '../entities/user_gamification_profile.dart';
 import '../entities/xp_transaction.dart';
-import '../entities/xp_transaction.dart' show XPSource;
 import '../entities/daily_streak.dart';
 import '../entities/achievement.dart';
 import 'xp_calculation_service.dart';

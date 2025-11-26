@@ -82,7 +82,7 @@ class InteractiveSwitch extends StatelessWidget {
               // Ejecutar el cambio
               onChanged?.call(newValue);
             },
-      activeColor: const Color(0xFF03A696),
+      activeThumbColor: const Color.fromARGB(255, 3, 166, 150),
     );
   }
 }

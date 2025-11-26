@@ -161,7 +161,7 @@ Future<void> configureDependencies() async {
     () => SleepNotificationService(),
   );
   getIt.registerLazySingleton<OfflineSessionService>(
-    () => OfflineSessionService(),
+    () => OfflineSessionService(getIt<AppLogger>()),
   );
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
 

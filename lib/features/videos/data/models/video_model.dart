@@ -77,6 +77,7 @@ class VideoModel extends Video {
     };
   }
 
+  @override
   VideoModel copyWith({
     String? id,
     String? title,

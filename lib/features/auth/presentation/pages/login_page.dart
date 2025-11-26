@@ -443,8 +443,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             onPressed: () {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Funcionalidad en desarrollo'),
+                const SnackBar(
+                  content:  Text('Funcionalidad en desarrollo'),
                   backgroundColor: AppColors.warning,
                   behavior: SnackBarBehavior.floating,
                 ),

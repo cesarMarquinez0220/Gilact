@@ -426,21 +426,21 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                   ),
                   child: Checkbox(
                     value: true,
-                    fillColor: MaterialStateProperty.all(Colors.transparent),
+                    fillColor: WidgetStateProperty.all(Colors.transparent),
                     checkColor: Colors.white,
                     activeColor: Colors.transparent,
                     side: BorderSide.none,
@@ -453,7 +453,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 Expanded(
                   child: Text(
                     'auth.register.acceptTerms'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -509,22 +509,22 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: errorText != null
-              ? Colors.red.withOpacity(0.5)
-              : Colors.white.withOpacity(0.3),
+                ? Colors.red.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, -2),
           ),
@@ -584,12 +584,12 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4FD1C7).withOpacity(0.4),
+            color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -634,12 +634,12 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -671,9 +671,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -704,7 +704,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           height: 6,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(3),
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
           child: Stack(
             children: [
@@ -720,7 +720,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4FD1C7).withOpacity(0.5),
+                      color: const Color(0xFF4FD1C7).withValues(alpha: 0.5),
                       blurRadius: 8,
                       spreadRadius: 1,
                     ),
@@ -770,10 +770,10 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                 shape: BoxShape.circle,
                 color: index <= widget.currentStep
                     ? Colors.white
-                    : Colors.white.withOpacity(0.3),
+                    : Colors.white.withValues(alpha: 0.3),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -790,9 +790,9 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
