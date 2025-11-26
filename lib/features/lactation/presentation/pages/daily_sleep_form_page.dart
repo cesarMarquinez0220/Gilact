@@ -12,7 +12,8 @@ import '../../presentation/providers/lactation_provider.dart';
 import 'dart:ui';
 import '../../../../alerta_dialoge.dart';
 import '../../../../main.dart';
-// Eliminado import de app_logger inexistente
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Página de registro diario de sueño del bebé (llamada desde notificación 8 AM)
 class DailySleepFormPage extends StatefulWidget {
@@ -29,13 +30,18 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
   final _formKey = GlobalKey<FormState>();
   final _hoursController = TextEditingController();
   final FocusNode _hoursFocusNode = FocusNode();
+  final AppLogger _logger = getIt<AppLogger>();
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late AnimationController _pulseController;
 
+  // Campos de animación no usados - mantenidos para uso futuro
+  // ignore: unused_field
   late Animation<double> _slideAnimation;
+  // ignore: unused_field
   late Animation<double> _fadeAnimation;
+  // ignore: unused_field
   late Animation<double> _pulseAnimation;
 
   bool _isLoading = false;
@@ -256,10 +262,12 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
             provider.loadTodayData();
             provider.loadWeekData();
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           // Si no está disponible, no es crítico
-          print(
-            '⚠️ DailySleepFormPage: No se pudo refrescar datos sin navegar: $e',
+          _logger.w(
+            'DailySleepFormPage: No se pudo refrescar datos sin navegar',
+            e,
+            stackTrace,
           );
         }
 
@@ -575,8 +583,9 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                       setState(() {
                                         if (parsed != null) {
                                           _hoursSlept = _snapToQuarter(parsed);
-                                          if (_hoursSlept > 12)
+                                          if (_hoursSlept > 12) {
                                             _hoursSlept = 12;
+                                          }
                                         }
                                         _hoursController.text = _hoursSlept
                                             .toStringAsFixed(1);
@@ -855,12 +864,14 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
               BoxShadow(
                 color: const Color(
                   0xFF4FD1C7,
-                ).withOpacity(0.4), // Sombra de color
+                ).withValues(alpha: 0.4), // Sombra de color
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // Sombra negra sutil
+                color: Colors.black.withValues(
+                  alpha: 0.1,
+                ), // Sombra negra sutil
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

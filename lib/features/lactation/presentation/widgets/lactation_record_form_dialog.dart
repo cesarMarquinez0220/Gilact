@@ -51,7 +51,10 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
   // Controladores de animación
   late AnimationController _slideController;
   late AnimationController _fadeController;
+  // Campos de animación no usados - mantenidos para uso futuro
+  // ignore: unused_field
   late Animation<double> _slideAnimation;
+  // ignore: unused_field
   late Animation<double> _fadeAnimation;
 
   late LactationService _lactationService;

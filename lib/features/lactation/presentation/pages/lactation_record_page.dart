@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart'; // Assuming this provides DialogExample
 import '../../../../core/services/app_initialization_service.dart' as app_init;
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/lactation_record.dart'; // Assuming this defines LactationRecord
 import '../../data/services/lactation_service.dart';
 
@@ -1426,10 +1427,16 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         return user.uid;
       }
 
-      print('❌ LactationRecordPage: No se encontró usuario en Firestore');
+      try {
+        final logger = getIt<AppLogger>();
+        logger.e('LactationRecordPage: No se encontró usuario en Firestore');
+      } catch (_) {}
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      try {
+        final logger = getIt<AppLogger>();
+        logger.e('Error obteniendo ID del usuario', e, stackTrace);
+      } catch (_) {}
       return null;
     }
   }

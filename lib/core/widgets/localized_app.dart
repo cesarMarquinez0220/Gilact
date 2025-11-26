@@ -61,7 +61,7 @@ class _LocalizedAppState extends State<LocalizedApp> {
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(
+              textScaler: const TextScaler.linear(
                 1.0,
               ), // Prevenir escalado automático
             ),

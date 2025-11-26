@@ -22,6 +22,7 @@ import 'health_page.dart';
 import '../../../settings/presentation/pages/profile_settings_page.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_logger.dart';
 
 // Widgets refactorizados
 import '../widgets/modern_bottom_navigation_bar.dart';
@@ -36,6 +37,7 @@ class MainNavigationPage extends StatefulWidget {
 
 class _MainNavigationPageState extends State<MainNavigationPage>
     with TickerProviderStateMixin {
+  final AppLogger _logger = getIt<AppLogger>();
   int _currentIndex = 0;
   late PageController _pageController;
 
@@ -150,7 +152,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   /// Inicializa los datos de la aplicación: precarga videos y configura providers
   Future<void> _initializeAppData() async {
-    print('🚀 MainNavigationPage: Inicializando datos de la aplicación...');
+    _logger.d('MainNavigationPage: Inicializando datos de la aplicación...');
 
     try {
       // Obtener el usuario actual - usar FirebaseAuth directamente para evitar problemas con AuthBloc
@@ -161,16 +163,16 @@ class _MainNavigationPageState extends State<MainNavigationPage>
         // Si no hay usuario en FirebaseAuth, verificar AuthBloc como fallback
         final authState = context.read<AuthBloc>().state;
         if (authState is! AuthAuthenticated) {
-          print('❌ Usuario no autenticado, saltando precarga');
+          _logger.w('Usuario no autenticado, saltando precarga');
           return;
         }
         userId = authState.user.id;
-        print('👤 Usuario autenticado desde AuthBloc: $userId');
+        _logger.d('Usuario autenticado desde AuthBloc: $userId');
       } else {
         // Intentar primero con UID de FirebaseAuth
         final uid = currentUser.uid;
-        print(
-          '🔍 MainNavigationPage: Verificando si existe documento con UID: $uid',
+        _logger.d(
+          'MainNavigationPage: Verificando si existe documento con UID: $uid',
         );
 
         // Verificar si el documento con este UID existe
@@ -181,7 +183,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
         if (docExists.exists) {
           userId = uid;
-          print('✅ MainNavigationPage: Usuario encontrado con UID: $userId');
+          _logger.d('MainNavigationPage: Usuario encontrado con UID: $userId');
         } else {
           // Si no existe con UID, buscar por email (como lo hace LactationService)
           final email =
@@ -189,20 +191,20 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               await CredentialsCacheService.loadCredentialsFromCache();
 
           if (email.isNotEmpty) {
-            print(
-              '🔄 MainNavigationPage: UID no coincide, buscando por email...',
+            _logger.d(
+              'MainNavigationPage: UID no coincide, buscando por email...',
             );
             userId = await _findUserByEmail(email);
             if (userId != null) {
-              print(
-                '✅ MainNavigationPage: Usuario encontrado por email: $userId',
+              _logger.d(
+                'MainNavigationPage: Usuario encontrado por email: $userId',
               );
             } else {
-              print('❌ MainNavigationPage: Usuario no encontrado por email');
+              _logger.e('MainNavigationPage: Usuario no encontrado por email');
               return;
             }
           } else {
-            print('❌ MainNavigationPage: No hay email disponible');
+            _logger.e('MainNavigationPage: No hay email disponible');
             return;
           }
         }
@@ -210,8 +212,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
         // Asegurar que AuthBloc esté sincronizado
         final authState = context.read<AuthBloc>().state;
         if (authState is! AuthAuthenticated) {
-          print(
-            '🔄 MainNavigationPage: Sincronizando AuthBloc con FirebaseAuth...',
+          _logger.d(
+            'MainNavigationPage: Sincronizando AuthBloc con FirebaseAuth...',
           );
           context.read<AuthBloc>().add(const GetCurrentUserRequested());
         }
@@ -222,7 +224,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Usar ! para indicar que sabemos que no es null
       final finalUserId = userId;
       if (finalUserId.isEmpty) {
-        print('❌ MainNavigationPage: Error crítico - userId es vacío');
+        _logger.e('MainNavigationPage: Error crítico - userId es vacío');
         return;
       }
 
@@ -244,16 +246,16 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Configurar estado inicial de lecciones (solo primera habilitada)
       _setupInitialLessonState();
 
-      print('✅ MainNavigationPage: Datos inicializados correctamente');
-    } catch (e) {
-      print('❌ Error inicializando datos: $e');
+      _logger.success('MainNavigationPage: Datos inicializados correctamente');
+    } catch (e, stackTrace) {
+      _logger.e('Error inicializando datos', e, stackTrace);
     }
   }
 
   /// Busca el userId del usuario por email (como lo hace LactationService)
   Future<String?> _findUserByEmail(String email) async {
     try {
-      print('🔍 MainNavigationPage: Buscando usuario por email: $email');
+      _logger.d('MainNavigationPage: Buscando usuario por email: $email');
 
       final userQuery = await FirebaseFirestore.instance
           .collection('Users')
@@ -268,15 +270,19 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           );
 
       if (userQuery.docs.isEmpty) {
-        print('❌ MainNavigationPage: Usuario no encontrado por email');
+        _logger.e('MainNavigationPage: Usuario no encontrado por email');
         return null;
       }
 
       final userId = userQuery.docs.first.id;
-      print('✅ MainNavigationPage: Usuario encontrado con ID: $userId');
+      _logger.d('MainNavigationPage: Usuario encontrado con ID: $userId');
       return userId;
-    } catch (e) {
-      print('❌ MainNavigationPage: Error buscando usuario por email: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'MainNavigationPage: Error buscando usuario por email',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -290,12 +296,12 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Si el perfil ya está cargado, no hacer nada
       if (currentState is UserProfileLoaded ||
           currentState is UserProfileUpdated) {
-        print('✅ MainNavigationPage: Perfil del usuario ya está cargado');
+        _logger.d('MainNavigationPage: Perfil del usuario ya está cargado');
         return;
       }
 
       // Si está en estado inicial, cargar el perfil
-      print('🔄 MainNavigationPage: Cargando perfil del usuario...');
+      _logger.d('MainNavigationPage: Cargando perfil del usuario...');
       userProfileBloc.add(GetUserProfileRequested(userId: userId));
 
       // Esperar a que se cargue el perfil (máximo 5 segundos)
@@ -305,8 +311,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
         await Future.delayed(const Duration(milliseconds: 500));
         final state = userProfileBloc.state;
         if (state is UserProfileLoaded || state is UserProfileUpdated) {
-          print(
-            '✅ MainNavigationPage: Perfil del usuario cargado exitosamente',
+          _logger.success(
+            'MainNavigationPage: Perfil del usuario cargado exitosamente',
           );
 
           // Cargar situación del usuario si no está cargada
@@ -314,16 +320,20 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           return;
         }
         if (state is UserProfileFailure) {
-          print(
-            '⚠️ MainNavigationPage: Error cargando perfil: ${state.message}',
+          _logger.w(
+            'MainNavigationPage: Error cargando perfil: ${state.message}',
           );
           return;
         }
         attempts++;
       }
-      print('⚠️ MainNavigationPage: Timeout cargando perfil del usuario');
-    } catch (e) {
-      print('❌ MainNavigationPage: Error cargando perfil del usuario: $e');
+      _logger.w('MainNavigationPage: Timeout cargando perfil del usuario');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'MainNavigationPage: Error cargando perfil del usuario',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -338,14 +348,17 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           currentState is UserProfileUpdated) {
         final profile = (currentState as dynamic).profile;
         if (profile.situationData != null && profile.situationData.isNotEmpty) {
-          print('✅ MainNavigationPage: Situación del usuario ya está cargada');
+          _logger.d(
+            'MainNavigationPage: Situación del usuario ya está cargada',
+          );
           return;
         }
       }
 
-      print('🔄 MainNavigationPage: Cargando situación del usuario...');
+      _logger.d('MainNavigationPage: Cargando situación del usuario...');
       final userSubcollectionsService = UserSubcollectionsService(
         FirebaseFirestore.instance,
+        _logger,
       );
       final situationData = await userSubcollectionsService
           .getUserSituationData(userId);
@@ -363,12 +376,16 @@ class _MainNavigationPageState extends State<MainNavigationPage>
             situationData: situationData,
           ),
         );
-        print(
-          '✅ MainNavigationPage: Situación del usuario cargada exitosamente',
+        _logger.success(
+          'MainNavigationPage: Situación del usuario cargada exitosamente',
         );
       }
-    } catch (e) {
-      print('❌ MainNavigationPage: Error cargando situación del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'MainNavigationPage: Error cargando situación del usuario',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -390,21 +407,21 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       if (hasPreviousProgress) {
         // Cargar progreso existente
         await leccionesProvider.loadProgressFromFirestore(userId);
-        print('📊 Progreso existente cargado para usuario: $userId');
+        _logger.d('Progreso existente cargado para usuario: $userId');
       } else {
         // Limpiar progreso para cuenta nueva
         await leccionesProvider.clearProgress();
-        print('🧹 Progreso limpiado para cuenta nueva');
+        _logger.d('Progreso limpiado para cuenta nueva');
       }
     }
 
-    print('📋 Providers inicializados');
+    _logger.d('Providers inicializados');
   }
 
   /// Verifica si el usuario tiene progreso previo en Firestore
   Future<bool> _checkIfUserHasProgress(String userId) async {
     try {
-      print('🔍 Verificando progreso previo para usuario: $userId');
+      _logger.d('Verificando progreso previo para usuario: $userId');
 
       // Consultar la subcolección de videos del usuario
       final videosCollection = FirebaseFirestore.instance
@@ -418,8 +435,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       final hasProgress = querySnapshot.docs.isNotEmpty;
 
       if (hasProgress) {
-        print(
-          '✅ Usuario tiene progreso previo: ${querySnapshot.docs.length} videos encontrados',
+        _logger.d(
+          'Usuario tiene progreso previo: ${querySnapshot.docs.length} videos encontrados',
         );
 
         // Mostrar detalles del progreso encontrado
@@ -427,15 +444,15 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           final data = doc.data();
           final videoId = data['videoId'];
           final estaCompletado = data['estaCompletado'] ?? false;
-          print('📹 Video $videoId - Completado: $estaCompletado');
+          _logger.d('Video $videoId - Completado: $estaCompletado');
         }
       } else {
-        print('🆕 Usuario nuevo sin progreso previo');
+        _logger.d('Usuario nuevo sin progreso previo');
       }
 
       return hasProgress;
-    } catch (e) {
-      print('❌ Error verificando progreso del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando progreso del usuario', e, stackTrace);
       // En caso de error, asumir que es usuario nuevo para evitar problemas
       return false;
     }
@@ -457,15 +474,15 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           // Precargar video en cache (solo los primeros segundos)
           await VideoCacheService.preloadVideoSegment(videoId, duration: 30);
 
-          print('📹 Video $videoId precargado en cache');
-        } catch (e) {
-          print('⚠️ Error precargando video $videoId: $e');
+          _logger.d('Video $videoId precargado en cache');
+        } catch (e, stackTrace) {
+          _logger.w('Error precargando video $videoId', e, stackTrace);
         }
       }
 
-      print('✅ Precarga inicial de videos completada (videos 1-2)');
-    } catch (e) {
-      print('❌ Error en precarga de videos: $e');
+      _logger.success('Precarga inicial de videos completada (videos 1-2)');
+    } catch (e, stackTrace) {
+      _logger.e('Error en precarga de videos', e, stackTrace);
     }
   }
 
@@ -473,8 +490,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   void _setupInitialLessonState() {
     // Para cuenta nueva, solo la primera lección está habilitada
     // No hay progreso previo, por lo que el estado inicial es correcto
-    print(
-      '🎯 Estado inicial de lecciones configurado (solo primera habilitada)',
+    _logger.d(
+      'Estado inicial de lecciones configurado (solo primera habilitada)',
     );
   }
 
@@ -483,8 +500,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     try {
       final videoInteractionService = GetIt.instance<VideoInteractionService>();
       await videoInteractionService.cleanupDuplicateDocuments(userId);
-    } catch (e) {
-      print('❌ Error limpiando documentos duplicados: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error limpiando documentos duplicados', e, stackTrace);
     }
   }
 
@@ -497,11 +514,11 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Verificar si ya está precargado
       final isPreloaded = await VideoCacheService.isVideoPreloaded(nextVideoId);
       if (isPreloaded) {
-        print('ℹ️ Video $nextVideoId ya está precargado');
+        _logger.d('Video $nextVideoId ya está precargado');
         return;
       }
 
-      print('📹 Precargando video $nextVideoId progresivamente...');
+      _logger.d('Precargando video $nextVideoId progresivamente...');
 
       // Precargar metadata del video
       await videoPreloadService.preloadVideoMetadata(nextVideoId);
@@ -509,23 +526,29 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       // Precargar video en cache
       await VideoCacheService.preloadVideoSegment(nextVideoId, duration: 30);
 
-      print('✅ Video $nextVideoId precargado progresivamente');
-    } catch (e) {
-      print('❌ Error en precarga progresiva: $e');
+      _logger.success('Video $nextVideoId precargado progresivamente');
+    } catch (e, stackTrace) {
+      _logger.e('Error en precarga progresiva', e, stackTrace);
     }
   }
 
   /// Inicializa el caché del LactationService para reducir consultas a Firebase
   Future<void> _initializeLactationServiceCache() async {
     try {
-      print(
-        '🔍 MainNavigationPage: Inicializando caché del LactationService...',
+      _logger.d(
+        'MainNavigationPage: Inicializando caché del LactationService...',
       );
       final lactationService = GetIt.instance<LactationService>();
       await lactationService.initializeUserCache();
-      print('✅ MainNavigationPage: Caché del LactationService inicializado');
-    } catch (e) {
-      print('❌ Error inicializando caché del LactationService: $e');
+      _logger.success(
+        'MainNavigationPage: Caché del LactationService inicializado',
+      );
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error inicializando caché del LactationService',
+        e,
+        stackTrace,
+      );
     }
   }
 }

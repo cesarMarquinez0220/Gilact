@@ -11,6 +11,8 @@ import '../../data/services/video_download_service.dart';
 import '../../data/services/video_progress_service.dart';
 import '../../data/services/video_interaction_service.dart';
 import '../../../../core/services/screen_recording_prevention_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
@@ -44,6 +46,7 @@ class OfflineVideoPlayer extends StatefulWidget {
 }
 
 class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
+  final AppLogger _logger = getIt<AppLogger>();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   final VideoEncryptionService _encryptionService = VideoEncryptionService();
@@ -53,6 +56,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       GetIt.instance<VideoInteractionService>();
 
   bool _isInitializing = true;
+  // ignore: unused_field
   bool _isPaused = false;
   bool _wasAlreadyCompleted = false;
   double _lastSavedProgress = 0.0;
@@ -75,9 +79,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
             // Pausar el video si se detecta grabación
             _videoController?.pause();
             _chewieController?.pause();
-            if (kDebugMode) {
-              print('⚠️ Grabación de pantalla detectada - Video pausado');
-            }
+            _logger.w('Grabación de pantalla detectada - Video pausado');
             // Mostrar mensaje al usuario
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -96,11 +98,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
 
   Future<void> _initializeOfflinePlayer() async {
     try {
-      if (kDebugMode) {
-        print(
-          '🎬 Iniciando reproductor offline para video: ${widget.video.id}',
-        );
-      }
+      _logger.d('Iniciando reproductor offline para video: ${widget.video.id}');
 
       // Verificar si el video está descargado
       final isDownloaded = await _downloadService.isVideoDownloaded(
@@ -111,9 +109,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         throw Exception('Video no está descargado');
       }
 
-      if (kDebugMode) {
-        print('✅ Video verificado como descargado');
-      }
+      _logger.d('Video verificado como descargado');
 
       // Obtener ruta del archivo encriptado
       final encryptedPath = await _downloadService.getDownloadedVideoPath(
@@ -123,9 +119,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         throw Exception('No se encontró el archivo descargado');
       }
 
-      if (kDebugMode) {
-        print('📁 Archivo encriptado encontrado: $encryptedPath');
-      }
+      _logger.d('Archivo encriptado encontrado: $encryptedPath');
 
       // Verificar que el archivo existe
       final encryptedFile = File(encryptedPath);
@@ -138,16 +132,12 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       final decryptedPath = '${tempDir.path}/${widget.video.id}_decrypted.mp4';
       _decryptedVideoFile = File(decryptedPath);
 
-      if (kDebugMode) {
-        print('🔓 Desencriptando video a: $decryptedPath');
-      }
+      _logger.d('Desencriptando video a: $decryptedPath');
 
       // Desencriptar el video completo en un archivo temporal
       await _decryptVideoToFile(encryptedPath, decryptedPath);
 
-      if (kDebugMode) {
-        print('✅ Video desencriptado exitosamente');
-      }
+      _logger.success('Video desencriptado exitosamente');
 
       // Verificar que el archivo desencriptado existe
       if (!await _decryptedVideoFile!.exists()) {
@@ -155,30 +145,22 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       }
 
       final fileSize = await _decryptedVideoFile!.length();
-      if (kDebugMode) {
-        print('📊 Tamaño del archivo desencriptado: ${fileSize} bytes');
-      }
+      _logger.d('Tamaño del archivo desencriptado: ${fileSize} bytes');
 
       // Inicializar video_player con el archivo desencriptado
-      if (kDebugMode) {
-        print('🎥 Inicializando VideoPlayerController...');
-      }
+      _logger.d('Inicializando VideoPlayerController...');
       _videoController = VideoPlayerController.file(_decryptedVideoFile!);
       await _videoController!.initialize();
 
-      if (kDebugMode) {
-        print('✅ VideoPlayerController inicializado');
-        print('📐 Aspect ratio: ${_videoController!.value.aspectRatio}');
-        print('⏱️ Duración: ${_videoController!.value.duration}');
-      }
+      _logger.d('VideoPlayerController inicializado');
+      _logger.d('Aspect ratio: ${_videoController!.value.aspectRatio}');
+      _logger.d('Duración: ${_videoController!.value.duration}');
 
       // Cargar última posición
       await _getLastPosition();
 
       // Crear ChewieController para controles personalizados
-      if (kDebugMode) {
-        print('🎮 Creando ChewieController...');
-      }
+      _logger.d('Creando ChewieController...');
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
         autoPlay: true,
@@ -188,9 +170,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         showControls: true,
         aspectRatio: _videoController!.value.aspectRatio,
         errorBuilder: (context, errorMessage) {
-          if (kDebugMode) {
-            print('❌ Error en Chewie: $errorMessage');
-          }
+          _logger.e('Error en Chewie: $errorMessage');
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -204,7 +184,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
                 const SizedBox(height: 8),
                 Text(
                   errorMessage,
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -213,9 +193,7 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         },
       );
 
-      if (kDebugMode) {
-        print('✅ ChewieController creado exitosamente');
-      }
+      _logger.success('ChewieController creado exitosamente');
 
       // Escuchar cambios de posición para guardar progreso
       _videoController!.addListener(_onVideoPositionChanged);
@@ -228,15 +206,10 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
           _isInitializing = false;
         });
         widget.onVideoReady?.call();
-        if (kDebugMode) {
-          print('🎉 Reproductor offline inicializado completamente');
-        }
+        _logger.success('Reproductor offline inicializado completamente');
       }
     } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Error inicializando reproductor offline: $e');
-        print('📚 Stack trace: $stackTrace');
-      }
+      _logger.e('Error inicializando reproductor offline', e, stackTrace);
       if (mounted) {
         setState(() {
           _isInitializing = false;
@@ -261,18 +234,14 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
     String decryptedPath,
   ) async {
     try {
-      if (kDebugMode) {
-        print('🔓 Iniciando desencriptación...');
-      }
+      _logger.d('Iniciando desencriptación...');
 
       final decryptedFile = File(decryptedPath);
 
       // Eliminar archivo si ya existe
       if (await decryptedFile.exists()) {
         await decryptedFile.delete();
-        if (kDebugMode) {
-          print('🗑️ Archivo temporal anterior eliminado');
-        }
+        _logger.d('Archivo temporal anterior eliminado');
       }
 
       final outputStream = decryptedFile.openWrite();
@@ -286,70 +255,65 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         chunkCount++;
         totalBytes += chunk.length;
 
-        if (kDebugMode && chunkCount % 100 == 0) {
-          print('📦 Chunks procesados: $chunkCount, bytes: $totalBytes');
+        if (chunkCount % 100 == 0) {
+          _logger.d('Chunks procesados: $chunkCount, bytes: $totalBytes');
         }
       }
 
       await outputStream.close();
 
-      if (kDebugMode) {
-        print(
-          '✅ Desencriptación completada: $chunkCount chunks, $totalBytes bytes',
+      _logger.success(
+        'Desencriptación completada: $chunkCount chunks, $totalBytes bytes',
+      );
+      final fileSize = await decryptedFile.length();
+      _logger.d('Tamaño final del archivo: $fileSize bytes');
+
+      // Verificar que el tamaño coincide
+      if (fileSize != totalBytes) {
+        _logger.w(
+          'Advertencia: El tamaño del archivo ($fileSize) no coincide con los bytes escritos ($totalBytes)',
         );
-        final fileSize = await decryptedFile.length();
-        print('📊 Tamaño final del archivo: $fileSize bytes');
+      }
 
-        // Verificar que el tamaño coincide
-        if (fileSize != totalBytes) {
-          print(
-            '⚠️ Advertencia: El tamaño del archivo ($fileSize) no coincide con los bytes escritos ($totalBytes)',
-          );
+      // Verificar que el archivo tiene la firma MP4 (debe empezar con "ftyp" o "moov")
+      final firstBytes = await decryptedFile.openRead(0, 12).first;
+      final firstBytesList = firstBytes.toList();
+
+      // Buscar "ftyp" o "moov" en los primeros bytes
+      String? signature;
+      for (int i = 0; i <= firstBytesList.length - 4; i++) {
+        final candidate = String.fromCharCodes(
+          firstBytesList.sublist(i, i + 4),
+        );
+        if (candidate == 'ftyp' || candidate == 'moov') {
+          signature = candidate;
+          break;
         }
+      }
 
-        // Verificar que el archivo tiene la firma MP4 (debe empezar con "ftyp" o "moov")
-        final firstBytes = await decryptedFile.openRead(0, 12).first;
-        final firstBytesList = firstBytes.toList();
+      if (signature != null) {
+        _logger.d('Firma del archivo encontrada: $signature');
+      } else {
+        // Mostrar los primeros bytes en hex para diagnóstico
+        final hexSignature = firstBytesList
+            .take(16)
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join(' ');
+        _logger.e('ERROR: El archivo no tiene firma MP4 válida (ftyp/moov)');
+        _logger.e('Primeros 16 bytes (hex): $hexSignature');
+        _logger.e(
+          'Primeros 16 bytes (ascii): ${String.fromCharCodes(firstBytesList.take(16).where((b) => b >= 32 && b <= 126))}',
+        );
 
-        // Buscar "ftyp" o "moov" en los primeros bytes
-        String? signature;
-        for (int i = 0; i <= firstBytesList.length - 4; i++) {
-          final candidate = String.fromCharCodes(
-            firstBytesList.sublist(i, i + 4),
-          );
-          if (candidate == 'ftyp' || candidate == 'moov') {
-            signature = candidate;
-            break;
-          }
-        }
-
-        if (signature != null) {
-          print('📋 Firma del archivo encontrada: $signature');
-        } else {
-          // Mostrar los primeros bytes en hex para diagnóstico
-          final hexSignature = firstBytesList
-              .take(16)
-              .map((b) => b.toRadixString(16).padLeft(2, '0'))
-              .join(' ');
-          print('❌ ERROR: El archivo no tiene firma MP4 válida (ftyp/moov)');
-          print('📋 Primeros 16 bytes (hex): $hexSignature');
-          print(
-            '📋 Primeros 16 bytes (ascii): ${String.fromCharCodes(firstBytesList.take(16).where((b) => b >= 32 && b <= 126))}',
-          );
-
-          // Lanzar error para que el usuario sepa que el archivo está corrupto
-          throw Exception(
-            'El archivo desencriptado está corrupto. No se encontró la firma MP4 válida. '
-            'Esto puede deberse a que el archivo original descargado de YouTube estaba corrupto. '
-            'Por favor, elimina este video descargado y vuelve a descargarlo.',
-          );
-        }
+        // Lanzar error para que el usuario sepa que el archivo está corrupto
+        throw Exception(
+          'El archivo desencriptado está corrupto. No se encontró la firma MP4 válida. '
+          'Esto puede deberse a que el archivo original descargado de YouTube estaba corrupto. '
+          'Por favor, elimina este video descargado y vuelve a descargarlo.',
+        );
       }
     } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Error en desencriptación: $e');
-        print('📚 Stack trace: $stackTrace');
-      }
+      _logger.e('Error en desencriptación', e, stackTrace);
       throw Exception('Error desencriptando video: $e');
     }
   }
@@ -373,8 +337,8 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         _lastSavedProgress =
             lastPosition / _videoController!.value.duration.inSeconds;
       }
-    } catch (e) {
-      print('Error obteniendo última posición: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo última posición', e, stackTrace);
     }
   }
 
@@ -431,19 +395,19 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
           widget.video.videoId,
           progressPercentage,
         );
-        if (kDebugMode) {
-          print(
-            '📊 Progreso actualizado en LeccionesProvider (offline): ${progressPercentage.toStringAsFixed(1)}%',
-          );
-        }
-      } catch (e) {
+        _logger.d(
+          'Progreso actualizado en LeccionesProvider (offline): ${progressPercentage.toStringAsFixed(1)}%',
+        );
+      } catch (e, stackTrace) {
         // Si no hay provider disponible (puede pasar en algunos contextos), ignorar
-        if (kDebugMode) {
-          print('⚠️ No se pudo actualizar LeccionesProvider (offline): $e');
-        }
+        _logger.w(
+          'No se pudo actualizar LeccionesProvider (offline)',
+          e,
+          stackTrace,
+        );
       }
-    } catch (e) {
-      print('Error guardando progreso: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando progreso', e, stackTrace);
     }
   }
 
@@ -458,8 +422,8 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         widget.video.videoId,
       );
       widget.onVideoCompleted?.call();
-    } catch (e) {
-      print('Error marcando video como completado: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error marcando video como completado', e, stackTrace);
     }
   }
 
@@ -490,10 +454,8 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
           .then((_) {
             // Archivo eliminado exitosamente
           })
-          .catchError((e) {
-            if (kDebugMode) {
-              print('Error eliminando archivo temporal: $e');
-            }
+          .catchError((e, stackTrace) {
+            _logger.e('Error eliminando archivo temporal', e, stackTrace);
           });
     }
 
@@ -541,14 +503,10 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       if (_videoController != null) {
         _videoController!.seekTo(Duration.zero);
         _videoController!.play();
-        if (kDebugMode) {
-          print('🔄 Reiniciando video offline desde el principio');
-        }
+        _logger.d('Reiniciando video offline desde el principio');
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error reiniciando video offline: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('Error reiniciando video offline', e, stackTrace);
     }
   }
 }

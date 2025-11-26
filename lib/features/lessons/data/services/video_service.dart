@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/video.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class VideoService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final AppLogger _logger = getIt<AppLogger>();
 
   static Future<List<Video>> getVideos() async {
     try {
@@ -39,8 +42,8 @@ class VideoService {
       });
 
       return videos;
-    } catch (e) {
-      print('Error al obtener videos desde Firebase: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error al obtener videos desde Firebase', e, stackTrace);
       // En caso de error, devolver lista vacía
       return [];
     }
@@ -76,8 +79,12 @@ class VideoService {
       videos.sort((a, b) => a.videoId.compareTo(b.videoId));
 
       return videos;
-    } catch (e) {
-      print('Error al obtener videos de la lección $lessonNumber: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error al obtener videos de la lección $lessonNumber',
+        e,
+        stackTrace,
+      );
       return [];
     }
   }
@@ -109,8 +116,8 @@ class VideoService {
         );
       }
       return null;
-    } catch (e) {
-      print('Error al obtener video con ID $videoId: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error al obtener video con ID $videoId', e, stackTrace);
       return null;
     }
   }

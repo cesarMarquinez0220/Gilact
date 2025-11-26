@@ -1,30 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Servicio especializado para manejar las subcolecciones del usuario
 @singleton
 class UserSubcollectionsService {
   final FirebaseFirestore _firestore;
+  final AppLogger _logger;
 
-  UserSubcollectionsService(this._firestore);
+  UserSubcollectionsService(this._firestore, this._logger);
 
   /// Crea las subcolecciones necesarias para un usuario
   Future<void> createUserSubcollections(String userId) async {
     try {
-      print(
-        '🔧 UserSubcollectionsService: Creando subcolecciones para usuario: $userId',
+      _logger.d(
+        'UserSubcollectionsService: Creando subcolecciones para usuario: $userId',
       );
 
       // Solo crear subcolección 'situacion' para información de la situación
       await _createSituacionSubcollection(userId);
 
       // La subcolección 'videos' se creará dinámicamente cuando el usuario pausa por primera vez
-      print(
-        '✅ UserSubcollectionsService: Subcolección situacion creada exitosamente',
+      _logger.success(
+        'UserSubcollectionsService: Subcolección situacion creada exitosamente',
       );
-    } catch (e) {
-      print('❌ UserSubcollectionsService: Error creando subcolecciones: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'UserSubcollectionsService: Error creando subcolecciones',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -32,7 +38,7 @@ class UserSubcollectionsService {
   /// Crea la subcolección 'situacion' para información de la situación
   Future<void> _createSituacionSubcollection(String userId) async {
     // La subcolección se creará automáticamente cuando se agreguen documentos
-    print('👶 Subcolección situacion preparada');
+    _logger.d('Subcolección situacion preparada');
   }
 
   /// Guarda la selección temporal de situación (antes de completar formularios)
@@ -41,9 +47,9 @@ class UserSubcollectionsService {
       // Guardar en SharedPreferences como selección temporal
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('temp_situation_$userId', situation);
-      print('✅ Selección temporal guardada: $situation');
-    } catch (e) {
-      print('❌ Error guardando selección temporal: $e');
+      _logger.success('Selección temporal guardada: $situation');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando selección temporal', e, stackTrace);
       rethrow;
     }
   }
@@ -53,8 +59,8 @@ class UserSubcollectionsService {
     try {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString('temp_situation_$userId');
-    } catch (e) {
-      print('❌ Error obteniendo selección temporal: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo selección temporal', e, stackTrace);
       return null;
     }
   }
@@ -64,9 +70,9 @@ class UserSubcollectionsService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('temp_situation_$userId');
-      print('✅ Selección temporal limpiada');
-    } catch (e) {
-      print('❌ Error limpiando selección temporal: $e');
+      _logger.success('Selección temporal limpiada');
+    } catch (e, stackTrace) {
+      _logger.e('Error limpiando selección temporal', e, stackTrace);
     }
   }
 
@@ -91,9 +97,9 @@ class UserSubcollectionsService {
       });
 
       await batch.commit();
-      print('✅ Situación guardada exitosamente: $situation');
-    } catch (e) {
-      print('❌ Error guardando situación: $e');
+      _logger.success('Situación guardada exitosamente: $situation');
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando situación', e, stackTrace);
       rethrow;
     }
   }
@@ -109,8 +115,8 @@ class UserSubcollectionsService {
           .get();
 
       return situacionDoc.exists;
-    } catch (e) {
-      print('❌ Error verificando subcolecciones: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando subcolecciones', e, stackTrace);
       return false;
     }
   }
@@ -129,8 +135,8 @@ class UserSubcollectionsService {
         return doc.data()?['situationType'] as String?;
       }
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo situación actual: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo situación actual', e, stackTrace);
       return null;
     }
   }
@@ -140,8 +146,8 @@ class UserSubcollectionsService {
     try {
       // Si userId parece ser un email, buscar por email primero
       if (userId.contains('@')) {
-        print(
-          '🔍 UserSubcollectionsService: Buscando usuario por email: $userId',
+        _logger.d(
+          'UserSubcollectionsService: Buscando usuario por email: $userId',
         );
 
         // Buscar el documento del usuario por email
@@ -153,8 +159,8 @@ class UserSubcollectionsService {
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print(
-            '🔍 UserSubcollectionsService: Usuario encontrado con ID: $userDocId',
+          _logger.d(
+            'UserSubcollectionsService: Usuario encontrado con ID: $userDocId',
           );
 
           // Ahora buscar la información de situación usando el ID real del usuario
@@ -166,21 +172,25 @@ class UserSubcollectionsService {
               .get();
 
           if (doc.exists) {
-            print(
-              '✅ UserSubcollectionsService: Documento de situación encontrado',
+            _logger.success(
+              'UserSubcollectionsService: Documento de situación encontrado',
             );
             return doc.data();
           } else {
-            print(
-              '⚠️ UserSubcollectionsService: Documento de situación no existe',
+            _logger.w(
+              'UserSubcollectionsService: Documento de situación no existe',
             );
           }
         } else {
-          print('❌ UserSubcollectionsService: Usuario no encontrado por email');
+          _logger.e(
+            'UserSubcollectionsService: Usuario no encontrado por email',
+          );
         }
       } else {
         // Si userId no es un email, usar directamente como ID
-        print('🔍 UserSubcollectionsService: Buscando usuario por ID: $userId');
+        _logger.d(
+          'UserSubcollectionsService: Buscando usuario por ID: $userId',
+        );
 
         final doc = await _firestore
             .collection('Users')
@@ -195,8 +205,8 @@ class UserSubcollectionsService {
       }
 
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo datos de situación: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo datos de situación', e, stackTrace);
       return null;
     }
   }
@@ -207,7 +217,7 @@ class UserSubcollectionsService {
     Map<String, dynamic> formData,
   ) async {
     try {
-      print('🎯 Completando proceso de onboarding para usuario: $userId');
+      _logger.d('Completando proceso de onboarding para usuario: $userId');
 
       // Obtener la situación temporal
       final tempSituation = await getTemporarySituation(userId);
@@ -224,9 +234,9 @@ class UserSubcollectionsService {
       // Limpiar selección temporal
       await clearTemporarySituation(userId);
 
-      print('✅ Proceso de onboarding completado exitosamente');
-    } catch (e) {
-      print('❌ Error completando proceso de onboarding: $e');
+      _logger.success('Proceso de onboarding completado exitosamente');
+    } catch (e, stackTrace) {
+      _logger.e('Error completando proceso de onboarding', e, stackTrace);
       rethrow;
     }
   }
@@ -280,11 +290,15 @@ class UserSubcollectionsService {
       batch.set(seleccionRef, seleccionData);
 
       await batch.commit();
-      print(
-        '✅ Situación con datos de formulario guardada exitosamente: $situation',
+      _logger.success(
+        'Situación con datos de formulario guardada exitosamente: $situation',
       );
-    } catch (e) {
-      print('❌ Error guardando situación con datos de formulario: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error guardando situación con datos de formulario',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }

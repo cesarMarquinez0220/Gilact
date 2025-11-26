@@ -17,6 +17,8 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
 import '../../../gamification/domain/services/gamification_service.dart';
 import 'package:get_it/get_it.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class LessonVideosPage extends StatefulWidget {
   final List<Video> videos;
@@ -34,6 +36,7 @@ class LessonVideosPage extends StatefulWidget {
 
 class _LessonVideosPageState extends State<LessonVideosPage>
     with WidgetsBindingObserver {
+  final AppLogger _logger = getIt<AppLogger>();
   List<Video>? _videos;
   int lastCompletedLesson = 0;
   DateTime? _lastProgressLoad;
@@ -66,7 +69,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     super.didChangeAppLifecycleState(state);
     // Recargar progreso cuando la app vuelve al foreground
     if (state == AppLifecycleState.resumed) {
-    _loadProgressFromFirestore();
+      _loadProgressFromFirestore();
     }
   }
 
@@ -97,18 +100,14 @@ class _LessonVideosPageState extends State<LessonVideosPage>
           leccionesProvider.getProgresoVideo(1) > 0;
 
       if (hasProgress) {
-        if (kDebugMode) {
-          print('✅ Progreso de lecciones ya está cargado, omitiendo carga');
-        }
+        _logger.d('Progreso de lecciones ya está cargado, omitiendo carga');
         return;
       }
 
       // Si no hay progreso, cargarlo desde Firestore
       await _loadProgressFromFirestore(force: true);
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error verificando progreso: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.w('Error verificando progreso', e, stackTrace);
       // Si hay error, intentar cargar de todas formas
       await _loadProgressFromFirestore(force: true);
     }
@@ -118,9 +117,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   Future<void> _loadProgressFromFirestore({bool force = false}) async {
     // Evitar múltiples llamadas simultáneas
     if (_isLoadingProgress && !force) {
-      if (kDebugMode) {
-        print('⏸️ Carga de progreso ya en curso, omitiendo...');
-      }
+      _logger.d('Carga de progreso ya en curso, omitiendo...');
       return;
     }
 
@@ -131,11 +128,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       if (!force) {
         if (_lastProgressLoad != null &&
             now.difference(_lastProgressLoad!) < _progressLoadCooldown) {
-          if (kDebugMode) {
-            print(
-              '⏸️ Recarga de progreso omitida (cooldown activo: ${now.difference(_lastProgressLoad!).inSeconds}s)',
-            );
-          }
+          _logger.d(
+            'Recarga de progreso omitida (cooldown activo: ${now.difference(_lastProgressLoad!).inSeconds}s)',
+          );
           return;
         }
       }
@@ -146,9 +141,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
         final userId = authState.user.id;
         final leccionesProvider = context.read<LeccionesProvider>();
 
-        if (kDebugMode) {
-          print('📊 Iniciando carga de progreso desde Firestore...');
-        }
+        _logger.d('Iniciando carga de progreso desde Firestore...');
 
         await leccionesProvider.loadProgressFromFirestore(userId);
         _lastProgressLoad = now;
@@ -157,16 +150,12 @@ class _LessonVideosPageState extends State<LessonVideosPage>
         if (mounted) {
           setState(() {}); // Forzar actualización de la UI
         }
-        if (kDebugMode) {
-          print(
-            '✅ Progreso cargado desde Firestore (${force ? "forzado" : "normal"})',
-          );
-        }
+        _logger.success(
+          'Progreso cargado desde Firestore (${force ? "forzado" : "normal"})',
+        );
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error cargando progreso al entrar a lecciones: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.w('Error cargando progreso al entrar a lecciones', e, stackTrace);
     } finally {
       _isLoadingProgress = false;
     }
@@ -195,9 +184,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     int duracionId,
     String videoURL,
   ) async {
-    if (kDebugMode) {
-      print("ID del video enviado al reproductor es: $videoId");
-    }
+    _logger.d("ID del video enviado al reproductor es: $videoId");
 
     // Obtener el nombre de imagen correcto usando el Provider
     final videoImagesProvider = Provider.of<VideoImagesProvider>(
@@ -206,9 +193,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     );
     final imageName = videoImagesProvider.getImageNameForVideo(videoId);
 
-    if (kDebugMode) {
-      print("📸 Imagen seleccionada para video $videoId: $imageName");
-    }
+    _logger.d("Imagen seleccionada para video $videoId: $imageName");
 
     // Convertir Video de lessons a Video de videos
     final video = video_entity.Video(
@@ -305,9 +290,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   Future<void> _refreshVideoProgress() async {
     // Recargar el progreso completo desde Firestore cuando se regresa del reproductor
     await _loadProgressFromFirestore(force: true);
-        if (kDebugMode) {
-          print('🔄 Progreso recargado desde Firestore después de ver video');
-    }
+    _logger.d('Progreso recargado desde Firestore después de ver video');
   }
 
   @override
@@ -457,57 +440,57 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       builder: (context, snapshot) {
         final isLocked = lessonId > 1 && (snapshot.data ?? false) == false;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título de la lección
-          Container(
+        return Container(
+          margin: const EdgeInsets.only(bottom: 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Título de la lección
+              Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 15,
                 ),
-            decoration: BoxDecoration(
+                decoration: BoxDecoration(
                   color: isLocked
                       ? Colors.grey.withValues(alpha: 0.3)
                       : Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: isLocked
                         ? Colors.grey.withValues(alpha: 0.5)
                         : Colors.white.withValues(alpha: 0.3),
                   ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
                         Expanded(
                           child: Text(
-                  '${'lessons.lesson'.tr()} $lessonId',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                            '${'lessons.lesson'.tr()} $lessonId',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                               color: isLocked ? Colors.grey[300] : Colors.white,
-                  ),
+                            ),
                           ),
                         ),
                         if (isLocked)
                           const Icon(Icons.lock, color: Colors.grey, size: 20),
                       ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  _getSubtitleForLesson(lessonId),
-                  style: GoogleFonts.quicksand(
-                    fontSize: 14,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      _getSubtitleForLesson(lessonId),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
                         color: isLocked
                             ? Colors.grey[400]
                             : Colors.white.withValues(alpha: 0.8),
-                  ),
-                ),
+                      ),
+                    ),
                     if (isLocked) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -519,11 +502,11 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                         ),
                       ),
                     ],
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
 
-          const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Camino de videos (bloqueado si la lección está bloqueada)
               Opacity(
@@ -538,9 +521,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
 
               // Botón de trivia (requisito antes de avanzar)
               if (!isLocked) _buildTriviaButton(lessonId, videos),
-        ],
-      ),
-    );
+            ],
+          ),
+        );
       },
     );
   }
@@ -589,11 +572,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final isAvailable = _isVideoAvailable(video, index);
 
     // Log para debugging del progreso (más detallado)
-    if (kDebugMode) {
-      print(
-        '📊 Video ${video.videoId}: Disponible=$isAvailable, Completado=$isCompleted, Progreso=${progress.toStringAsFixed(1)}%',
-      );
-    }
+    _logger.d(
+      'Video ${video.videoId}: Disponible=$isAvailable, Completado=$isCompleted, Progreso=${progress.toStringAsFixed(1)}%',
+    );
 
     // Tamaño dinámico del nodo
     final nodeSize = isCompleted
@@ -631,9 +612,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                 strokeWidth: 4,
                 backgroundColor: Colors.transparent,
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                   Color(
-                    0xFFFF9800,
-                  ), // Naranja vibrante para mejor visibilidad
+                  Color(0xFFFF9800), // Naranja vibrante para mejor visibilidad
                 ),
               ),
             ),
@@ -902,7 +881,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final isCompleted = await _isTriviaCompleted(lessonId);
     if (isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+        SnackBar(
           content: Text('trivia.alreadyCompleted'.tr()),
           backgroundColor: Colors.green,
         ),

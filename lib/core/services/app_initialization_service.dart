@@ -12,6 +12,8 @@ import 'package:get_it/get_it.dart';
 import '../../features/user/presentation/bloc/user_profile_bloc.dart';
 import '../../features/lactation/presentation/providers/lactation_provider.dart';
 import '../../main.dart' show navigatorKey;
+import 'app_logger.dart';
+import '../di/injection.dart';
 
 /// Servicio para refrescar el estado de la aplicación (perfil, situación,
 /// notificaciones) y navegar a Home sin pasar por la pantalla de Welcome.
@@ -63,6 +65,7 @@ class AppInitializationService {
       // 4) Cargar situación y actualizar BLoC
       final userSubcollectionsService = UserSubcollectionsService(
         FirebaseFirestore.instance,
+        getIt<AppLogger>(),
       );
       final situationData = await userSubcollectionsService
           .getUserSituationData(userId);
@@ -158,16 +161,22 @@ class AppInitializationService {
             context,
             listen: false,
           );
-          print(
-            '🔄 AppInitializationService: Refrescando datos de lactancia desde contexto...',
+          final logger = getIt<AppLogger>();
+          logger.d(
+            'AppInitializationService: Refrescando datos de lactancia desde contexto...',
           );
           await lactationProvider.refreshTodayData();
           await lactationProvider.loadWeekData();
-          print('✅ AppInitializationService: Datos de lactancia refrescados');
+          logger.success(
+            'AppInitializationService: Datos de lactancia refrescados',
+          );
           return;
-        } catch (e) {
-          print(
-            '⚠️ AppInitializationService: Error obteniendo provider del contexto: $e',
+        } catch (e, stackTrace) {
+          final logger = getIt<AppLogger>();
+          logger.w(
+            'AppInitializationService: Error obteniendo provider del contexto',
+            e,
+            stackTrace,
           );
           // Si no está disponible aún, esperar un poco más e intentar nuevamente
           await Future.delayed(const Duration(milliseconds: 300));
@@ -176,25 +185,30 @@ class AppInitializationService {
               context,
               listen: false,
             );
-            print(
-              '🔄 AppInitializationService: Refrescando datos de lactancia (segundo intento)...',
+            logger.d(
+              'AppInitializationService: Refrescando datos de lactancia (segundo intento)...',
             );
             await lactationProvider.refreshTodayData();
             await lactationProvider.loadWeekData();
-            print(
-              '✅ AppInitializationService: Datos de lactancia refrescados (segundo intento)',
+            logger.success(
+              'AppInitializationService: Datos de lactancia refrescados (segundo intento)',
             );
             return;
-          } catch (e2) {
-            print(
-              '⚠️ AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
+          } catch (e2, stackTrace2) {
+            logger.w(
+              'AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
+              e2,
+              stackTrace2,
             );
           }
         }
       }
-    } catch (e) {
-      print(
-        '⚠️ AppInitializationService: Error refrescando datos de lactancia: $e',
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.w(
+        'AppInitializationService: Error refrescando datos de lactancia',
+        e,
+        stackTrace,
       );
     }
   }
@@ -227,16 +241,18 @@ class _NotificationVerificationManager {
       (_) => _verifyNotifications(),
     );
 
-    print(
-      '✅ AppInitializationService: Verificación periódica de notificaciones iniciada',
+    final logger = getIt<AppLogger>();
+    logger.success(
+      'AppInitializationService: Verificación periódica de notificaciones iniciada',
     );
   }
 
   static void stop() {
     _timer?.cancel();
     _timer = null;
-    print(
-      '🛑 AppInitializationService: Verificación periódica de notificaciones detenida',
+    final logger = getIt<AppLogger>();
+    logger.d(
+      'AppInitializationService: Verificación periódica de notificaciones detenida',
     );
   }
 
@@ -250,14 +266,20 @@ class _NotificationVerificationManager {
         final sleepNotificationService =
             GetIt.instance<SleepNotificationService>();
         await sleepNotificationService.verifyAndRescheduleIfNeeded();
-      } catch (e) {
-        print(
-          '⚠️ AppInitializationService: Error verificando notificaciones de sueño: $e',
+      } catch (e, stackTrace) {
+        final logger = getIt<AppLogger>();
+        logger.w(
+          'AppInitializationService: Error verificando notificaciones de sueño',
+          e,
+          stackTrace,
         );
       }
-    } catch (e) {
-      print(
-        '⚠️ AppInitializationService: Error verificando notificaciones: $e',
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.w(
+        'AppInitializationService: Error verificando notificaciones',
+        e,
+        stackTrace,
       );
     }
   }

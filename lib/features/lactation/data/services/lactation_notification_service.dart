@@ -5,6 +5,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import 'notification_handler.dart';
 import 'sleep_notification_service.dart';
 
@@ -18,6 +20,7 @@ class LactationNotificationService {
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
+  final AppLogger _logger = getIt<AppLogger>();
   bool _isInitialized = false;
 
   // MethodChannel para programar alarmas nativas (funciona incluso con app cerrada)
@@ -66,7 +69,7 @@ class LactationNotificationService {
     );
 
     _isInitialized = true;
-    print('🔔 LactationNotificationService: Servicio inicializado');
+    _logger.d('LactationNotificationService: Servicio inicializado');
   }
 
   /// Calcula el intervalo de lactancia recomendado basado en la edad del bebé
@@ -132,8 +135,8 @@ class LactationNotificationService {
         ?.requestNotificationsPermission();
 
     if (granted != true) {
-      print(
-        '❌ LactationNotificationService: Permisos de notificación NO concedidos',
+      _logger.e(
+        'LactationNotificationService: Permisos de notificación NO concedidos',
       );
       return;
     }
@@ -141,32 +144,32 @@ class LactationNotificationService {
     // Calcular intervalo de lactancia basado en la edad del bebé
     final lactationInterval = calculateLactationInterval(babyBirthDate);
 
-    print(
-      '🔔 LactationNotificationService: Intervalo calculado basado en edad del bebé: ${lactationInterval.inHours}h ${lactationInterval.inMinutes.remainder(60)}m',
+    _logger.d(
+      'LactationNotificationService: Intervalo calculado basado en edad del bebé: ${lactationInterval.inHours}h ${lactationInterval.inMinutes.remainder(60)}m',
     );
 
     // Calcular tiempo de notificación según el intervalo calculado
     final notificationTime = lastFeedTime.add(lactationInterval);
     final now = tz.TZDateTime.now(tz.local);
 
-    print(
-      '🔔 LactationNotificationService: Última toma: ${lastFeedTime.toString()}',
+    _logger.d(
+      'LactationNotificationService: Última toma: ${lastFeedTime.toString()}',
     );
-    print(
-      '🔔 LactationNotificationService: Intervalo: ${lactationInterval.inMinutes} minutos',
+    _logger.d(
+      'LactationNotificationService: Intervalo: ${lactationInterval.inMinutes} minutos',
     );
-    print('🔔 LactationNotificationService: Hora actual: ${now.toString()}');
-    print(
-      '🔔 LactationNotificationService: Hora programada: ${notificationTime.toString()}',
+    _logger.d('LactationNotificationService: Hora actual: ${now.toString()}');
+    _logger.d(
+      'LactationNotificationService: Hora programada: ${notificationTime.toString()}',
     );
-    print(
-      '🔔 LactationNotificationService: Tiempo hasta notificación: ${notificationTime.difference(now).inMinutes} minutos',
+    _logger.d(
+      'LactationNotificationService: Tiempo hasta notificación: ${notificationTime.difference(now).inMinutes} minutos',
     );
 
     // Si el tiempo ya pasó, no programar
     if (notificationTime.isBefore(now)) {
-      print(
-        '⚠️ LactationNotificationService: El tiempo de notificación ya pasó, no se programará',
+      _logger.w(
+        'LactationNotificationService: El tiempo de notificación ya pasó, no se programará',
       );
       return;
     }
@@ -195,8 +198,8 @@ class LactationNotificationService {
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
-      color: const Color(0xFF4FD1C7),
-      ledColor: const Color(0xFF4FD1C7),
+      color: Color(0xFF4FD1C7),
+      ledColor: Color(0xFF4FD1C7),
       ledOnMs: 1000,
       ledOffMs: 500,
       // Configurar para que no se elimine automáticamente
@@ -221,8 +224,8 @@ class LactationNotificationService {
 
     // Intentar programar con método nativo primero
     try {
-      print(
-        '🔔 LactationNotificationService: Intentando programar con método NATIVO (funciona con app cerrada)...',
+      _logger.d(
+        'LactationNotificationService: Intentando programar con método NATIVO (funciona con app cerrada)...',
       );
 
       // Convertir la fecha programada a timestamp en milisegundos
@@ -243,8 +246,8 @@ class LactationNotificationService {
           });
 
       if (result == true) {
-        print(
-          '✅ LactationNotificationService: Notificación programada con método NATIVO',
+        _logger.success(
+          'LactationNotificationService: Notificación programada con método NATIVO',
         );
         scheduledSuccessfully = true;
 
@@ -258,11 +261,13 @@ class LactationNotificationService {
         // Iniciar verificación periódica cada minuto para detectar si no se disparó
         _startNotificationCheckTimer(notificationId, scheduledTime);
       }
-    } catch (e) {
-      print(
-        '⚠️ LactationNotificationService: Error programando con método nativo: $e',
+    } catch (e, stackTrace) {
+      _logger.w(
+        'LactationNotificationService: Error programando con método nativo',
+        e,
+        stackTrace,
       );
-      print('⚠️ Intentando con flutter_local_notifications como fallback...');
+      _logger.w('Intentando con flutter_local_notifications como fallback...');
       scheduledSuccessfully = false;
     }
 
@@ -281,8 +286,8 @@ class LactationNotificationService {
           payload: 'lactation_reminder_${lastFeedTime.millisecondsSinceEpoch}',
         );
 
-        print(
-          '✅ LactationNotificationService: Notificación programada para ${scheduledTime.toString()}',
+        _logger.success(
+          'LactationNotificationService: Notificación programada para ${scheduledTime.toString()}',
         );
 
         // Verificar que se programó correctamente
@@ -301,24 +306,26 @@ class LactationNotificationService {
               .toList();
           if (ourNotificationList.isNotEmpty) {
             final ourNotification = ourNotificationList.first;
-            print(
-              '✅ LactationNotificationService: Notificación verificada en lista pendiente:',
+            _logger.success(
+              'LactationNotificationService: Notificación verificada en lista pendiente:',
             );
-            print('   ID: ${ourNotification.id}');
-            print('   Título: ${ourNotification.title}');
-            print('   Cuerpo: ${ourNotification.body}');
+            _logger.d('   ID: ${ourNotification.id}');
+            _logger.d('   Título: ${ourNotification.title}');
+            _logger.d('   Cuerpo: ${ourNotification.body}');
           } else {
-            print(
-              '❌ LactationNotificationService: ERROR - Notificación NO encontrada en lista pendiente después de programar',
+            _logger.e(
+              'LactationNotificationService: ERROR - Notificación NO encontrada en lista pendiente después de programar',
             );
           }
         }
 
         // Iniciar verificación periódica cada minuto para detectar si no se disparó
         _startNotificationCheckTimer(notificationId, scheduledTime);
-      } catch (e) {
-        print(
-          '❌ LactationNotificationService: Error programando notificación: $e',
+      } catch (e, stackTrace) {
+        _logger.e(
+          'LactationNotificationService: Error programando notificación',
+          e,
+          stackTrace,
         );
         // Intentar con modo inexacto si falla el modo exacto
         try {
@@ -334,12 +341,14 @@ class LactationNotificationService {
             payload:
                 'lactation_reminder_${lastFeedTime.millisecondsSinceEpoch}',
           );
-          print(
-            '✅ LactationNotificationService: Notificación programada (modo inexacto)',
+          _logger.success(
+            'LactationNotificationService: Notificación programada (modo inexacto)',
           );
-        } catch (e2) {
-          print(
-            '❌ LactationNotificationService: Error programando notificación (modo inexacto): $e2',
+        } catch (e2, stackTrace2) {
+          _logger.e(
+            'LactationNotificationService: Error programando notificación (modo inexacto)',
+            e2,
+            stackTrace2,
           );
         }
       }
@@ -377,8 +386,8 @@ class LactationNotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('lactation_notification_$notificationId');
     await prefs.remove('lactation_notification_${notificationId}_feed_time');
-    print(
-      '🔔 LactationNotificationService: Notificación $notificationId cancelada',
+    _logger.d(
+      'LactationNotificationService: Notificación $notificationId cancelada',
     );
   }
 
@@ -402,8 +411,8 @@ class LactationNotificationService {
       }
     }
 
-    print(
-      '🔔 LactationNotificationService: Todas las notificaciones canceladas',
+    _logger.d(
+      'LactationNotificationService: Todas las notificaciones canceladas',
     );
   }
 
@@ -476,8 +485,8 @@ class LactationNotificationService {
 
           // Solo reprogramar si el tiempo programado aún no ha pasado
           if (scheduledTime.isAfter(now)) {
-            print(
-              '🔄 LactationNotificationService: Reprogramando notificación eliminada $notificationId',
+            _logger.d(
+              'LactationNotificationService: Reprogramando notificación eliminada $notificationId',
             );
             await scheduleLactationReminder(lastFeedTime: feedTime);
           } else {
@@ -489,9 +498,11 @@ class LactationNotificationService {
           }
         }
       }
-    } catch (e) {
-      print(
-        '❌ LactationNotificationService: Error verificando notificaciones: $e',
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LactationNotificationService: Error verificando notificaciones',
+        e,
+        stackTrace,
       );
     }
   }
@@ -515,16 +526,18 @@ class LactationNotificationService {
 
       if (!hasSleepNotification) {
         // La notificación de sueño fue eliminada, reprogramarla
-        print(
-          '🔄 LactationNotificationService: Reprogramando notificación de sueño eliminada',
+        _logger.d(
+          'LactationNotificationService: Reprogramando notificación de sueño eliminada',
         );
         // Importar y usar el servicio de notificaciones de sueño
         final sleepService = SleepNotificationService();
         await sleepService.scheduleDailySleepNotification();
       }
-    } catch (e) {
-      print(
-        '❌ LactationNotificationService: Error verificando notificación de sueño: $e',
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LactationNotificationService: Error verificando notificación de sueño',
+        e,
+        stackTrace,
       );
     }
   }
@@ -546,9 +559,11 @@ class LactationNotificationService {
           .where((n) => n.id >= _lactationNotificationIdBase)
           .map((n) => n.id)
           .toList();
-    } catch (e) {
-      print(
-        '❌ LactationNotificationService: Error obteniendo notificaciones pendientes: $e',
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LactationNotificationService: Error obteniendo notificaciones pendientes',
+        e,
+        stackTrace,
       );
       return [];
     }
@@ -584,8 +599,8 @@ class LactationNotificationService {
     _currentNotificationId = notificationId;
     _currentScheduledTime = scheduledTime;
 
-    print(
-      '⏰ LactationNotificationService: Iniciando verificación periódica cada minuto para notificación $notificationId',
+    _logger.d(
+      'LactationNotificationService: Iniciando verificación periódica cada minuto para notificación $notificationId',
     );
 
     // Verificar cada minuto si la notificación debería haberse disparado
@@ -602,14 +617,14 @@ class LactationNotificationService {
         final now = tz.TZDateTime.now(tz.local);
         final diff = _currentScheduledTime!.difference(now);
 
-        print(
-          '⏰ LactationNotificationService: Verificación periódica - Diferencia: ${diff.inMinutes} minutos (${diff.isNegative ? "PASÓ" : "FUTURO"})',
+        _logger.d(
+          'LactationNotificationService: Verificación periódica - Diferencia: ${diff.inMinutes} minutos (${diff.isNegative ? "PASÓ" : "FUTURO"})',
         );
 
         // Si la fecha programada ya pasó (0 minutos o más)
         if (diff.isNegative || diff.inMinutes == 0) {
-          print(
-            '⏰ LactationNotificationService: Verificación periódica - Fecha programada ya pasó o es ahora (${diff.inMinutes} minutos)',
+          _logger.d(
+            'LactationNotificationService: Verificación periódica - Fecha programada ya pasó o es ahora (${diff.inMinutes} minutos)',
           );
 
           // Verificar si la notificación aún está pendiente
@@ -625,16 +640,16 @@ class LactationNotificationService {
               (n) => n.id == _currentNotificationId,
             );
 
-            print(
-              '⏰ LactationNotificationService: Notificación aún pendiente: $isStillPending',
+            _logger.d(
+              'LactationNotificationService: Notificación aún pendiente: $isStillPending',
             );
 
             if (isStillPending) {
-              print(
-                '⚠️ LactationNotificationService: PROBLEMA DETECTADO - Notificación programada NO se disparó!',
+              _logger.w(
+                'LactationNotificationService: PROBLEMA DETECTADO - Notificación programada NO se disparó!',
               );
-              print(
-                '🔄 LactationNotificationService: Mostrando notificación inmediata como fallback...',
+              _logger.d(
+                'LactationNotificationService: Mostrando notificación inmediata como fallback...',
               );
 
               // Cancelar el timer ya que vamos a manejar esto
@@ -664,12 +679,14 @@ class LactationNotificationService {
                   ),
                   payload: 'lactation_reminder_fallback',
                 );
-                print(
-                  '✅ LactationNotificationService: Notificación de fallback mostrada',
+                _logger.success(
+                  'LactationNotificationService: Notificación de fallback mostrada',
                 );
-              } catch (e) {
-                print(
-                  '❌ LactationNotificationService: Error mostrando notificación de fallback: $e',
+              } catch (e, stackTrace) {
+                _logger.e(
+                  'LactationNotificationService: Error mostrando notificación de fallback',
+                  e,
+                  stackTrace,
                 );
               }
 
@@ -678,8 +695,8 @@ class LactationNotificationService {
               _currentScheduledTime = null;
             } else {
               // La notificación ya no está pendiente, probablemente se disparó
-              print(
-                '✅ LactationNotificationService: Notificación ya no está pendiente (probablemente se disparó)',
+              _logger.success(
+                'LactationNotificationService: Notificación ya no está pendiente (probablemente se disparó)',
               );
               timer.cancel();
               _notificationCheckTimer = null;
@@ -689,13 +706,15 @@ class LactationNotificationService {
           }
         } else if (!diff.isNegative && diff.inMinutes <= 5) {
           // Si estamos a menos de 5 minutos de la hora programada, verificar más frecuentemente
-          print(
-            '⏰ LactationNotificationService: Verificación periódica - ${diff.inMinutes} minutos hasta notificación',
+          _logger.d(
+            'LactationNotificationService: Verificación periódica - ${diff.inMinutes} minutos hasta notificación',
           );
         }
-      } catch (e) {
-        print(
-          '❌ LactationNotificationService: Error en verificación periódica: $e',
+      } catch (e, stackTrace) {
+        _logger.e(
+          'LactationNotificationService: Error en verificación periódica',
+          e,
+          stackTrace,
         );
       }
     });

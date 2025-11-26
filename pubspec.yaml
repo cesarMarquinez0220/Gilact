@@ -88,6 +88,7 @@ dependencies:
   youtube_explode_dart: ^2.0.0
   local_auth: ^2.3.0
   audioplayers: ^6.0.0
+  logger: ^2.6.2
 
 dev_dependencies:
   flutter_test:

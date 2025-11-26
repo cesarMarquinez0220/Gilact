@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -8,6 +7,8 @@ import '../../domain/entities/video.dart';
 import '../widgets/advanced_video_player.dart';
 import '../../data/services/video_cache_service.dart';
 import '../../data/services/video_preload_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final Video video;
@@ -28,6 +29,7 @@ class VideoPlayerPage extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
+  final AppLogger _logger = getIt<AppLogger>();
   bool _isVideoPreloaded = false;
   final GlobalKey _playerKey = GlobalKey();
   bool _isNavigatingToNext =
@@ -58,15 +60,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           _isVideoPreloaded = isPreloaded || hasPreloadedController;
         });
 
-        print(
-          '🎬 Video ${widget.video.videoId} precargado: $_isVideoPreloaded',
+        _logger.d(
+          'Video ${widget.video.videoId} precargado: $_isVideoPreloaded',
         );
 
         // Siempre ir directo al reproductor sin pantalla de carga
         _initializeVideoDirectly();
       }
-    } catch (e) {
-      print('Error verificando precarga: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando precarga', e, stackTrace);
       // En caso de error, ir directo al reproductor
       _initializeVideoDirectly();
     }
@@ -81,15 +83,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
-      if (kDebugMode) {
-        print('🔄 Orientación landscape establecida en initState');
-      }
+      _logger.d('Orientación landscape establecida en initState');
     }
   }
 
   void _onVideoReady() {
     if (mounted) {
-      print('🎬 Video ${widget.video.videoId} listo para reproducir');
+      _logger.d('Video ${widget.video.videoId} listo para reproducir');
     }
   }
 
@@ -306,13 +306,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       // Usar el método estático de AdvancedVideoPlayer para reiniciar
       AdvancedVideoPlayer.replayVideo(_playerKey);
-      if (kDebugMode) {
-        print('🔄 Video reiniciado desde el principio');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error reiniciando video: $e');
-      }
+      _logger.d('Video reiniciado desde el principio');
+    } catch (e, stackTrace) {
+      _logger.e('Error reiniciando video', e, stackTrace);
     }
   }
 }

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class LactationRecordDialog extends StatefulWidget {
   const LactationRecordDialog({Key? key}) : super(key: key);
@@ -16,6 +18,7 @@ class LactationRecordDialog extends StatefulWidget {
 class _LactationRecordDialogState extends State<LactationRecordDialog>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Controladores de texto
   final _volumenExtraccionController = TextEditingController();
@@ -122,7 +125,7 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: const BoxDecoration(
-                        borderRadius:  BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
                         ),
@@ -565,8 +568,8 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
 
       // Si el usuario tiene email, buscar por email primero
       if (user.email != null) {
-        print(
-          '🔍 LactationRecordDialog: Buscando usuario por email: ${user.email}',
+        _logger.d(
+          'LactationRecordDialog: Buscando usuario por email: ${user.email}',
         );
 
         // Buscar el documento del usuario por email
@@ -578,33 +581,33 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print(
-            '🔍 LactationRecordDialog: Usuario encontrado con ID: $userDocId',
+          _logger.d(
+            'LactationRecordDialog: Usuario encontrado con ID: $userDocId',
           );
           return userDocId;
         } else {
-          print('❌ LactationRecordDialog: Usuario no encontrado por email');
+          _logger.w('LactationRecordDialog: Usuario no encontrado por email');
         }
       }
 
       // Fallback: intentar con UID directamente
-      print('🔍 LactationRecordDialog: Intentando con UID: ${user.uid}');
+      _logger.d('LactationRecordDialog: Intentando con UID: ${user.uid}');
       final docSnapshot = await FirebaseFirestore.instance
           .collection('Users')
           .doc(user.uid)
           .get();
 
       if (docSnapshot.exists) {
-        print(
-          '🔍 LactationRecordDialog: Usuario encontrado con UID directo: ${user.uid}',
+        _logger.d(
+          'LactationRecordDialog: Usuario encontrado con UID directo: ${user.uid}',
         );
         return user.uid;
       }
 
-      print('❌ LactationRecordDialog: No se encontró usuario en Firestore');
+      _logger.e('LactationRecordDialog: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }

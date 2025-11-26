@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart' hide Key;
 import 'package:encrypt/encrypt.dart';
 import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para encriptar y desencriptar videos usando AES-256
 class VideoEncryptionService {
@@ -13,6 +15,7 @@ class VideoEncryptionService {
   IV? _initializationVector;
   Encrypter? _encrypter;
   bool _isInitialized = false;
+  final AppLogger _logger = getIt<AppLogger>();
 
   VideoEncryptionService() {
     // La inicialización se hará de forma lazy cuando se necesite
@@ -140,12 +143,16 @@ class VideoEncryptionService {
         }
 
         if (kDebugMode) {
-          print('✅ Video desencriptado exitosamente (método completo)');
+          _logger.success('Video desencriptado exitosamente (método completo)');
         }
         return;
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (kDebugMode) {
-          print('⚠️ Método completo falló, intentando método por chunks: $e');
+          _logger.w(
+            'Método completo falló, intentando método por chunks',
+            e,
+            stackTrace,
+          );
         }
         // Si falla, intentar el método antiguo (por chunks con IVs encadenados)
       }
@@ -214,8 +221,8 @@ class VideoEncryptionService {
       if (buffer.isNotEmpty) {
         if (buffer.length != blockSize) {
           if (kDebugMode) {
-            print(
-              '⚠️ Último bloque incompleto: ${buffer.length} bytes (esperado $blockSize)',
+            _logger.w(
+              'Último bloque incompleto: ${buffer.length} bytes (esperado $blockSize)',
             );
           }
           // Intentar procesarlo de todas formas (puede ser padding)
@@ -273,9 +280,10 @@ class VideoEncryptionService {
       }
 
       if (kDebugMode) {
-        print('✅ Video desencriptado exitosamente (método por chunks)');
+        _logger.success('Video desencriptado exitosamente (método por chunks)');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.e('Error desencriptando video', e, stackTrace);
       throw Exception('Error desencriptando video: $e');
     }
   }

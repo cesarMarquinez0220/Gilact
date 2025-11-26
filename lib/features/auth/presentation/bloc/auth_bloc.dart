@@ -5,6 +5,8 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/auth_usecases.dart';
 import '../../data/services/offline_session_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -20,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final DeleteAccountUseCase _deleteAccountUseCase;
   final OfflineSessionService _offlineSessionService;
   final ConnectivityService _connectivityService;
+  final AppLogger _logger = getIt<AppLogger>();
 
   AuthBloc({
     required SignInUseCase signInUseCase,
@@ -60,7 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignInRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     // Verificar conectividad
     final isConnected = await _connectivityService.isConnected();
@@ -79,9 +82,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (offlineUser != null) {
           emit(AuthAuthenticated(offlineUser));
         } else {
-          emit(AuthFailure(
-            'Sesión no encontrada. Se requiere conexión para iniciar sesión por primera vez.',
-          ));
+          emit(
+            AuthFailure(
+              'Sesión no encontrada. Se requiere conexión para iniciar sesión por primera vez.',
+            ),
+          );
         }
       } else {
         emit(AuthFailure('Credenciales incorrectas'));
@@ -100,7 +105,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (user) async {
         // Guardar sesión offline después de login exitoso
-        final passwordHash = _offlineSessionService.hashPassword(event.password);
+        final passwordHash = _offlineSessionService.hashPassword(
+          event.password,
+        );
         await _offlineSessionService.saveOfflineSession(
           user: user,
           email: event.email,
@@ -116,14 +123,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     // Verificar conectividad (registro siempre requiere conexión)
     final isConnected = await _connectivityService.isConnected();
     if (!isConnected) {
-      emit(AuthFailure(
-        'Se requiere conexión a internet para crear una cuenta nueva.',
-      ));
+      emit(
+        AuthFailure(
+          'Se requiere conexión a internet para crear una cuenta nueva.',
+        ),
+      );
       return;
     }
 
@@ -146,7 +155,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (user) async {
         // Guardar sesión offline después de registro exitoso
-        final passwordHash = _offlineSessionService.hashPassword(event.password);
+        final passwordHash = _offlineSessionService.hashPassword(
+          event.password,
+        );
         await _offlineSessionService.saveOfflineSession(
           user: user,
           email: event.email,
@@ -162,7 +173,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignOutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     // Limpiar sesión offline
     await _offlineSessionService.clearSession();
@@ -173,11 +184,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final result = await _signOutUseCase();
       result.fold(
         (failure) => emit(AuthFailure(failure.message)),
-        (_) => emit(AuthUnauthenticated()),
+        (_) => emit(const AuthUnauthenticated()),
       );
     } else {
       // Sin conexión, solo limpiar sesión local
-      emit(AuthUnauthenticated());
+      emit(const AuthUnauthenticated());
     }
   }
 
@@ -185,7 +196,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     GetCurrentUserRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     final result = await _getCurrentUserUseCase();
 
@@ -193,7 +204,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthAuthenticated(user));
       } else {
-        emit(AuthUnauthenticated());
+        emit(const AuthUnauthenticated());
       }
     });
   }
@@ -202,7 +213,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResetPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     final result = await _resetPasswordUseCase(
       ResetPasswordParams(email: event.email),
@@ -210,7 +221,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(AuthPasswordResetSent()),
+      (_) => emit(const AuthPasswordResetSent()),
     );
   }
 
@@ -218,13 +229,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SendEmailVerificationRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     final result = await _sendEmailVerificationUseCase();
 
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(AuthEmailVerificationSent()),
+      (_) => emit(const AuthEmailVerificationSent()),
     );
   }
 
@@ -232,7 +243,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     UpdateProfileRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     final result = await _updateProfileUseCase(
       UpdateProfileParams(name: event.name, photoUrl: event.photoUrl),
@@ -248,18 +259,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     DeleteAccountRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     final result = await _deleteAccountUseCase();
 
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (_) async {
-        // Limpiar sesión offline al eliminar cuenta
-        await _offlineSessionService.clearSession();
-        emit(AuthUnauthenticated());
-      },
-    );
+    result.fold((failure) => emit(AuthFailure(failure.message)), (_) async {
+      // Limpiar sesión offline al eliminar cuenta
+      await _offlineSessionService.clearSession();
+      emit(const AuthUnauthenticated());
+    });
   }
 
   /// Verificar sesión offline al iniciar app
@@ -267,7 +275,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckOfflineSessionRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     try {
       // 1. Verificar si hay sesión offline válida
@@ -289,19 +297,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isConnected) {
         // Intentar obtener usuario de Firebase
         final result = await _getCurrentUserUseCase();
-        result.fold(
-          (failure) => emit(AuthUnauthenticated()),
-          (user) {
-            if (user != null) {
-              emit(AuthAuthenticated(user));
-            } else {
-              emit(AuthUnauthenticated());
-            }
-          },
-        );
+        result.fold((failure) => emit(AuthUnauthenticated()), (user) {
+          if (user != null) {
+            emit(AuthAuthenticated(user));
+          } else {
+            emit(const AuthUnauthenticated());
+          }
+        });
       } else {
         // Sin conexión y sin sesión offline
-        emit(AuthUnauthenticated());
+        emit(const AuthUnauthenticated());
       }
     } catch (e) {
       emit(AuthFailure('Error verificando sesión: $e'));
@@ -337,7 +342,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       result.fold(
         (failure) {
           // Si falla, mantener sesión offline
-          print('⚠️ No se pudo sincronizar sesión: ${failure.message}');
+          _logger.w('No se pudo sincronizar sesión: ${failure.message}');
         },
         (firebaseUser) {
           if (firebaseUser != null) {
@@ -347,8 +352,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           }
         },
       );
-    } catch (e) {
-      print('❌ Error sincronizando sesión: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error sincronizando sesión', e, stackTrace);
     }
   }
 
@@ -357,15 +362,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     BiometricSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
 
     try {
       // Verificar que hay una sesión offline válida
       final hasSession = await _offlineSessionService.hasValidSession();
       if (!hasSession) {
-        emit(AuthFailure(
-          'Sesión expirada. Por favor, inicia sesión con tu contraseña',
-        ));
+        emit(
+          AuthFailure(
+            'Sesión expirada. Por favor, inicia sesión con tu contraseña',
+          ),
+        );
         return;
       }
 
@@ -391,7 +398,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         result.fold(
           (failure) {
             // Si falla Firebase, usar sesión offline
-            print('⚠️ No se pudo sincronizar con Firebase, usando sesión offline');
+            _logger.w(
+              'No se pudo sincronizar con Firebase, usando sesión offline',
+            );
             emit(AuthAuthenticated(offlineUser));
           },
           (firebaseUser) {
@@ -409,8 +418,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Sin conexión, usar sesión offline
         emit(AuthAuthenticated(offlineUser));
       }
-    } catch (e) {
-      print('❌ Error en autenticación biométrica: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error en autenticación biométrica', e, stackTrace);
       emit(AuthFailure('Error en autenticación biométrica: ${e.toString()}'));
     }
   }

@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'app_logger.dart';
+import '../di/injection.dart';
 
 /// Servicio para manejar notificaciones pendientes cuando la app está cerrada
 class PendingNotificationService {
@@ -17,10 +19,21 @@ class PendingNotificationService {
         'data': data ?? {},
         'timestamp': DateTime.now().toIso8601String(),
       };
-      await prefs.setString(_pendingNotificationKey, jsonEncode(notificationData));
-      print('💾 PendingNotificationService: Notificación pendiente guardada: $type');
-    } catch (e) {
-      print('❌ PendingNotificationService: Error guardando notificación pendiente: $e');
+      await prefs.setString(
+        _pendingNotificationKey,
+        jsonEncode(notificationData),
+      );
+      final logger = getIt<AppLogger>();
+      logger.d(
+        'PendingNotificationService: Notificación pendiente guardada: $type',
+      );
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e(
+        'PendingNotificationService: Error guardando notificación pendiente',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -30,13 +43,22 @@ class PendingNotificationService {
       final prefs = await SharedPreferences.getInstance();
       final notificationJson = prefs.getString(_pendingNotificationKey);
       if (notificationJson != null) {
-        final notificationData = jsonDecode(notificationJson) as Map<String, dynamic>;
-        print('📥 PendingNotificationService: Notificación pendiente encontrada: ${notificationData['type']}');
+        final notificationData =
+            jsonDecode(notificationJson) as Map<String, dynamic>;
+        final logger = getIt<AppLogger>();
+        logger.d(
+          'PendingNotificationService: Notificación pendiente encontrada: ${notificationData['type']}',
+        );
         return notificationData;
       }
       return null;
-    } catch (e) {
-      print('❌ PendingNotificationService: Error obteniendo notificación pendiente: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e(
+        'PendingNotificationService: Error obteniendo notificación pendiente',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -46,9 +68,15 @@ class PendingNotificationService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_pendingNotificationKey);
-      print('🗑️ PendingNotificationService: Notificación pendiente limpiada');
-    } catch (e) {
-      print('❌ PendingNotificationService: Error limpiando notificación pendiente: $e');
+      final logger = getIt<AppLogger>();
+      logger.d('PendingNotificationService: Notificación pendiente limpiada');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e(
+        'PendingNotificationService: Error limpiando notificación pendiente',
+        e,
+        stackTrace,
+      );
     }
   }
 

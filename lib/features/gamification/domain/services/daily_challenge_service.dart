@@ -99,7 +99,7 @@ class DailyChallengeService {
     });
     if (completedLessons < totalLessons) {
       availableChallenges.add(
-        DailyChallenge(
+        const DailyChallenge(
           id: 'complete_1_lesson',
           title: 'Día de Aprendizaje',
           description: 'Completa una lección hoy',
@@ -118,7 +118,7 @@ class DailyChallengeService {
     );
     if (pendingTrivias > 0) {
       availableChallenges.add(
-        DailyChallenge(
+        const DailyChallenge(
           id: 'complete_1_trivia',
           title: 'Desafío de Conocimiento',
           description: 'Completa una trivia de lección hoy',

@@ -12,6 +12,8 @@ import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
 import '../../../lactation/data/services/sleep_notification_service.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -32,11 +34,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late Animation<Offset> _textSlide;
   late Animation<double> _particleAnimation;
   late Animation<double> _progressAnimation;
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   void initState() {
     super.initState();
-    print('🔍 WelcomeScreen: initState() - INICIANDO WelcomeScreen...');
+    _logger.d('WelcomeScreen: initState() - INICIANDO WelcomeScreen...');
     _initializeAnimations();
     _startWelcomeSequence();
   }
@@ -106,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _startWelcomeSequence() {
-    print('🔍 _startWelcomeSequence: INICIANDO secuencia de bienvenida...');
+    _logger.d('_startWelcomeSequence: INICIANDO secuencia de bienvenida...');
 
     // Iniciar animación principal
     _mainController.forward();
@@ -119,35 +122,35 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // Iniciar partículas
     _particleController.repeat();
 
-    print(
-      '🔍 _startWelcomeSequence: Animaciones iniciadas, esperando 3 segundos...',
+    _logger.d(
+      '_startWelcomeSequence: Animaciones iniciadas, esperando 3 segundos...',
     );
 
     // Después de las animaciones, verificar onboarding y situación del usuario
     Future.delayed(const Duration(seconds: 3), () {
-      print(
-        '🔍 _startWelcomeSequence: Delay completado, iniciando verificación...',
+      _logger.d(
+        '_startWelcomeSequence: Delay completado, iniciando verificación...',
       );
       _checkOnboardingAndUserSituation();
     });
   }
 
   Future<void> _checkOnboardingAndUserSituation() async {
-    print(
-      '🔍 _checkOnboardingAndUserSituation: INICIANDO verificación de onboarding...',
+    _logger.d(
+      '_checkOnboardingAndUserSituation: INICIANDO verificación de onboarding...',
     );
 
     // Verificar si es un registro nuevo
     final prefs = await SharedPreferences.getInstance();
     final isNewRegistration = prefs.getBool('is_new_registration') ?? false;
 
-    print(
-      '🔍 _checkOnboardingAndUserSituation: is_new_registration = $isNewRegistration',
+    _logger.d(
+      '_checkOnboardingAndUserSituation: is_new_registration = $isNewRegistration',
     );
 
     if (isNewRegistration) {
-      print(
-        '✅ _checkOnboardingAndUserSituation: Es un registro nuevo, limpiando flag y saliendo...',
+      _logger.success(
+        '_checkOnboardingAndUserSituation: Es un registro nuevo, limpiando flag y saliendo...',
       );
       // Limpiar el flag de registro nuevo
       await prefs.remove('is_new_registration');
@@ -155,8 +158,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       return;
     }
 
-    print(
-      '🔍 _checkOnboardingAndUserSituation: No es registro nuevo, verificando estado del onboarding...',
+    _logger.d(
+      '_checkOnboardingAndUserSituation: No es registro nuevo, verificando estado del onboarding...',
     );
 
     // Verificar estado del onboarding desde Firestore y sincronizar con SharedPreferences
@@ -168,18 +171,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     try {
       // Obtener email del usuario
       String email = await _getUserEmail();
-      print('🔍 _checkAndSyncOnboardingStatus: Email obtenido: "$email"');
+      _logger.d('_checkAndSyncOnboardingStatus: Email obtenido: "$email"');
 
       if (email.isEmpty) {
-        print(
-          '❌ ERROR _checkAndSyncOnboardingStatus: Email vacío, navegando a onboarding por defecto',
+        _logger.e(
+          '_checkAndSyncOnboardingStatus: Email vacío, navegando a onboarding por defecto',
         );
         Navigator.of(context).pushReplacementNamed('/onboarding');
         return;
       }
 
-      print(
-        '🔍 _checkAndSyncOnboardingStatus: Buscando usuario en Firestore con email: "$email"',
+      _logger.d(
+        '_checkAndSyncOnboardingStatus: Buscando usuario en Firestore con email: "$email"',
       );
 
       // Buscar el documento del usuario por email
@@ -189,14 +192,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           .limit(1)
           .get();
 
-      print(
-        '🔍 _checkAndSyncOnboardingStatus: Query completada. Documentos encontrados: ${userQuery.docs.length}',
+      _logger.d(
+        '_checkAndSyncOnboardingStatus: Query completada. Documentos encontrados: ${userQuery.docs.length}',
       );
 
       if (userQuery.docs.isNotEmpty) {
         final userDocId = userQuery.docs.first.id;
-        print(
-          '✅ _checkAndSyncOnboardingStatus: Usuario encontrado con ID: $userDocId',
+        _logger.success(
+          '_checkAndSyncOnboardingStatus: Usuario encontrado con ID: $userDocId',
         );
 
         // Verificar el estado del onboarding en Firestore
@@ -207,19 +210,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             .doc('seleccion')
             .get();
 
-        print(
-          '🔍 _checkAndSyncOnboardingStatus: Documento de situación existe: ${situacionDoc.exists}',
+        _logger.d(
+          '_checkAndSyncOnboardingStatus: Documento de situación existe: ${situacionDoc.exists}',
         );
 
         if (situacionDoc.exists) {
           final data = situacionDoc.data();
-          print('🔍 _checkAndSyncOnboardingStatus: Datos del documento: $data');
+          _logger.d(
+            '_checkAndSyncOnboardingStatus: Datos del documento: $data',
+          );
 
           final onboardingCompletedInFirestore =
               data?['onboardingCompleted'] as bool? ?? false;
 
-          print(
-            '🔍 _checkAndSyncOnboardingStatus: onboardingCompleted en Firestore = $onboardingCompletedInFirestore',
+          _logger.d(
+            '_checkAndSyncOnboardingStatus: onboardingCompleted en Firestore = $onboardingCompletedInFirestore',
           );
 
           // Sincronizar con SharedPreferences
@@ -229,39 +234,38 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             onboardingCompletedInFirestore,
           );
 
-          print(
-            '🔍 _checkAndSyncOnboardingStatus: SharedPreferences actualizado con onboarding_completed = $onboardingCompletedInFirestore',
+          _logger.d(
+            '_checkAndSyncOnboardingStatus: SharedPreferences actualizado con onboarding_completed = $onboardingCompletedInFirestore',
           );
 
           if (onboardingCompletedInFirestore) {
-            print(
-              '✅ _checkAndSyncOnboardingStatus: Onboarding completado, verificando situación del usuario...',
+            _logger.success(
+              '_checkAndSyncOnboardingStatus: Onboarding completado, verificando situación del usuario...',
             );
             await _checkUserSituation();
           } else {
-            print(
-              '⚠️ _checkAndSyncOnboardingStatus: Onboarding NO completado, navegando a onboarding...',
+            _logger.w(
+              '_checkAndSyncOnboardingStatus: Onboarding NO completado, navegando a onboarding...',
             );
             Navigator.of(context).pushReplacementNamed('/onboarding');
           }
         } else {
-          print(
-            '❌ _checkAndSyncOnboardingStatus: Documento de situación no existe, navegando a onboarding...',
+          _logger.e(
+            '_checkAndSyncOnboardingStatus: Documento de situación no existe, navegando a onboarding...',
           );
           Navigator.of(context).pushReplacementNamed('/onboarding');
         }
       } else {
-        print(
-          '❌ _checkAndSyncOnboardingStatus: Usuario no encontrado en Firestore, navegando a onboarding...',
+        _logger.e(
+          '_checkAndSyncOnboardingStatus: Usuario no encontrado en Firestore, navegando a onboarding...',
         );
         Navigator.of(context).pushReplacementNamed('/onboarding');
       }
-    } catch (e) {
-      print(
-        '❌ ERROR _checkAndSyncOnboardingStatus: Error verificando onboarding: $e',
-      );
-      print(
-        '🔍 _checkAndSyncOnboardingStatus: Stack trace: ${StackTrace.current}',
+    } catch (e, stackTrace) {
+      _logger.e(
+        '_checkAndSyncOnboardingStatus: Error verificando onboarding',
+        e,
+        stackTrace,
       );
 
       // En caso de error, usar SharedPreferences como fallback
@@ -269,18 +273,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       final onboardingCompleted =
           prefs.getBool('onboarding_completed') ?? false;
 
-      print(
-        '🔍 _checkAndSyncOnboardingStatus: Fallback - onboarding_completed desde SharedPreferences = $onboardingCompleted',
+      _logger.d(
+        '_checkAndSyncOnboardingStatus: Fallback - onboarding_completed desde SharedPreferences = $onboardingCompleted',
       );
 
       if (onboardingCompleted) {
-        print(
-          '✅ _checkAndSyncOnboardingStatus: Fallback - Onboarding completado, verificando situación...',
+        _logger.success(
+          '_checkAndSyncOnboardingStatus: Fallback - Onboarding completado, verificando situación...',
         );
         await _checkUserSituation();
       } else {
-        print(
-          '⚠️ _checkAndSyncOnboardingStatus: Fallback - Onboarding NO completado, navegando a onboarding...',
+        _logger.w(
+          '_checkAndSyncOnboardingStatus: Fallback - Onboarding NO completado, navegando a onboarding...',
         );
         Navigator.of(context).pushReplacementNamed('/onboarding');
       }
@@ -292,20 +296,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     String email = await _getUserEmail();
 
     // Debug: mostrar el email que se está usando
-    print(
-      '🔍 WelcomeScreen: Verificando situación del usuario con email: "$email"',
+    _logger.d(
+      'WelcomeScreen: Verificando situación del usuario con email: "$email"',
     );
 
     // Verificar que el email no esté vacío
     if (email.isEmpty) {
-      print('❌ ERROR: Email del usuario está vacío');
-      print('🔄 Redirigiendo a home por defecto...');
+      _logger.e('ERROR: Email del usuario está vacío');
+      _logger.d('Redirigiendo a home por defecto...');
       _navigateToHome();
       return;
     }
 
     try {
-      print('🌐 Consultando Firestore para usuario: $email');
+      _logger.d('Consultando Firestore para usuario: $email');
 
       // Agregar timeout para evitar que se cuelgue indefinidamente
       QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
@@ -316,35 +320,35 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           .timeout(
             const Duration(seconds: 10),
             onTimeout: () {
-              print('⏰ Timeout en consulta Firestore - redirigiendo a home');
+              _logger.w('Timeout en consulta Firestore - redirigiendo a home');
               throw TimeoutException(
                 'Consulta a Firestore excedió el tiempo límite',
               );
             },
           );
 
-      print(
-        '✅ Consulta Firestore completada. Documentos encontrados: ${usersSnapshot.docs.length}',
+      _logger.success(
+        'Consulta Firestore completada. Documentos encontrados: ${usersSnapshot.docs.length}',
       );
 
       if (usersSnapshot.docs.isNotEmpty) {
         DocumentSnapshot userDocument = usersSnapshot.docs.first;
         String userId = userDocument.id;
 
-        print(
-          '👤 Usuario encontrado en Firestore con ID: $userId, cargando información completa...',
+        _logger.d(
+          'Usuario encontrado en Firestore con ID: $userId, cargando información completa...',
         );
 
         // Cargar información completa del usuario y situación
         await _loadCompleteUserData(userId, email);
       } else {
         // El usuario no existe en la base de datos.
-        print('❌ Usuario no encontrado en Firestore - redirigiendo a home');
+        _logger.e('Usuario no encontrado en Firestore - redirigiendo a home');
         _navigateToHome();
       }
-    } catch (e) {
-      print('❌ Error en _checkUserSituation: $e');
-      print('🔄 Redirigiendo a home por error...');
+    } catch (e, stackTrace) {
+      _logger.e('Error en _checkUserSituation', e, stackTrace);
+      _logger.d('Redirigiendo a home por error...');
 
       // En caso de error, redirigir a home
       _navigateToHome();
@@ -353,26 +357,26 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _loadCompleteUserData(String userId, String email) async {
     try {
-      print('🔄 WelcomeScreen: Cargando datos completos del usuario...');
-      print(
-        '🔍 WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
+      _logger.d('WelcomeScreen: Cargando datos completos del usuario...');
+      _logger.d(
+        'WelcomeScreen: Estado inicial del UserProfileBloc: ${context.read<UserProfileBloc>().state.runtimeType}',
       );
 
       // 0. Reinicializar el UserProfileBloc para el nuevo usuario (sin desconectar)
-      print(
-        '🔄 WelcomeScreen: Reinicializando UserProfileBloc para nuevo usuario...',
+      _logger.d(
+        'WelcomeScreen: Reinicializando UserProfileBloc para nuevo usuario...',
       );
       context.read<UserProfileBloc>().add(ResetUserProfileRequested());
 
       // Esperar un momento para que se procese el reinicio
       await Future.delayed(const Duration(milliseconds: 100));
 
-      print(
-        '🔍 WelcomeScreen: Estado del UserProfileBloc después de reinicio: ${context.read<UserProfileBloc>().state.runtimeType}',
+      _logger.d(
+        'WelcomeScreen: Estado del UserProfileBloc después de reinicio: ${context.read<UserProfileBloc>().state.runtimeType}',
       );
 
       // 1. Cargar perfil básico del usuario y esperar a que se complete
-      print('🔍 WelcomeScreen: Enviando GetUserProfileRequested...');
+      _logger.d('WelcomeScreen: Enviando GetUserProfileRequested...');
       context.read<UserProfileBloc>().add(
         GetUserProfileRequested(userId: userId),
       );
@@ -380,20 +384,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       // Esperar a que el perfil se cargue completamente
       await _waitForUserProfileToLoad();
 
-      print(
-        '🔍 WelcomeScreen: Estado del UserProfileBloc después de cargar perfil: ${context.read<UserProfileBloc>().state.runtimeType}',
+      _logger.d(
+        'WelcomeScreen: Estado del UserProfileBloc después de cargar perfil: ${context.read<UserProfileBloc>().state.runtimeType}',
       );
 
       // 2. Cargar información de situación usando UserSubcollectionsService
       final userSubcollectionsService = UserSubcollectionsService(
         FirebaseFirestore.instance,
+        getIt<AppLogger>(),
       );
       final situationData = await userSubcollectionsService
           .getUserSituationData(userId);
 
       if (situationData != null) {
-        print(
-          '✅ WelcomeScreen: Información de situación cargada: $situationData',
+        _logger.success(
+          'WelcomeScreen: Información de situación cargada: $situationData',
         );
 
         // Determinar si es preparto o postparto
@@ -401,16 +406,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         final isPrePartum = situationType == 'preparto';
         final isPostPartum = situationType == 'postparto';
 
-        print('🔍 WelcomeScreen: situationType = $situationType');
-        print(
-          '🔍 WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        _logger.d('WelcomeScreen: situationType = $situationType');
+        _logger.d(
+          'WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
         );
 
         // Actualizar el UserProfileBloc con la información de situación
-        print('🔍 WelcomeScreen: Enviando UpdateUserSituationRequested...');
-        print('🔍 WelcomeScreen: userId = $userId');
-        print(
-          '🔍 WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        _logger.d('WelcomeScreen: Enviando UpdateUserSituationRequested...');
+        _logger.d('WelcomeScreen: userId = $userId');
+        _logger.d(
+          'WelcomeScreen: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
         );
 
         context.read<UserProfileBloc>().add(
@@ -422,42 +427,42 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
         );
 
-        print('🔍 WelcomeScreen: UpdateUserSituationRequested enviado');
+        _logger.d('WelcomeScreen: UpdateUserSituationRequested enviado');
 
         // Esperar un momento para que se procese la información
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Verificar el estado después de la actualización
         final currentState = context.read<UserProfileBloc>().state;
-        print(
-          '🔍 WelcomeScreen: Estado del UserProfileBloc después de actualización: ${currentState.runtimeType}',
+        _logger.d(
+          'WelcomeScreen: Estado del UserProfileBloc después de actualización: ${currentState.runtimeType}',
         );
 
         if (currentState is UserProfileUpdated) {
-          print('✅ WelcomeScreen: Situación actualizada exitosamente');
+          _logger.success('WelcomeScreen: Situación actualizada exitosamente');
         } else if (currentState is UserProfileFailure) {
-          print(
-            '❌ WelcomeScreen: Error actualizando situación: ${currentState.message}',
+          _logger.e(
+            'WelcomeScreen: Error actualizando situación: ${currentState.message}',
           );
         } else {
-          print(
-            '⚠️ WelcomeScreen: Estado inesperado después de actualización: $currentState',
+          _logger.w(
+            'WelcomeScreen: Estado inesperado después de actualización: $currentState',
           );
         }
       } else {
-        print('⚠️ WelcomeScreen: No se encontró información de situación');
+        _logger.w('WelcomeScreen: No se encontró información de situación');
       }
 
       // 3. Programar notificación diaria de sueño si es postparto
       if (situationData != null &&
           situationData['situationType'] == 'postparto') {
-        print(
-          '🌙 WelcomeScreen: Usuario es postparto, programando notificación diaria',
+        _logger.d(
+          'WelcomeScreen: Usuario es postparto, programando notificación diaria',
         );
         await _scheduleSleepNotification();
       } else {
-        print(
-          '⚠️ WelcomeScreen: Usuario no es postparto, no se programará notificación',
+        _logger.w(
+          'WelcomeScreen: Usuario no es postparto, no se programará notificación',
         );
       }
 
@@ -465,17 +470,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       await _loadLessonsProgress(userId);
 
       // 5. Navegar a home con toda la información cargada
-      print('🚀 WelcomeScreen: Navegando a home con datos completos...');
+      _logger.d('WelcomeScreen: Navegando a home con datos completos...');
       _navigateToHome();
-    } catch (e) {
-      print('❌ Error cargando datos completos: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error cargando datos completos', e, stackTrace);
       _navigateToHome();
     }
   }
 
   Future<void> _waitForUserProfileToLoad() async {
-    print(
-      '⏳ WelcomeScreen: Esperando a que se cargue el perfil del usuario...',
+    _logger.d(
+      'WelcomeScreen: Esperando a que se cargue el perfil del usuario...',
     );
 
     // Esperar hasta que el UserProfileBloc tenga un perfil cargado
@@ -484,20 +489,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     while (attempts < maxAttempts) {
       final currentState = context.read<UserProfileBloc>().state;
-      print(
-        '🔍 WelcomeScreen: Intento $attempts - Estado actual: ${currentState.runtimeType}',
+      _logger.d(
+        'WelcomeScreen: Intento $attempts - Estado actual: ${currentState.runtimeType}',
       );
 
       if (currentState is UserProfileLoaded ||
           currentState is UserProfileUpdated) {
-        print('✅ WelcomeScreen: Perfil del usuario cargado exitosamente');
-        print('🔍 WelcomeScreen: Estado final: $currentState');
+        _logger.success(
+          'WelcomeScreen: Perfil del usuario cargado exitosamente',
+        );
+        _logger.d('WelcomeScreen: Estado final: $currentState');
         return;
       }
 
       if (currentState is UserProfileFailure) {
-        print(
-          '❌ WelcomeScreen: Error cargando perfil del usuario: ${currentState.message}',
+        _logger.e(
+          'WelcomeScreen: Error cargando perfil del usuario: ${currentState.message}',
         );
         return;
       }
@@ -507,68 +514,72 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       attempts++;
     }
 
-    print(
-      '⚠️ WelcomeScreen: Timeout esperando perfil del usuario después de $maxAttempts intentos',
+    _logger.w(
+      'WelcomeScreen: Timeout esperando perfil del usuario después de $maxAttempts intentos',
     );
   }
 
   Future<String> _getUserEmail() async {
     try {
-      print('🔍 _getUserEmail: Iniciando obtención de email...');
+      _logger.d('_getUserEmail: Iniciando obtención de email...');
 
       // Intentar obtener desde Firebase Auth primero
       final firebaseUser = FirebaseAuth.instance.currentUser;
-      print(
-        '🔍 _getUserEmail: Firebase Auth currentUser: ${firebaseUser?.uid}',
+      _logger.d(
+        '_getUserEmail: Firebase Auth currentUser: ${firebaseUser?.uid}',
       );
-      print('🔍 _getUserEmail: Firebase Auth email: "${firebaseUser?.email}"');
+      _logger.d('_getUserEmail: Firebase Auth email: "${firebaseUser?.email}"');
 
       if (firebaseUser?.email != null && firebaseUser!.email!.isNotEmpty) {
-        print(
-          '✅ _getUserEmail: Email obtenido desde Firebase Auth: "${firebaseUser.email}"',
+        _logger.success(
+          '_getUserEmail: Email obtenido desde Firebase Auth: "${firebaseUser.email}"',
         );
         return firebaseUser.email!;
       }
 
-      print(
-        '⚠️ _getUserEmail: Firebase Auth email vacío, intentando SharedPreferences...',
+      _logger.w(
+        '_getUserEmail: Firebase Auth email vacío, intentando SharedPreferences...',
       );
 
       // Fallback a SharedPreferences
       String email = await CredentialsCacheService.loadCredentialsFromCache();
-      print('🔍 _getUserEmail: Email desde SharedPreferences: "$email"');
+      _logger.d('_getUserEmail: Email desde SharedPreferences: "$email"');
 
       if (email.isEmpty) {
-        print(
-          '❌ ERROR _getUserEmail: Email vacío tanto en Firebase Auth como en SharedPreferences',
+        _logger.e(
+          '_getUserEmail: Email vacío tanto en Firebase Auth como en SharedPreferences',
         );
-        print(
-          '🔍 _getUserEmail: Verificando SharedPreferences directamente...',
+        _logger.d(
+          '_getUserEmail: Verificando SharedPreferences directamente...',
         );
 
         // Verificación adicional de SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         final cachedEmail = prefs.getString('cached_email');
         final saveCredentials = prefs.getBool('save_credentials');
-        print('🔍 _getUserEmail: cached_email directo: "$cachedEmail"');
-        print('🔍 _getUserEmail: save_credentials: $saveCredentials');
+        _logger.d('_getUserEmail: cached_email directo: "$cachedEmail"');
+        _logger.d('_getUserEmail: save_credentials: $saveCredentials');
 
         if (cachedEmail != null && cachedEmail.isNotEmpty) {
-          print(
-            '✅ _getUserEmail: Email encontrado en SharedPreferences directo: "$cachedEmail"',
+          _logger.success(
+            '_getUserEmail: Email encontrado en SharedPreferences directo: "$cachedEmail"',
           );
           return cachedEmail;
         }
       } else {
-        print(
-          '✅ _getUserEmail: Email obtenido desde SharedPreferences: "$email"',
+        _logger.success(
+          '_getUserEmail: Email obtenido desde SharedPreferences: "$email"',
         );
         return email;
       }
 
       return '';
-    } catch (e) {
-      print('❌ ERROR _getUserEmail: Error obteniendo email del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        '_getUserEmail: Error obteniendo email del usuario',
+        e,
+        stackTrace,
+      );
       return '';
     }
   }
@@ -578,17 +589,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     try {
       final notificationService = GetIt.instance<SleepNotificationService>();
       await notificationService.scheduleDailySleepNotification();
-      print('✅ WelcomeScreen: Notificación diaria programada exitosamente');
-    } catch (e) {
-      print('❌ WelcomeScreen: Error programando notificación: $e');
+      _logger.success(
+        'WelcomeScreen: Notificación diaria programada exitosamente',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('WelcomeScreen: Error programando notificación', e, stackTrace);
     }
   }
 
   /// Carga el progreso de lecciones desde Firestore
   Future<void> _loadLessonsProgress(String userId) async {
     try {
-      print(
-        '📚 WelcomeScreen: Cargando progreso de lecciones desde Firestore...',
+      _logger.d(
+        'WelcomeScreen: Cargando progreso de lecciones desde Firestore...',
       );
 
       // Verificar que el LeccionesProvider esté disponible
@@ -602,18 +615,24 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       // Cargar el progreso desde Firestore
       await leccionesProvider.loadProgressFromFirestore(userId);
 
-      print('✅ WelcomeScreen: Progreso de lecciones cargado exitosamente');
-    } catch (e) {
+      _logger.success(
+        'WelcomeScreen: Progreso de lecciones cargado exitosamente',
+      );
+    } catch (e, stackTrace) {
       // No bloquear la navegación si falla la carga del progreso
-      print('⚠️ WelcomeScreen: Error cargando progreso de lecciones: $e');
-      print('🔄 Continuando con la navegación...');
+      _logger.w(
+        'WelcomeScreen: Error cargando progreso de lecciones',
+        e,
+        stackTrace,
+      );
+      _logger.d('Continuando con la navegación...');
     }
   }
 
   void _navigateToHome() {
     // Navegar a la página principal con toda la información ya cargada
     Navigator.pushReplacementNamed(context, '/home');
-    print('🔄 Navegando a Home con datos completos cargados');
+    _logger.d('Navegando a Home con datos completos cargados');
   }
 
   @override

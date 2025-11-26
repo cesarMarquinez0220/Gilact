@@ -122,7 +122,7 @@ class GamificationService {
       final profileResult = await _repository.getProfile(userId);
       return await profileResult.fold((error) => Left(error), (profile) async {
         if (profile == null) {
-          return Left('Perfil no encontrado');
+          return const Left('Perfil no encontrado');
         }
 
         // Verificar si ya se completó hoy
@@ -213,7 +213,7 @@ class GamificationService {
     );
 
     if (milestoneBonus == null) {
-      return Right(null); // No hay milestone alcanzado
+      return const Right(null); // No hay milestone alcanzado
     }
 
     return await _addXPAndUpdateProfile(userId, milestoneBonus);
@@ -349,7 +349,7 @@ class GamificationService {
     try {
       final profileResult = await _repository.getProfile(userId);
       return await profileResult.fold((error) => Left(error), (profile) async {
-        if (profile == null) return Right([]);
+        if (profile == null) return const Right([]);
 
         final newAchievements = _achievementService.detectNewAchievements(
           profile: profile,

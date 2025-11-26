@@ -7,6 +7,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt;
 import 'video_encryption_service.dart';
 import '../../domain/entities/video.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Estado de descarga de un video
 enum DownloadStatus {
@@ -61,6 +63,7 @@ class VideoDownloadService {
   final Dio _dio = Dio();
   final VideoEncryptionService _encryptionService = VideoEncryptionService();
   final Connectivity _connectivity = Connectivity();
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Directorio privado para videos descargados
   Directory? _downloadDirectory;
@@ -269,12 +272,16 @@ class VideoDownloadService {
         if (contentLength != null) {
           expectedFileSize = int.tryParse(contentLength);
           if (kDebugMode && expectedFileSize != null) {
-            print('📏 Tamaño esperado del archivo: $expectedFileSize bytes');
+            _logger.d('Tamaño esperado del archivo: $expectedFileSize bytes');
           }
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (kDebugMode) {
-          print('⚠️ No se pudo obtener el tamaño esperado del archivo: $e');
+          _logger.w(
+            'No se pudo obtener el tamaño esperado del archivo',
+            e,
+            stackTrace,
+          );
         }
       }
 
@@ -325,25 +332,25 @@ class VideoDownloadService {
       }
 
       if (kDebugMode) {
-        print('📥 Archivo descargado: $downloadedSize bytes');
+        _logger.d('Archivo descargado: $downloadedSize bytes');
         if (expectedFileSize != null) {
           if (downloadedSize != expectedFileSize) {
-            print(
-              '⚠️ ADVERTENCIA: El tamaño del archivo descargado ($downloadedSize) no coincide con el tamaño esperado ($expectedFileSize)',
+            _logger.w(
+              'ADVERTENCIA: El tamaño del archivo descargado ($downloadedSize) no coincide con el tamaño esperado ($expectedFileSize)',
             );
-            print(
-              '⚠️ Esto puede indicar que la descarga está incompleta o corrupta',
+            _logger.w(
+              'Esto puede indicar que la descarga está incompleta o corrupta',
             );
           } else {
-            print(
-              '✅ El tamaño del archivo descargado coincide con el tamaño esperado',
+            _logger.success(
+              'El tamaño del archivo descargado coincide con el tamaño esperado',
             );
           }
         }
         if (lastReceived != null && lastReceived! > 0) {
           if (downloadedSize != lastReceived) {
-            print(
-              '⚠️ ADVERTENCIA: El tamaño del archivo ($downloadedSize) no coincide con los bytes recibidos ($lastReceived)',
+            _logger.w(
+              'ADVERTENCIA: El tamaño del archivo ($downloadedSize) no coincide con los bytes recibidos ($lastReceived)',
             );
           }
         }
@@ -377,8 +384,8 @@ class VideoDownloadService {
             if (i > 8) {
               // "ftyp" debería estar cerca del inicio (después del tamaño del box)
               if (kDebugMode) {
-                print(
-                  '⚠️ Advertencia: "ftyp" encontrado en posición $i, debería estar más cerca del inicio',
+                _logger.w(
+                  'Advertencia: "ftyp" encontrado en posición $i, debería estar más cerca del inicio',
                 );
               }
             }
@@ -412,9 +419,9 @@ class VideoDownloadService {
               .map((b) => b.toRadixString(16).padLeft(2, '0'))
               .join(' ');
           if (kDebugMode) {
-            print('❌ ERROR: El archivo descargado no tiene firma MP4 válida');
-            print('📋 No se encontró "ftyp" en los primeros bytes');
-            print('📋 Primeros 16 bytes (hex): $hexSignature');
+            _logger.e('ERROR: El archivo descargado no tiene firma MP4 válida');
+            _logger.d('No se encontró "ftyp" en los primeros bytes');
+            _logger.d('Primeros 16 bytes (hex): $hexSignature');
           }
           throw Exception(
             'El archivo descargado de YouTube está corrupto o no es un MP4 válido. '
@@ -423,24 +430,30 @@ class VideoDownloadService {
         }
 
         if (kDebugMode) {
-          print('✅ Firma MP4 "ftyp" encontrada en archivo descargado');
+          _logger.success('Firma MP4 "ftyp" encontrada en archivo descargado');
           if (foundMoov) {
-            print('✅ Estructura "moov" encontrada en archivo descargado');
+            _logger.success(
+              'Estructura "moov" encontrada en archivo descargado',
+            );
           } else {
-            print(
-              '⚠️ Advertencia: No se encontró "moov" en los primeros bytes. '
+            _logger.w(
+              'Advertencia: No se encontró "moov" en los primeros bytes. '
               'Esto puede ser normal en MP4 fragmentados, pero puede indicar un archivo incompleto.',
             );
           }
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (e.toString().contains('corrupto') ||
             e.toString().contains('MP4 válido') ||
             e.toString().contains('ftyp')) {
           rethrow;
         }
         if (kDebugMode) {
-          print('⚠️ Advertencia: No se pudo validar la firma MP4: $e');
+          _logger.w(
+            'Advertencia: No se pudo validar la firma MP4',
+            e,
+            stackTrace,
+          );
         }
       }
 

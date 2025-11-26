@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
@@ -23,6 +25,7 @@ class LactationFlowPage extends StatefulWidget {
 
 class _LactationFlowPageState extends State<LactationFlowPage>
     with TickerProviderStateMixin {
+  final AppLogger _logger = getIt<AppLogger>();
   LactationStep _currentStep = LactationStep.initial;
   Map<String, dynamic> _data = {};
   List<String> _history = [];
@@ -35,12 +38,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   @override
   void initState() {
     super.initState();
-    print('🚀 LactationFlowPage: Inicializando página...');
-    print('📅 LactationFlowPage: Fecha seleccionada: ${widget.selectedDate}');
-    print('🆔 LactationFlowPage: Registro existente: ${widget.existingRecord}');
-    print('📍 LactationFlowPage: Paso inicial: $_currentStep');
-    print('📊 LactationFlowPage: Datos iniciales: $_data');
-    print('📋 LactationFlowPage: Historial inicial: $_history');
+    _logger.d('LactationFlowPage: Inicializando página...');
+    _logger.d('LactationFlowPage: Fecha seleccionada: ${widget.selectedDate}');
+    _logger.d(
+      'LactationFlowPage: Registro existente: ${widget.existingRecord}',
+    );
+    _logger.d('LactationFlowPage: Paso inicial: $_currentStep');
+    _logger.d('LactationFlowPage: Datos iniciales: $_data');
+    _logger.d('LactationFlowPage: Historial inicial: $_history');
 
     // Inicializar servicio de lactancia
     _lactationService = LactationService(
@@ -551,14 +556,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   final minutes = int.tryParse(value);
                   if (minutes != null) {
                     _data['duration'] = Duration(minutes: minutes);
-                    print(
-                      '⏱️ LactationFlowPage: Duración manual ingresada: $minutes minutos',
+                    _logger.d(
+                      'LactationFlowPage: Duración manual ingresada: $minutes minutos',
                     );
                   }
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Duración en minutos',
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -607,26 +612,26 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 child: ElevatedButton(
                   onPressed: () {
                     if (_data['duration'] != null) {
-                      print(
-                        '💾 LactationFlowPage: Botón guardar duración presionado',
+                      _logger.d(
+                        'LactationFlowPage: Botón guardar duración presionado',
                       );
                       final isMixed =
                           _data['type']?.toString().toLowerCase() == 'mixto';
                       if (isMixed) {
-                        print(
-                          '🔄 LactationFlowPage: Lactancia mixta, avanzando a volumen',
+                        _logger.d(
+                          'LactationFlowPage: Lactancia mixta, avanzando a volumen',
                         );
                         setState(() {
                           _currentStep = LactationStep.bottleVolume;
                         });
                       } else {
-                        print(
-                          '💾 LactationFlowPage: Lactancia materna completa, guardando',
+                        _logger.d(
+                          'LactationFlowPage: Lactancia materna completa, guardando',
                         );
                         _saveRecord();
                       }
                     } else {
-                      print('⚠️ LactationFlowPage: Duración no ingresada');
+                      _logger.w('LactationFlowPage: Duración no ingresada');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -756,14 +761,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   if (volume != null) {
                     _data['volume'] = volume;
                     _data['unit'] = 'ml';
-                    print(
-                      '🍼 LactationFlowPage: Volumen manual ingresado: $volume ml',
+                    _logger.d(
+                      'LactationFlowPage: Volumen manual ingresado: $volume ml',
                     );
                   }
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Volumen en ml',
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -812,12 +817,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 child: ElevatedButton(
                   onPressed: () {
                     if (_data['volume'] != null) {
-                      print(
-                        '💾 LactationFlowPage: Botón guardar volumen presionado',
+                      _logger.d(
+                        'LactationFlowPage: Botón guardar volumen presionado',
                       );
                       _saveRecord();
                     } else {
-                      print('⚠️ LactationFlowPage: Volumen no ingresado');
+                      _logger.w('LactationFlowPage: Volumen no ingresado');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -935,7 +940,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.save, color: Colors.white, size: 20),
+                      const Icon(Icons.save, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Guardar Registro',
@@ -1018,7 +1023,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.arrow_back_ios,
                         color: Colors.white70, // 4. Ajustamos color y tamaño
                         size: 15,
@@ -1220,11 +1225,11 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   void _selectOption(LactationOption option) {
-    print(
-      '🎯 LactationFlowPage: Opción seleccionada: ${option.title} (${option.id})',
+    _logger.d(
+      'LactationFlowPage: Opción seleccionada: ${option.title} (${option.id})',
     );
-    print('📍 LactationFlowPage: Paso actual: $_currentStep');
-    print('📊 LactationFlowPage: Datos antes de selección: $_data');
+    _logger.d('LactationFlowPage: Paso actual: $_currentStep');
+    _logger.d('LactationFlowPage: Datos antes de selección: $_data');
 
     // --- INICIO CORRECCIÓN DE DATOS ---
     String dataKey;
@@ -1248,21 +1253,21 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     // No guardar el dato si es 'otro', solo activar el flag
     if (option.id != 'otro') {
       _data[dataKey] = option.id; // Guardar el ID (ej: '10min')
-      print('💾 LactationFlowPage: Guardando $dataKey = ${option.id}');
+      _logger.d('LactationFlowPage: Guardando $dataKey = ${option.id}');
     } else {
-      print('✏️ LactationFlowPage: Activando entrada manual para $dataKey');
+      _logger.d('LactationFlowPage: Activando entrada manual para $dataKey');
     }
     _history.add(dataKey); // Añadir la *llave* (ej: 'duration') al historial
-    print('📋 LactationFlowPage: Historial actualizado: $_history');
+    _logger.d('LactationFlowPage: Historial actualizado: $_history');
     // --- FIN CORRECCIÓN DE DATOS ---
 
     if (option.id == 'otro') {
       if (_currentStep == LactationStep.breastDuration) {
         _data['manualEntry'] = true;
-        print('📝 LactationFlowPage: Activando entrada manual de duración');
+        _logger.d('LactationFlowPage: Activando entrada manual de duración');
       } else if (_currentStep == LactationStep.bottleVolume) {
         _data['manualEntryVolume'] = true;
-        print('📝 LactationFlowPage: Activando entrada manual de volumen');
+        _logger.d('LactationFlowPage: Activando entrada manual de volumen');
       }
       // BUG #4 Arreglado: Faltaba setState para mostrar el input manual
       setState(() {});
@@ -1270,35 +1275,37 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     }
 
     // FLUJO RÁPIDO: Guardar inmediatamente para opciones predefinidas
-    print('🚀 LactationFlowPage: Procesando flujo rápido...');
+    _logger.d('LactationFlowPage: Procesando flujo rápido...');
     switch (_currentStep) {
       case LactationStep.initial:
         if (option.id == 'pecho' || option.id == 'mixto') {
-          print(
-            '🤱 LactationFlowPage: Lactancia materna detectada, avanzando a selección de lado',
+          _logger.d(
+            'LactationFlowPage: Lactancia materna detectada, avanzando a selección de lado',
           );
           _currentStep = LactationStep.breastSide;
         } else {
-          print('🍼 LactationFlowPage: Biberón detectado, avanzando a volumen');
+          _logger.d(
+            'LactationFlowPage: Biberón detectado, avanzando a volumen',
+          );
           // Si es biberón, ir directo al volumen
           _currentStep = LactationStep.bottleVolume;
         }
         break;
       case LactationStep.breastSide:
-        print('⏱️ LactationFlowPage: Lado seleccionado, avanzando a duración');
+        _logger.d('LactationFlowPage: Lado seleccionado, avanzando a duración');
         _currentStep = LactationStep.breastDuration;
         break;
       case LactationStep.breastDuration:
         // Ahora esto funciona gracias a la corrección de datos
         final isMixed = _data['type']?.toString().toLowerCase() == 'mixto';
         if (isMixed) {
-          print(
-            '🔄 LactationFlowPage: Lactancia mixta detectada, avanzando a volumen',
+          _logger.d(
+            'LactationFlowPage: Lactancia mixta detectada, avanzando a volumen',
           );
           _currentStep = LactationStep.bottleVolume;
         } else {
-          print(
-            '💾 LactationFlowPage: Lactancia materna completa, guardando registro',
+          _logger.d(
+            'LactationFlowPage: Lactancia materna completa, guardando registro',
           );
           // Guardar inmediatamente si no es mixto
           _saveRecord();
@@ -1306,47 +1313,49 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         }
         break;
       case LactationStep.bottleVolume:
-        print('💾 LactationFlowPage: Volumen seleccionado, guardando registro');
+        _logger.d(
+          'LactationFlowPage: Volumen seleccionado, guardando registro',
+        );
         // Guardar inmediatamente después de seleccionar volumen
         _saveRecord();
         return;
       default:
-        print('💾 LactationFlowPage: Paso final, guardando registro');
+        _logger.d('LactationFlowPage: Paso final, guardando registro');
         _saveRecord();
         return;
     }
 
-    print('➡️ LactationFlowPage: Avanzando al paso: $_currentStep');
+    _logger.d('LactationFlowPage: Avanzando al paso: $_currentStep');
     setState(() {});
   }
 
   void _goBack() {
-    print('⬅️ LactationFlowPage: Navegando hacia atrás...');
-    print('📍 LactationFlowPage: Paso actual: $_currentStep');
-    print('📊 LactationFlowPage: Datos actuales: $_data');
-    print('📋 LactationFlowPage: Historial actual: $_history');
+    _logger.d('LactationFlowPage: Navegando hacia atrás...');
+    _logger.d('LactationFlowPage: Paso actual: $_currentStep');
+    _logger.d('LactationFlowPage: Datos actuales: $_data');
+    _logger.d('LactationFlowPage: Historial actual: $_history');
 
     // 1. Manejar salida de modo "manual"
     // Si estamos en modo manual, "Atrás" debe volver a la lista de opciones
     if (_data['manualEntry'] == true) {
-      print('📝 LactationFlowPage: Saliendo del modo manual de duración');
+      _logger.d('LactationFlowPage: Saliendo del modo manual de duración');
       setState(() {
         _data.remove('manualEntry');
         _history.removeLast(); // Remover 'duration' del historial
       });
-      print(
-        '📋 LactationFlowPage: Historial después de salir de manual: $_history',
+      _logger.d(
+        'LactationFlowPage: Historial después de salir de manual: $_history',
       );
       return;
     }
     if (_data['manualEntryVolume'] == true) {
-      print('📝 LactationFlowPage: Saliendo del modo manual de volumen');
+      _logger.d('LactationFlowPage: Saliendo del modo manual de volumen');
       setState(() {
         _data.remove('manualEntryVolume');
         _history.removeLast(); // Remover 'volume' del historial
       });
-      print(
-        '📋 LactationFlowPage: Historial después de salir de manual: $_history',
+      _logger.d(
+        'LactationFlowPage: Historial después de salir de manual: $_history',
       );
       return;
     }
@@ -1354,21 +1363,21 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     // 2. Navegación de página normal
     if (_history.isNotEmpty) {
       final lastStepKey = _history.removeLast();
-      print('🗑️ LactationFlowPage: Removiendo último paso: $lastStepKey');
+      _logger.d('LactationFlowPage: Removiendo último paso: $lastStepKey');
       _data.remove(lastStepKey);
-      print(
-        '📊 LactationFlowPage: Datos después de remover $lastStepKey: $_data',
+      _logger.d(
+        'LactationFlowPage: Datos después de remover $lastStepKey: $_data',
       );
 
       LactationStep previousStep;
       switch (_currentStep) {
         case LactationStep.breastSide:
           previousStep = LactationStep.initial;
-          print('⬅️ LactationFlowPage: Volviendo de lado a tipo inicial');
+          _logger.d('LactationFlowPage: Volviendo de lado a tipo inicial');
           break;
         case LactationStep.breastDuration:
           previousStep = LactationStep.breastSide;
-          print('⬅️ LactationFlowPage: Volviendo de duración a lado');
+          _logger.d('LactationFlowPage: Volviendo de duración a lado');
           break;
 
         case LactationStep.bottleVolume:
@@ -1377,14 +1386,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               _data['type']; // 'type' es el paso anterior, sigue en _data
           if (type == 'mixto') {
             previousStep = LactationStep.breastDuration;
-            print(
-              '⬅️ LactationFlowPage: Volviendo de volumen a duración (mixto)',
+            _logger.d(
+              'LactationFlowPage: Volviendo de volumen a duración (mixto)',
             );
           } else {
             // El tipo fue 'biberon'
             previousStep = LactationStep.initial;
-            print(
-              '⬅️ LactationFlowPage: Volviendo de volumen a tipo inicial (biberón)',
+            _logger.d(
+              'LactationFlowPage: Volviendo de volumen a tipo inicial (biberón)',
             );
           }
           break;
@@ -1394,34 +1403,38 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           // Vemos cuál fue el último dato que se guardó
           if (lastStepKey == 'volume') {
             previousStep = LactationStep.bottleVolume;
-            print('⬅️ LactationFlowPage: Volviendo de confirmación a volumen');
+            _logger.d('LactationFlowPage: Volviendo de confirmación a volumen');
           } else {
             // El último dato fue 'duration'
             previousStep = LactationStep.breastDuration;
-            print('⬅️ LactationFlowPage: Volviendo de confirmación a duración');
+            _logger.d(
+              'LactationFlowPage: Volviendo de confirmación a duración',
+            );
           }
           break;
 
         default:
           previousStep = LactationStep.initial;
-          print('⬅️ LactationFlowPage: Volviendo al paso inicial por defecto');
+          _logger.d('LactationFlowPage: Volviendo al paso inicial por defecto');
       }
 
-      print('➡️ LactationFlowPage: Nuevo paso: $previousStep');
+      _logger.d('LactationFlowPage: Nuevo paso: $previousStep');
       setState(() {
         _currentStep = previousStep;
       });
     } else {
-      print('🚪 LactationFlowPage: No hay historial, cerrando pantalla');
+      _logger.d('LactationFlowPage: No hay historial, cerrando pantalla');
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _saveRecord() async {
-    print('🔄 LactationFlowPage: Iniciando guardado de registro...');
-    print('📊 LactationFlowPage: Datos del registro: $_data');
-    print('📅 LactationFlowPage: Fecha seleccionada: ${widget.selectedDate}');
-    print('🆔 LactationFlowPage: Registro existente: ${widget.existingRecord}');
+    _logger.d('LactationFlowPage: Iniciando guardado de registro...');
+    _logger.d('LactationFlowPage: Datos del registro: $_data');
+    _logger.d('LactationFlowPage: Fecha seleccionada: ${widget.selectedDate}');
+    _logger.d(
+      'LactationFlowPage: Registro existente: ${widget.existingRecord}',
+    );
 
     // Validar datos antes de guardar
     _validateAndLogData();
@@ -1429,13 +1442,15 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     try {
       // Crear objeto LactationRecord para guardar en Firestore
       final record = _createLactationRecord();
-      print('🔥 LactationFlowPage: Guardando registro en Firestore...');
-      print('💾 LactationFlowPage: Registro creado: ${record.toMap()}');
+      _logger.d('LactationFlowPage: Guardando registro en Firestore...');
+      _logger.d('LactationFlowPage: Registro creado: ${record.toMap()}');
 
       // Guardar en Firestore usando LactationService
       await _lactationService.saveRecord(record);
 
-      print('✅ LactationFlowPage: Registro guardado exitosamente en Firestore');
+      _logger.success(
+        'LactationFlowPage: Registro guardado exitosamente en Firestore',
+      );
 
       // Guardar el contexto antes de navegar para mostrar mensaje después
       final currentContext = context;
@@ -1464,8 +1479,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           );
         }
       }
-    } catch (e) {
-      print('❌ LactationFlowPage: Error guardando en Firestore: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LactationFlowPage: Error guardando en Firestore',
+        e,
+        stackTrace,
+      );
       // Mostrar error al usuario usando navigatorKey si está disponible
       if (mounted) {
         final errorContext =
@@ -1499,7 +1518,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     }
 
     // Determinar duración
-    Duration duracion = Duration(minutes: 15); // Valor por defecto
+    Duration duracion = const Duration(minutes: 15); // Valor por defecto
     if (_data['duration'] != null) {
       if (_data['duration'] is Duration) {
         duracion = _data['duration'] as Duration;
@@ -1567,14 +1586,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       vecesBiberon = 1;
     }
 
-    print('🔧 LactationFlowPage: Creando registro con datos:');
-    print('   - Tipo: $tipoAlimentacion -> $tipo');
-    print('   - Lado: $ladoPecho -> $pechoDado');
-    print('   - Duración: $duracion');
-    print('   - Volumen: $volumenExtraccion $unidadVolumen');
-    print('   - Fecha: $recordDate');
-    print('   - Veces pecho: $vecesPecho');
-    print('   - Veces biberón: $vecesBiberon');
+    _logger.d('LactationFlowPage: Creando registro con datos:');
+    _logger.d('   - Tipo: $tipoAlimentacion -> $tipo');
+    _logger.d('   - Lado: $ladoPecho -> $pechoDado');
+    _logger.d('   - Duración: $duracion');
+    _logger.d('   - Volumen: $volumenExtraccion $unidadVolumen');
+    _logger.d('   - Fecha: $recordDate');
+    _logger.d('   - Veces pecho: $vecesPecho');
+    _logger.d('   - Veces biberón: $vecesBiberon');
 
     return LactationRecord(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -1599,47 +1618,47 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   void _validateAndLogData() {
-    print('🔍 LactationFlowPage: Validando datos del registro...');
+    _logger.d('LactationFlowPage: Validando datos del registro...');
 
     // Validar tipo de alimentación
     if (_data.containsKey('type')) {
-      print('✅ Tipo de alimentación: ${_data['type']}');
+      _logger.d('Tipo de alimentación: ${_data['type']}');
     } else {
-      print('❌ ERROR: Tipo de alimentación no especificado');
+      _logger.e('ERROR: Tipo de alimentación no especificado');
     }
 
     // Validar lado del pecho (si aplica)
     if (_data.containsKey('side')) {
-      print('✅ Lado del pecho: ${_data['side']}');
+      _logger.d('Lado del pecho: ${_data['side']}');
     } else if (_data['type'] == 'pecho' || _data['type'] == 'mixto') {
-      print(
-        '⚠️ ADVERTENCIA: Lado del pecho no especificado para lactancia materna',
+      _logger.w(
+        'ADVERTENCIA: Lado del pecho no especificado para lactancia materna',
       );
     }
 
     // Validar duración (si aplica)
     if (_data.containsKey('duration')) {
-      print('✅ Duración: ${_data['duration']}');
+      _logger.d('Duración: ${_data['duration']}');
     } else if (_data['type'] == 'pecho' || _data['type'] == 'mixto') {
-      print('❌ ERROR: Duración no especificada para lactancia materna');
+      _logger.e('ERROR: Duración no especificada para lactancia materna');
     }
 
     // Validar volumen (si aplica)
     if (_data.containsKey('volume')) {
-      print('✅ Volumen: ${_data['volume']} ${_data['unit'] ?? 'ml'}');
+      _logger.d('Volumen: ${_data['volume']} ${_data['unit'] ?? 'ml'}');
     } else if (_data['type'] == 'biberon' || _data['type'] == 'mixto') {
-      print('❌ ERROR: Volumen no especificado para biberón');
+      _logger.e('ERROR: Volumen no especificado para biberón');
     }
 
     // Validar entrada manual
     if (_data.containsKey('manualEntry')) {
-      print('📝 Entrada manual de duración: ${_data['manualEntry']}');
+      _logger.d('Entrada manual de duración: ${_data['manualEntry']}');
     }
     if (_data.containsKey('manualEntryVolume')) {
-      print('📝 Entrada manual de volumen: ${_data['manualEntryVolume']}');
+      _logger.d('Entrada manual de volumen: ${_data['manualEntryVolume']}');
     }
 
-    print('📋 Historial de pasos: $_history');
+    _logger.d('Historial de pasos: $_history');
   }
 
   Widget _buildAnimatedBackground() {

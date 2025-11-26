@@ -12,6 +12,8 @@ import '../../../../alerta_dialoge.dart';
 import '../../domain/entities/baby_weight_record.dart';
 import '../../data/datasources/baby_weight_offline_local_data_source.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 enum CalendarView { day, week, month }
 
@@ -51,6 +53,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   late LactationService _lactationService;
   final BabyWeightOfflineLocalDataSource _weightDataSource =
       BabyWeightOfflineLocalDataSource();
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   void initState() {
@@ -67,9 +70,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
   }
 
   void _usePreloadedData() async {
-    print(
-      '📦 [DEBUG] _usePreloadedData(): ${widget.preloadedRecords!.length} registros precargados',
-    );
+    _logger.d('_usePreloadedData(): ${widget.preloadedRecords!.length} registros precargados');
 
     // Cargar registros de peso
     final weightRecords = await _loadWeightRecordsForMonth(_selectedDate);
@@ -86,12 +87,10 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                   record.fechaRegistro.day == _selectedDate.day,
             )
             .toList();
-        print('📊 [DEBUG] Filtrados para el día: ${_records.length} registros');
+        _logger.d('Filtrados para el día: ${_records.length} registros');
       } else {
         _records = widget.preloadedRecords!;
-        print(
-          '📊 [DEBUG] Usando todos los registros precargados: ${_records.length}',
-        );
+        _logger.d('Usando todos los registros precargados: ${_records.length}');
       }
 
       _monthRecords = widget.preloadedRecords!;
@@ -122,8 +121,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       setState(() {
         _stats = stats;
       });
-    } catch (e) {
-      print('Error calculando estadísticas: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error calculando estadísticas', e, stackTrace);
     }
   }
 
@@ -164,7 +163,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       // Obtener userId
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        print('⚠️ No hay usuario autenticado para cargar registros de peso');
+        _logger.w('No hay usuario autenticado para cargar registros de peso');
         return [];
       }
 
@@ -200,9 +199,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
               .orderBy('timestamp', descending: false)
               .get();
 
-          print(
-            '📊 Registros de peso desde Firestore: ${querySnapshot.docs.length}',
-          );
+          _logger.d('Registros de peso desde Firestore: ${querySnapshot.docs.length}');
 
           for (final doc in querySnapshot.docs) {
             final data = doc.data();
@@ -222,8 +219,8 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
               ),
             );
           }
-        } catch (e) {
-          print('⚠️ Error consultando Firestore para peso: $e');
+        } catch (e, stackTrace) {
+          _logger.e('Error consultando Firestore para peso', e, stackTrace);
         }
       }
 
@@ -260,20 +257,18 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           }
         }
 
-        print(
-          '📊 Registros de peso locales adicionales: ${localRecordsInRange.length}',
-        );
-      } catch (e) {
-        print('⚠️ Error obteniendo datos locales de peso: $e');
+        _logger.d('Registros de peso locales adicionales: ${localRecordsInRange.length}');
+      } catch (e, stackTrace) {
+        _logger.e('Error obteniendo datos locales de peso', e, stackTrace);
       }
 
       // Ordenar por fecha
       records.sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
 
-      print('✅ Total registros de peso cargados: ${records.length}');
+      _logger.success('Total registros de peso cargados: ${records.length}');
       return records;
-    } catch (e) {
-      print('❌ Error cargando registros de peso: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error cargando registros de peso', e, stackTrace);
       return [];
     }
   }
@@ -283,37 +278,29 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
     try {
       // Verificar si el usuario tiene situación Post-Parto (ahora usa caché)
-      print('🔍 LactationCalendarWidget: Verificando situación postparto...');
+      _logger.d('LactationCalendarWidget: Verificando situación postparto...');
       final hasPostpartum = await _lactationService.hasPostpartumSituation();
-      print('🔍 LactationCalendarWidget: hasPostpartum = $hasPostpartum');
+      _logger.d('LactationCalendarWidget: hasPostpartum = $hasPostpartum');
 
       if (!hasPostpartum) {
-        print(
-          '⚠️ LactationCalendarWidget: Usuario no tiene situación postparto, mostrando diálogo',
-        );
+        _logger.w('LactationCalendarWidget: Usuario no tiene situación postparto, mostrando diálogo');
         setState(() => _isLoading = false);
         _showPostpartumRequiredDialog();
         return;
       }
 
-      print(
-        '✅ LactationCalendarWidget: Usuario tiene situación postparto, cargando datos...',
-      );
+      _logger.d('LactationCalendarWidget: Usuario tiene situación postparto, cargando datos...');
 
       List<LactationRecord> records;
       LactationStats? stats;
 
       switch (_currentView) {
         case CalendarView.day:
-          print('📅 [DEBUG] Vista DÍA - Fecha seleccionada: $_selectedDate');
+          _logger.d('Vista DÍA - Fecha seleccionada: $_selectedDate');
           records = await _lactationService.getRecordsForDate(_selectedDate);
-          print(
-            '📊 [DEBUG] Registros cargados de Firestore: ${records.length}',
-          );
+          _logger.d('Registros cargados de Firestore: ${records.length}');
           for (var record in records) {
-            print(
-              '   - ID: ${record.id}, Fecha: ${record.fechaRegistro}, Tipo: ${record.tipo}',
-            );
+            _logger.d('   - ID: ${record.id}, Fecha: ${record.fechaRegistro}, Tipo: ${record.tipo}');
           }
           // Cargar estadísticas específicas del día seleccionado
           stats = await _getDayStats(_selectedDate, records);
@@ -334,9 +321,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       // Cargar registros de peso para el mes actual
       final weightRecords = await _loadWeightRecordsForMonth(_selectedDate);
 
-      print('💾 [DEBUG] Asignando ${records.length} registros a _records');
-      print('💾 [DEBUG] Asignando ${weightRecords.length} registros de peso');
-      print('💾 [DEBUG] Vista actual: $_currentView');
+      _logger.d('Asignando ${records.length} registros a _records');
+      _logger.d('Asignando ${weightRecords.length} registros de peso');
+      _logger.d('Vista actual: $_currentView');
       setState(() {
         _records = records;
         _weightRecords = weightRecords;
@@ -348,12 +335,10 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           _monthRecords = records;
           _monthWeightRecords = weightRecords;
           _monthDataLoaded = true;
-          print(
-            '✅ [DEBUG] Datos del mes actualizados: ${_monthRecords.length} lactancia, ${_monthWeightRecords.length} peso',
-          );
+          _logger.d('Datos del mes actualizados: ${_monthRecords.length} lactancia, ${_monthWeightRecords.length} peso');
         }
       });
-      print('✅ [DEBUG] _records actualizado con ${_records.length} elementos');
+      _logger.d('_records actualizado con ${_records.length} elementos');
 
       // Precargar datos del mes en background cuando estamos en vista de día
       if (_currentView == CalendarView.day && !_monthDataLoaded) {
@@ -361,9 +346,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
       }
 
       _fadeController.forward();
-    } catch (e) {
+    } catch (e, stackTrace) {
       setState(() => _isLoading = false);
-      print('Error cargando datos: $e');
+      _logger.e('Error cargando datos', e, stackTrace);
       DialogExample.showErrorDialog(
         context,
         'Error de Carga',
@@ -416,7 +401,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
   Future<void> _preloadMonthData() async {
     try {
-      print('🔄 Precargando datos del mes en background...');
+      _logger.d('Precargando datos del mes en background...');
       final monthRecords = await _lactationService.getRecordsForMonth(
         _selectedDate,
       );
@@ -430,11 +415,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
             monthWeightRecords; // Solo actualizar _monthWeightRecords, no _weightRecords
         _monthDataLoaded = true;
       });
-      print(
-        '✅ Datos del mes precargados exitosamente (${monthRecords.length} lactancia, ${monthWeightRecords.length} peso)',
-      );
-    } catch (e) {
-      print('❌ Error precargando datos del mes: $e');
+      _logger.success('Datos del mes precargados exitosamente (${monthRecords.length} lactancia, ${monthWeightRecords.length} peso)');
+    } catch (e, stackTrace) {
+      _logger.e('Error precargando datos del mes', e, stackTrace);
     }
   }
 
@@ -824,19 +807,11 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
           recordDate.day == _selectedDate.day;
     }).toList();
 
-    print('🏗️ [DEBUG] _buildDayView():');
-    print('   - Total de registros en _records: ${_records.length}');
-    print('   - dayRecords.length: ${dayRecords.length}');
-    print('   - dayWeightRecords.length: ${dayWeightRecords.length}');
-    print('   - Fecha seleccionada: $_selectedDate');
+    _logger.d('_buildDayView(): Total registros: ${_records.length}, dayRecords: ${dayRecords.length}, dayWeightRecords: ${dayWeightRecords.length}, Fecha: $_selectedDate');
 
     if (dayRecords.isNotEmpty) {
-      print(
-        '   - Primer registro: ID=${dayRecords.first.id}, Fecha=${dayRecords.first.fechaRegistro}',
-      );
-      print(
-        '   - Último registro: ID=${dayRecords.last.id}, Fecha=${dayRecords.last.fechaRegistro}',
-      );
+      _logger.d('Primer registro: ID=${dayRecords.first.id}, Fecha=${dayRecords.first.fechaRegistro}');
+      _logger.d('Último registro: ID=${dayRecords.last.id}, Fecha=${dayRecords.last.fechaRegistro}');
     }
 
     final hasAnyRecords = dayRecords.isNotEmpty || dayWeightRecords.isNotEmpty;
@@ -859,16 +834,12 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                       // Mostrar primero registros de lactancia, luego peso
                       if (index < dayRecords.length) {
                         final record = dayRecords[index];
-                        print(
-                          '🎴 [DEBUG] Construyendo card lactancia #${index + 1}/${dayRecords.length} - ID: ${record.id}, Fecha: ${record.fechaRegistro}',
-                        );
+                        _logger.d('Construyendo card lactancia #${index + 1}/${dayRecords.length} - ID: ${record.id}, Fecha: ${record.fechaRegistro}');
                         return _buildLactationRecordCard(record);
                       } else {
                         final weightRecord =
                             dayWeightRecords[index - dayRecords.length];
-                        print(
-                          '⚖️ [DEBUG] Construyendo card peso #${index - dayRecords.length + 1}/${dayWeightRecords.length} - ID: ${weightRecord.id}, Fecha: ${weightRecord.recordedAt}',
-                        );
+                        _logger.d('Construyendo card peso #${index - dayRecords.length + 1}/${dayWeightRecords.length} - ID: ${weightRecord.id}, Fecha: ${weightRecord.recordedAt}');
                         return _buildWeightRecordCard(weightRecord);
                       }
                     },
@@ -1224,20 +1195,9 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
         // Debug para el día 15 (que sabemos que tiene peso)
         if (day.day == 15 && day.month == 11) {
-          print('🔍 [DEBUG] Día 15 - Vista: $_currentView');
-          print(
-            '   - _monthWeightRecords.length: ${_monthWeightRecords.length}',
-          );
-          print('   - _weightRecords.length: ${_weightRecords.length}');
-          print(
-            '   - monthWeightRecordsToUse.length: ${monthWeightRecordsToUse.length}',
-          );
-          print('   - dayWeightRecords.length: ${dayWeightRecords.length}');
-          print('   - _monthDataLoaded: $_monthDataLoaded');
+          _logger.d('Día 15 - Vista: $_currentView, _monthWeightRecords: ${_monthWeightRecords.length}, _weightRecords: ${_weightRecords.length}, monthWeightRecordsToUse: ${monthWeightRecordsToUse.length}, dayWeightRecords: ${dayWeightRecords.length}, _monthDataLoaded: $_monthDataLoaded');
           if (monthWeightRecordsToUse.isNotEmpty) {
-            print(
-              '   - Primer registro de peso: ${monthWeightRecordsToUse.first.recordedAt}',
-            );
+            _logger.d('Primer registro de peso: ${monthWeightRecordsToUse.first.recordedAt}');
           }
         }
 

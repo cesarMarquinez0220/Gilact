@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import '../../data/services/lactation_service.dart';
 import '../../data/services/lactation_notification_service.dart';
 import '../../domain/entities/lactation_record.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Provider para manejar el estado de lactancia de manera reactiva
 class LactationProvider extends ChangeNotifier {
   final LactationService _lactationService;
+  final AppLogger _logger = getIt<AppLogger>();
   Timer? _timer;
 
   LactationProvider(this._lactationService) {
@@ -20,7 +23,7 @@ class LactationProvider extends ChangeNotifier {
   LactationStats? _todayStats;
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Cache para intervalo dinámico basado en edad del bebé
   Duration? _cachedLactationInterval;
   DateTime? _lastIntervalUpdate;
@@ -35,7 +38,7 @@ class LactationProvider extends ChangeNotifier {
   /// Carga los datos del día actual
   Future<void> loadTodayData() async {
     try {
-      print('📥 loadTodayData: Iniciando carga...');
+      _logger.d('loadTodayData: Iniciando carga...');
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
@@ -43,28 +46,28 @@ class LactationProvider extends ChangeNotifier {
       final today = DateTime.now();
       final records = await _lactationService.getRecordsForDate(today);
 
-      print('📥 loadTodayData: Registros encontrados: ${records.length}');
+      _logger.d('loadTodayData: Registros encontrados: ${records.length}');
       for (final record in records) {
-        print('   - ${record.fechaRegistro}');
+        _logger.d('   - ${record.fechaRegistro}');
       }
 
       _todayRecords = records;
       _todayStats = _calculateTodayStats(records);
-      
+
       // Actualizar intervalo dinámico basado en edad del bebé
       await _updateLactationInterval();
-      
+
       _isLoading = false;
       notifyListeners();
-      print('📥 loadTodayData: Datos cargados y notificados');
-    } catch (e) {
+      _logger.d('loadTodayData: Datos cargados y notificados');
+    } catch (e, stackTrace) {
       _errorMessage = 'Error cargando datos: $e';
       _isLoading = false;
       notifyListeners();
-      print('❌ loadTodayData: Error: $e');
+      _logger.e('loadTodayData: Error', e, stackTrace);
     }
   }
-  
+
   /// Actualiza el intervalo de lactancia basado en la edad del bebé
   Future<void> _updateLactationInterval() async {
     try {
@@ -80,16 +83,22 @@ class LactationProvider extends ChangeNotifier {
         _cachedLactationInterval =
             LactationNotificationService.calculateLactationInterval(birthDate);
         _lastIntervalUpdate = DateTime.now();
-        print(
-          '⏰ LactationProvider: Intervalo dinámico actualizado: ${_cachedLactationInterval!.inHours}h ${_cachedLactationInterval!.inMinutes.remainder(60)}m',
+        _logger.d(
+          'LactationProvider: Intervalo dinámico actualizado: ${_cachedLactationInterval!.inHours}h ${_cachedLactationInterval!.inMinutes.remainder(60)}m',
         );
       } else {
         // Usar intervalo por defecto si no se puede obtener la fecha
         _cachedLactationInterval = const Duration(hours: 2, minutes: 30);
-        print('⏰ LactationProvider: Usando intervalo por defecto (no se pudo obtener fecha de nacimiento)');
+        _logger.d(
+          'LactationProvider: Usando intervalo por defecto (no se pudo obtener fecha de nacimiento)',
+        );
       }
-    } catch (e) {
-      print('⚠️ LactationProvider: Error actualizando intervalo: $e');
+    } catch (e, stackTrace) {
+      _logger.w(
+        'LactationProvider: Error actualizando intervalo',
+        e,
+        stackTrace,
+      );
       // Usar intervalo por defecto en caso de error
       _cachedLactationInterval = const Duration(hours: 2, minutes: 30);
     }
@@ -122,8 +131,8 @@ class LactationProvider extends ChangeNotifier {
         startOfWeek.day,
       );
 
-      print(
-        '📅 Cargando datos de la semana desde: $startOfWeekMidnight (weekday: ${startOfWeekMidnight.weekday})',
+      _logger.d(
+        'Cargando datos de la semana desde: $startOfWeekMidnight (weekday: ${startOfWeekMidnight.weekday})',
       );
 
       final records = await _lactationService.getRecordsForWeek(
@@ -131,14 +140,14 @@ class LactationProvider extends ChangeNotifier {
       );
       _weekRecords = records;
 
-      print('📊 Registros cargados: ${records.length}');
+      _logger.d('Registros cargados: ${records.length}');
       for (final record in records) {
-        print('  - ${record.fechaRegistro}');
+        _logger.d('  - ${record.fechaRegistro}');
       }
 
       notifyListeners();
-    } catch (e) {
-      print('❌ Error cargando datos de la semana: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error cargando datos de la semana', e, stackTrace);
     }
   }
 
@@ -162,11 +171,11 @@ class LactationProvider extends ChangeNotifier {
     // Debug: mostrar info para domingo (día 0 del índice del calendario)
     if (date.weekday == 7) {
       // Domingo
-      print(
-        '🔍 Domingo ${date.day}/${date.month}: ${matchingRecords.length} registros',
+      _logger.d(
+        'Domingo ${date.day}/${date.month}: ${matchingRecords.length} registros',
       );
       for (final record in matchingRecords) {
-        print('   - Registro: ${record.fechaRegistro}');
+        _logger.d('   - Registro: ${record.fechaRegistro}');
       }
     }
 
@@ -176,17 +185,18 @@ class LactationProvider extends ChangeNotifier {
   /// Agrega un nuevo registro y actualiza el estado
   Future<void> addRecord(LactationRecord record) async {
     try {
-      print('💾 addRecord: Guardando registro...');
-      print('   Fecha: ${record.fechaRegistro}');
+      _logger.d(
+        'addRecord: Guardando registro... Fecha: ${record.fechaRegistro}',
+      );
       await _lactationService.saveRecord(record);
-      print('💾 addRecord: Registro guardado exitosamente');
+      _logger.success('addRecord: Registro guardado exitosamente');
       // Recargar datos después de agregar
       await loadTodayData();
-      print('💾 addRecord: Datos recargados');
-    } catch (e) {
+      _logger.d('addRecord: Datos recargados');
+    } catch (e, stackTrace) {
       _errorMessage = 'Error guardando registro: $e';
       notifyListeners();
-      print('❌ addRecord: Error guardando: $e');
+      _logger.e('addRecord: Error guardando', e, stackTrace);
     }
   }
 
@@ -237,10 +247,12 @@ class LactationProvider extends ChangeNotifier {
   /// Obtiene el tiempo hasta la próxima toma
   /// Calcula el intervalo dinámico basado en la edad del bebé
   String getNextFeedTime() {
-    print('⏰ getNextFeedTime: _todayRecords.length = ${_todayRecords.length}');
+    _logger.d(
+      'getNextFeedTime: _todayRecords.length = ${_todayRecords.length}',
+    );
 
     if (_todayRecords.isEmpty) {
-      print('⏰ getNextFeedTime: No hay registros hoy - retornando "Ahora"');
+      _logger.d('getNextFeedTime: No hay registros hoy - retornando "Ahora"');
       return 'Ahora';
     }
 
@@ -248,19 +260,18 @@ class LactationProvider extends ChangeNotifier {
     // Por lo tanto, el PRIMER elemento es el más reciente
     final lastFeed = _todayRecords.first;
     final now = DateTime.now();
-    
+
     // Usar intervalo dinámico cacheado, o por defecto si no está disponible
-    final suggestedInterval = _cachedLactationInterval ?? const Duration(hours: 2, minutes: 30);
+    final suggestedInterval =
+        _cachedLactationInterval ?? const Duration(hours: 2, minutes: 30);
     final nextFeedTime = lastFeed.fechaRegistro.add(suggestedInterval);
 
-    print('⏰ Toma más reciente: ${lastFeed.fechaRegistro}');
-    print('⏰ Intervalo usado: ${suggestedInterval.inHours}h ${suggestedInterval.inMinutes.remainder(60)}m');
-    print('⏰ Hora actual: $now');
-    print('⏰ Próxima toma sugerida: $nextFeedTime');
-    print('⏰ ¿Ya pasó?: ${now.isAfter(nextFeedTime)}');
+    _logger.d(
+      'Toma más reciente: ${lastFeed.fechaRegistro}, Intervalo: ${suggestedInterval.inHours}h ${suggestedInterval.inMinutes.remainder(60)}m, Hora actual: $now, Próxima toma: $nextFeedTime, ¿Ya pasó?: ${now.isAfter(nextFeedTime)}',
+    );
 
     if (now.isAfter(nextFeedTime)) {
-      print('⏰ Ya pasó el tiempo - retornando "Ahora"');
+      _logger.d('Ya pasó el tiempo - retornando "Ahora"');
       return 'Ahora';
     }
 
@@ -268,7 +279,7 @@ class LactationProvider extends ChangeNotifier {
     final hours = timeUntilNext.inHours;
     final minutes = timeUntilNext.inMinutes.remainder(60);
 
-    print('⏰ Tiempo restante: ${hours}h ${minutes}m');
+    _logger.d('Tiempo restante: ${hours}h ${minutes}m');
 
     if (hours > 0) {
       return '${hours}h ${minutes}m';
@@ -331,7 +342,7 @@ class LactationProvider extends ChangeNotifier {
   void _startAutoRefreshTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      print('⏱️ Timer: Actualizando temporizador...');
+      _logger.d('Timer: Actualizando temporizador...');
       // Notificar a los listeners para que el widget se reconstruya
       // y el temporizador se actualice automáticamente
       notifyListeners();

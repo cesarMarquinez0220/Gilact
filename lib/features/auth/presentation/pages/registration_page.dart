@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/registration_background_widget.dart';
 import '../widgets/registration_form_widget.dart';
@@ -44,6 +46,7 @@ class _RegistrationPageState extends State<RegistrationPage>
   int _currentStep = 0;
   Map<String, String> _errors = {};
   double _profileCompletion = 0.0;
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   void initState() {
@@ -121,7 +124,9 @@ class _RegistrationPageState extends State<RegistrationPage>
               state.message,
             );
           } else if (state is AuthAuthenticated) {
-            print('🔍 RegistrationPage: Usuario registrado exitosamente');
+            _logger.success(
+              'RegistrationPage: Usuario registrado exitosamente',
+            );
             _handleSuccessfulRegistration();
           }
         },
@@ -384,8 +389,8 @@ class _RegistrationPageState extends State<RegistrationPage>
     // Marcar que es un registro nuevo ANTES de registrar
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_new_registration', true);
-    print(
-      '🔍 RegistrationPage: Flag is_new_registration marcado ANTES del registro',
+    _logger.d(
+      'RegistrationPage: Flag is_new_registration marcado ANTES del registro',
     );
 
     // Registrar usuario
@@ -612,13 +617,13 @@ class _RegistrationPageState extends State<RegistrationPage>
   }
 
   Future<void> _handleSuccessfulRegistration() async {
-    print('🔍 RegistrationPage: Manejando registro exitoso...');
+    _logger.d('RegistrationPage: Manejando registro exitoso...');
 
     // Limpiar datos guardados después del registro exitoso
     await _clearSavedData();
 
     // Navegar directamente al onboarding sin mostrar diálogo de éxito
-    print('🔍 RegistrationPage: Navegando a onboarding...');
+    _logger.d('RegistrationPage: Navegando a onboarding...');
     Navigator.of(context).pushReplacementNamed('/onboarding');
   }
 
@@ -671,8 +676,8 @@ class _RegistrationPageState extends State<RegistrationPage>
 
       // Limpiar flag de onboarding para que el nuevo usuario vea el onboarding
       await prefs.remove('onboarding_completed');
-      print(
-        '🔍 RegistrationPage: Flag de onboarding limpiado para nuevo usuario',
+      _logger.d(
+        'RegistrationPage: Flag de onboarding limpiado para nuevo usuario',
       );
     } catch (e) {
       // Error al limpiar datos, continuar normalmente

@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 import '../../domain/services/lactation_decision_tree.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 // Colores de la aplicación
 class _AppColors {
@@ -31,6 +33,7 @@ class QuickLactationDialog extends StatefulWidget {
 
 class _QuickLactationDialogState extends State<QuickLactationDialog>
     with TickerProviderStateMixin {
+  final AppLogger _logger = getIt<AppLogger>();
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -366,8 +369,8 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
 
   void _selectOption(LactationOption option) {
     setState(() {
-      print(
-        '🔍 DEBUG: Seleccionando opción: ${option.id} en paso: ${_currentStep.name}',
+      _logger.d(
+        'Seleccionando opción: ${option.id} en paso: ${_currentStep.name}',
       );
 
       // Si estamos en confirmación y seleccionamos "Guardar"
@@ -382,8 +385,7 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
       _data[_currentStep.name] = option.id;
       _history.add('${_currentStep.name}: ${option.id}');
 
-      print('🔍 DEBUG: Datos actualizados: $_data');
-      print('🔍 DEBUG: Historial actualizado: $_history');
+      _logger.d('Datos actualizados: $_data, Historial: $_history');
 
       // Continuar con el flujo normal
       final nextStep = LactationDecisionTree.getNextStep(
@@ -392,15 +394,15 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
         context: _data,
       );
 
-      print('🔍 DEBUG: Siguiente paso: ${nextStep.name}');
+      _logger.d('Siguiente paso: ${nextStep.name}');
       _currentStep = nextStep;
     });
   }
 
   void _goToPreviousStep() {
-    print('🔍 DEBUG: Navegando hacia atrás desde: ${_currentStep.name}');
-    print('🔍 DEBUG: Historial (antes): $_history');
-    print('🔍 DEBUG: Datos (antes): $_data');
+    _logger.d(
+      'Navegando hacia atrás desde: ${_currentStep.name}, Historial: $_history, Datos: $_data',
+    );
 
     if (_history.isNotEmpty) {
       // 1. Obtener y remover la última decisión del historial
@@ -421,9 +423,9 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
         previousStep = LactationStep.values.firstWhere(
           (e) => e.name == stepNameKey,
         );
-      } catch (e) {
+      } catch (e, stackTrace) {
         // Si falla (no debería pasar), volver al inicio
-        print('Error al parsear el paso anterior: $e');
+        _logger.e('Error al parsear el paso anterior', e, stackTrace);
         previousStep = LactationStep.initial;
       }
 
@@ -431,12 +433,12 @@ class _QuickLactationDialogState extends State<QuickLactationDialog>
       //    Así volvemos a la pantalla de "breastDuration"
       _currentStep = previousStep;
 
-      print('🔍 DEBUG: Nuevo paso: ${_currentStep.name}');
-      print('🔍 DEBUG: Historial (después): $_history');
-      print('🔍 DEBUG: Datos (después): $_data');
+      _logger.d(
+        'Nuevo paso: ${_currentStep.name}, Historial: $_history, Datos: $_data',
+      );
     } else {
       // No hay historial, así que ya estamos en el inicio
-      print('🔍 DEBUG: No hay historial, volviendo a initial');
+      _logger.d('No hay historial, volviendo a initial');
       _currentStep = LactationStep.initial;
       _data.clear();
     }

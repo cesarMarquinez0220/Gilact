@@ -7,6 +7,8 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import 'notification_handler.dart';
 import 'lactation_service.dart';
 
@@ -17,6 +19,7 @@ class SleepNotificationService {
   factory SleepNotificationService() => _instance;
   SleepNotificationService._internal();
 
+  final AppLogger _logger = getIt<AppLogger>();
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
@@ -68,7 +71,7 @@ class SleepNotificationService {
     await _createNotificationChannel();
 
     _isInitialized = true;
-    print('🔔 SleepNotificationService: Servicio inicializado');
+    _logger.d('SleepNotificationService: Servicio inicializado');
   }
 
   /// Crear canal de notificación para Android
@@ -91,7 +94,7 @@ class SleepNotificationService {
       );
 
       await androidImplementation.createNotificationChannel(channel);
-      print('✅ SleepNotificationService: Canal de notificación creado');
+      _logger.success('SleepNotificationService: Canal de notificación creado');
     }
   }
 
@@ -115,8 +118,8 @@ class SleepNotificationService {
       await _scheduleDailyReminder(hour: hour, babyName: babyName);
     }
 
-    print(
-      '🔔 SleepNotificationService: Recordatorios programados para las horas: $reminderHours',
+    _logger.d(
+      'SleepNotificationService: Recordatorios programados para las horas: $reminderHours',
     );
   }
 
@@ -127,8 +130,8 @@ class SleepNotificationService {
     // Cancelar notificaciones existentes
     await cancelAllSleepReminders();
 
-    print(
-      '🔔 SleepNotificationService: Programando notificaciones cada 2 minutos...',
+    _logger.d(
+      'SleepNotificationService: Programando notificaciones cada 2 minutos...',
     );
 
     // Programar notificaciones cada 2 minutos por los próximos 20 minutos
@@ -137,8 +140,8 @@ class SleepNotificationService {
     for (int i = 0; i < 10; i++) {
       final scheduledTime = now.add(Duration(minutes: (i + 1) * 2));
 
-      print(
-        '🔔 DEBUG: Programando notificación ${i + 1} para ${scheduledTime}',
+      _logger.d(
+        'DEBUG: Programando notificación ${i + 1} para ${scheduledTime}',
       );
 
       const AndroidNotificationDetails androidDetails =
@@ -149,8 +152,8 @@ class SleepNotificationService {
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
-            color: const Color(0xFF03A696),
-            ledColor: const Color(0xFF03A696),
+            color: Color(0xFF03A696),
+            ledColor: Color(0xFF03A696),
             ledOnMs: 1000,
             ledOffMs: 500,
           );
@@ -179,11 +182,15 @@ class SleepNotificationService {
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'sleep_reminder_test_${i + 1}',
         );
-        print(
-          '✅ DEBUG: Notificación ${i + 1} programada exitosamente (modo exacto)',
+        _logger.success(
+          'DEBUG: Notificación ${i + 1} programada exitosamente (modo exacto)',
         );
-      } catch (e) {
-        print('❌ DEBUG: Error con modo exacto, intentando modo inexacto: $e');
+      } catch (e, stackTrace) {
+        _logger.w(
+          'DEBUG: Error con modo exacto, intentando modo inexacto',
+          e,
+          stackTrace,
+        );
         try {
           // Si falla el modo exacto, usar modo inexacto
           await _notifications.zonedSchedule(
@@ -197,17 +204,21 @@ class SleepNotificationService {
                 UILocalNotificationDateInterpretation.absoluteTime,
             payload: 'sleep_reminder_test_${i + 1}',
           );
-          print(
-            '✅ DEBUG: Notificación ${i + 1} programada exitosamente (modo inexacto)',
+          _logger.success(
+            'DEBUG: Notificación ${i + 1} programada exitosamente (modo inexacto)',
           );
-        } catch (e2) {
-          print('❌ DEBUG: Error programando notificación ${i + 1}: $e2');
+        } catch (e2, stackTrace2) {
+          _logger.e(
+            'DEBUG: Error programando notificación ${i + 1}',
+            e2,
+            stackTrace2,
+          );
         }
       }
     }
 
-    print(
-      '🔔 SleepNotificationService: 10 notificaciones programadas cada 2 minutos',
+    _logger.d(
+      'SleepNotificationService: 10 notificaciones programadas cada 2 minutos',
     );
   }
 
@@ -215,7 +226,7 @@ class SleepNotificationService {
   Future<void> scheduleImmediateTestNotification() async {
     await initialize();
 
-    print('🔔 DEBUG: Programando notificación inmediata de prueba...');
+    _logger.d('DEBUG: Programando notificación inmediata de prueba...');
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
@@ -225,8 +236,8 @@ class SleepNotificationService {
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
-          color: const Color(0xFF03A696),
-          ledColor: const Color(0xFF03A696),
+          color: Color(0xFF03A696),
+          ledColor: Color(0xFF03A696),
           ledOnMs: 1000,
           ledOffMs: 500,
         );
@@ -250,9 +261,13 @@ class SleepNotificationService {
         details,
         payload: 'immediate_test',
       );
-      print('✅ DEBUG: Notificación inmediata programada exitosamente');
-    } catch (e) {
-      print('❌ DEBUG: Error programando notificación inmediata: $e');
+      _logger.success('DEBUG: Notificación inmediata programada exitosamente');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'DEBUG: Error programando notificación inmediata',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -270,8 +285,8 @@ class SleepNotificationService {
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
-      color: const Color(0xFF03A696),
-      ledColor: const Color(0xFF03A696),
+      color: Color(0xFF03A696),
+      ledColor: Color(0xFF03A696),
       ledOnMs: 1000,
       ledOffMs: 500,
     );
@@ -328,7 +343,7 @@ class SleepNotificationService {
     }
 
     await prefs.remove('sleep_reminder_hours');
-    print('🔔 SleepNotificationService: Todos los recordatorios cancelados');
+    _logger.d('SleepNotificationService: Todos los recordatorios cancelados');
   }
 
   /// Mostrar notificación inmediata de prueba
@@ -401,8 +416,8 @@ class SleepNotificationService {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        print(
-          '⚠️ SleepNotificationService: Usuario no autenticado, no se programará notificación',
+        _logger.w(
+          'SleepNotificationService: Usuario no autenticado, no se programará notificación',
         );
         return;
       }
@@ -416,17 +431,21 @@ class SleepNotificationService {
       final isPostpartum = await lactationService.hasPostpartumSituation();
 
       if (!isPostpartum) {
-        print(
-          '⚠️ SleepNotificationService: Usuario no es postparto, no se programará notificación',
+        _logger.w(
+          'SleepNotificationService: Usuario no es postparto, no se programará notificación',
         );
         return;
       }
 
-      print(
-        '✅ SleepNotificationService: Usuario es postparto, programando notificación',
+      _logger.d(
+        'SleepNotificationService: Usuario es postparto, programando notificación',
       );
-    } catch (e) {
-      print('⚠️ SleepNotificationService: Error verificando situación: $e');
+    } catch (e, stackTrace) {
+      _logger.w(
+        'SleepNotificationService: Error verificando situación',
+        e,
+        stackTrace,
+      );
       return;
     }
 
@@ -444,17 +463,17 @@ class SleepNotificationService {
       final bool? granted = await androidImplementation
           .requestNotificationsPermission();
 
-    if (granted != true) {
-      print(
-        '❌ SleepNotificationService: Permisos de notificación NO concedidos',
-      );
-      print('⚠️ No se programará la notificación sin permisos');
-      return;
-    } else {
-        print(
-          '✅ SleepNotificationService: Permisos de notificación concedidos',
+      if (granted != true) {
+        _logger.e(
+          'SleepNotificationService: Permisos de notificación NO concedidos',
         );
-    }
+        _logger.w('No se programará la notificación sin permisos');
+        return;
+      } else {
+        _logger.d(
+          'SleepNotificationService: Permisos de notificación concedidos',
+        );
+      }
 
       // Verificar permiso de alarmas exactas (Android 12+)
       try {
@@ -462,32 +481,38 @@ class SleepNotificationService {
           'canScheduleExactAlarms',
         );
         canScheduleExactAlarms = result ?? false;
-      } catch (e) {
-        print(
-          '⚠️ SleepNotificationService: No se pudo verificar permiso de alarmas exactas: $e',
+      } catch (e, stackTrace) {
+        _logger.w(
+          'SleepNotificationService: No se pudo verificar permiso de alarmas exactas',
+          e,
+          stackTrace,
         );
         // Asumir que no está concedido si no se puede verificar
         canScheduleExactAlarms = false;
       }
 
-      print(
-        'ℹ️ SleepNotificationService: Notificaciones habilitadas: ${await androidImplementation.areNotificationsEnabled()}',
+      final notificationsEnabled = await androidImplementation
+          .areNotificationsEnabled();
+      _logger.d(
+        'SleepNotificationService: Notificaciones habilitadas: $notificationsEnabled',
       );
-      print(
-        'ℹ️ SleepNotificationService: Permiso de alarmas exactas: ${canScheduleExactAlarms ? "✅ Concedido" : "❌ NO concedido"}',
+      _logger.d(
+        'SleepNotificationService: Permiso de alarmas exactas: ${canScheduleExactAlarms ? "✅ Concedido" : "❌ NO concedido"}',
       );
 
       if (!canScheduleExactAlarms) {
-        print(
-          '⚠️ ADVERTENCIA: El permiso de alarmas exactas NO está concedido.',
+        _logger.w(
+          'ADVERTENCIA: El permiso de alarmas exactas NO está concedido.',
         );
-        print(
+        _logger.w(
           '   Esto significa que las notificaciones programadas pueden no dispararse a tiempo.',
         );
-        print('   Para solucionarlo:');
-        print('   1. Ve a Configuración → Aplicaciones → Gilact → Permisos');
-        print('   2. Activa "Alarmas y recordatorios"');
-        print(
+        _logger.w('   Para solucionarlo:');
+        _logger.w(
+          '   1. Ve a Configuración → Aplicaciones → Gilact → Permisos',
+        );
+        _logger.w('   2. Activa "Alarmas y recordatorios"');
+        _logger.w(
           '   3. O ve a Configuración → Aplicaciones → Gilact → Batería → No optimizar',
         );
       }
@@ -499,8 +524,8 @@ class SleepNotificationService {
     final now = tz.TZDateTime.now(tz.local);
 
     // Programar para las 8:00 AM todos los días
-    final horaDeseada = 8;
-    final minutosDeseados = 0;
+    const horaDeseada = 8;
+    const minutosDeseados = 0;
 
     var scheduledDate = tz.TZDateTime(
       tz.local,
@@ -526,8 +551,8 @@ class SleepNotificationService {
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
-          color: const Color(0xFF03A696),
-          ledColor: const Color(0xFF03A696),
+          color: Color(0xFF03A696),
+          ledColor: Color(0xFF03A696),
           ledOnMs: 1000,
           ledOffMs: 500,
           enableVibration: true,
@@ -549,17 +574,17 @@ class SleepNotificationService {
       iOS: iosDetails,
     );
 
-    print(
-      '🔔 SleepNotificationService: Programando notificación para ${horaDeseada.toString().padLeft(2, '0')}:${minutosDeseados.toString().padLeft(2, '0')}',
+    _logger.d(
+      'SleepNotificationService: Programando notificación para ${horaDeseada.toString().padLeft(2, '0')}:${minutosDeseados.toString().padLeft(2, '0')}',
     );
-    print(
-      '🔔 SleepNotificationService: Hora actual: ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+    _logger.d(
+      'SleepNotificationService: Hora actual: ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
     );
-    print(
-      '🔔 SleepNotificationService: Hora programada: ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
+    _logger.d(
+      'SleepNotificationService: Hora programada: ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
     );
-    print(
-      '🔔 SleepNotificationService: Tiempo hasta notificación: ${scheduledDate.difference(now).inMinutes} minutos',
+    _logger.d(
+      'SleepNotificationService: Tiempo hasta notificación: ${scheduledDate.difference(now).inMinutes} minutos',
     );
 
     // Notificación de prueba removida - ya no es necesaria
@@ -571,8 +596,8 @@ class SleepNotificationService {
 
     // Intentar programar con método nativo primero
     try {
-      print(
-        '🔔 SleepNotificationService: Intentando programar con método NATIVO (funciona con app cerrada)...',
+      _logger.d(
+        'SleepNotificationService: Intentando programar con método NATIVO (funciona con app cerrada)...',
       );
 
       // Convertir la fecha programada a timestamp en milisegundos
@@ -584,8 +609,8 @@ class SleepNotificationService {
       );
 
       if (result == true) {
-    print(
-          '✅ SleepNotificationService: Notificación programada con método NATIVO',
+        _logger.success(
+          'SleepNotificationService: Notificación programada con método NATIVO',
         );
         scheduledSuccessfully = true;
 
@@ -606,38 +631,40 @@ class SleepNotificationService {
         _startNotificationCheckTimer(scheduledDate);
 
         // Verificar que se programó correctamente (aunque no aparezca en lista de Flutter)
-        print(
-          'ℹ️ SleepNotificationService: Notificación nativa programada (no aparece en lista de Flutter, es normal)',
+        _logger.d(
+          'SleepNotificationService: Notificación nativa programada (no aparece en lista de Flutter, es normal)',
         );
       }
-    } catch (e) {
-      print(
-        '⚠️ SleepNotificationService: Error programando con método nativo: $e',
+    } catch (e, stackTrace) {
+      _logger.w(
+        'SleepNotificationService: Error programando con método nativo',
+        e,
+        stackTrace,
       );
-      print('⚠️ Intentando con flutter_local_notifications como fallback...');
+      _logger.w('Intentando con flutter_local_notifications como fallback...');
       scheduledSuccessfully = false;
     }
 
     // Si el método nativo falló, usar flutter_local_notifications como fallback
     if (!scheduledSuccessfully && canScheduleExactAlarms) {
       try {
-        print(
-          '🔔 SleepNotificationService: Intentando programar con modo EXACTO (fallback)...',
+        _logger.d(
+          'SleepNotificationService: Intentando programar con modo EXACTO (fallback)...',
         );
         await _notifications.zonedSchedule(
           889, // ID para la notificación diaria de las 8 AM
-      '🌙 Registro de Sueño Diario',
-      '¿Cuántas horas durmió el bebé anoche?',
+          '🌙 Registro de Sueño Diario',
+          '¿Cuántas horas durmió el bebé anoche?',
           scheduledDate,
-      details,
+          details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           // 🧪 MODO PRUEBA: Comentar matchDateTimeComponents para prueba única
           // matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'daily_sleep_registration',
-    );
-        print('✅ Notificación programada (modo exacto)');
+          payload: 'daily_sleep_registration',
+        );
+        _logger.success('Notificación programada (modo exacto)');
         scheduledSuccessfully = true;
 
         // Verificar que se programó correctamente
@@ -655,12 +682,12 @@ class SleepNotificationService {
               ? ourNotificationList.first
               : null;
           if (ourNotification != null) {
-            print('✅ Notificación verificada en lista pendiente:');
-            print('   ID: ${ourNotification.id}');
-            print('   Título: ${ourNotification.title}');
-            print('   Cuerpo: ${ourNotification.body}');
+            _logger.success('Notificación verificada en lista pendiente:');
+            _logger.d('   ID: ${ourNotification.id}');
+            _logger.d('   Título: ${ourNotification.title}');
+            _logger.d('   Cuerpo: ${ourNotification.body}');
           } else {
-            print('❌ ERROR: Notificación no encontrada en lista pendiente');
+            _logger.e('ERROR: Notificación no encontrada en lista pendiente');
           }
         }
 
@@ -676,18 +703,17 @@ class SleepNotificationService {
         // Iniciar verificación periódica cada minuto para detectar si no se disparó
         _startNotificationCheckTimer(scheduledDate);
       } catch (e, stackTrace) {
-        print('❌ ERROR con modo exacto: $e');
-        print('📋 Stack trace: $stackTrace');
-        print('⚠️ Intentando con modo INEXACTO como fallback...');
+        _logger.e('ERROR con modo exacto', e, stackTrace);
+        _logger.w('Intentando con modo INEXACTO como fallback...');
         scheduledSuccessfully =
             false; // Marcar como no exitoso para intentar modo inexacto
       }
     } else {
-      print(
-        '⚠️ SleepNotificationService: Permiso de alarmas exactas NO concedido, usando modo INEXACTO',
+      _logger.w(
+        'SleepNotificationService: Permiso de alarmas exactas NO concedido, usando modo INEXACTO',
       );
-      print(
-        '   ⚠️ ADVERTENCIA: Las notificaciones pueden tener retraso de varios minutos',
+      _logger.w(
+        '   ADVERTENCIA: Las notificaciones pueden tener retraso de varios minutos',
       );
       scheduledSuccessfully = false;
     }
@@ -695,21 +721,21 @@ class SleepNotificationService {
     // Si el modo exacto falló o no está disponible, usar modo inexacto
     if (!scheduledSuccessfully) {
       try {
-    await _notifications.zonedSchedule(
+        await _notifications.zonedSchedule(
           889,
-      '🌙 Registro de Sueño Diario',
-      '¿Cuántas horas durmió el bebé anoche?',
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.inexact,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+          '🌙 Registro de Sueño Diario',
+          '¿Cuántas horas durmió el bebé anoche?',
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexact,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
           // 🧪 MODO PRUEBA: Comentar matchDateTimeComponents para prueba única
           // matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'daily_sleep_registration',
-    );
-        print(
-          '✅ Notificación programada (modo inexacto - puede tener retraso)',
+          payload: 'daily_sleep_registration',
+        );
+        _logger.success(
+          'Notificación programada (modo inexacto - puede tener retraso)',
         );
         scheduledSuccessfully = true;
 
@@ -728,15 +754,15 @@ class SleepNotificationService {
               ? ourNotificationList.first
               : null;
           if (ourNotification != null) {
-            print(
-              '✅ Notificación verificada en lista pendiente (modo inexacto):',
+            _logger.success(
+              'Notificación verificada en lista pendiente (modo inexacto):',
             );
-            print('   ID: ${ourNotification.id}');
-            print('   Título: ${ourNotification.title}');
-            print('   Cuerpo: ${ourNotification.body}');
+            _logger.d('   ID: ${ourNotification.id}');
+            _logger.d('   Título: ${ourNotification.title}');
+            _logger.d('   Cuerpo: ${ourNotification.body}');
           } else {
-            print(
-              '❌ ERROR: Notificación no encontrada en lista pendiente (modo inexacto)',
+            _logger.e(
+              'ERROR: Notificación no encontrada en lista pendiente (modo inexacto)',
             );
           }
         }
@@ -752,9 +778,11 @@ class SleepNotificationService {
 
         // Iniciar verificación periódica cada minuto para detectar si no se disparó
         _startNotificationCheckTimer(scheduledDate);
-      } catch (e2) {
-        print(
-          '❌ ERROR CRÍTICO: No se pudo programar la notificación ni en modo exacto ni inexacto: $e2',
+      } catch (e2, stackTrace2) {
+        _logger.e(
+          'ERROR CRÍTICO: No se pudo programar la notificación ni en modo exacto ni inexacto',
+          e2,
+          stackTrace2,
         );
         scheduledSuccessfully = false;
       }
@@ -777,10 +805,10 @@ class SleepNotificationService {
             ? ourNotificationList.first
             : null;
         if (ourNotification != null) {
-          print('✅ Notificación verificada en lista pendiente:');
-          print('   ID: ${ourNotification.id}');
-          print('   Título: ${ourNotification.title}');
-          print('   Cuerpo: ${ourNotification.body}');
+          _logger.success('Notificación verificada en lista pendiente:');
+          _logger.d('   ID: ${ourNotification.id}');
+          _logger.d('   Título: ${ourNotification.title}');
+          _logger.d('   Cuerpo: ${ourNotification.body}');
 
           // Verificar la fecha programada
           final prefs = await SharedPreferences.getInstance();
@@ -791,17 +819,19 @@ class SleepNotificationService {
             final savedDate = DateTime.parse(savedTime);
             final now = DateTime.now();
             final diff = savedDate.difference(now);
-            print('   ⏰ Fecha programada guardada: $savedTime');
-            print('   ⏰ Tiempo hasta notificación: ${diff.inMinutes} minutos');
+            _logger.d('   ⏰ Fecha programada guardada: $savedTime');
+            _logger.d(
+              '   ⏰ Tiempo hasta notificación: ${diff.inMinutes} minutos',
+            );
 
             if (diff.isNegative) {
-              print('   ⚠️ ADVERTENCIA: La fecha programada ya pasó!');
+              _logger.w('   ADVERTENCIA: La fecha programada ya pasó!');
             }
             // No iniciar timer aquí porque ya se inició después de programar
           }
         } else {
-          print(
-            '❌ ERROR: Notificación no encontrada en lista pendiente después de programar',
+          _logger.e(
+            'ERROR: Notificación no encontrada en lista pendiente después de programar',
           );
         }
       }
@@ -817,15 +847,17 @@ class SleepNotificationService {
       final pendingNotifications = await androidNotifications
           .pendingNotificationRequests();
 
-    print(
-        '📋 Total de notificaciones pendientes: ${pendingNotifications.length}',
-    );
+      _logger.d(
+        'Total de notificaciones pendientes: ${pendingNotifications.length}',
+      );
       pendingNotifications.forEach((notification) {
-      print('  📱 ID: ${notification.id}, Título: "${notification.title}"');
-      if (notification.body != null) {
-        print('     💬 Cuerpo: "${notification.body}"');
-      }
-    });
+        _logger.d(
+          '  📱 ID: ${notification.id}, Título: "${notification.title}"',
+        );
+        if (notification.body != null) {
+          _logger.d('     💬 Cuerpo: "${notification.body}"');
+        }
+      });
 
       // Verificar específicamente nuestra notificación
       final ourNotificationList = pendingNotifications
@@ -835,15 +867,17 @@ class SleepNotificationService {
           ? ourNotificationList.first
           : null;
       if (ourNotification != null) {
-        print('✅ Nuestra notificación (ID 889) está en la lista pendiente');
+        _logger.success(
+          'Nuestra notificación (ID 889) está en la lista pendiente',
+        );
       } else {
-        print(
-          '❌ ERROR: Nuestra notificación (ID 889) NO está en la lista pendiente',
+        _logger.e(
+          'ERROR: Nuestra notificación (ID 889) NO está en la lista pendiente',
         );
       }
     } else {
-      print(
-        '⚠️ No se pudo obtener el plugin de Android para verificar notificaciones',
+      _logger.w(
+        'No se pudo obtener el plugin de Android para verificar notificaciones',
       );
     }
   }
@@ -857,11 +891,13 @@ class SleepNotificationService {
       if (isNative) {
         await _nativeAlarmChannel.invokeMethod('cancelSleepNotification');
         await prefs.setBool('sleep_notification_native', false);
-        print('🔔 SleepNotificationService: Notificación NATIVA cancelada');
+        _logger.d('SleepNotificationService: Notificación NATIVA cancelada');
       }
-    } catch (e) {
-      print(
-        '⚠️ SleepNotificationService: Error cancelando notificación nativa: $e',
+    } catch (e, stackTrace) {
+      _logger.w(
+        'SleepNotificationService: Error cancelando notificación nativa',
+        e,
+        stackTrace,
       );
     }
 
@@ -870,8 +906,8 @@ class SleepNotificationService {
     _stopNotificationCheckTimer();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('sleep_notification_scheduled', false);
-    print(
-      '🔔 SleepNotificationService: Notificación diaria de las 8 AM cancelada',
+    _logger.d(
+      'SleepNotificationService: Notificación diaria de las 8 AM cancelada',
     );
   }
 
@@ -898,19 +934,23 @@ class SleepNotificationService {
           final savedDate = DateTime.parse(savedTime);
           final now = DateTime.now();
           if (savedDate.isBefore(now)) {
-            print(
-              '⚠️ SleepNotificationService: Notificación programada pero la fecha ya pasó',
+            _logger.w(
+              'SleepNotificationService: Notificación programada pero la fecha ya pasó',
             );
-            print('   Fecha programada: $savedTime');
-            print('   Hora actual: ${now.toIso8601String()}');
+            _logger.d('   Fecha programada: $savedTime');
+            _logger.d('   Hora actual: ${now.toIso8601String()}');
             return false; // La notificación ya debería haberse disparado
           }
         }
       }
 
       return isScheduled;
-    } catch (e) {
-      print('❌ SleepNotificationService: Error verificando notificación: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'SleepNotificationService: Error verificando notificación',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -942,14 +982,14 @@ class SleepNotificationService {
         // Si la fecha programada ya pasó (más de 2 minutos de diferencia)
         // Y la notificación aún está en la lista pendiente, significa que no se disparó
         if (diff.isNegative && diff.inMinutes.abs() > 2 && isStillPending) {
-          print(
-            '⚠️ SleepNotificationService: PROBLEMA DETECTADO - Notificación programada para ${savedDate.toIso8601String()} pero ya pasó (${diff.inMinutes.abs()} minutos)',
+          _logger.w(
+            'SleepNotificationService: PROBLEMA DETECTADO - Notificación programada para ${savedDate.toIso8601String()} pero ya pasó (${diff.inMinutes.abs()} minutos)',
           );
-          print(
-            '⚠️ SleepNotificationService: La notificación aún está en la lista pendiente, lo que significa que NO se disparó',
+          _logger.w(
+            'SleepNotificationService: La notificación aún está en la lista pendiente, lo que significa que NO se disparó',
           );
-          print(
-            '🔄 SleepNotificationService: Mostrando notificación inmediata como fallback...',
+          _logger.d(
+            'SleepNotificationService: Mostrando notificación inmediata como fallback...',
           );
 
           // Cancelar la notificación programada que no se disparó
@@ -975,28 +1015,30 @@ class SleepNotificationService {
               ),
               payload: 'daily_sleep_registration',
             );
-            print(
-              '✅ SleepNotificationService: Notificación de fallback mostrada',
+            _logger.success(
+              'SleepNotificationService: Notificación de fallback mostrada',
             );
-          } catch (e) {
-            print(
-              '❌ SleepNotificationService: Error mostrando notificación de fallback: $e',
+          } catch (e, stackTrace) {
+            _logger.e(
+              'SleepNotificationService: Error mostrando notificación de fallback',
+              e,
+              stackTrace,
             );
           }
 
           // Reprogramar para mañana
-          print('🔄 SleepNotificationService: Reprogramando para mañana...');
+          _logger.d('SleepNotificationService: Reprogramando para mañana...');
           await scheduleDailySleepNotification();
           return;
         } else if (diff.isNegative &&
             diff.inMinutes.abs() > 2 &&
             !isStillPending) {
           // La fecha pasó pero la notificación ya no está pendiente, probablemente se disparó
-          print(
-            '✅ SleepNotificationService: Notificación programada para ${savedDate.toIso8601String()} ya pasó y no está pendiente (probablemente se disparó)',
+          _logger.success(
+            'SleepNotificationService: Notificación programada para ${savedDate.toIso8601String()} ya pasó y no está pendiente (probablemente se disparó)',
           );
           // Reprogramar para mañana
-          print('🔄 SleepNotificationService: Reprogramando para mañana...');
+          _logger.d('SleepNotificationService: Reprogramando para mañana...');
           await scheduleDailySleepNotification();
           return;
         }
@@ -1004,8 +1046,8 @@ class SleepNotificationService {
 
       final isScheduled = await isSleepNotificationScheduled();
       if (!isScheduled) {
-        print(
-          '🔄 SleepNotificationService: Notificación no encontrada, reprogramando...',
+        _logger.d(
+          'SleepNotificationService: Notificación no encontrada, reprogramando...',
         );
         // No mostrar notificación de prueba al reprogramar, solo programar
         await scheduleDailySleepNotification(skipTestNotification: true);
@@ -1015,25 +1057,27 @@ class SleepNotificationService {
           final savedDate = DateTime.parse(savedTime);
           final now = DateTime.now();
           if (savedDate.isBefore(now)) {
-            print(
-              '🔄 SleepNotificationService: Notificación programada pero fecha pasada, reprogramando...',
+            _logger.d(
+              'SleepNotificationService: Notificación programada pero fecha pasada, reprogramando...',
             );
             // No mostrar notificación de prueba al reprogramar, solo programar
             await scheduleDailySleepNotification(skipTestNotification: true);
           }
         }
       }
-    } catch (e) {
-      print(
-        '❌ SleepNotificationService: Error verificando y reprogramando: $e',
+    } catch (e, stackTrace) {
+      _logger.e(
+        'SleepNotificationService: Error verificando y reprogramando',
+        e,
+        stackTrace,
       );
     }
   }
 
   /// Diagnosticar por qué la notificación no se disparó
   Future<void> diagnoseNotificationIssue() async {
-    print(
-      '🔍 SleepNotificationService: Iniciando diagnóstico de notificaciones...',
+    _logger.d(
+      'SleepNotificationService: Iniciando diagnóstico de notificaciones...',
     );
 
     try {
@@ -1043,15 +1087,15 @@ class SleepNotificationService {
           >();
 
       if (androidNotifications == null) {
-        print('❌ No se pudo obtener el plugin de Android');
+        _logger.e('No se pudo obtener el plugin de Android');
         return;
       }
 
       // 1. Verificar permisos de notificación
       final notificationsEnabled = await androidNotifications
           .areNotificationsEnabled();
-      print(
-        '📋 Permisos de notificación: ${notificationsEnabled == true ? "✅ Concedidos" : "❌ NO concedidos"}',
+      _logger.d(
+        'Permisos de notificación: ${notificationsEnabled == true ? "✅ Concedidos" : "❌ NO concedidos"}',
       );
 
       // 1.1. Verificar permiso de alarmas exactas (Android 12+)
@@ -1061,36 +1105,44 @@ class SleepNotificationService {
           'canScheduleExactAlarms',
         );
         canScheduleExactAlarms = result ?? false;
-        print(
-          '📋 Permiso de alarmas exactas: ${canScheduleExactAlarms ? "✅ Concedido" : "❌ NO concedido (CRÍTICO)"}',
+        _logger.d(
+          'Permiso de alarmas exactas: ${canScheduleExactAlarms ? "✅ Concedido" : "❌ NO concedido (CRÍTICO)"}',
         );
         if (!canScheduleExactAlarms) {
-          print(
-            '   ⚠️ Sin este permiso, las notificaciones programadas pueden no dispararse a tiempo.',
+          _logger.w(
+            '   Sin este permiso, las notificaciones programadas pueden no dispararse a tiempo.',
           );
-          print(
+          _logger.w(
             '   💡 Solución: Configuración → Aplicaciones → Gilact → Permisos → Alarmas y recordatorios',
           );
         }
-      } catch (e) {
-        print('⚠️ No se pudo verificar permiso de alarmas exactas: $e');
+      } catch (e, stackTrace) {
+        _logger.w(
+          'No se pudo verificar permiso de alarmas exactas',
+          e,
+          stackTrace,
+        );
         canScheduleExactAlarms = false;
       }
 
       // 2. Verificar notificaciones pendientes
       final pending = await androidNotifications.pendingNotificationRequests();
-      print('📋 Notificaciones pendientes: ${pending.length}');
+      _logger.d('Notificaciones pendientes: ${pending.length}');
       final ourNotificationList = pending.where((n) => n.id == 889).toList();
       final ourNotification = ourNotificationList.isNotEmpty
           ? ourNotificationList.first
           : null;
 
       if (ourNotification != null) {
-        print('✅ Nuestra notificación (ID 889) está en la lista pendiente');
-        print('   Título: ${ourNotification.title}');
-        print('   Cuerpo: ${ourNotification.body}');
+        _logger.success(
+          'Nuestra notificación (ID 889) está en la lista pendiente',
+        );
+        _logger.d('   Título: ${ourNotification.title}');
+        _logger.d('   Cuerpo: ${ourNotification.body}');
       } else {
-        print('❌ Nuestra notificación (ID 889) NO está en la lista pendiente');
+        _logger.e(
+          'Nuestra notificación (ID 889) NO está en la lista pendiente',
+        );
       }
 
       // 3. Verificar fecha programada guardada
@@ -1100,13 +1152,13 @@ class SleepNotificationService {
         final savedDate = DateTime.parse(savedTime);
         final now = DateTime.now();
         final diff = savedDate.difference(now);
-        print('📅 Fecha programada guardada: $savedTime');
-        print('📅 Hora actual: ${now.toIso8601String()}');
-        print('📅 Diferencia: ${diff.inMinutes} minutos');
+        _logger.d('Fecha programada guardada: $savedTime');
+        _logger.d('Hora actual: ${now.toIso8601String()}');
+        _logger.d('Diferencia: ${diff.inMinutes} minutos');
 
         if (diff.isNegative) {
-          print('⚠️ PROBLEMA ENCONTRADO: La fecha programada ya pasó!');
-          print(
+          _logger.w('PROBLEMA ENCONTRADO: La fecha programada ya pasó!');
+          _logger.w(
             '   Esto significa que la notificación debería haberse disparado pero no lo hizo.',
           );
 
@@ -1122,43 +1174,47 @@ class SleepNotificationService {
           }
 
           if (!canSchedule) {
-            print(
-              '   ❌ CAUSA PRINCIPAL: Permiso de alarmas exactas NO concedido',
+            _logger.e(
+              '   CAUSA PRINCIPAL: Permiso de alarmas exactas NO concedido',
             );
-            print('   📱 Abriendo configuración de la app...');
+            _logger.d('   📱 Abriendo configuración de la app...');
             try {
               await _notificationChannel.invokeMethod('openAppSettings');
-              print(
-                '   ✅ Configuración abierta. Por favor concede el permiso "Alarmas y recordatorios"',
+              _logger.success(
+                '   Configuración abierta. Por favor concede el permiso "Alarmas y recordatorios"',
               );
-            } catch (e) {
-              print('   ⚠️ No se pudo abrir la configuración: $e');
+            } catch (e, stackTrace) {
+              _logger.w('   No se pudo abrir la configuración', e, stackTrace);
             }
           } else {
-            print('   Posibles causas:');
-            print('   1. Optimización de batería bloqueando la notificación');
-            print('   2. Modo "No molestar" activo');
-            print('   3. App necesita estar en "No optimizar batería"');
-            print('');
-            print('   SOLUCIÓN:');
-            print('   1. Ve a Configuración → Aplicaciones → Gilact → Batería');
-            print('   2. Selecciona "No optimizar"');
+            _logger.w('   Posibles causas:');
+            _logger.w(
+              '   1. Optimización de batería bloqueando la notificación',
+            );
+            _logger.w('   2. Modo "No molestar" activo');
+            _logger.w('   3. App necesita estar en "No optimizar batería"');
+            _logger.w('');
+            _logger.w('   SOLUCIÓN:');
+            _logger.w(
+              '   1. Ve a Configuración → Aplicaciones → Gilact → Batería',
+            );
+            _logger.w('   2. Selecciona "No optimizar"');
           }
         } else {
-          print(
-            '✅ La fecha programada es futura, la notificación debería dispararse en ${diff.inMinutes} minutos',
+          _logger.success(
+            'La fecha programada es futura, la notificación debería dispararse en ${diff.inMinutes} minutos',
           );
         }
       } else {
-        print('⚠️ No hay fecha programada guardada');
+        _logger.w('No hay fecha programada guardada');
       }
 
       // 4. Verificar canal de notificación
-      print('📋 Verificando canal de notificación...');
+      _logger.d('Verificando canal de notificación...');
       await _createNotificationChannel();
-      print('✅ Canal de notificación verificado/creado');
-    } catch (e) {
-      print('❌ Error en diagnóstico: $e');
+      _logger.success('Canal de notificación verificado/creado');
+    } catch (e, stackTrace) {
+      _logger.e('Error en diagnóstico', e, stackTrace);
     }
   }
 
@@ -1167,8 +1223,8 @@ class SleepNotificationService {
     // Cancelar timer anterior si existe
     _notificationCheckTimer?.cancel();
 
-    print(
-      '⏰ SleepNotificationService: Iniciando verificación periódica cada minuto para notificación programada',
+    _logger.d(
+      'SleepNotificationService: Iniciando verificación periódica cada minuto para notificación programada',
     );
 
     // Verificar cada minuto si la notificación debería haberse disparado
@@ -1179,14 +1235,14 @@ class SleepNotificationService {
         final now = tz.TZDateTime.now(tz.local);
         final diff = scheduledDate.difference(now);
 
-        print(
-          '⏰ SleepNotificationService: Verificación periódica - Diferencia: ${diff.inMinutes} minutos (${diff.isNegative ? "PASÓ" : "FUTURO"})',
+        _logger.d(
+          'SleepNotificationService: Verificación periódica - Diferencia: ${diff.inMinutes} minutos (${diff.isNegative ? "PASÓ" : "FUTURO"})',
         );
 
         // Si la fecha programada ya pasó (0 minutos o más)
         if (diff.isNegative || diff.inMinutes == 0) {
-          print(
-            '⏰ SleepNotificationService: Verificación periódica - Fecha programada ya pasó o es ahora (${diff.inMinutes} minutos)',
+          _logger.d(
+            'SleepNotificationService: Verificación periódica - Fecha programada ya pasó o es ahora (${diff.inMinutes} minutos)',
           );
 
           // Verificar si la notificación aún está pendiente
@@ -1200,16 +1256,16 @@ class SleepNotificationService {
                 .pendingNotificationRequests();
             final isStillPending = pending.any((n) => n.id == 889);
 
-            print(
-              '⏰ SleepNotificationService: Notificación aún pendiente: $isStillPending',
+            _logger.d(
+              'SleepNotificationService: Notificación aún pendiente: $isStillPending',
             );
 
             if (isStillPending) {
-              print(
-                '⚠️ SleepNotificationService: PROBLEMA DETECTADO - Notificación programada NO se disparó!',
+              _logger.w(
+                'SleepNotificationService: PROBLEMA DETECTADO - Notificación programada NO se disparó!',
               );
-              print(
-                '🔄 SleepNotificationService: Mostrando notificación inmediata como fallback...',
+              _logger.d(
+                'SleepNotificationService: Mostrando notificación inmediata como fallback...',
               );
 
               // Cancelar el timer ya que vamos a manejar esto
@@ -1239,24 +1295,26 @@ class SleepNotificationService {
                   ),
                   payload: 'daily_sleep_registration',
                 );
-                print(
-                  '✅ SleepNotificationService: Notificación de fallback mostrada',
+                _logger.success(
+                  'SleepNotificationService: Notificación de fallback mostrada',
                 );
-              } catch (e) {
-                print(
-                  '❌ SleepNotificationService: Error mostrando notificación de fallback: $e',
+              } catch (e, stackTrace) {
+                _logger.e(
+                  'SleepNotificationService: Error mostrando notificación de fallback',
+                  e,
+                  stackTrace,
                 );
               }
 
               // Reprogramar para mañana
-              print(
-                '🔄 SleepNotificationService: Reprogramando para mañana...',
+              _logger.d(
+                'SleepNotificationService: Reprogramando para mañana...',
               );
               await scheduleDailySleepNotification(skipTestNotification: true);
             } else {
               // La notificación ya no está pendiente, probablemente se disparó
-              print(
-                '✅ SleepNotificationService: Notificación ya no está pendiente (probablemente se disparó)',
+              _logger.success(
+                'SleepNotificationService: Notificación ya no está pendiente (probablemente se disparó)',
               );
               timer.cancel();
               _notificationCheckTimer = null;
@@ -1264,13 +1322,15 @@ class SleepNotificationService {
           }
         } else if (!diff.isNegative && diff.inMinutes <= 5) {
           // Si estamos a menos de 5 minutos de la hora programada, verificar más frecuentemente
-          print(
-            '⏰ SleepNotificationService: Verificación periódica - ${diff.inMinutes} minutos hasta notificación',
+          _logger.d(
+            'SleepNotificationService: Verificación periódica - ${diff.inMinutes} minutos hasta notificación',
           );
         }
-      } catch (e) {
-        print(
-          '❌ SleepNotificationService: Error en verificación periódica: $e',
+      } catch (e, stackTrace) {
+        _logger.e(
+          'SleepNotificationService: Error en verificación periódica',
+          e,
+          stackTrace,
         );
       }
     });

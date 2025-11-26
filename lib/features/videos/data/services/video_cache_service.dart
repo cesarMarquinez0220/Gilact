@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 class VideoCacheService {
   static const String _cacheKey = 'video_cache';
@@ -32,8 +34,9 @@ class VideoCacheService {
 
       cache[videoId.toString()] = cacheData;
       await prefs.setString(_cacheKey, jsonEncode(cache));
-    } catch (e) {
-      print('Error caching video info: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error caching video info', e, stackTrace);
     }
   }
 
@@ -62,8 +65,9 @@ class VideoCacheService {
           }
         }
       }
-    } catch (e) {
-      print('Error getting cached video info: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error getting cached video info', e, stackTrace);
     }
     return null;
   }
@@ -92,8 +96,9 @@ class VideoCacheService {
 
       cache[videoId.toString()] = progressData;
       await prefs.setString(_progressKey, jsonEncode(cache));
-    } catch (e) {
-      print('Error caching video progress: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error caching video progress', e, stackTrace);
     }
   }
 
@@ -124,8 +129,9 @@ class VideoCacheService {
           }
         }
       }
-    } catch (e) {
-      print('Error getting cached video progress: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error getting cached video progress', e, stackTrace);
     }
     return null;
   }
@@ -166,8 +172,9 @@ class VideoCacheService {
 
         await prefs.setString(_progressKey, jsonEncode(cache));
       }
-    } catch (e) {
-      print('Error cleaning expired cache: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error cleaning expired cache', e, stackTrace);
     }
   }
 
@@ -177,8 +184,9 @@ class VideoCacheService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_cacheKey);
       await prefs.remove(_progressKey);
-    } catch (e) {
-      print('Error clearing all cache: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error clearing all cache', e, stackTrace);
     }
   }
 
@@ -206,8 +214,9 @@ class VideoCacheService {
         'videoCacheCount': videoCacheCount,
         'progressCacheCount': progressCacheCount,
       };
-    } catch (e) {
-      print('Error getting cache stats: $e');
+    } catch (e, stackTrace) {
+      final logger = getIt<AppLogger>();
+      logger.e('Error getting cache stats', e, stackTrace);
       return {'videoCacheCount': 0, 'progressCacheCount': 0};
     }
   }
@@ -217,12 +226,13 @@ class VideoCacheService {
     int videoId, {
     int duration = 30,
   }) async {
+    final logger = getIt<AppLogger>();
     try {
-      print('📹 Precargando segmento de video $videoId (${duration}s)');
+      logger.d('Precargando segmento de video $videoId (${duration}s)');
 
       // Simular precarga del segmento
       // En una implementación real, aquí se descargaría el segmento del video
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       // Guardar información de precarga
       final prefs = await SharedPreferences.getInstance();
@@ -235,9 +245,9 @@ class VideoCacheService {
 
       await prefs.setString(preloadKey, jsonEncode(preloadData));
 
-      print('✅ Segmento de video $videoId precargado exitosamente');
-    } catch (e) {
-      print('❌ Error precargando segmento de video $videoId: $e');
+      logger.success('Segmento de video $videoId precargado exitosamente');
+    } catch (e, stackTrace) {
+      logger.e('Error precargando segmento de video $videoId', e, stackTrace);
     }
   }
 

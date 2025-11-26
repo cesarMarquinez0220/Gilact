@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/biometric_auth_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import '../../domain/services/auth_validation_service.dart';
 import '../../domain/services/credentials_cache_service.dart';
 import '../bloc/auth_bloc.dart';
@@ -39,6 +40,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   String? _passwordError;
   bool _showBiometricButton = false;
   final BiometricAuthService _biometricAuthService = BiometricAuthService();
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   void initState() {
@@ -60,18 +62,20 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             _showBiometricButton = true;
           });
         }
-        if (kDebugMode) {
-          print('✅ LoginPage: Autenticación biométrica habilitada automáticamente');
-        }
+        _logger.success(
+          'LoginPage: Autenticación biométrica habilitada automáticamente',
+        );
       } else {
-        if (kDebugMode) {
-          print('⚠️ LoginPage: Autenticación biométrica no disponible en este dispositivo');
-        }
+        _logger.w(
+          'LoginPage: Autenticación biométrica no disponible en este dispositivo',
+        );
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ LoginPage: Error habilitando autenticación biométrica: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LoginPage: Error habilitando autenticación biométrica',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -94,24 +98,23 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         });
       }
 
-      if (kDebugMode) {
-        print(
-          '🔐 LoginPage: Autenticación biométrica disponible: $isAvailable',
-        );
-        print('🔐 LoginPage: Autenticación biométrica habilitada: $isEnabled');
-        print('🔐 LoginPage: Credenciales guardadas: $hasCredentials');
-        print('🔐 LoginPage: Mostrar botón biométrico: $shouldShow');
-        
-        // Información adicional para depuración
-        if (isAvailable) {
-          final availableTypes = await _biometricAuthService.getAvailableBiometrics();
-          print('🔐 LoginPage: Tipos biométricos disponibles: $availableTypes');
-        }
+      _logger.d('LoginPage: Autenticación biométrica disponible: $isAvailable');
+      _logger.d('LoginPage: Autenticación biométrica habilitada: $isEnabled');
+      _logger.d('LoginPage: Credenciales guardadas: $hasCredentials');
+      _logger.d('LoginPage: Mostrar botón biométrico: $shouldShow');
+
+      // Información adicional para depuración
+      if (isAvailable) {
+        final availableTypes = await _biometricAuthService
+            .getAvailableBiometrics();
+        _logger.d('LoginPage: Tipos biométricos disponibles: $availableTypes');
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ LoginPage: Error verificando autenticación biométrica: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LoginPage: Error verificando autenticación biométrica',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -220,9 +223,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
                   // Guardar credenciales si está marcado
                   if (_saveCredentials) {
-                    print('🔍 LoginPage: Guardando credenciales en caché...');
-                    print(
-                      '🔍 LoginPage: Email a guardar: "${_emailController.text.trim()}"',
+                    _logger.d('LoginPage: Guardando credenciales en caché...');
+                    _logger.d(
+                      'LoginPage: Email a guardar: "${_emailController.text.trim()}"',
                     );
                     CredentialsCacheService.saveCredentialsInCache(
                       _emailController.text.trim(),
@@ -232,8 +235,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     // Habilitar autenticación biométrica si está disponible (async sin await)
                     _enableBiometricIfAvailable();
                   } else {
-                    print(
-                      '🔍 LoginPage: No se guardarán credenciales (_saveCredentials = false)',
+                    _logger.d(
+                      'LoginPage: No se guardarán credenciales (_saveCredentials = false)',
                     );
                   }
 
@@ -248,14 +251,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     if (isNewRegistration) {
                       // Es un registro nuevo, no navegar desde aquí
                       // El RegistrationPage ya se encarga de la navegación
-                      print(
-                        '🔍 LoginPage: Detectado registro nuevo, no navegando desde aquí',
+                      _logger.d(
+                        'LoginPage: Detectado registro nuevo, no navegando desde aquí',
                       );
                       await prefs.remove('is_new_registration');
                     } else {
                       // Es un login normal, verificar notificación pendiente primero
-                      print(
-                        '🔍 LoginPage: Login normal, verificando notificación pendiente...',
+                      _logger.d(
+                        'LoginPage: Login normal, verificando notificación pendiente...',
                       );
 
                       // Verificar si hay notificación pendiente

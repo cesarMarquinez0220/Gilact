@@ -8,6 +8,8 @@ import '../pages/lactation_calendar_page.dart';
 import '../pages/lactation_flow_page_enhanced.dart';
 import '../../data/services/lactation_service.dart';
 import '../../domain/entities/lactation_record.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 // Colores de la aplicación
 class _AppColors {
@@ -36,6 +38,7 @@ class SmartLactationButton extends StatefulWidget {
 
 class _SmartLactationButtonState extends State<SmartLactationButton> {
   late LactationService _lactationService;
+  final AppLogger _logger = getIt<AppLogger>();
   List<LactationRecord> _preloadedRecords = [];
   bool _isDataPreloaded = false;
   bool _isPreloading = false;
@@ -60,7 +63,7 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
     }
 
     try {
-      print('🔄 SmartLactationButton: Precargando datos...');
+      _logger.d('SmartLactationButton: Precargando datos...');
 
       // Precargar datos del día actual
       final today = widget.selectedDate ?? DateTime.now();
@@ -69,11 +72,8 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
       // Precargar datos del mes para el calendario
       final monthRecords = await _lactationService.getRecordsForMonth(today);
 
-      print(
-        '📦 [DEBUG] SmartLactationButton: dayRecords = ${dayRecords.length}',
-      );
-      print(
-        '📦 [DEBUG] SmartLactationButton: monthRecords = ${monthRecords.length}',
+      _logger.d(
+        'SmartLactationButton: dayRecords = ${dayRecords.length}, monthRecords = ${monthRecords.length}',
       );
 
       if (mounted) {
@@ -86,13 +86,12 @@ class _SmartLactationButtonState extends State<SmartLactationButton> {
         });
       }
 
-      print(
-        '📦 [DEBUG] SmartLactationButton: _preloadedRecords final = ${_preloadedRecords.length}',
+      _logger.d(
+        'SmartLactationButton: _preloadedRecords final = ${_preloadedRecords.length}',
       );
-
-      print('✅ SmartLactationButton: Datos precargados exitosamente');
-    } catch (e) {
-      print('❌ SmartLactationButton: Error precargando datos: $e');
+      _logger.success('SmartLactationButton: Datos precargados exitosamente');
+    } catch (e, stackTrace) {
+      _logger.e('SmartLactationButton: Error precargando datos', e, stackTrace);
       if (mounted) {
         setState(() {
           _isPreloading = false;

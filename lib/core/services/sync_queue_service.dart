@@ -1,22 +1,14 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'app_logger.dart';
+import '../di/injection.dart';
 
 /// Tipo de operación de sincronización
-enum SyncOperationType {
-  create,
-  update,
-  delete,
-}
+enum SyncOperationType { create, update, delete }
 
 /// Estado de una operación de sincronización
-enum SyncStatus {
-  pending,
-  syncing,
-  completed,
-  failed,
-}
+enum SyncStatus { pending, syncing, completed, failed }
 
 /// Modelo de una operación en la cola de sincronización
 class SyncOperation {
@@ -118,6 +110,7 @@ class SyncOperation {
 /// Servicio para gestionar la cola de sincronización
 class SyncQueueService {
   static final SyncQueueService _instance = SyncQueueService._internal();
+  final AppLogger _logger = getIt<AppLogger>();
   factory SyncQueueService() => _instance;
   SyncQueueService._internal();
 
@@ -155,15 +148,11 @@ class SyncQueueService {
         ''');
 
         // Índices para mejorar búsquedas
-        await db.execute(
-          'CREATE INDEX idx_status ON sync_queue(status)',
-        );
+        await db.execute('CREATE INDEX idx_status ON sync_queue(status)');
         await db.execute(
           'CREATE INDEX idx_collection_path ON sync_queue(collection_path)',
         );
-        await db.execute(
-          'CREATE INDEX idx_local_id ON sync_queue(local_id)',
-        );
+        await db.execute('CREATE INDEX idx_local_id ON sync_queue(local_id)');
       },
     );
   }
@@ -177,15 +166,11 @@ class SyncQueueService {
         operation.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      if (kDebugMode) {
-        print(
-          '✅ SyncQueueService: Operación agregada - ${operation.operationType.name} en ${operation.collectionPath}',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error agregando operación: $e');
-      }
+      _logger.success(
+        'SyncQueueService: Operación agregada - ${operation.operationType.name} en ${operation.collectionPath}',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error agregando operación', e, stackTrace);
       rethrow;
     }
   }
@@ -202,10 +187,12 @@ class SyncQueueService {
       );
 
       return maps.map((map) => SyncOperation.fromMap(map)).toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error obteniendo operaciones pendientes: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'SyncQueueService: Error obteniendo operaciones pendientes',
+        e,
+        stackTrace,
+      );
       return [];
     }
   }
@@ -219,10 +206,8 @@ class SyncQueueService {
         [SyncStatus.pending.name],
       );
       return Sqflite.firstIntValue(result) ?? 0;
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error obteniendo conteo: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error obteniendo conteo', e, stackTrace);
       return 0;
     }
   }
@@ -263,10 +248,8 @@ class SyncQueueService {
         where: 'id = ?',
         whereArgs: [operationId],
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error actualizando estado: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error actualizando estado', e, stackTrace);
     }
   }
 
@@ -283,10 +266,8 @@ class SyncQueueService {
 
       if (maps.isEmpty) return null;
       return SyncOperation.fromMap(maps.first);
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error obteniendo operación: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error obteniendo operación', e, stackTrace);
       return null;
     }
   }
@@ -295,15 +276,9 @@ class SyncQueueService {
   Future<void> removeCompletedOperation(String operationId) async {
     try {
       final db = await database;
-      await db.delete(
-        'sync_queue',
-        where: 'id = ?',
-        whereArgs: [operationId],
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error eliminando operación: $e');
-      }
+      await db.delete('sync_queue', where: 'id = ?', whereArgs: [operationId]);
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error eliminando operación', e, stackTrace);
     }
   }
 
@@ -316,10 +291,8 @@ class SyncQueueService {
         where: 'status = ?',
         whereArgs: [SyncStatus.completed.name],
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error limpiando operaciones: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('SyncQueueService: Error limpiando operaciones', e, stackTrace);
     }
   }
 
@@ -340,12 +313,13 @@ class SyncQueueService {
       );
 
       return maps.map((map) => SyncOperation.fromMap(map)).toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ SyncQueueService: Error obteniendo operaciones fallidas: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e(
+        'SyncQueueService: Error obteniendo operaciones fallidas',
+        e,
+        stackTrace,
+      );
       return [];
     }
   }
 }
-

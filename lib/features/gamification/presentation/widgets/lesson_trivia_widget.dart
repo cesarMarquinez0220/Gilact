@@ -9,11 +9,9 @@ import '../../domain/services/trivia_service.dart';
 import '../../../../core/services/vibration_service.dart';
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/di/injection.dart';
-import '../../domain/services/gamification_service.dart';
 import '../../domain/services/xp_calculation_service.dart';
 import '../../presentation/bloc/gamification_bloc.dart';
 import '../../presentation/bloc/gamification_event.dart';
-import 'package:get_it/get_it.dart';
 import 'xp_celebration_animation.dart';
 import '../../../../core/theme/app_colors.dart';
 

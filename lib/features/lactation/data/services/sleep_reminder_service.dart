@@ -1,4 +1,6 @@
 import 'dart:async';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para manejar recordatorios automáticos sobre el sueño del bebé
 /// Versión simplificada sin dependencias externas
@@ -7,7 +9,8 @@ class SleepReminderService {
 
   /// Inicializa el servicio de notificaciones
   static Future<void> initialize() async {
-    print('🔔 SleepReminderService inicializado');
+    final logger = getIt<AppLogger>();
+    logger.d('SleepReminderService inicializado');
   }
 
   /// Programa una notificación para preguntar sobre el sueño del bebé
@@ -28,7 +31,8 @@ class SleepReminderService {
 
     // Verificar que la hora sea válida (no en el pasado)
     if (notificationTime.isBefore(DateTime.now())) {
-      print('⚠️ La hora de notificación está en el pasado, no se programará');
+      final logger = getIt<AppLogger>();
+      logger.w('La hora de notificación está en el pasado, no se programará');
       return;
     }
 
@@ -43,20 +47,23 @@ class SleepReminderService {
     // Agregar a la lista de recordatorios pendientes
     _pendingReminders.add(reminder);
 
-    print('✅ Recordatorio programado para: $notificationTime');
-    print('📝 Tipo de alimentación: $feedingType');
+    final logger = getIt<AppLogger>();
+    logger.success('Recordatorio programado para: $notificationTime');
+    logger.d('Tipo de alimentación: $feedingType');
   }
 
   /// Cancela todas las notificaciones programadas
   static Future<void> cancelAllNotifications() async {
     _pendingReminders.clear();
-    print('🗑️ Todos los recordatorios cancelados');
+    final logger = getIt<AppLogger>();
+    logger.d('Todos los recordatorios cancelados');
   }
 
   /// Cancela una notificación específica
   static Future<void> cancelNotification(int id) async {
     _pendingReminders.removeWhere((reminder) => reminder.notificationId == id);
-    print('🗑️ Recordatorio $id cancelado');
+    final logger = getIt<AppLogger>();
+    logger.d('Recordatorio $id cancelado');
   }
 
   /// Obtiene los recordatorios pendientes

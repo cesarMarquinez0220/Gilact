@@ -1,17 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para manejar las interacciones del usuario con los videos
 class VideoInteractionService {
   final FirebaseFirestore _firestore;
+  final AppLogger _logger = getIt<AppLogger>();
 
   VideoInteractionService(this._firestore);
 
   /// Crea la subcolección videos cuando el usuario inicia su primera lección
   Future<void> initializeVideosSubcollection(String userId, int videoId) async {
     try {
-      print(
-        '🎬 Inicializando subcolección videos para usuario: $userId, video: $videoId',
+      _logger.d(
+        'Inicializando subcolección videos para usuario: $userId, video: $videoId',
       );
 
       // Verificar si ya existe algún documento en la subcolección videos
@@ -24,17 +27,17 @@ class VideoInteractionService {
 
       if (existingDocs.docs.isEmpty) {
         // Es la primera vez que el usuario inicia una lección
-        print('🎬 Primera lección detectada, creando subcolección videos');
+        _logger.d('Primera lección detectada, creando subcolección videos');
 
         // La subcolección se creará automáticamente al agregar el primer documento
 
         // Crear el primer registro de interacción
         await _createFirstVideoInteraction(userId, videoId);
       } else {
-        print('ℹ️ Subcolección videos ya existe');
+        _logger.d('Subcolección videos ya existe');
       }
-    } catch (e) {
-      print('❌ Error inicializando subcolección videos: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error inicializando subcolección videos', e, stackTrace);
       rethrow;
     }
   }
@@ -42,8 +45,8 @@ class VideoInteractionService {
   /// Maneja la primera pausa de un video (actualiza registro existente)
   Future<void> handleFirstVideoPause(String userId, int videoId) async {
     try {
-      print(
-        '⏸️ Manejando primera pausa del video $videoId para usuario $userId',
+      _logger.d(
+        'Manejando primera pausa del video $videoId para usuario $userId',
       );
 
       // Verificar si ya existe algún documento en la subcolección videos
@@ -58,11 +61,11 @@ class VideoInteractionService {
         // Si no existe, crear la subcolección (fallback)
         await initializeVideosSubcollection(userId, videoId);
       } else {
-        print('ℹ️ Subcolección videos ya existe, registrando pausa');
+        _logger.d('Subcolección videos ya existe, registrando pausa');
         await _recordVideoInteraction(userId, videoId);
       }
-    } catch (e) {
-      print('❌ Error manejando primera pausa: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error manejando primera pausa', e, stackTrace);
       rethrow;
     }
   }
@@ -87,9 +90,11 @@ class VideoInteractionService {
         'fechaActualizacion': Timestamp.fromDate(DateTime.now()),
       });
 
-      print('✅ Primer registro de interacción creado para video $videoId');
-    } catch (e) {
-      print('❌ Error creando primer registro de interacción: $e');
+      _logger.success(
+        'Primer registro de interacción creado para video $videoId',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error creando primer registro de interacción', e, stackTrace);
       rethrow;
     }
   }
@@ -120,9 +125,9 @@ class VideoInteractionService {
         await _createFirstVideoInteraction(userId, videoId);
       }
 
-      print('📊 Interacción registrada para video $videoId');
-    } catch (e) {
-      print('❌ Error registrando interacción: $e');
+      _logger.d('Interacción registrada para video $videoId');
+    } catch (e, stackTrace) {
+      _logger.e('Error registrando interacción', e, stackTrace);
       rethrow;
     }
   }
@@ -133,7 +138,7 @@ class VideoInteractionService {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        print('❌ VideoInteractionService: Usuario no autenticado');
+        _logger.e('VideoInteractionService: Usuario no autenticado');
         return null;
       }
 
@@ -147,17 +152,17 @@ class VideoInteractionService {
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print(
-            '✅ VideoInteractionService: Usuario encontrado por email, ID del documento: $userDocId',
+          _logger.d(
+            'VideoInteractionService: Usuario encontrado por email, ID del documento: $userDocId',
           );
           return userDocId;
         } else {
-          print(
-            '⚠️ VideoInteractionService: No se encontró usuario por email: ${user.email}',
+          _logger.w(
+            'VideoInteractionService: No se encontró usuario por email: ${user.email}',
           );
         }
       } else {
-        print('⚠️ VideoInteractionService: Usuario no tiene email');
+        _logger.w('VideoInteractionService: Usuario no tiene email');
       }
 
       // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
@@ -167,16 +172,16 @@ class VideoInteractionService {
           .get();
 
       if (docSnapshot.exists) {
-        print(
-          '⚠️ VideoInteractionService: Usando UID como fallback (no recomendado): ${user.uid}',
+        _logger.w(
+          'VideoInteractionService: Usando UID como fallback (no recomendado): ${user.uid}',
         );
         return user.uid;
       }
 
-      print('❌ VideoInteractionService: No se encontró usuario en Firestore');
+      _logger.e('VideoInteractionService: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }
@@ -188,8 +193,8 @@ class VideoInteractionService {
       // Obtener el ID correcto del documento del usuario (ignorar el userId pasado)
       final userDocId = await _getUserDocumentId();
       if (userDocId == null) {
-        print(
-          '❌ VideoInteractionService: No se pudo obtener el ID del documento del usuario',
+        _logger.e(
+          'VideoInteractionService: No se pudo obtener el ID del documento del usuario',
         );
         return;
       }
@@ -200,8 +205,8 @@ class VideoInteractionService {
           .collection('videos')
           .doc(videoId.toString());
 
-      print(
-        '📊 VideoInteractionService: Marcando video como completado en /Users/$userDocId/videos/$videoId',
+      _logger.d(
+        'VideoInteractionService: Marcando video como completado en /Users/$userDocId/videos/$videoId',
       );
 
       // Obtener el documento actual para preservar campos existentes
@@ -231,9 +236,11 @@ class VideoInteractionService {
 
       await videoDoc.set(videoData, SetOptions(merge: true));
 
-      print('✅ Video $videoId marcado como completado con todos los campos');
-    } catch (e) {
-      print('❌ Error marcando video como completado: $e');
+      _logger.success(
+        'Video $videoId marcado como completado con todos los campos',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error marcando video como completado', e, stackTrace);
       rethrow;
     }
   }
@@ -255,8 +262,8 @@ class VideoInteractionService {
         return doc.data();
       }
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo progreso del video: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo progreso del video', e, stackTrace);
       return null;
     }
   }
@@ -268,14 +275,14 @@ class VideoInteractionService {
       // Obtener el ID correcto del documento del usuario (ignorar el userId pasado)
       final userDocId = await _getUserDocumentId();
       if (userDocId == null) {
-        print(
-          '❌ VideoInteractionService: No se pudo obtener el ID del documento del usuario',
+        _logger.e(
+          'VideoInteractionService: No se pudo obtener el ID del documento del usuario',
         );
         return [];
       }
 
-      print(
-        '📊 VideoInteractionService: Obteniendo videos completados de /Users/$userDocId/videos',
+      _logger.d(
+        'VideoInteractionService: Obteniendo videos completados de /Users/$userDocId/videos',
       );
 
       final querySnapshot = await _firestore
@@ -299,13 +306,13 @@ class VideoInteractionService {
           .where((id) => id > 0) // Filtrar IDs inválidos
           .toList();
 
-      print(
-        '✅ VideoInteractionService: Encontrados ${completedVideos.length} videos completados: $completedVideos',
+      _logger.d(
+        'VideoInteractionService: Encontrados ${completedVideos.length} videos completados: $completedVideos',
       );
 
       return completedVideos;
-    } catch (e) {
-      print('❌ Error obteniendo videos completados: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo videos completados', e, stackTrace);
       return [];
     }
   }
@@ -313,7 +320,7 @@ class VideoInteractionService {
   /// Limpia documentos duplicados en la subcolección videos (solo para usuarios existentes)
   Future<void> cleanupDuplicateDocuments(String userId) async {
     try {
-      print('🧹 Verificando documentos duplicados para usuario: $userId');
+      _logger.d('Verificando documentos duplicados para usuario: $userId');
 
       final videosCollection = _firestore
           .collection('Users')
@@ -339,14 +346,14 @@ class VideoInteractionService {
         // Solo eliminar si hay documentos duplicados
         for (final duplicateId in duplicatesToDelete) {
           await videosCollection.doc(duplicateId).delete();
-          print('🗑️ Documento duplicado eliminado: $duplicateId');
+          _logger.d('Documento duplicado eliminado: $duplicateId');
         }
-        print('✅ Limpieza de documentos duplicados completada');
+        _logger.success('Limpieza de documentos duplicados completada');
       } else {
-        print('ℹ️ No se encontraron documentos duplicados para limpiar');
+        _logger.d('No se encontraron documentos duplicados para limpiar');
       }
-    } catch (e) {
-      print('❌ Error limpiando documentos duplicados: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error limpiando documentos duplicados', e, stackTrace);
     }
   }
 }

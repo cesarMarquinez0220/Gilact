@@ -23,7 +23,7 @@ class AchievementService {
   /// Lista de todos los logros disponibles
   List<Achievement> getAllAchievements() {
     int badgeIndex = 0; // Índice para rotación de badges
-    
+
     return [
       // Logros de Lactancia - PROGRESIVOS (para prueba)
       Achievement(
@@ -71,7 +71,7 @@ class AchievementService {
         requiredValue: 5,
         xpReward: 60,
       ),
-      Achievement(
+      const Achievement(
         id: 'complete_records_10',
         title: 'Registro Completo',
         description: 'Completa 10 registros completos',
@@ -80,7 +80,7 @@ class AchievementService {
         requiredValue: 10,
         xpReward: 50,
       ),
-      Achievement(
+      const Achievement(
         id: 'consistent_7_days',
         title: 'Consistente',
         description: '7 registros en 7 días',
@@ -162,7 +162,7 @@ class AchievementService {
         requiredValue: 12,
         xpReward: 150,
       ),
-      Achievement(
+      const Achievement(
         id: 'nocturnal',
         title: 'Nocturna',
         description: 'Registra lactancia entre 12am-6am',
@@ -173,7 +173,7 @@ class AchievementService {
       ),
 
       // Logros de Lecciones
-      Achievement(
+      const Achievement(
         id: 'first_lesson',
         title: 'Primera Lección',
         description: 'Completa tu primera lección',
@@ -182,7 +182,7 @@ class AchievementService {
         requiredValue: 1,
         xpReward: 50,
       ),
-      Achievement(
+      const Achievement(
         id: 'student_5',
         title: 'Estudiante',
         description: 'Completa 5 lecciones',
@@ -191,7 +191,7 @@ class AchievementService {
         requiredValue: 5,
         xpReward: 150,
       ),
-      Achievement(
+      const Achievement(
         id: 'learner_10',
         title: 'Aprendiz',
         description: 'Completa 10 lecciones',
@@ -200,7 +200,7 @@ class AchievementService {
         requiredValue: 10,
         xpReward: 300,
       ),
-      Achievement(
+      const Achievement(
         id: 'master_all',
         title: 'Maestro',
         description: 'Completa todas las lecciones',
@@ -211,7 +211,7 @@ class AchievementService {
       ),
 
       // Logros de Racha
-      Achievement(
+      const Achievement(
         id: 'streak_3',
         title: 'Iniciando',
         description: 'Racha de 3 días',
@@ -220,7 +220,7 @@ class AchievementService {
         requiredValue: 3,
         xpReward: 50,
       ),
-      Achievement(
+      const Achievement(
         id: 'streak_7',
         title: 'Comprometida',
         description: 'Racha de 7 días',
@@ -229,7 +229,7 @@ class AchievementService {
         requiredValue: 7,
         xpReward: 100,
       ),
-      Achievement(
+      const Achievement(
         id: 'streak_30',
         title: 'Dedicada',
         description: 'Racha de 30 días',
@@ -238,7 +238,7 @@ class AchievementService {
         requiredValue: 30,
         xpReward: 500,
       ),
-      Achievement(
+      const Achievement(
         id: 'streak_100',
         title: 'Legendaria',
         description: 'Racha de 100 días',
@@ -249,7 +249,7 @@ class AchievementService {
       ),
 
       // Logros Especiales
-      Achievement(
+      const Achievement(
         id: 'level_5',
         title: 'Nivel 5',
         description: 'Alcanza nivel 5',
@@ -258,7 +258,7 @@ class AchievementService {
         requiredValue: 5,
         xpReward: 200,
       ),
-      Achievement(
+      const Achievement(
         id: 'level_10',
         title: 'Nivel 10',
         description: 'Alcanza nivel 10',
@@ -267,7 +267,7 @@ class AchievementService {
         requiredValue: 10,
         xpReward: 500,
       ),
-      Achievement(
+      const Achievement(
         id: 'perfect_week',
         title: 'Semana Perfecta',
         description: '7 días consecutivos con actividad',
@@ -276,7 +276,7 @@ class AchievementService {
         requiredValue: 7,
         xpReward: 200,
       ),
-      Achievement(
+      const Achievement(
         id: 'growth_tracker',
         title: 'Crecimiento',
         description: 'Registra peso del bebé 5 veces',
@@ -287,7 +287,7 @@ class AchievementService {
       ),
 
       // ========== LOGROS ADICIONALES PARA 6 MESES ==========
-      
+
       // Logros de Registros Totales (Milestones)
       Achievement(
         id: 'milestone_10',
@@ -612,7 +612,8 @@ class AchievementService {
             case 'complete_25':
             case 'complete_50':
             case 'complete_100':
-              shouldUnlock = completeLactationRecords >= achievement.requiredValue;
+              shouldUnlock =
+                  completeLactationRecords >= achievement.requiredValue;
               break;
             // Nocturnos
             case 'nocturnal_10':
@@ -690,10 +691,9 @@ class AchievementService {
       }
 
       if (shouldUnlock) {
-        newlyUnlocked.add(achievement.copyWith(
-          isUnlocked: true,
-          unlockedAt: DateTime.now(),
-        ));
+        newlyUnlocked.add(
+          achievement.copyWith(isUnlocked: true, unlockedAt: DateTime.now()),
+        );
       }
     }
 
@@ -701,24 +701,18 @@ class AchievementService {
   }
 
   /// Obtiene logros desbloqueados por el usuario
-  List<Achievement> getUnlockedAchievements(
-    UserGamificationProfile profile,
-  ) {
+  List<Achievement> getUnlockedAchievements(UserGamificationProfile profile) {
     final allAchievements = getAllAchievements();
     final unlockedIds = profile.unlockedAchievements.toSet();
 
     return allAchievements
         .where((achievement) => unlockedIds.contains(achievement.id))
-        .map((achievement) => achievement.copyWith(
-              isUnlocked: true,
-            ))
+        .map((achievement) => achievement.copyWith(isUnlocked: true))
         .toList();
   }
 
   /// Obtiene logros bloqueados (aún no desbloqueados)
-  List<Achievement> getLockedAchievements(
-    UserGamificationProfile profile,
-  ) {
+  List<Achievement> getLockedAchievements(UserGamificationProfile profile) {
     final allAchievements = getAllAchievements();
     final unlockedIds = profile.unlockedAchievements.toSet();
 

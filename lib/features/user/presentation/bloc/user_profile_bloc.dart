@@ -1,13 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/user_profile_entities.dart';
 import '../../domain/usecases/user_profile_usecases.dart';
 import '../../data/datasources/user_profile_offline_local_data_source.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';
@@ -20,6 +21,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final UserProfileOfflineLocalDataSource _offlineDataSource =
       UserProfileOfflineLocalDataSource();
   final ConnectivityService _connectivityService = ConnectivityService();
+  final AppLogger _logger = getIt<AppLogger>();
 
   UserProfileBloc({
     required GetUserProfileUseCase getUserProfileUseCase,
@@ -49,64 +51,54 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       final isConnected = await _connectivityService.isConnected();
 
       if (isConnected) {
-        if (kDebugMode) {
-          print(
-            '🌐 UserProfileBloc: Con conexión, obteniendo perfil de Firestore...',
-          );
-        }
+        _logger.d(
+          'UserProfileBloc: Con conexión, obteniendo perfil de Firestore...',
+        );
 
         // Si hay conexión, obtener de Firestore y actualizar cache
         final result = await _getUserProfileUseCase(event.userId);
 
         // Manejar Left (failure) o Right (success) por separado para poder usar await
         if (result.isLeft()) {
-          if (kDebugMode) {
-            print(
-              '⚠️ UserProfileBloc: Error obteniendo de Firestore, intentando desde cache',
-            );
-          }
+          _logger.w(
+            'UserProfileBloc: Error obteniendo de Firestore, intentando desde cache',
+          );
           // Si falla Firestore, intentar desde cache
           await _loadFromCache(event.userId, emit);
         } else {
           // Éxito: obtener el perfil del Right
           final profile = result.fold((failure) => null, (profile) => profile);
           if (profile != null) {
-            if (kDebugMode) {
-              print(
-                '✅ UserProfileBloc: Perfil obtenido de Firestore, actualizando cache',
-              );
-            }
+            _logger.d(
+              'UserProfileBloc: Perfil obtenido de Firestore, actualizando cache',
+            );
             // Cachear perfil actualizado
             try {
               await _offlineDataSource.cacheUserProfile(profile);
-            } catch (e) {
-              if (kDebugMode) {
-                print('⚠️ UserProfileBloc: Error cacheando perfil: $e');
-              }
+            } catch (e, stackTrace) {
+              _logger.w(
+                'UserProfileBloc: Error cacheando perfil',
+                e,
+                stackTrace,
+              );
               // Continuar aunque falle el cache
             }
             emit(UserProfileLoaded(profile));
           } else {
-            if (kDebugMode) {
-              print(
-                '⚠️ UserProfileBloc: Perfil null de Firestore, intentando desde cache',
-              );
-            }
+            _logger.w(
+              'UserProfileBloc: Perfil null de Firestore, intentando desde cache',
+            );
             // Fallback: intentar desde cache
             await _loadFromCache(event.userId, emit);
           }
         }
       } else {
         // Sin conexión: cargar desde cache
-        if (kDebugMode) {
-          print('📴 UserProfileBloc: Sin conexión, cargando desde cache');
-        }
+        _logger.d('UserProfileBloc: Sin conexión, cargando desde cache');
         await _loadFromCache(event.userId, emit);
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ UserProfileBloc: Error obteniendo perfil: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('UserProfileBloc: Error obteniendo perfil', e, stackTrace);
       // Intentar desde cache como fallback
       await _loadFromCache(event.userId, emit);
     }
@@ -123,24 +115,18 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       );
 
       if (cachedProfile != null) {
-        if (kDebugMode) {
-          print('✅ UserProfileBloc: Perfil cargado desde cache');
-        }
+        _logger.d('UserProfileBloc: Perfil cargado desde cache');
         emit(UserProfileLoaded(cachedProfile));
       } else {
-        if (kDebugMode) {
-          print('⚠️ UserProfileBloc: No hay perfil en cache');
-        }
+        _logger.w('UserProfileBloc: No hay perfil en cache');
         emit(
           const UserProfileFailure(
             'No hay conexión y no hay datos en cache. Por favor, conecta a internet para cargar tu perfil.',
           ),
         );
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ UserProfileBloc: Error cargando desde cache: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.e('UserProfileBloc: Error cargando desde cache', e, stackTrace);
       emit(UserProfileFailure('Error cargando perfil: $e'));
     }
   }
@@ -191,16 +177,16 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         currentProfile = currentState.profile;
       } else if (currentState is UserProfileFailure) {
         // Si estamos en estado de falla, crear un perfil básico con la información de situación
-        print(
-          '⚠️ UserProfileBloc: Estado de falla detectado, creando perfil básico',
+        _logger.w(
+          'UserProfileBloc: Estado de falla detectado, creando perfil básico',
         );
 
         // Extraer información del bebé de los situationData
         BabyInfo? babyInfo;
         if (event.situationData != null && event.isPostPartum) {
           babyInfo = _extractBabyInfoFromSituationData(event.situationData!);
-          print(
-            '👶 UserProfileBloc: Información del bebé extraída: ${babyInfo?.name}',
+          _logger.d(
+            'UserProfileBloc: Información del bebé extraída: ${babyInfo?.name}',
           );
         }
 
@@ -230,8 +216,8 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
             event.situationData != null &&
             event.isPostPartum) {
           babyInfo = _extractBabyInfoFromSituationData(event.situationData!);
-          print(
-            '👶 UserProfileBloc: Información del bebé extraída para perfil existente: ${babyInfo?.name}',
+          _logger.d(
+            'UserProfileBloc: Información del bebé extraída para perfil existente: ${babyInfo?.name}',
           );
         }
 
@@ -257,16 +243,16 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         _offlineDataSource.cacheUserProfile(updatedProfile);
 
         emit(UserProfileUpdated(updatedProfile));
-        print(
-          '✅ UserProfileBloc: Situación actualizada - isPrePartum: ${event.isPrePartum}, isPostPartum: ${event.isPostPartum}',
+        _logger.success(
+          'UserProfileBloc: Situación actualizada - isPrePartum: ${event.isPrePartum}, isPostPartum: ${event.isPostPartum}',
         );
       } else {
-        print(
-          '⚠️ UserProfileBloc: No hay perfil cargado para actualizar situación',
+        _logger.w(
+          'UserProfileBloc: No hay perfil cargado para actualizar situación',
         );
       }
-    } catch (e) {
-      print('❌ UserProfileBloc: Error actualizando situación: $e');
+    } catch (e, stackTrace) {
+      _logger.e('UserProfileBloc: Error actualizando situación', e, stackTrace);
       emit(UserProfileFailure('Error actualizando situación: $e'));
     }
   }
@@ -290,9 +276,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     Emitter<UserProfileState> emit,
   ) async {
     // Solo resetea el estado sin desconectar al usuario
-    print('🔄 UserProfileBloc: Reseteando estado del perfil...');
+    _logger.d('UserProfileBloc: Reseteando estado del perfil...');
     emit(const UserProfileInitial());
-    print('✅ UserProfileBloc: Estado del perfil reseteado');
+    _logger.success('UserProfileBloc: Estado del perfil reseteado');
   }
 
   /// Extrae la información del bebé de los datos de situación
@@ -318,10 +304,14 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         );
       }
 
-      print('⚠️ UserProfileBloc: Datos insuficientes para crear BabyInfo');
+      _logger.w('UserProfileBloc: Datos insuficientes para crear BabyInfo');
       return null;
-    } catch (e) {
-      print('❌ UserProfileBloc: Error extrayendo información del bebé: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'UserProfileBloc: Error extrayendo información del bebé',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }

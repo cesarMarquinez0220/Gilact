@@ -5,6 +5,8 @@ import '../../../lessons/presentation/pages/lesson_videos_page.dart';
 import '../../../videos/presentation/pages/user_videos_page.dart';
 import '../../../lactation/presentation/pages/lactation_record_page.dart';
 import '../../../lactation/presentation/pages/lactation_flow_page.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para manejar la lógica de navegación y estado del usuario
 class NavigationService {
@@ -58,7 +60,10 @@ class NavigationService {
           // Si el usuario completó el registro exitosamente, refrescar datos
           if (result == true) {
             // Aquí podrías agregar lógica para refrescar datos si es necesario
-            print('✅ Registro de lactancia completado exitosamente');
+            try {
+              final logger = getIt<AppLogger>();
+              logger.success('Registro de lactancia completado exitosamente');
+            } catch (_) {}
           }
         });
   }
@@ -76,7 +81,10 @@ class NavigationService {
         )
         .then((result) {
           if (result == true) {
-            print('✅ Registro de lactancia completado exitosamente');
+            try {
+              final logger = getIt<AppLogger>();
+              logger.success('Registro de lactancia completado exitosamente');
+            } catch (_) {}
           }
         });
   }

@@ -1,13 +1,12 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:injectable/injectable.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'app_logger.dart';
 
 /// Servicio para manejar sonidos en la aplicación
-@singleton
 class SoundService {
   final SharedPreferences _prefs;
+  final AppLogger _logger;
   final AudioPlayer _audioPlayer = AudioPlayer();
   static const String _keySoundEnabled = 'soundEnabled';
 
@@ -17,7 +16,7 @@ class SoundService {
   static const String _soundLevelUp = 'assets/sounds/level_up.wav';
   static const String _soundTriviaCorrect = 'assets/sounds/trivia_correct.ogg';
 
-  SoundService(this._prefs);
+  SoundService(this._prefs, this._logger);
 
   /// Verifica si el sonido está habilitado
   bool isSoundEnabled() {
@@ -30,12 +29,17 @@ class SoundService {
     if (!isSoundEnabled()) return;
 
     try {
-      await _audioPlayer.play(AssetSource(assetPath.replaceFirst('assets/', '')));
-    } catch (e) {
+      await _audioPlayer.play(
+        AssetSource(assetPath.replaceFirst('assets/', '')),
+      );
+    } catch (e, stackTrace) {
       // Ignorar errores de reproducción de sonido
-      if (kDebugMode) {
-        print('⚠️ Error reproduciendo sonido $assetPath: $e');
-      }
+      _logger.serviceError(
+        'SoundService',
+        'reproducir sonido $assetPath',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -46,10 +50,13 @@ class SoundService {
 
     try {
       SystemSound.play(soundType);
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error reproduciendo sonido del sistema: $e');
-      }
+    } catch (e, stackTrace) {
+      _logger.serviceError(
+        'SoundService',
+        'reproducir sonido del sistema',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -88,4 +95,3 @@ class SoundService {
     await playAlertSound();
   }
 }
-

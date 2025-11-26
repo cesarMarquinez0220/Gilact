@@ -5,6 +5,7 @@ import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/sync_queue_service.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../main.dart' as app_main;
 import '../../../gamification/domain/services/gamification_service.dart';
@@ -21,6 +22,7 @@ class LactationService {
   final LactationDatabase _localDatabase = LactationDatabase();
   final ConnectivityService _connectivityService = ConnectivityService();
   final SyncQueueService _syncQueueService = SyncQueueService();
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Cache para evitar consultas repetidas
   String? _cachedUserDocId;
@@ -38,21 +40,21 @@ class LactationService {
       _gamificationService = getIt<GamificationService>();
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ GamificationService no disponible: $e');
+        _logger.w('GamificationService no disponible', e);
       }
     }
   }
 
   /// Inicializa el caché del usuario (llamar desde MainNavigationPage)
   Future<void> initializeUserCache() async {
-    print('🔍 LactationService: Inicializando caché del usuario...');
+    _logger.d('LactationService: Inicializando caché del usuario...');
     try {
       final currentUserDocId = await _getUserDocumentId();
       if (currentUserDocId != null) {
         // Verificar si el usuario cambió
         if (currentUserDocId != _cachedUserDocId) {
-          print(
-            '🔄 LactationService: Usuario cambió, limpiando caché anterior...',
+          _logger.d(
+            'LactationService: Usuario cambió, limpiando caché anterior...',
           );
           clearCache();
         }
@@ -62,12 +64,12 @@ class LactationService {
           _cachedUserDocId!,
         );
         _lastCacheUpdate = DateTime.now();
-        print(
-          '✅ LactationService: Caché inicializado - UserDocId: $_cachedUserDocId, HasPostpartum: $_cachedHasPostpartumSituation',
+        _logger.success(
+          'LactationService: Caché inicializado - UserDocId: $_cachedUserDocId, HasPostpartum: $_cachedHasPostpartumSituation',
         );
       }
-    } catch (e) {
-      print('❌ Error inicializando caché: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error inicializando caché', e, stackTrace);
     }
   }
 
@@ -120,15 +122,19 @@ class LactationService {
       }
 
       return null;
-    } catch (e) {
-      print('❌ LactationService: Error obteniendo fecha de nacimiento: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'LactationService: Error obteniendo fecha de nacimiento',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
 
   /// Limpia el caché (llamar al cerrar sesión o cambiar usuario)
   void clearCache() {
-    print('🧹 LactationService: Limpiando caché...');
+    _logger.d('LactationService: Limpiando caché...');
     _cachedUserDocId = null;
     _cachedHasPostpartumSituation = null;
     _lastCacheUpdate = null;
@@ -139,8 +145,8 @@ class LactationService {
     try {
       final currentUserDocId = await _getUserDocumentId();
       return currentUserDocId != _cachedUserDocId;
-    } catch (e) {
-      print('❌ Error verificando cambio de usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando cambio de usuario', e, stackTrace);
       return true; // En caso de error, asumir que cambió
     }
   }
@@ -174,16 +180,18 @@ class LactationService {
       // PASO 1: SIEMPRE guardar localmente primero
       await _localDatabase.insertRecord(record);
       if (kDebugMode) {
-        print('✅ Registro de lactancia guardado localmente: ${record.id}');
+        _logger.success(
+          'Registro de lactancia guardado localmente: ${record.id}',
+        );
       }
 
       // PASO 1.5: Agregar XP y detectar badges (GAMIFICACIÓN)
       // Se ejecuta después de guardar para tener el conteo correcto
       try {
         await _addGamificationXP(record);
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (kDebugMode) {
-          print('⚠️ Error agregando gamificación (no crítico): $e');
+          _logger.w('Error agregando gamificación (no crítico)', e, stackTrace);
         }
       }
 
@@ -241,9 +249,13 @@ class LactationService {
               }
             }
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           if (kDebugMode) {
-            print('⚠️ Error obteniendo información del bebé (no crítico): $e');
+            _logger.w(
+              'Error obteniendo información del bebé (no crítico)',
+              e,
+              stackTrace,
+            );
           }
         }
 
@@ -264,14 +276,16 @@ class LactationService {
           babyBirthDate: babyBirthDate,
         );
         if (kDebugMode) {
-          print(
-            '✅ Notificación de lactancia programada para $intervalText después',
+          _logger.success(
+            'Notificación de lactancia programada para $intervalText después',
           );
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (kDebugMode) {
-          print(
-            '⚠️ Error programando notificación de lactancia (no crítico): $e',
+          _logger.w(
+            'Error programando notificación de lactancia (no crítico)',
+            e,
+            stackTrace,
           );
         }
       }
@@ -287,17 +301,19 @@ class LactationService {
           await _localDatabase.markAsSynced(record.id, docRef.id);
 
           if (kDebugMode) {
-            print(
-              '✅ Registro de lactancia sincronizado con Firestore: ${docRef.id}',
+            _logger.success(
+              'Registro de lactancia sincronizado con Firestore: ${docRef.id}',
             );
           }
 
           return docRef.id;
-        } catch (e) {
+        } catch (e, stackTrace) {
           // Si falla Firestore, el registro queda local para sincronizar después
           if (kDebugMode) {
-            print(
-              '⚠️ Error guardando en Firestore, quedará pendiente de sincronización: $e',
+            _logger.w(
+              'Error guardando en Firestore, quedará pendiente de sincronización',
+              e,
+              stackTrace,
             );
           }
 
@@ -309,8 +325,8 @@ class LactationService {
       } else {
         // Sin conexión: agregar a cola de sincronización
         if (kDebugMode) {
-          print(
-            '📴 Sin conexión: Registro guardado localmente, se sincronizará cuando haya conexión',
+          _logger.d(
+            'Sin conexión: Registro guardado localmente, se sincronizará cuando haya conexión',
           );
         }
 
@@ -318,9 +334,9 @@ class LactationService {
 
         return record.id; // Retornar ID local
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('❌ Error guardando registro de lactancia: $e');
+        _logger.e('Error guardando registro de lactancia', e, stackTrace);
       }
       rethrow;
     }
@@ -383,7 +399,7 @@ class LactationService {
       milestoneResult.fold(
         (error) {
           if (kDebugMode) {
-            print('⚠️ Error verificando milestone: $error');
+            _logger.w('Error verificando milestone: $error');
           }
         },
         (milestoneProfile) {
@@ -391,8 +407,8 @@ class LactationService {
               app_main.navigatorKey.currentContext != null) {
             // Mostrar notificación de milestone alcanzado
             if (kDebugMode) {
-              print(
-                '🎉 ¡Milestone alcanzado! $totalRecords registros - Bonus de XP otorgado',
+              _logger.success(
+                '¡Milestone alcanzado! $totalRecords registros - Bonus de XP otorgado',
               );
             }
             // El XP ya fue agregado por el servicio, solo mostramos mensaje
@@ -405,9 +421,13 @@ class LactationService {
       if (_userStatisticsService != null) {
         try {
           userStats = await _userStatisticsService.getUserStatistics(userId);
-        } catch (e) {
+        } catch (e, stackTrace) {
           if (kDebugMode) {
-            print('⚠️ Error obteniendo estadísticas del usuario: $e');
+            _logger.w(
+              'Error obteniendo estadísticas del usuario',
+              e,
+              stackTrace,
+            );
           }
         }
       }
@@ -449,9 +469,9 @@ class LactationService {
           });
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('⚠️ Error en gamificación: $e');
+        _logger.w('Error en gamificación', e, stackTrace);
       }
     }
   }
@@ -494,10 +514,10 @@ class LactationService {
       );
 
       await _syncQueueService.addOperation(operation);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('❌ SyncQueueService: Error agregando operación: $e');
-        print('! Error agregando a cola de sincronización: $e');
+        _logger.e('SyncQueueService: Error agregando operación', e, stackTrace);
+        _logger.e('Error agregando a cola de sincronización', e, stackTrace);
       }
     }
   }
@@ -508,7 +528,9 @@ class LactationService {
       // PASO 1: Actualizar localmente primero
       await _localDatabase.updateRecord(record);
       if (kDebugMode) {
-        print('✅ Registro de lactancia actualizado localmente: $recordId');
+        _logger.success(
+          'Registro de lactancia actualizado localmente: $recordId',
+        );
       }
 
       // PASO 2: Si hay conexión, intentar actualizar en Firestore inmediatamente
@@ -530,15 +552,17 @@ class LactationService {
           }
 
           if (kDebugMode) {
-            print(
-              '✅ Registro de lactancia actualizado en Firestore: $recordId',
+            _logger.success(
+              'Registro de lactancia actualizado en Firestore: $recordId',
             );
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           // Si falla Firestore, agregar a cola de sincronización
           if (kDebugMode) {
-            print(
-              '⚠️ Error actualizando en Firestore, quedará pendiente de sincronización: $e',
+            _logger.w(
+              'Error actualizando en Firestore, quedará pendiente de sincronización',
+              e,
+              stackTrace,
             );
           }
           await _addToSyncQueue(record, SyncOperationType.update);
@@ -546,15 +570,15 @@ class LactationService {
       } else {
         // Sin conexión: agregar a cola de sincronización
         if (kDebugMode) {
-          print(
-            '📴 Sin conexión: Registro actualizado localmente, se sincronizará cuando haya conexión',
+          _logger.d(
+            'Sin conexión: Registro actualizado localmente, se sincronizará cuando haya conexión',
           );
         }
         await _addToSyncQueue(record, SyncOperationType.update);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('❌ Error actualizando registro de lactancia: $e');
+        _logger.e('Error actualizando registro de lactancia', e, stackTrace);
       }
       rethrow;
     }
@@ -565,9 +589,9 @@ class LactationService {
     try {
       final collection = await _lactationCollection;
       await collection.doc(recordId).delete();
-      print('✅ Registro de lactancia eliminado: $recordId');
-    } catch (e) {
-      print('❌ Error eliminando registro de lactancia: $e');
+      _logger.success('Registro de lactancia eliminado: $recordId');
+    } catch (e, stackTrace) {
+      _logger.e('Error eliminando registro de lactancia', e, stackTrace);
       rethrow;
     }
   }
@@ -623,10 +647,12 @@ class LactationService {
 
           return combinedRecords.values.toList()
             ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-        } catch (e) {
+        } catch (e, stackTrace) {
           if (kDebugMode) {
-            print(
-              '⚠️ Error obteniendo registros de Firestore, usando solo locales: $e',
+            _logger.w(
+              'Error obteniendo registros de Firestore, usando solo locales',
+              e,
+              stackTrace,
             );
           }
           // Si falla Firestore, retornar solo registros locales
@@ -635,20 +661,20 @@ class LactationService {
       } else {
         // Sin conexión: retornar solo registros locales
         if (kDebugMode) {
-          print('📴 Sin conexión: Retornando solo registros locales');
+          _logger.d('Sin conexión: Retornando solo registros locales');
         }
         return localRecords;
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('❌ Error obteniendo registros para fecha: $e');
+        _logger.e('Error obteniendo registros para fecha', e, stackTrace);
       }
       // En caso de error, intentar retornar registros locales
       try {
         return await _localDatabase.getRecordsForDate(date);
-      } catch (e2) {
+      } catch (e2, stackTrace2) {
         if (kDebugMode) {
-          print('❌ Error obteniendo registros locales: $e2');
+          _logger.e('Error obteniendo registros locales', e2, stackTrace2);
         }
         return [];
       }
@@ -684,8 +710,8 @@ class LactationService {
             ),
           )
           .toList();
-    } catch (e) {
-      print('❌ Error obteniendo registros para semana: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo registros para semana', e, stackTrace);
       return [];
     }
   }
@@ -714,8 +740,8 @@ class LactationService {
             ),
           )
           .toList();
-    } catch (e) {
-      print('❌ Error obteniendo registros para mes: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo registros para mes', e, stackTrace);
       return [];
     }
   }
@@ -760,8 +786,8 @@ class LactationService {
         feedsToday: feedsToday,
         durationToday: durationToday,
       );
-    } catch (e) {
-      print('❌ Error obteniendo estadísticas: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo estadísticas', e, stackTrace);
       return LactationStats(
         totalFeeds: 0,
         totalDuration: Duration.zero,
@@ -786,38 +812,38 @@ class LactationService {
       return _cachedUserDocId;
     }
 
-    print('🔍 LactationService: Caché no válido, consultando Firestore...');
+    _logger.d('LactationService: Caché no válido, consultando Firestore...');
     try {
       final user = _auth.currentUser;
-      print(
-        '🔍 LactationService: _getUserDocumentId() - Usuario actual: ${user?.uid}',
+      _logger.d(
+        'LactationService: _getUserDocumentId() - Usuario actual: ${user?.uid}',
       );
-      print(
-        '🔍 LactationService: _getUserDocumentId() - Email: ${user?.email}',
+      _logger.d(
+        'LactationService: _getUserDocumentId() - Email: ${user?.email}',
       );
 
       if (user == null) {
-        print(
-          '❌ LactationService: Usuario no autenticado, intentando obtener usuario actual...',
+        _logger.w(
+          'LactationService: Usuario no autenticado, intentando obtener usuario actual...',
         );
 
         // Esperar un poco y volver a intentar
         await Future.delayed(const Duration(milliseconds: 500));
         final retryUser = _auth.currentUser;
-        print('🔍 LactationService: Usuario en reintento: ${retryUser?.uid}');
+        _logger.d('LactationService: Usuario en reintento: ${retryUser?.uid}');
 
         if (retryUser == null) {
-          print(
-            '❌ LactationService: Usuario sigue siendo null después del reintento',
+          _logger.w(
+            'LactationService: Usuario sigue siendo null después del reintento',
           );
-          print(
-            '🔍 LactationService: Intentando con ID conocido del usuario...',
+          _logger.d(
+            'LactationService: Intentando con ID conocido del usuario...',
           );
 
           // Usar el ID conocido del usuario desde los logs
           const knownUserId = 'GVMaxiXpAFMW2VmFFbEuYhsFs733';
-          print(
-            '🔍 LactationService: Verificando si existe documento con ID conocido: $knownUserId',
+          _logger.d(
+            'LactationService: Verificando si existe documento con ID conocido: $knownUserId',
           );
 
           final knownUserDoc = await _firestore
@@ -826,15 +852,15 @@ class LactationService {
               .get();
 
           if (knownUserDoc.exists) {
-            print(
-              '✅ LactationService: Documento encontrado con ID conocido: $knownUserId',
+            _logger.success(
+              'LactationService: Documento encontrado con ID conocido: $knownUserId',
             );
             // Actualizar caché
             _cachedUserDocId = knownUserId;
             _lastCacheUpdate = DateTime.now();
             return knownUserId;
           } else {
-            print('❌ LactationService: Documento con ID conocido no existe');
+            _logger.e('LactationService: Documento con ID conocido no existe');
             return null;
           }
         }
@@ -854,8 +880,8 @@ class LactationService {
         _lastCacheUpdate = DateTime.now();
       }
       return result;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }
@@ -864,26 +890,28 @@ class LactationService {
   Future<String?> _getUserDocumentIdWithUser(dynamic user) async {
     try {
       // Primero intentar con UID directamente (más rápido)
-      print('🔍 LactationService: Intentando con UID primero: ${user.uid}');
+      _logger.d('LactationService: Intentando con UID primero: ${user.uid}');
       final docSnapshot = await _firestore
           .collection('Users')
           .doc(user.uid)
           .get();
 
-      print(
-        '🔍 LactationService: Documento con UID existe: ${docSnapshot.exists}',
+      _logger.d(
+        'LactationService: Documento con UID existe: ${docSnapshot.exists}',
       );
 
       if (docSnapshot.exists) {
-        print(
-          '🔍 LactationService: Usuario encontrado con UID directo: ${user.uid}',
+        _logger.d(
+          'LactationService: Usuario encontrado con UID directo: ${user.uid}',
         );
         return user.uid;
       }
 
       // Si no existe con UID, buscar por email
       if (user.email != null) {
-        print('🔍 LactationService: Buscando usuario por email: ${user.email}');
+        _logger.d(
+          'LactationService: Buscando usuario por email: ${user.email}',
+        );
 
         // Buscar el documento del usuario por email
         final userQuery = await _firestore
@@ -892,23 +920,23 @@ class LactationService {
             .limit(1)
             .get();
 
-        print(
-          '🔍 LactationService: Query por email completada. Documentos encontrados: ${userQuery.docs.length}',
+        _logger.d(
+          'LactationService: Query por email completada. Documentos encontrados: ${userQuery.docs.length}',
         );
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print('🔍 LactationService: Usuario encontrado con ID: $userDocId');
+          _logger.d('LactationService: Usuario encontrado con ID: $userDocId');
           return userDocId;
         } else {
-          print('❌ LactationService: Usuario no encontrado por email');
+          _logger.e('LactationService: Usuario no encontrado por email');
         }
       }
 
-      print('❌ LactationService: No se encontró usuario en Firestore');
+      _logger.e('LactationService: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }
@@ -917,17 +945,17 @@ class LactationService {
   Future<bool> hasPostpartumSituation() async {
     // Verificar caché primero
     if (_isCacheValid && _cachedHasPostpartumSituation != null) {
-      print(
-        '✅ LactationService: Usando caché para hasPostpartumSituation: $_cachedHasPostpartumSituation',
+      _logger.d(
+        'LactationService: Usando caché para hasPostpartumSituation: $_cachedHasPostpartumSituation',
       );
       return _cachedHasPostpartumSituation!;
     }
 
-    print('🔍 LactationService: Caché no válido, consultando Firestore...');
+    _logger.d('LactationService: Caché no válido, consultando Firestore...');
     try {
       final userDocId = await _getUserDocumentId();
       if (userDocId == null) {
-        print('❌ LactationService: userDocId es null, retornando false');
+        _logger.e('LactationService: userDocId es null, retornando false');
         return false;
       }
 
@@ -939,8 +967,8 @@ class LactationService {
       _lastCacheUpdate = DateTime.now();
 
       return result;
-    } catch (e) {
-      print('❌ Error verificando situación Post-Parto: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error verificando situación Post-Parto', e, stackTrace);
       return false;
     }
   }
@@ -948,8 +976,8 @@ class LactationService {
   /// Verifica directamente la situación Post-Parto sin caché
   Future<bool> _checkPostpartumSituationDirect(String userDocId) async {
     try {
-      print(
-        '🔍 LactationService: Verificando situación directa para: $userDocId',
+      _logger.d(
+        'LactationService: Verificando situación directa para: $userDocId',
       );
 
       final docSnapshot = await _firestore
@@ -962,14 +990,18 @@ class LactationService {
       if (docSnapshot.exists) {
         final data = docSnapshot.data();
         final situationType = data?['situationType'] as String?;
-        print('🔍 LactationService: situationType encontrado: $situationType');
+        _logger.d('LactationService: situationType encontrado: $situationType');
         return situationType == 'postparto';
       } else {
-        print('⚠️ LactationService: Documento de situación no existe');
+        _logger.w('LactationService: Documento de situación no existe');
         return false;
       }
-    } catch (e) {
-      print('❌ Error verificando situación Post-Parto directa: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error verificando situación Post-Parto directa',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -986,8 +1018,8 @@ class LactationService {
         );
       }
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo registro por ID: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo registro por ID', e, stackTrace);
       return null;
     }
   }

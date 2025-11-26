@@ -340,28 +340,28 @@ class LactationDecisionTree {
             icon: '💧',
             color: 0xFF00BCD4,
           ),
-          LactationOption(
+          const LactationOption(
             id: '30',
             title: '30 ml',
             description: '1 onza',
             icon: '💧',
             color: 0xFF00BCD4,
           ),
-          LactationOption(
+          const LactationOption(
             id: '60',
             title: '60 ml',
             description: '2 onzas',
             icon: '💧',
             color: 0xFF00BCD4,
           ),
-          LactationOption(
+          const LactationOption(
             id: '90',
             title: '90 ml',
             description: '3 onzas',
             icon: '💧',
             color: 0xFF00BCD4,
           ),
-          LactationOption(
+          const LactationOption(
             id: '120',
             title: '120 ml',
             description: '4 onzas',

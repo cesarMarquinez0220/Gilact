@@ -2,6 +2,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'app_logger.dart';
+import '../di/injection.dart';
 
 /// Servicio para manejar el guardado automático de progreso
 @singleton
@@ -9,6 +11,7 @@ class AutoSaveService {
   final SharedPreferences _prefs;
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final AppLogger _logger = getIt<AppLogger>();
   static const String _keyAutoSaveProgress = 'autoSaveProgress';
 
   AutoSaveService(this._prefs, this._firestore, this._auth);
@@ -28,14 +31,14 @@ class AutoSaveService {
     bool isCompleted = false,
   }) async {
     if (!isAutoSaveEnabled()) {
-      print('⏸️ Guardado automático deshabilitado, omitiendo guardado');
+      _logger.d('Guardado automático deshabilitado, omitiendo guardado');
       return;
     }
 
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        print('⚠️ Usuario no autenticado, no se puede guardar progreso');
+        _logger.w('Usuario no autenticado, no se puede guardar progreso');
         return;
       }
 
@@ -68,9 +71,9 @@ class AutoSaveService {
         'fechaActualizacion': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      print('✅ Progreso guardado automáticamente para video $videoId');
-    } catch (e) {
-      print('❌ Error en guardado automático: $e');
+      _logger.success('Progreso guardado automáticamente para video $videoId');
+    } catch (e, stackTrace) {
+      _logger.e('Error en guardado automático', e, stackTrace);
       // No lanzar excepción, solo registrar el error
     }
   }
@@ -115,9 +118,11 @@ class AutoSaveService {
         'fechaActualizacion': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      print('✅ Progreso de lección guardado automáticamente para lección $lessonId');
-    } catch (e) {
-      print('❌ Error guardando progreso de lección: $e');
+      _logger.success(
+        'Progreso de lección guardado automáticamente para lección $lessonId',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando progreso de lección', e, stackTrace);
     }
   }
 
@@ -159,10 +164,11 @@ class AutoSaveService {
         'fechaActualizacion': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      print('✅ Datos guardados automáticamente en $collection/$documentId');
-    } catch (e) {
-      print('❌ Error guardando datos genéricos: $e');
+      _logger.success(
+        'Datos guardados automáticamente en $collection/$documentId',
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error guardando datos genéricos', e, stackTrace);
     }
   }
 }
-

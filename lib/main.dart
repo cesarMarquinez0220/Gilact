@@ -32,6 +32,7 @@ import 'features/lactation/presentation/pages/baby_weight_form_page.dart';
 import 'core/services/offline_sync_service.dart';
 import 'core/services/app_initialization_service.dart';
 import 'core/services/localization_service.dart';
+import 'core/services/app_logger.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,19 +48,26 @@ void main() async {
   // Inicializar EasyLocalization
   await EasyLocalization.ensureInitialized();
 
+  // Crear logger temporal antes de configureDependencies
+  late AppLogger logger;
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    logger = AppLogger(prefs);
+  } catch (e) {
+    // Si falla, crear uno básico sin SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    logger = AppLogger(prefs);
+  }
+
   try {
     // Inicializar Firebase de forma segura
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    if (kDebugMode) {
-      print('✅ Firebase inicializado correctamente');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('❌ Error al inicializar Firebase: $e');
-    }
+    logger.success('Firebase inicializado correctamente');
+  } catch (e, stackTrace) {
+    logger.e('Error al inicializar Firebase', e, stackTrace);
   }
 
   // Comentamos temporalmente los servicios que pueden causar problemas
@@ -73,16 +81,15 @@ void main() async {
 
   // Configurar inyección de dependencias
   await configureDependencies();
+  
+  // Usar logger de GetIt después de configureDependencies
+  final appLogger = getIt<AppLogger>();
 
   // Inicializar servicios de notificaciones (no bloquea si falla)
   try {
     await _initializeNotificationServices();
-  } catch (e) {
-    if (kDebugMode) {
-      print(
-        '⚠️ Error al inicializar servicios de notificación (no crítico): $e',
-      );
-    }
+  } catch (e, stackTrace) {
+    appLogger.w('Error al inicializar servicios de notificación (no crítico)', e, stackTrace);
   }
 
   // Registrar handler para mensajes en background
@@ -91,10 +98,8 @@ void main() async {
   // Inicializar servicio de notificaciones push (no bloquea si falla)
   try {
     await _initializePushNotificationService();
-  } catch (e) {
-    if (kDebugMode) {
-      print('⚠️ Error al inicializar servicio de push (no crítico): $e');
-    }
+  } catch (e, stackTrace) {
+    appLogger.w('Error al inicializar servicio de push (no crítico)', e, stackTrace);
   }
 
   // Inicializar el manejador de notificaciones
@@ -103,12 +108,8 @@ void main() async {
   // Iniciar verificación periódica de notificaciones (no bloquea si falla)
   try {
     AppInitializationService.startPeriodicNotificationVerification();
-  } catch (e) {
-    if (kDebugMode) {
-      print(
-        '⚠️ Error al iniciar verificación periódica de notificaciones (no crítico): $e',
-      );
-    }
+  } catch (e, stackTrace) {
+    appLogger.w('Error al iniciar verificación periódica de notificaciones (no crítico)', e, stackTrace);
   }
 
   // Inicializar servicio de sincronización offline con callbacks (no bloquea si falla)
@@ -116,30 +117,20 @@ void main() async {
     final offlineSyncService = getIt<OfflineSyncService>();
     offlineSyncService.startAutoSync(
       onSyncCompleted: (int count) {
-        if (kDebugMode) {
-          print('✅ Sincronización completada: $count operaciones');
-        }
+        appLogger.success('Sincronización completada: $count operaciones');
         // Mostrar notificación de sincronización completada
         _showSyncNotification(count, true);
       },
       onSyncFailed: (int count) {
-        if (kDebugMode) {
-          print('⚠️ Sincronización fallida: $count operaciones');
-        }
+        appLogger.w('Sincronización fallida: $count operaciones');
         // Mostrar notificación de error
         _showSyncNotification(count, false);
       },
     );
 
-    if (kDebugMode) {
-      print('✅ Servicio de sincronización offline iniciado');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print(
-        '⚠️ Error al inicializar servicio de sincronización (no crítico): $e',
-      );
-    }
+    appLogger.success('Servicio de sincronización offline iniciado');
+  } catch (e, stackTrace) {
+    appLogger.w('Error al inicializar servicio de sincronización (no crítico)', e, stackTrace);
   }
 
   runApp(const MyApp());
@@ -151,8 +142,11 @@ void _showSyncNotification(int count, bool success) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     final context = navigatorKey.currentContext;
     if (context == null) {
-      if (kDebugMode) {
-        print('⚠️ No se puede mostrar notificación: contexto no disponible');
+      try {
+        final logger = getIt<AppLogger>();
+        logger.w('No se puede mostrar notificación: contexto no disponible');
+      } catch (_) {
+        // Si GetIt no está disponible, ignorar
       }
       return;
     }
@@ -187,9 +181,12 @@ void _showSyncNotification(int count, bool success) {
           ),
         ),
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error mostrando notificación de sincronización: $e');
+    } catch (e, stackTrace) {
+      try {
+        final logger = getIt<AppLogger>();
+        logger.e('Error mostrando notificación de sincronización', e, stackTrace);
+      } catch (_) {
+        // Si GetIt no está disponible, ignorar
       }
     }
   });
@@ -211,12 +208,14 @@ Future<void> _initializeNotificationServices() async {
     // La notificación se programará después de que el usuario inicie sesión
     // y se verifique que es postparto (en WelcomeScreen o similar)
 
-    if (kDebugMode) {
-      print('✅ Servicios de notificación inicializados correctamente');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('❌ Error al inicializar servicios de notificación: $e');
+    final logger = getIt<AppLogger>();
+    logger.success('Servicios de notificación inicializados correctamente');
+  } catch (e, stackTrace) {
+    try {
+      final logger = getIt<AppLogger>();
+      logger.e('Error al inicializar servicios de notificación', e, stackTrace);
+    } catch (_) {
+      // Si GetIt no está disponible, ignorar
     }
   }
 }
@@ -227,12 +226,14 @@ Future<void> _initializePushNotificationService() async {
     final pushService = PushNotificationService();
     await pushService.initialize();
 
-    if (kDebugMode) {
-      print('✅ Servicio de notificaciones push inicializado');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('❌ Error al inicializar servicio de push: $e');
+    final logger = getIt<AppLogger>();
+    logger.success('Servicio de notificaciones push inicializado');
+  } catch (e, stackTrace) {
+    try {
+      final logger = getIt<AppLogger>();
+      logger.e('Error al inicializar servicio de push', e, stackTrace);
+    } catch (_) {
+      // Si GetIt no está disponible, ignorar
     }
   }
 }

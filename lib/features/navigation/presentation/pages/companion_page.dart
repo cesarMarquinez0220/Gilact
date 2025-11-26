@@ -17,6 +17,7 @@ import '../../../gamification/domain/entities/daily_challenge.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/services/vibration_service.dart';
+import '../../../../core/services/app_logger.dart';
 import '../widgets/companion_achievements_section.dart';
 import '../widgets/companion_daily_challenge_section.dart';
 import '../widgets/companion_stats_summary.dart';
@@ -395,13 +396,15 @@ class CompanionPage extends StatelessWidget {
 Future<DailyStreak?> _getStreak(String userId) async {
   try {
     final repository = getIt<GamificationRepository>();
+    final logger = getIt<AppLogger>();
     final result = await repository.getStreak(userId);
     return result.fold((error) {
-      print('❌ Error obteniendo racha: $error');
+      logger.e('Error obteniendo racha: $error');
       return null;
     }, (streak) => streak);
-  } catch (e) {
-    print('❌ Excepción obteniendo racha: $e');
+  } catch (e, stackTrace) {
+    final logger = getIt<AppLogger>();
+    logger.e('Excepción obteniendo racha', e, stackTrace);
     return null;
   }
 }

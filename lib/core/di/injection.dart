@@ -55,6 +55,7 @@ import '../../core/services/conflict_resolution_service.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/services/sound_service.dart';
 import '../../core/services/vibration_service.dart';
+import '../../core/services/app_logger.dart';
 import '../../core/services/auto_save_service.dart';
 import '../../features/videos/data/services/video_encryption_service.dart';
 import '../../features/videos/data/services/video_download_service.dart';
@@ -102,7 +103,10 @@ Future<void> configureDependencies() async {
 
   // Services
   getIt.registerLazySingleton<UserSubcollectionsService>(
-    () => UserSubcollectionsService(getIt<FirebaseFirestore>()),
+    () => UserSubcollectionsService(
+      getIt<FirebaseFirestore>(),
+      getIt<AppLogger>(),
+    ),
   );
   getIt.registerLazySingleton<VideoInteractionService>(
     () => VideoInteractionService(getIt<FirebaseFirestore>()),
@@ -136,7 +140,7 @@ Future<void> configureDependencies() async {
       gamificationRepository: getIt<GamificationRepository>(),
     ),
   );
-  
+
   // Actualizar LactationService para incluir UserStatisticsService
   getIt.unregister<LactationService>();
   getIt.registerLazySingleton<LactationService>(
@@ -147,8 +151,11 @@ Future<void> configureDependencies() async {
     ),
   );
   getIt.registerLazySingleton<LactationFlowService>(
-    () =>
-        LactationFlowService(getIt<FirebaseFirestore>(), getIt<FirebaseAuth>()),
+    () => LactationFlowService(
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseAuth>(),
+      getIt<AppLogger>(),
+    ),
   );
   getIt.registerLazySingleton<SleepNotificationService>(
     () => SleepNotificationService(),
@@ -170,11 +177,15 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<LocalizationService>(
     () => LocalizationService(getIt<SharedPreferences>()),
   );
+  // AppLogger debe registrarse antes de servicios que lo usan
+  getIt.registerLazySingleton<AppLogger>(
+    () => AppLogger(getIt<SharedPreferences>()),
+  );
   getIt.registerLazySingleton<SoundService>(
-    () => SoundService(getIt<SharedPreferences>()),
+    () => SoundService(getIt<SharedPreferences>(), getIt<AppLogger>()),
   );
   getIt.registerLazySingleton<VibrationService>(
-    () => VibrationService(getIt<SharedPreferences>()),
+    () => VibrationService(getIt<SharedPreferences>(), getIt<AppLogger>()),
   );
   getIt.registerLazySingleton<AutoSaveService>(
     () => AutoSaveService(
@@ -209,11 +220,9 @@ Future<void> configureDependencies() async {
 
   // Gamification Service (después de GamificationRepository)
   getIt.registerLazySingleton<GamificationService>(
-    () => GamificationService(
-      repository: getIt<GamificationRepository>(),
-    ),
+    () => GamificationService(repository: getIt<GamificationRepository>()),
   );
-  
+
   // Daily Challenge Service
   getIt.registerLazySingleton<DailyChallengeService>(
     () => DailyChallengeService(
@@ -451,28 +460,40 @@ Future<void> configureDependencies() async {
 
   // Use Cases - Settings
   getIt.registerLazySingleton(
-    () => settings_usecases.GetAppConfigurationUseCase(getIt<SettingsRepository>()),
+    () => settings_usecases.GetAppConfigurationUseCase(
+      getIt<SettingsRepository>(),
+    ),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.UpdateAppConfigurationUseCase(getIt<SettingsRepository>()),
+    () => settings_usecases.UpdateAppConfigurationUseCase(
+      getIt<SettingsRepository>(),
+    ),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.GetUserStatisticsUseCase(getIt<SettingsRepository>()),
+    () =>
+        settings_usecases.GetUserStatisticsUseCase(getIt<SettingsRepository>()),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.UpdateUserStatisticsUseCase(getIt<SettingsRepository>()),
+    () => settings_usecases.UpdateUserStatisticsUseCase(
+      getIt<SettingsRepository>(),
+    ),
   );
   getIt.registerLazySingleton(
     () => settings_usecases.SubmitFeedbackUseCase(getIt<SettingsRepository>()),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.GetLocalSettingsUseCase(getIt<SettingsRepository>()),
+    () =>
+        settings_usecases.GetLocalSettingsUseCase(getIt<SettingsRepository>()),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.UpdateLocalSettingUseCase(getIt<SettingsRepository>()),
+    () => settings_usecases.UpdateLocalSettingUseCase(
+      getIt<SettingsRepository>(),
+    ),
   );
   getIt.registerLazySingleton(
-    () => settings_usecases.UpdateLocalSettingsUseCase(getIt<SettingsRepository>()),
+    () => settings_usecases.UpdateLocalSettingsUseCase(
+      getIt<SettingsRepository>(),
+    ),
   );
 
   // BLoCs - Solo los básicos necesarios para que funcione la app
@@ -577,21 +598,26 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerFactory(
-    () => GamificationBloc(
-      repository: getIt<GamificationRepository>(),
-    ),
+    () => GamificationBloc(repository: getIt<GamificationRepository>()),
   );
 
   getIt.registerFactory(
     () => SettingsBloc(
-      getAppConfigurationUseCase: getIt<settings_usecases.GetAppConfigurationUseCase>(),
-      updateAppConfigurationUseCase: getIt<settings_usecases.UpdateAppConfigurationUseCase>(),
-      getUserStatisticsUseCase: getIt<settings_usecases.GetUserStatisticsUseCase>(),
-      updateUserStatisticsUseCase: getIt<settings_usecases.UpdateUserStatisticsUseCase>(),
+      getAppConfigurationUseCase:
+          getIt<settings_usecases.GetAppConfigurationUseCase>(),
+      updateAppConfigurationUseCase:
+          getIt<settings_usecases.UpdateAppConfigurationUseCase>(),
+      getUserStatisticsUseCase:
+          getIt<settings_usecases.GetUserStatisticsUseCase>(),
+      updateUserStatisticsUseCase:
+          getIt<settings_usecases.UpdateUserStatisticsUseCase>(),
       submitFeedbackUseCase: getIt<settings_usecases.SubmitFeedbackUseCase>(),
-      getLocalSettingsUseCase: getIt<settings_usecases.GetLocalSettingsUseCase>(),
-      updateLocalSettingUseCase: getIt<settings_usecases.UpdateLocalSettingUseCase>(),
-      updateLocalSettingsUseCase: getIt<settings_usecases.UpdateLocalSettingsUseCase>(),
+      getLocalSettingsUseCase:
+          getIt<settings_usecases.GetLocalSettingsUseCase>(),
+      updateLocalSettingUseCase:
+          getIt<settings_usecases.UpdateLocalSettingUseCase>(),
+      updateLocalSettingsUseCase:
+          getIt<settings_usecases.UpdateLocalSettingsUseCase>(),
     ),
   );
 }

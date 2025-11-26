@@ -20,6 +20,7 @@ import '../../domain/services/app_color_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/offline_sync_service.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
@@ -42,6 +43,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final AppLogger _logger = getIt<AppLogger>();
   final ConnectivityService _connectivityService = ConnectivityService();
   StreamSubscription<bool>? _connectivitySubscription;
   bool _wasOffline = false;
@@ -63,7 +65,7 @@ class _HomePageState extends State<HomePage> {
       // Si estaba offline y ahora hay conexión, recargar datos
       if (_wasOffline && isConnected) {
         if (mounted) {
-          print('🌐 HomePage: Conexión restaurada, recargando datos...');
+          _logger.d('HomePage: Conexión restaurada, recargando datos...');
           await _reloadDataOnConnectionRestored();
         }
       }
@@ -81,22 +83,22 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     try {
-      print(
-        '🔄 HomePage: Iniciando recarga de datos después de restaurar conexión...',
+      _logger.d(
+        'HomePage: Iniciando recarga de datos después de restaurar conexión...',
       );
 
       // 1. Obtener userId correcto (buscando por email si es necesario)
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        print('❌ HomePage: No hay usuario autenticado');
+        _logger.w('HomePage: No hay usuario autenticado');
         return;
       }
 
       String? userId = await _getUserDocumentId(user);
 
       if (userId == null || userId.isEmpty) {
-        print(
-          '❌ HomePage: No se pudo obtener userId, intentando desde estado...',
+        _logger.w(
+          'HomePage: No se pudo obtener userId, intentando desde estado...',
         );
         // Fallback: intentar obtener del estado del bloc
         final userProfileBloc = context.read<UserProfileBloc>();
@@ -110,15 +112,15 @@ class _HomePageState extends State<HomePage> {
       }
 
       if (userId == null || userId.isEmpty) {
-        print('❌ HomePage: No se pudo obtener userId de ninguna fuente');
+        _logger.e('HomePage: No se pudo obtener userId de ninguna fuente');
         return;
       }
 
-      print('✅ HomePage: userId obtenido: $userId');
+      _logger.d('HomePage: userId obtenido: $userId');
 
       // 2. Recargar perfil de usuario desde Firestore
       final userProfileBloc = context.read<UserProfileBloc>();
-      print('🔄 HomePage: Solicitando recarga de perfil...');
+      _logger.d('HomePage: Solicitando recarga de perfil...');
       userProfileBloc.add(GetUserProfileRequested(userId: userId));
 
       // 3. Esperar a que el perfil se cargue (con timeout)
@@ -140,11 +142,11 @@ class _HomePageState extends State<HomePage> {
       final offlineSyncService = getIt<OfflineSyncService>();
       offlineSyncService.forceSync();
 
-      print(
-        '✅ HomePage: Datos recargados exitosamente después de restaurar conexión',
+      _logger.success(
+        'HomePage: Datos recargados exitosamente después de restaurar conexión',
       );
-    } catch (e) {
-      print('❌ HomePage: Error recargando datos: $e');
+    } catch (e, stackTrace) {
+      _logger.e('HomePage: Error recargando datos', e, stackTrace);
       // Intentar recargar desde cache como fallback
       if (mounted) {
         await _reloadFromCache();
@@ -157,7 +159,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // PRIORIDAD 1: Buscar por email (más confiable)
       if (user.email != null) {
-        print('🔍 HomePage: Buscando usuario por email: ${user.email}');
+        _logger.d('HomePage: Buscando usuario por email: ${user.email}');
 
         final userQuery = await FirebaseFirestore.instance
             .collection('Users')
@@ -167,7 +169,7 @@ class _HomePageState extends State<HomePage> {
             .timeout(
               const Duration(seconds: 5),
               onTimeout: () {
-                print('⏱️ HomePage: Timeout buscando usuario por email');
+                _logger.w('HomePage: Timeout buscando usuario por email');
                 return FirebaseFirestore.instance
                     .collection('Users')
                     .where('email', isEqualTo: user.email)
@@ -178,15 +180,17 @@ class _HomePageState extends State<HomePage> {
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print('✅ HomePage: Usuario encontrado por email, ID: $userDocId');
+          _logger.d('HomePage: Usuario encontrado por email, ID: $userDocId');
           return userDocId;
         } else {
-          print('⚠️ HomePage: No se encontró usuario por email: ${user.email}');
+          _logger.w(
+            'HomePage: No se encontró usuario por email: ${user.email}',
+          );
         }
       }
 
       // PRIORIDAD 2: Intentar con UID directamente (fallback)
-      print('🔍 HomePage: Intentando con UID como fallback: ${user.uid}');
+      _logger.d('HomePage: Intentando con UID como fallback: ${user.uid}');
       final docSnapshot = await FirebaseFirestore.instance
           .collection('Users')
           .doc(user.uid)
@@ -194,7 +198,7 @@ class _HomePageState extends State<HomePage> {
           .timeout(
             const Duration(seconds: 5),
             onTimeout: () {
-              print('⏱️ HomePage: Timeout buscando usuario por UID');
+              _logger.w('HomePage: Timeout buscando usuario por UID');
               return FirebaseFirestore.instance
                   .collection('Users')
                   .doc(user.uid)
@@ -203,16 +207,16 @@ class _HomePageState extends State<HomePage> {
           );
 
       if (docSnapshot.exists) {
-        print(
-          '⚠️ HomePage: Usuario encontrado con UID (fallback): ${user.uid}',
+        _logger.w(
+          'HomePage: Usuario encontrado con UID (fallback): ${user.uid}',
         );
         return user.uid;
       }
 
-      print('❌ HomePage: No se encontró usuario en Firestore');
+      _logger.e('HomePage: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ HomePage: Error obteniendo userId: $e');
+    } catch (e, stackTrace) {
+      _logger.e('HomePage: Error obteniendo userId', e, stackTrace);
       return null;
     }
   }
@@ -232,7 +236,7 @@ class _HomePageState extends State<HomePage> {
       // Configurar timeout
       timeoutTimer = Timer(Duration(seconds: timeoutSeconds), () {
         if (!completer.isCompleted) {
-          print('⏱️ HomePage: Timeout esperando perfil');
+          _logger.w('HomePage: Timeout esperando perfil');
           subscription?.cancel();
           completer.complete();
         }
@@ -241,14 +245,14 @@ class _HomePageState extends State<HomePage> {
       // Escuchar cambios de estado
       subscription = bloc.stream.listen((state) {
         if (state is UserProfileLoaded || state is UserProfileUpdated) {
-          print('✅ HomePage: Perfil cargado exitosamente');
+          _logger.success('HomePage: Perfil cargado exitosamente');
           timeoutTimer?.cancel();
           subscription?.cancel();
           if (!completer.isCompleted) {
             completer.complete();
           }
         } else if (state is UserProfileFailure) {
-          print('❌ HomePage: Error cargando perfil: ${state.message}');
+          _logger.e('HomePage: Error cargando perfil: ${state.message}');
           timeoutTimer?.cancel();
           subscription?.cancel();
           if (!completer.isCompleted) {
@@ -258,8 +262,8 @@ class _HomePageState extends State<HomePage> {
       });
 
       await completer.future;
-    } catch (e) {
-      print('❌ HomePage: Error esperando perfil: $e');
+    } catch (e, stackTrace) {
+      _logger.e('HomePage: Error esperando perfil', e, stackTrace);
     }
   }
 
@@ -552,11 +556,11 @@ class _HomePageState extends State<HomePage> {
       final repository = getIt<GamificationRepository>();
       final result = await repository.getStreak(userId);
       return result.fold((error) {
-        print('❌ Error obteniendo racha: $error');
+        _logger.e('Error obteniendo racha: $error');
         return null;
       }, (streak) => streak);
-    } catch (e) {
-      print('❌ Excepción obteniendo racha: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Excepción obteniendo racha', e, stackTrace);
       return null;
     }
   }
@@ -569,10 +573,11 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     try {
-      print('🔄 HomePage: Cargando información de situación...');
+      _logger.d('HomePage: Cargando información de situación...');
 
       final userSubcollectionsService = UserSubcollectionsService(
         FirebaseFirestore.instance,
+        _logger,
       );
 
       final situationData = await userSubcollectionsService
@@ -580,22 +585,21 @@ class _HomePageState extends State<HomePage> {
           .timeout(
             const Duration(seconds: 5),
             onTimeout: () {
-              print('⏱️ HomePage: Timeout cargando información de situación');
+              _logger.w('HomePage: Timeout cargando información de situación');
               return null;
             },
           );
 
       if (situationData != null) {
-        print('✅ HomePage: Información de situación cargada: $situationData');
+        _logger.d('HomePage: Información de situación cargada: $situationData');
 
         // Determinar si es preparto o postparto
         final situationType = situationData['situationType'] as String?;
         final isPrePartum = situationType == 'preparto';
         final isPostPartum = situationType == 'postparto';
 
-        print('🔍 HomePage: situationType = $situationType');
-        print(
-          '🔍 HomePage: isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
+        _logger.d(
+          'HomePage: situationType = $situationType, isPrePartum = $isPrePartum, isPostPartum = $isPostPartum',
         );
 
         // Actualizar el UserProfileBloc con la información de situación
@@ -608,13 +612,17 @@ class _HomePageState extends State<HomePage> {
               situationData: situationData,
             ),
           );
-          print('✅ HomePage: Información de situación actualizada');
+          _logger.success('HomePage: Información de situación actualizada');
         }
       } else {
-        print('⚠️ HomePage: No se encontró información de situación');
+        _logger.w('HomePage: No se encontró información de situación');
       }
-    } catch (e) {
-      print('❌ HomePage: Error cargando información de situación: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'HomePage: Error cargando información de situación',
+        e,
+        stackTrace,
+      );
       // No es crítico, continuar sin actualizar la situación
     }
   }
@@ -624,7 +632,7 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     try {
-      print('🔄 HomePage: Intentando recargar desde cache...');
+      _logger.d('HomePage: Intentando recargar desde cache...');
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
@@ -634,7 +642,7 @@ class _HomePageState extends State<HomePage> {
       // Si ya hay un perfil cargado, no hacer nada
       if (currentState is UserProfileLoaded ||
           currentState is UserProfileUpdated) {
-        print('✅ HomePage: Perfil ya está cargado');
+        _logger.d('HomePage: Perfil ya está cargado');
         return;
       }
 
@@ -643,8 +651,8 @@ class _HomePageState extends State<HomePage> {
       if (userId != null && userId.isNotEmpty) {
         userProfileBloc.add(GetUserProfileRequested(userId: userId));
       }
-    } catch (e) {
-      print('❌ HomePage: Error recargando desde cache: $e');
+    } catch (e, stackTrace) {
+      _logger.e('HomePage: Error recargando desde cache', e, stackTrace);
     }
   }
 
@@ -718,19 +726,19 @@ class _HomePageState extends State<HomePage> {
           // Contenido principal usando BlocBuilder
           BlocBuilder<UserProfileBloc, UserProfileState>(
             builder: (context, state) {
-              print('🏠 HomePage: Estado recibido: ${state.runtimeType}');
+              _logger.d('HomePage: Estado recibido: ${state.runtimeType}');
               if (state is UserProfileLoaded) {
-                print(
-                  '🏠 HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
+                _logger.d(
+                  'HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
                 );
               } else if (state is UserProfileUpdated) {
-                print(
-                  '🏠 HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
+                _logger.d(
+                  'HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
                 );
               } else if (state is UserProfileFailure) {
-                print('🏠 HomePage: UserProfileFailure - ${state.message}');
+                _logger.e('HomePage: UserProfileFailure - ${state.message}');
               } else {
-                print('🏠 HomePage: Estado inesperado: $state');
+                _logger.w('HomePage: Estado inesperado: $state');
               }
               return _buildHomeContent(context, state);
             },
@@ -897,11 +905,8 @@ class _HomePageState extends State<HomePage> {
     UserProfileState state,
   ) {
     final isPostPartum = NavigationService.getUserPostPartumStatus(state);
-    print(
-      '🏠 HomePage: _buildHomeContentSections - isPostPartum: $isPostPartum',
-    );
-    print(
-      '🏠 HomePage: _buildHomeContentSections - state: ${state.runtimeType}',
+    _logger.d(
+      'HomePage: _buildHomeContentSections - isPostPartum: $isPostPartum, state: ${state.runtimeType}',
     );
 
     return Column(
@@ -993,42 +998,42 @@ class _HomePageState extends State<HomePage> {
   /// Construye la sección de postparto con logs detallados
   Widget _buildPostPartumSection(UserProfileState state) {
     if (state is UserProfileLoaded) {
-      print(
-        '🏠 HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
+      _logger.d(
+        'HomePage: UserProfileLoaded - isPostPartum: ${state.profile.isPostPartum}',
       );
       // Solo mostrar PostpartoProfileWidget para usuarios postparto
       // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
       if (state.profile.isPostPartum) {
-        print(
-          '🏠 HomePage: Mostrando PostpartoProfileWidget para UserProfileLoaded',
+        _logger.d(
+          'HomePage: Mostrando PostpartoProfileWidget para UserProfileLoaded',
         );
         return PostpartoProfileWidget(userProfile: state.profile);
       } else {
-        print(
-          '🏠 HomePage: NO mostrando PostpartoProfileWidget para UserProfileLoaded (no es postparto)',
+        _logger.d(
+          'HomePage: NO mostrando PostpartoProfileWidget para UserProfileLoaded (no es postparto)',
         );
         return const SizedBox.shrink();
       }
     } else if (state is UserProfileUpdated) {
-      print(
-        '🏠 HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
+      _logger.d(
+        'HomePage: UserProfileUpdated - isPostPartum: ${state.profile.isPostPartum}',
       );
       // Solo mostrar PostpartoProfileWidget para usuarios postparto
       // Los usuarios preparto ya tienen CountdownCard que muestra toda la información necesaria
       if (state.profile.isPostPartum) {
-        print(
-          '🏠 HomePage: Mostrando PostpartoProfileWidget para UserProfileUpdated',
+        _logger.d(
+          'HomePage: Mostrando PostpartoProfileWidget para UserProfileUpdated',
         );
         return PostpartoProfileWidget(userProfile: state.profile);
       } else {
-        print(
-          '🏠 HomePage: NO mostrando PostpartoProfileWidget para UserProfileUpdated (no es postparto)',
+        _logger.d(
+          'HomePage: NO mostrando PostpartoProfileWidget para UserProfileUpdated (no es postparto)',
         );
         return const SizedBox.shrink();
       }
     } else {
-      print(
-        '🏠 HomePage: Estado no reconocido para mostrar PostpartoProfileWidget: ${state.runtimeType}',
+      _logger.w(
+        'HomePage: Estado no reconocido para mostrar PostpartoProfileWidget: ${state.runtimeType}',
       );
       return const SizedBox.shrink();
     }
@@ -1063,7 +1068,7 @@ class _HomePageState extends State<HomePage> {
 
       // Solo hacer la transición si aún está en preparto
       if (profile.isPrePartum && !profile.isPostPartum) {
-        print('🎉 HomePage: Timer llegó a 0, transicionando a postparto...');
+        _logger.d('HomePage: Timer llegó a 0, transicionando a postparto...');
 
         // Actualizar situación del usuario
         context.read<UserProfileBloc>().add(
@@ -1394,11 +1399,11 @@ class _HomePageState extends State<HomePage> {
             duration: const Duration(milliseconds: 1200),
             child: SmartLactationButton(
               onSuccess: () async {
-                print('🔄 onSuccess: Refrescando datos...');
+                _logger.d('onSuccess: Refrescando datos...');
                 // Refrescar datos después de registrar lactancia
                 await lactationProvider.refreshTodayData();
                 await lactationProvider.loadWeekData();
-                print('🔄 onSuccess: Datos refrescados');
+                _logger.d('onSuccess: Datos refrescados');
               },
             ),
           ),
@@ -1418,8 +1423,8 @@ class _HomePageState extends State<HomePage> {
 
     // Obtener los días de la semana actual
     final startOfWeek = now.subtract(Duration(days: todayWeekday % 7));
-    print(
-      '📅 Inicio de semana (DOMINGO): ${startOfWeek.day}/${startOfWeek.month}/${startOfWeek.year}',
+    _logger.d(
+      'Inicio de semana (DOMINGO): ${startOfWeek.day}/${startOfWeek.month}/${startOfWeek.year}',
     );
 
     return Row(
@@ -1432,8 +1437,8 @@ class _HomePageState extends State<HomePage> {
 
         // Debug solo para domingo y lunes para verificar el bug
         if (index == 0 || index == 1) {
-          print(
-            '📆 ${index == 0 ? "DOMINGO" : "LUNES"}: ${date.day}/${date.month} - Marcado: $isMarked',
+          _logger.d(
+            '${index == 0 ? "DOMINGO" : "LUNES"}: ${date.day}/${date.month} - Marcado: $isMarked',
           );
         }
 
@@ -1551,7 +1556,7 @@ class _HomePageState extends State<HomePage> {
               const Icon(
                 Icons.info_outline,
                 size: 16,
-                color:  Color(0xFF03A696),
+                color: Color(0xFF03A696),
               ),
               const SizedBox(width: 4),
               Text(

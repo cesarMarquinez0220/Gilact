@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para manejar el progreso de videos con Firestore
 /// Mantiene la funcionalidad específica del reproductor anterior
 class VideoProgressService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AppLogger _logger = getIt<AppLogger>();
 
   // Caché para el ID del documento del usuario
   String? _cachedUserDocId;
@@ -22,7 +25,7 @@ class VideoProgressService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        print('❌ VideoProgressService: Usuario no autenticado');
+        _logger.e('VideoProgressService: Usuario no autenticado');
         return null;
       }
 
@@ -36,17 +39,17 @@ class VideoProgressService {
 
         if (userQuery.docs.isNotEmpty) {
           _cachedUserDocId = userQuery.docs.first.id;
-          print(
-            '✅ VideoProgressService: Usuario encontrado por email, ID del documento: $_cachedUserDocId',
+          _logger.d(
+            'VideoProgressService: Usuario encontrado por email, ID del documento: $_cachedUserDocId',
           );
           return _cachedUserDocId;
         } else {
-          print(
-            '⚠️ VideoProgressService: No se encontró usuario por email: ${user.email}',
+          _logger.w(
+            'VideoProgressService: No se encontró usuario por email: ${user.email}',
           );
         }
       } else {
-        print('⚠️ VideoProgressService: Usuario no tiene email');
+        _logger.w('VideoProgressService: Usuario no tiene email');
       }
 
       // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
@@ -57,17 +60,17 @@ class VideoProgressService {
           .get();
 
       if (docSnapshot.exists) {
-        print(
-          '⚠️ VideoProgressService: Usando UID como fallback (no recomendado): ${user.uid}',
+        _logger.w(
+          'VideoProgressService: Usando UID como fallback (no recomendado): ${user.uid}',
         );
         _cachedUserDocId = user.uid;
         return user.uid;
       }
 
-      print('❌ VideoProgressService: No se encontró usuario en Firestore');
+      _logger.e('VideoProgressService: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }
@@ -89,8 +92,8 @@ class VideoProgressService {
       // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
       final userDocId = await _getUserDocumentId();
       if (userDocId == null) {
-        print(
-          '❌ VideoProgressService: No se pudo obtener el ID del documento del usuario',
+        _logger.e(
+          'VideoProgressService: No se pudo obtener el ID del documento del usuario',
         );
         return;
       }
@@ -100,8 +103,8 @@ class VideoProgressService {
           .collection('videos')
           .doc(videoId.toString());
 
-      print(
-        '📊 VideoProgressService: Guardando progreso en /Users/$userDocId/videos/$videoId',
+      _logger.d(
+        'VideoProgressService: Guardando progreso en /Users/$userDocId/videos/$videoId',
       );
 
       final videoData = {
@@ -135,9 +138,9 @@ class VideoProgressService {
         });
       }
 
-      print('Información del video guardada con éxito en Firestore');
-    } catch (error) {
-      print('Error al guardar información en Firestore: $error');
+      _logger.success('Información del video guardada con éxito en Firestore');
+    } catch (error, stackTrace) {
+      _logger.e('Error al guardar información en Firestore', error, stackTrace);
     }
   }
 
@@ -162,8 +165,12 @@ class VideoProgressService {
       if (videoDoc.exists) {
         return videoDoc.data() as Map<String, dynamic>;
       }
-    } catch (error) {
-      print('Error al obtener información del video en Firestore: $error');
+    } catch (error, stackTrace) {
+      _logger.e(
+        'Error al obtener información del video en Firestore',
+        error,
+        stackTrace,
+      );
     }
 
     return {};
@@ -228,8 +235,8 @@ class VideoProgressService {
         'avance': videoData['avance'] ?? 0.0,
         'estaCompletado': videoData['estaCompletado'] ?? false,
       };
-    } catch (error) {
-      print('Error al obtener estadísticas del video: $error');
+    } catch (error, stackTrace) {
+      _logger.e('Error al obtener estadísticas del video', error, stackTrace);
       return {};
     }
   }

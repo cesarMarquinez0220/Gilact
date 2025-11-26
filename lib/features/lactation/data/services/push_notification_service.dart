@@ -11,6 +11,8 @@ import '../../presentation/pages/daily_sleep_form_page.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../../core/services/pending_notification_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para manejar notificaciones push desde Firestore
 class PushNotificationService {
@@ -24,12 +26,13 @@ class PushNotificationService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final ConnectivityService _connectivityService = ConnectivityService();
+  final AppLogger _logger = getIt<AppLogger>();
   bool _isLocalNotificationsInitialized = false;
 
   /// Inicializar el servicio de notificaciones push
   Future<void> initialize() async {
     try {
-      print('🔔 PushNotificationService: Inicializando...');
+      _logger.d('PushNotificationService: Inicializando...');
 
       // Solicitar permisos
       await _requestPermission();
@@ -39,14 +42,14 @@ class PushNotificationService {
       if (isConnected) {
         await _saveTokenToFirestore();
       } else {
-        print(
-          '📴 PushNotificationService: Sin conexión, token se guardará cuando haya conexión',
+        _logger.d(
+          'PushNotificationService: Sin conexión, token se guardará cuando haya conexión',
         );
       }
 
       // Escuchar cambios en el token
       _messaging.onTokenRefresh.listen((newToken) async {
-        print('🔔 PushNotificationService: Token actualizado: $newToken');
+        _logger.d('PushNotificationService: Token actualizado: $newToken');
         // Verificar conectividad antes de guardar
         final connected = await _connectivityService.isConnected();
         if (connected) {
@@ -60,11 +63,13 @@ class PushNotificationService {
       // Configurar listener para toques en notificaciones locales
       _setupLocalNotificationHandlers();
 
-      print('✅ PushNotificationService: Inicializado correctamente');
-    } catch (e) {
+      _logger.success('PushNotificationService: Inicializado correctamente');
+    } catch (e, stackTrace) {
       // No bloquear el inicio de la app si falla la inicialización
-      print(
-        '⚠️ PushNotificationService: Error en inicialización (no crítico): $e',
+      _logger.w(
+        'PushNotificationService: Error en inicialización (no crítico)',
+        e,
+        stackTrace,
       );
     }
   }
@@ -78,13 +83,13 @@ class PushNotificationService {
           iOS: DarwinInitializationSettings(),
         ),
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          print('🔔 PushNotificationService: Notificación local tocada');
-          print('📦 Payload: ${response.payload}');
+          _logger.d('PushNotificationService: Notificación local tocada');
+          _logger.d('Payload: ${response.payload}');
 
           if (response.payload != null) {
             final type = response.payload!;
-            print(
-              '🎯 PushNotificationService: Tipo de notificación local: $type',
+            _logger.d(
+              'PushNotificationService: Tipo de notificación local: $type',
             );
 
             // Navegar según el tipo
@@ -102,7 +107,7 @@ class PushNotificationService {
                 _navigateToDailySleep();
                 break;
               default:
-                print('⚠️ PushNotificationService: Tipo desconocido: $type');
+                _logger.w('PushNotificationService: Tipo desconocido: $type');
             }
           }
         },
@@ -113,7 +118,7 @@ class PushNotificationService {
 
   /// Solicitar permisos para notificaciones
   Future<void> _requestPermission() async {
-    print('🔔 PushNotificationService: Solicitando permisos...');
+    _logger.d('PushNotificationService: Solicitando permisos...');
 
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -125,12 +130,12 @@ class PushNotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('✅ PushNotificationService: Permisos concedidos');
+      _logger.success('PushNotificationService: Permisos concedidos');
     } else if (settings.authorizationStatus ==
         AuthorizationStatus.provisional) {
-      print('⚠️ PushNotificationService: Permisos provisionales');
+      _logger.w('PushNotificationService: Permisos provisionales');
     } else {
-      print('❌ PushNotificationService: Permisos denegados');
+      _logger.e('PushNotificationService: Permisos denegados');
     }
   }
 
@@ -140,7 +145,7 @@ class PushNotificationService {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        print('❌ PushNotificationService: Usuario no autenticado');
+        _logger.e('PushNotificationService: Usuario no autenticado');
         return null;
       }
 
@@ -154,17 +159,17 @@ class PushNotificationService {
 
         if (userQuery.docs.isNotEmpty) {
           final userDocId = userQuery.docs.first.id;
-          print(
-            '✅ PushNotificationService: Usuario encontrado por email, ID del documento: $userDocId',
+          _logger.success(
+            'PushNotificationService: Usuario encontrado por email, ID del documento: $userDocId',
           );
           return userDocId;
         } else {
-          print(
-            '⚠️ PushNotificationService: No se encontró usuario por email: ${user.email}',
+          _logger.w(
+            'PushNotificationService: No se encontró usuario por email: ${user.email}',
           );
         }
       } else {
-        print('⚠️ PushNotificationService: Usuario no tiene email');
+        _logger.w('PushNotificationService: Usuario no tiene email');
       }
 
       // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
@@ -174,16 +179,16 @@ class PushNotificationService {
           .get();
 
       if (docSnapshot.exists) {
-        print(
-          '⚠️ PushNotificationService: Usando UID como fallback (no recomendado): ${user.uid}',
+        _logger.w(
+          'PushNotificationService: Usando UID como fallback (no recomendado): ${user.uid}',
         );
         return user.uid;
       }
 
-      print('❌ PushNotificationService: No se encontró usuario en Firestore');
+      _logger.e('PushNotificationService: No se encontró usuario en Firestore');
       return null;
-    } catch (e) {
-      print('❌ Error obteniendo ID del usuario: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;
     }
   }
@@ -193,8 +198,8 @@ class PushNotificationService {
     // Verificar conectividad primero
     final isConnected = await _connectivityService.isConnected();
     if (!isConnected) {
-      print(
-        '📴 PushNotificationService: Sin conexión, no se puede guardar token',
+      _logger.d(
+        'PushNotificationService: Sin conexión, no se puede guardar token',
       );
       return;
     }
@@ -202,8 +207,8 @@ class PushNotificationService {
     // Obtener el ID correcto del documento del usuario en Firestore
     final userDocId = await _getUserDocumentId();
     if (userDocId == null) {
-      print(
-        '❌ PushNotificationService: No se pudo obtener el ID del documento del usuario',
+      _logger.e(
+        'PushNotificationService: No se pudo obtener el ID del documento del usuario',
       );
       return;
     }
@@ -211,12 +216,12 @@ class PushNotificationService {
     try {
       final token = await _messaging.getToken();
       if (token == null) {
-        print('⚠️ PushNotificationService: No se pudo obtener token');
+        _logger.w('PushNotificationService: No se pudo obtener token');
         return;
       }
 
-      print(
-        '🔔 PushNotificationService: Guardando token en Firestore para usuario: $userDocId',
+      _logger.d(
+        'PushNotificationService: Guardando token en Firestore para usuario: $userDocId',
       );
 
       // Guardar el token en la colección del usuario usando el ID correcto del documento
@@ -234,11 +239,15 @@ class PushNotificationService {
             'updated_at': FieldValue.serverTimestamp(),
           });
 
-      print(
-        '✅ PushNotificationService: Token guardado en /Users/$userDocId/device_tokens/$token',
+      _logger.success(
+        'PushNotificationService: Token guardado en /Users/$userDocId/device_tokens/$token',
       );
-    } catch (e) {
-      print('❌ PushNotificationService: Error guardando token: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'PushNotificationService: Error guardando token',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -246,23 +255,27 @@ class PushNotificationService {
   void _setupMessageHandlers() {
     // Cuando la app está en FOREGROUND
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      print('🔔 PushNotificationService: Mensaje recibido en foreground');
-      print('📋 Título: ${message.notification?.title}');
-      print('💬 Cuerpo: ${message.notification?.body}');
-      print('📦 Data: ${message.data}');
+      _logger.d('PushNotificationService: Mensaje recibido en foreground');
+      _logger.d('Título: ${message.notification?.title}');
+      _logger.d('Cuerpo: ${message.notification?.body}');
+      _logger.d('Data: ${message.data}');
 
       // MOSTRAR NOTIFICACIÓN VISUALMENTE
       try {
-        print('🔍 DEBUG: Llamando a _showLocalNotificationFromPush...');
+        _logger.d('DEBUG: Llamando a _showLocalNotificationFromPush...');
         await _showLocalNotificationFromPush(message);
-      } catch (e) {
-        print('❌ DEBUG: Error llamando a _showLocalNotificationFromPush: $e');
+      } catch (e, stackTrace) {
+        _logger.e(
+          'DEBUG: Error llamando a _showLocalNotificationFromPush',
+          e,
+          stackTrace,
+        );
       }
     });
 
     // Cuando la app está en BACKGROUND y se toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('🔔 PushNotificationService: Mensaje abierto desde background');
+      _logger.d('PushNotificationService: Mensaje abierto desde background');
 
       // Verificar si el usuario está autenticado
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -271,8 +284,8 @@ class PushNotificationService {
         final data = message.data;
         final type = data['type'] as String?;
         if (type != null) {
-          print(
-            '💾 PushNotificationService: Guardando notificación pendiente (background): $type',
+          _logger.d(
+            'PushNotificationService: Guardando notificación pendiente (background): $type',
           );
           PendingNotificationService.savePendingNotification(
             type: type,
@@ -288,7 +301,7 @@ class PushNotificationService {
     // Verificar si la app se abrió desde una notificación
     _messaging.getInitialMessage().then((message) {
       if (message != null) {
-        print('🔔 PushNotificationService: App abierta desde notificación');
+        _logger.d('PushNotificationService: App abierta desde notificación');
 
         // Verificar si el usuario está autenticado
         final currentUser = FirebaseAuth.instance.currentUser;
@@ -297,8 +310,8 @@ class PushNotificationService {
           final data = message.data;
           final type = data['type'] as String?;
           if (type != null) {
-            print(
-              '💾 PushNotificationService: Guardando notificación pendiente: $type',
+            _logger.d(
+              'PushNotificationService: Guardando notificación pendiente: $type',
             );
             PendingNotificationService.savePendingNotification(
               type: type,
@@ -318,7 +331,7 @@ class PushNotificationService {
     final data = message.data;
     final type = data['type'] as String?;
 
-    print('🔔 PushNotificationService: Tipo de notificación: $type');
+    _logger.d('PushNotificationService: Tipo de notificación: $type');
 
     switch (type) {
       case 'lesson':
@@ -334,24 +347,26 @@ class PushNotificationService {
         _navigateToDailySleep();
         break;
       default:
-        print('⚠️ PushNotificationService: Tipo de notificación desconocido');
+        _logger.w('PushNotificationService: Tipo de notificación desconocido');
     }
   }
 
   void _navigateToLessons() {
-    print('📚 PushNotificationService: Navegando a lecciones...');
+    _logger.d('PushNotificationService: Navegando a lecciones...');
 
     final context = navigatorKey.currentContext;
     if (context == null) {
-      print('❌ PushNotificationService: Context no disponible para navegación');
+      _logger.e(
+        'PushNotificationService: Context no disponible para navegación',
+      );
       return;
     }
 
     // Verificar autenticación antes de navegar
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print(
-        '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      _logger.w(
+        'PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
       // Guardar notificación pendiente para reanudar después del login
       PendingNotificationService.savePendingNotification(
@@ -365,8 +380,8 @@ class PushNotificationService {
       return;
     }
 
-    print(
-      '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
+    _logger.d(
+      'PushNotificationService: Usuario autenticado (${currentUser.uid})',
     );
 
     // Pasar lista vacía de videos porque se cargan en initState del LessonVideosPage
@@ -377,7 +392,9 @@ class PushNotificationService {
       ),
     );
 
-    print('✅ PushNotificationService: Navegación a lecciones completada');
+    _logger.success(
+      'PushNotificationService: Navegación a lecciones completada',
+    );
   }
 
   /// Mostrar diálogo cuando se requiere inicio de sesión
@@ -415,21 +432,23 @@ class PushNotificationService {
   }
 
   void _navigateToLactationQuick() {
-    print(
-      '🚀 PushNotificationService: Navegando a registro rápido de lactancia...',
+    _logger.d(
+      'PushNotificationService: Navegando a registro rápido de lactancia...',
     );
 
     final context = navigatorKey.currentContext;
     if (context == null) {
-      print('❌ PushNotificationService: Context no disponible para navegación');
+      _logger.e(
+        'PushNotificationService: Context no disponible para navegación',
+      );
       return;
     }
 
     // Verificar autenticación antes de navegar
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print(
-        '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      _logger.w(
+        'PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
       // Guardar notificación pendiente para reanudar después del login
       PendingNotificationService.savePendingNotification(
@@ -443,33 +462,37 @@ class PushNotificationService {
       return;
     }
 
-    print(
-      '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
+    _logger.d(
+      'PushNotificationService: Usuario autenticado (${currentUser.uid})',
     );
 
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const LactationFlowPage()));
 
-    print('✅ PushNotificationService: Navegación a registro rápido completada');
+    _logger.success(
+      'PushNotificationService: Navegación a registro rápido completada',
+    );
   }
 
   void _navigateToLactationComplete() {
-    print(
-      '📝 PushNotificationService: Navegando a registro completo de lactancia...',
+    _logger.d(
+      'PushNotificationService: Navegando a registro completo de lactancia...',
     );
 
     final context = navigatorKey.currentContext;
     if (context == null) {
-      print('❌ PushNotificationService: Context no disponible para navegación');
+      _logger.e(
+        'PushNotificationService: Context no disponible para navegación',
+      );
       return;
     }
 
     // Verificar autenticación antes de navegar
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print(
-        '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      _logger.w(
+        'PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
       // Guardar notificación pendiente para reanudar después del login
       PendingNotificationService.savePendingNotification(
@@ -483,33 +506,35 @@ class PushNotificationService {
       return;
     }
 
-    print(
-      '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
+    _logger.d(
+      'PushNotificationService: Usuario autenticado (${currentUser.uid})',
     );
 
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const LactationRecordPage()));
 
-    print(
-      '✅ PushNotificationService: Navegación a registro completo completada',
+    _logger.success(
+      'PushNotificationService: Navegación a registro completo completada',
     );
   }
 
   void _navigateToDailySleep() {
-    print('😴 PushNotificationService: Navegando a registro de sueño...');
+    _logger.d('PushNotificationService: Navegando a registro de sueño...');
 
     final context = navigatorKey.currentContext;
     if (context == null) {
-      print('❌ PushNotificationService: Context no disponible para navegación');
+      _logger.e(
+        'PushNotificationService: Context no disponible para navegación',
+      );
       return;
     }
 
     // Verificar autenticación antes de navegar
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print(
-        '⚠️ PushNotificationService: Usuario no autenticado, redirigiendo a login...',
+      _logger.w(
+        'PushNotificationService: Usuario no autenticado, redirigiendo a login...',
       );
       // Guardar notificación pendiente para reanudar después del login
       PendingNotificationService.savePendingNotification(
@@ -523,8 +548,8 @@ class PushNotificationService {
       return;
     }
 
-    print(
-      '✅ PushNotificationService: Usuario autenticado (${currentUser.uid})',
+    _logger.d(
+      'PushNotificationService: Usuario autenticado (${currentUser.uid})',
     );
 
     Navigator.of(context).push(
@@ -533,8 +558,8 @@ class PushNotificationService {
       ),
     );
 
-    print(
-      '✅ PushNotificationService: Navegación a registro de sueño completada',
+    _logger.success(
+      'PushNotificationService: Navegación a registro de sueño completada',
     );
   }
 
@@ -542,9 +567,13 @@ class PushNotificationService {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _messaging.subscribeToTopic(topic);
-      print('✅ PushNotificationService: Suscrito al tema: $topic');
-    } catch (e) {
-      print('❌ PushNotificationService: Error suscribiendo al tema: $e');
+      _logger.success('PushNotificationService: Suscrito al tema: $topic');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'PushNotificationService: Error suscribiendo al tema',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -552,35 +581,40 @@ class PushNotificationService {
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _messaging.unsubscribeFromTopic(topic);
-      print('✅ PushNotificationService: Desuscrito del tema: $topic');
-    } catch (e) {
-      print('❌ PushNotificationService: Error desuscribiendo del tema: $e');
+      _logger.success('PushNotificationService: Desuscrito del tema: $topic');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'PushNotificationService: Error desuscribiendo del tema',
+        e,
+        stackTrace,
+      );
     }
   }
 
   /// Manejar notificación pendiente después del login
   /// Este método debe ser llamado después de que el usuario inicia sesión
   static Future<void> handlePendingNotification(BuildContext? context) async {
-    print('🔍 PushNotificationService: Verificando notificación pendiente...');
+    final logger = getIt<AppLogger>();
+    logger.d('PushNotificationService: Verificando notificación pendiente...');
 
     final pendingNotification =
         await PendingNotificationService.getPendingNotification();
     if (pendingNotification == null) {
-      print('ℹ️ PushNotificationService: No hay notificación pendiente');
+      logger.d('PushNotificationService: No hay notificación pendiente');
       return;
     }
 
     final type = pendingNotification['type'] as String?;
     if (type == null) {
-      print(
-        '⚠️ PushNotificationService: Tipo de notificación pendiente no válido',
+      logger.w(
+        'PushNotificationService: Tipo de notificación pendiente no válido',
       );
       await PendingNotificationService.clearPendingNotification();
       return;
     }
 
-    print(
-      '✅ PushNotificationService: Notificación pendiente encontrada: $type',
+    logger.success(
+      'PushNotificationService: Notificación pendiente encontrada: $type',
     );
 
     // Limpiar la notificación pendiente
@@ -590,7 +624,7 @@ class PushNotificationService {
     if (context == null) {
       final navigatorContext = navigatorKey.currentContext;
       if (navigatorContext == null) {
-        print('❌ PushNotificationService: Context no disponible para navegar');
+        logger.e('PushNotificationService: Context no disponible para navegar');
         return;
       }
       context = navigatorContext;
@@ -614,15 +648,15 @@ class PushNotificationService {
         service._navigateToDailySleep();
         break;
       default:
-        print(
-          '⚠️ PushNotificationService: Tipo de notificación pendiente desconocido: $type',
+        logger.w(
+          'PushNotificationService: Tipo de notificación pendiente desconocido: $type',
         );
     }
   }
 
   /// Mostrar notificación localmente cuando la app está en foreground
   Future<void> _showLocalNotificationFromPush(RemoteMessage message) async {
-    print('🔔 PushNotificationService: Mostrando notificación local...');
+    _logger.d('PushNotificationService: Mostrando notificación local...');
 
     try {
       // Crear el canal de notificación para Android
@@ -658,10 +692,12 @@ class PushNotificationService {
         payload: message.data['type'],
       );
 
-      print('✅ PushNotificationService: Notificación local mostrada');
-    } catch (e) {
-      print(
-        '❌ PushNotificationService: Error mostrando notificación local: $e',
+      _logger.success('PushNotificationService: Notificación local mostrada');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'PushNotificationService: Error mostrando notificación local',
+        e,
+        stackTrace,
       );
     }
   }
@@ -670,6 +706,8 @@ class PushNotificationService {
 /// Handler global para mensajes en background
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // En background handler, no podemos usar DI, así que usamos print
+  // ya que este handler se ejecuta en un isolate separado
   print('🔔 Background: Mensaje recibido en background');
   print('📋 Título: ${message.notification?.title}');
   print('💬 Cuerpo: ${message.notification?.body}');

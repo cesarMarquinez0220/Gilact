@@ -66,7 +66,10 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   final VideoProgressService _progressService = VideoProgressService();
   final VideoInteractionService _interactionService =
       GetIt.instance<VideoInteractionService>();
+  // Campos no usados - mantenidos para uso futuro
+  // ignore: unused_field
   final VideoPreloadService _preloadService = VideoPreloadService();
+  // ignore: unused_field
   final ImageCompressionService _compressionService = ImageCompressionService();
   final VideoDownloadService _downloadService = VideoDownloadService();
   final ConnectivityService _connectivityService = ConnectivityService();
@@ -74,42 +77,32 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   bool _isOfflineMode = false;
   bool _isCheckingDownload = true;
 
-  bool _isPaused = false;
   int _pauseCount = 0;
   int _forwardCount = 0;
-  bool _canPop = true;
-  bool _guardadoRealizado = false;
   bool _duracionImpresa = false;
-  bool _isSavingProgress = false;
-  double _lastSavedProgress = 0.0;
   Duration _totalDuration = Duration.zero;
 
-  // Variables para mejoras de UX
-  double _playbackSpeed = 1.0;
-  bool _isOneHandMode = false;
-  final List<double> _completedMilestones = [];
   Timer? _progressNotificationTimer;
 
   // Variables para overlay con animación
   bool _showVideoOverlay = true;
   Timer? _overlayTimer;
 
-  // Variables para overlay de doble tap estilo Netflix
-  bool _showSeekOverlay = false;
-  String _seekMessage = '';
-  bool _isSeekingForward = false;
   Timer? _seekOverlayTimer;
 
-  // Variables para auto-play del siguiente video
-  bool _showAutoPlayCountdown = false;
-  int _countdownSeconds = 5;
   Timer? _countdownTimer;
-  bool _isLastVideoInLesson = false;
-
-  // Variable para controlar estado de reproducción
-  bool _isPlaying = false;
   bool _wasAlreadyCompleted = false;
   StreamSubscription<bool>? _recordingStatusSubscription;
+
+  // Variables para estado del video
+  // ignore: unused_field
+  bool _isLastVideoInLesson = false;
+  // ignore: unused_field
+  double _lastSavedProgress = 0.0;
+  // ignore: unused_field
+  bool _isPaused = false;
+  // ignore: unused_field
+  bool _isPlaying = false;
 
   // Key para acceder al OfflineVideoPlayer cuando está en modo offline
   final GlobalKey _offlinePlayerKey = GlobalKey();

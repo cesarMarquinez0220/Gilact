@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../domain/services/lactation_decision_tree.dart';
 import '../../domain/entities/lactation_record.dart';
 import 'sleep_reminder_service.dart';
@@ -8,8 +9,9 @@ import 'sleep_reminder_service.dart';
 class LactationFlowService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final AppLogger _logger;
 
-  LactationFlowService(this._firestore, this._auth);
+  LactationFlowService(this._firestore, this._auth, this._logger);
 
   /// Guarda un registro de lactancia basado en el contexto del flujo
   Future<void> saveLactationRecord({
@@ -115,9 +117,11 @@ class LactationFlowService {
         feedingType: feedingType,
       );
 
-      print('✅ Recordatorio de sueño programado para mañana a las 8 AM');
-    } catch (e) {
-      print('⚠️ Error programando recordatorio de sueño: $e');
+      _logger.success(
+        'Recordatorio de sueño programado para mañana a las 8 AM',
+      );
+    } catch (e, stackTrace) {
+      _logger.w('Error programando recordatorio de sueño', e, stackTrace);
       // No lanzar excepción para no interrumpir el guardado del registro
     }
   }

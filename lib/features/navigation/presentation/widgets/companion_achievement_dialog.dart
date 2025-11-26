@@ -270,6 +270,8 @@ class _AchievementDetailsDialogContentState
     }
   }
 
+  // Método no usado - mantenido para uso futuro
+  // ignore: unused_element
   String? _getUserId() {
     try {
       final userState = context.read<UserProfileBloc>().state;

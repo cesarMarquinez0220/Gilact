@@ -1,14 +1,16 @@
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
+import 'app_logger.dart';
 
 /// Servicio para manejar vibraciones en la aplicación
 @singleton
 class VibrationService {
   final SharedPreferences _prefs;
+  final AppLogger _logger;
   static const String _keyVibrationEnabled = 'vibrationEnabled';
 
-  VibrationService(this._prefs);
+  VibrationService(this._prefs, this._logger);
 
   /// Verifica si la vibración está habilitada
   bool isVibrationEnabled() {
@@ -22,9 +24,9 @@ class VibrationService {
 
     try {
       await HapticFeedback.lightImpact();
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Ignorar errores de vibración
-      print('⚠️ Error en vibración ligera: $e');
+      _logger.serviceError('VibrationService', 'vibración ligera', e, stackTrace);
     }
   }
 
@@ -34,8 +36,8 @@ class VibrationService {
 
     try {
       await HapticFeedback.mediumImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración media: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración media', e, stackTrace);
     }
   }
 
@@ -45,8 +47,8 @@ class VibrationService {
 
     try {
       await HapticFeedback.heavyImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración pesada: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración pesada', e, stackTrace);
     }
   }
 
@@ -56,8 +58,8 @@ class VibrationService {
 
     try {
       await HapticFeedback.selectionClick();
-    } catch (e) {
-      print('⚠️ Error en vibración de selección: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de selección', e, stackTrace);
     }
   }
 
@@ -69,8 +71,8 @@ class VibrationService {
       await lightImpact();
       await Future.delayed(const Duration(milliseconds: 80));
       await lightImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de éxito: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de éxito', e, stackTrace);
     }
   }
 
@@ -84,8 +86,8 @@ class VibrationService {
       await mediumImpact();
       await Future.delayed(const Duration(milliseconds: 80));
       await lightImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de logro: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de logro', e, stackTrace);
     }
   }
 
@@ -97,8 +99,8 @@ class VibrationService {
       await lightImpact();
       await Future.delayed(const Duration(milliseconds: 50));
       await lightImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de XP: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de XP', e, stackTrace);
     }
   }
 
@@ -114,8 +116,8 @@ class VibrationService {
       await lightImpact();
       await Future.delayed(const Duration(milliseconds: 60));
       await mediumImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de nivel: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de nivel', e, stackTrace);
     }
   }
 
@@ -129,8 +131,8 @@ class VibrationService {
       await lightImpact();
       await Future.delayed(const Duration(milliseconds: 40));
       await lightImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de trivia: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de trivia', e, stackTrace);
     }
   }
 
@@ -139,8 +141,8 @@ class VibrationService {
     if (!isVibrationEnabled()) return;
     try {
       await mediumImpact();
-    } catch (e) {
-      print('⚠️ Error en vibración de error: $e');
+    } catch (e, stackTrace) {
+      _logger.serviceError('VibrationService', 'vibración de error', e, stackTrace);
     }
   }
 
@@ -149,4 +151,3 @@ class VibrationService {
     await selectionClick();
   }
 }
-

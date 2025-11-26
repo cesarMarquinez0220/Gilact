@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 import 'sleep_notification_service.dart';
 
 /// Manejador global de notificaciones para la aplicación
@@ -18,10 +20,11 @@ class NotificationHandler {
 
   /// Manejar cuando se toca una notificación
   static void handleNotificationTap(NotificationResponse response) {
-    print('🔔 NotificationHandler: Notificación tocada - ID: ${response.id}');
+    final logger = getIt<AppLogger>();
+    logger.d('NotificationHandler: Notificación tocada - ID: ${response.id}');
 
     if (_navigatorKey?.currentState == null) {
-      print('⚠️ NotificationHandler: Navigator no disponible');
+      logger.w('NotificationHandler: Navigator no disponible');
       return;
     }
 
@@ -49,8 +52,9 @@ class NotificationHandler {
 
   /// Manejar notificación diaria de las 8 AM para registro de sueño
   static void _handleDailySleepNotification(BuildContext context) {
-    print(
-      '🔔 NotificationHandler: Manejando notificación diaria de sueño a las 8 AM',
+    final logger = getIt<AppLogger>();
+    logger.d(
+      'NotificationHandler: Manejando notificación diaria de sueño a las 8 AM',
     );
 
     // Navegar al formulario de registro de sueño diario
@@ -61,8 +65,9 @@ class NotificationHandler {
 
   /// Manejar recordatorio de sueño
   static void _handleSleepReminder(BuildContext context, int hour) {
-    print(
-      '🔔 NotificationHandler: Manejando recordatorio de sueño para las $hour:00',
+    final logger = getIt<AppLogger>();
+    logger.d(
+      'NotificationHandler: Manejando recordatorio de sueño para las $hour:00',
     );
 
     // Navegar al formulario de registro de sueño usando rutas nombradas
@@ -88,7 +93,8 @@ class NotificationHandler {
     bool isFromNotification = false,
   }) {
     if (_navigatorKey?.currentState == null) {
-      print('⚠️ NotificationHandler: Navigator no disponible para navegación');
+      final logger = getIt<AppLogger>();
+      logger.w('NotificationHandler: Navigator no disponible para navegación');
       return;
     }
 
@@ -105,16 +111,19 @@ class NotificationHandler {
 
   /// Programar notificaciones cada minuto para pruebas
   static Future<void> scheduleMinuteRemindersForTesting() async {
+    final logger = getIt<AppLogger>();
     try {
       final notificationService = GetIt.instance<SleepNotificationService>();
       await notificationService.scheduleMinuteReminders();
 
-      print(
-        '🔔 NotificationHandler: Notificaciones cada minuto programadas para pruebas',
+      logger.d(
+        'NotificationHandler: Notificaciones cada minuto programadas para pruebas',
       );
-    } catch (e) {
-      print(
-        '❌ NotificationHandler: Error programando notificaciones cada minuto: $e',
+    } catch (e, stackTrace) {
+      logger.e(
+        'NotificationHandler: Error programando notificaciones cada minuto',
+        e,
+        stackTrace,
       );
     }
   }
