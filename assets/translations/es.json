@@ -462,15 +462,6 @@
     "watchVideo": "Ver Video",
     "completeLesson": "Completar Lección"
   },
-  "gamification": {
-    "xp": "XP",
-    "level": "Nivel",
-    "streak": "Racha",
-    "achievements": "Logros",
-    "achievementUnlocked": "¡Logro Desbloqueado!",
-    "levelUp": "¡Subiste de Nivel!",
-    "excellent": "¡Excelente!"
-  },
   "home": {
     "lessons": "Lecciones",
     "lessonsDescription": "Mira tu progreso de lecciones",
@@ -631,6 +622,7 @@
     "title": "Tips de Lactancia",
     "progress": "Progreso",
     "favorites": "Favoritos",
+    "favoritesInDevelopment": "Funcionalidad de favoritos en desarrollo",
     "tip": "Tip",
     "titles": {
       "complementaryFeeding": "Alimentación Complementaria",
@@ -1057,9 +1049,6 @@
     "loginRequired": "Inicio de sesión requerido",
     "loginRequiredMessage": "Por favor, inicia sesión para acceder a las lecciones."
   },
-  "tips": {
-    "favoritesInDevelopment": "Funcionalidad de favoritos en desarrollo"
-  },
   "videos": {
     "playError": "Error al reproducir video: {error}",
     "@playError": {
@@ -1116,6 +1105,13 @@
     "alimentacionComplementaria": "Alimentación Complementaria"
   },
   "gamification": {
+    "xp": "XP",
+    "level": "Nivel",
+    "streak": "Racha",
+    "achievements": "Logros",
+    "achievementUnlocked": "¡Logro Desbloqueado!",
+    "levelUp": "¡Subiste de Nivel!",
+    "excellent": "¡Excelente!",
     "messages": {
       "excellentWork": "¡Excelente trabajo! 🎉",
       "closeToLevelUp": "Estás muy cerca de subir de nivel",

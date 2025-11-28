@@ -47,55 +47,68 @@ class CompanionAchievementBadge extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // Contenido principal del badge
-                  Column(
+                  // Contenido principal del badge con layout fijo
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Icono/Badge
-                      Opacity(
+                        // Icono/Badge con tamaño y posición fijos
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Opacity(
                         opacity: isUnlocked ? 1.0 : 0.5,
                         child: isAssetPath
                             ? Image.asset(
                                 achievement.icon,
                                 width: 40,
                                 height: 40,
+                                    fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Icon(
                                     Icons.emoji_events,
-                                    size: 40,
+                                        size: 32,
                                     color: isUnlocked
                                         ? Colors.amber[700]
                                         : Colors.grey[600],
                                   );
                                 },
                               )
-                            : Text(
+                                : Center(
+                                    child: Text(
                                 achievement.icon,
                                 style: TextStyle(
-                                  fontSize: 32,
-                                  color: isUnlocked ? null : Colors.grey[600],
+                                        fontSize: 30,
+                                        color: isUnlocked
+                                            ? null
+                                            : Colors.grey[600],
+                                      ),
+                                    ),
                                 ),
                               ),
                       ),
-                      const SizedBox(height: 6),
-                      // Título (truncado)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        const SizedBox(height: 4),
+                        // Título centrado con altura fija
+                        Flexible(
                         child: Text(
                           achievement.title,
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.quicksand(
-                            fontSize: 10,
+                              fontSize: 9,
                             fontWeight: FontWeight.w600,
                             color: isUnlocked
                                 ? const Color(0xFF2C3E50)
                                 : Colors.grey[600],
+                              height: 1.1,
+                            ),
                           ),
                         ),
+                      ],
                       ),
-                    ],
                   ),
                   // Overlay de bloqueo si no está desbloqueado
                   if (!isUnlocked)
@@ -105,7 +118,7 @@ class CompanionAchievementBadge extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Center(
-                        child:  Icon(Icons.lock, color: Colors.white, size: 24),
+                        child: Icon(Icons.lock, color: Colors.white, size: 24),
                       ),
                     ),
                 ],

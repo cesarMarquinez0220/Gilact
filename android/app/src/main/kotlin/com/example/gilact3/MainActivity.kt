@@ -7,6 +7,10 @@ import android.content.Intent
 import android.provider.Settings
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.content.Context
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -17,6 +21,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val EVENT_CHANNEL = "screen_recording_prevention_events"
     private val NOTIFICATION_CHANNEL = "notification_permissions"
     private val NATIVE_ALARM_CHANNEL = "native_alarm_scheduler"
+    private val VIBRATION_CHANNEL = "system_vibration"
     private var isSecureFlagEnabled = false
     private var eventSink: EventChannel.EventSink? = null
 
@@ -128,6 +133,100 @@ class MainActivity : FlutterFragmentActivity() {
                 }
             }
         )
+        
+        // Configurar MethodChannel para vibraciones del sistema
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VIBRATION_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "vibratePattern" -> {
+                    try {
+                        @Suppress("UNCHECKED_CAST")
+                        val patternList = call.argument<List<Int>>("pattern")
+                        @Suppress("UNCHECKED_CAST")
+                        val amplitudesList = call.argument<List<Int>>("amplitudes")
+                        if (patternList != null) {
+                            // Convertir List<Int> a LongArray
+                            val pattern = LongArray(patternList.size) { patternList[it].toLong() }
+                            val amplitudes = amplitudesList?.map { it.toInt() }?.toIntArray()
+                            vibratePattern(pattern, amplitudes)
+                            result.success(true)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Pattern is required", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("VIBRATION_ERROR", e.message, null)
+                    }
+                }
+                "vibrateDuration" -> {
+                    try {
+                        val duration = call.argument<Long>("duration") ?: 100L
+                        vibrateDuration(duration)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("VIBRATION_ERROR", e.message, null)
+                    }
+                }
+                "cancel" -> {
+                    try {
+                        cancelVibration()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("VIBRATION_ERROR", e.message, null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+    }
+    
+    private fun getVibrator(): Vibrator? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+    
+    private fun vibratePattern(pattern: LongArray, amplitudes: IntArray? = null) {
+        val vibrator = getVibrator() ?: return
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Android 8.0+ usa VibrationEffect con amplitudes
+            val vibrationEffect = if (amplitudes != null && amplitudes.size == pattern.size) {
+                // Usar amplitudes personalizadas para diferentes intensidades
+                VibrationEffect.createWaveform(pattern, amplitudes, -1) // -1 = no repeat
+            } else {
+                // Sin amplitudes, usar intensidad por defecto
+                VibrationEffect.createWaveform(pattern, -1) // -1 = no repeat
+            }
+            vibrator.vibrate(vibrationEffect)
+        } else {
+            // Android 7.1 y anteriores (no soporta amplitudes)
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(pattern, -1) // -1 = no repeat
+        }
+    }
+    
+    private fun vibrateDuration(duration: Long) {
+        val vibrator = getVibrator() ?: return
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Android 8.0+ usa VibrationEffect
+            val vibrationEffect = VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
+            vibrator.vibrate(vibrationEffect)
+        } else {
+            // Android 7.1 y anteriores
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(duration)
+        }
+    }
+    
+    private fun cancelVibration() {
+        val vibrator = getVibrator() ?: return
+        vibrator.cancel()
     }
 
     private fun enableSecureFlag() {

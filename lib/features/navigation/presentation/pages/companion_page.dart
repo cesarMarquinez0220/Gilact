@@ -23,6 +23,8 @@ import '../widgets/companion_daily_challenge_section.dart';
 import '../widgets/companion_stats_summary.dart';
 import '../widgets/companion_mascot_wrapper.dart';
 import '../widgets/companion_new_achievements_animation.dart';
+import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
+import '../../../gamification/domain/services/achievement_service.dart';
 
 /// Página dedicada a la compañera de gamificación
 class CompanionPage extends StatelessWidget {
@@ -295,6 +297,77 @@ class CompanionPage extends StatelessWidget {
               ],
             ),
           ),
+          // Botones de prueba para ver el diálogo de logro (MÁS VISIBLES)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Botón 1: Solo mostrar diálogo
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _testAchievementDialog(context),
+                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.emoji_events,
+                        color: Colors.amber[700],
+                        size: isSmallScreen ? 22 : 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Botón 2: Simular desbloqueo real
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _testRealAchievementUnlock(context),
+                  borderRadius: BorderRadius.circular(25),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.star,
+                      color: Colors.orange[700],
+                      size: isSmallScreen ? 22 : 24,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           Container(
             width: isSmallScreen ? 56 : 64,
             height: isSmallScreen ? 56 : 64,
@@ -389,6 +462,93 @@ class CompanionPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Método de prueba para mostrar el diálogo de logro desbloqueado
+  void _testAchievementDialog(BuildContext context) {
+    final achievementService = AchievementService();
+    final allAchievements = achievementService.getAllAchievements();
+    
+    if (allAchievements.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay logros disponibles')),
+      );
+      return;
+    }
+    
+    // Buscar un logro con badge específico para la prueba
+    // Intentar encontrar uno de los milestones, niveles, o daily_3 (Día Activo)
+    final testAchievement = allAchievements.firstWhere(
+      (a) => a.id == 'daily_3' ||  // Día Activo
+             a.id == 'milestone_10' || 
+             a.id == 'level_3' || 
+             a.id == 'streak_7' ||
+             a.id == 'complete_25',
+      orElse: () => allAchievements.first,
+    );
+    
+    AchievementUnlockedDialog.show(
+      context,
+      testAchievement,
+      testAchievement.xpReward,
+    );
+  }
+
+  /// Método de prueba para simular desbloqueo real de un logro
+  /// Esto agregará el logro al perfil y mostrará la animación automáticamente
+  void _testRealAchievementUnlock(BuildContext context) {
+    final gamificationBloc = context.read<GamificationBloc>();
+    final currentState = gamificationBloc.state;
+    
+    if (currentState is! GamificationLoaded) return;
+    
+    final achievementService = AchievementService();
+    final allAchievements = achievementService.getAllAchievements();
+    
+    // Buscar un logro que no esté desbloqueado
+    final unlockedIds = currentState.profile.unlockedAchievements.toSet();
+    final testAchievement = allAchievements.firstWhere(
+      (a) => !unlockedIds.contains(a.id) && 
+             (a.id == 'daily_3' ||  // Día Activo
+              a.id == 'milestone_10' || 
+              a.id == 'level_3' || 
+              a.id == 'streak_7' ||
+              a.id == 'complete_25'),
+      orElse: () => allAchievements.firstWhere(
+        (a) => !unlockedIds.contains(a.id),
+        orElse: () => allAchievements.first,
+      ),
+    );
+    
+    // Agregar el logro al perfil
+    final updatedUnlockedAchievements = [
+      ...currentState.profile.unlockedAchievements,
+      testAchievement.id,
+    ];
+    final updatedNewAchievements = [
+      ...currentState.profile.newAchievements,
+      testAchievement.id,
+    ];
+    
+    final updatedProfile = currentState.profile.copyWith(
+      unlockedAchievements: updatedUnlockedAchievements,
+      newAchievements: updatedNewAchievements,
+      updatedAt: DateTime.now(),
+    );
+    
+    // Actualizar el perfil
+    gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
+    
+    // Mostrar el diálogo de logro desbloqueado
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (context.mounted) {
+        AchievementUnlockedDialog.show(
+          context,
+          testAchievement,
+          testAchievement.xpReward,
+        );
+      }
+    });
   }
 }
 

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
@@ -9,6 +10,9 @@ class VibrationService {
   final SharedPreferences _prefs;
   final AppLogger _logger;
   static const String _keyVibrationEnabled = 'vibrationEnabled';
+  static const MethodChannel _vibrationChannel = MethodChannel(
+    'system_vibration',
+  );
 
   VibrationService(this._prefs, this._logger);
 
@@ -26,7 +30,12 @@ class VibrationService {
       await HapticFeedback.lightImpact();
     } catch (e, stackTrace) {
       // Ignorar errores de vibración
-      _logger.serviceError('VibrationService', 'vibración ligera', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración ligera',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -37,7 +46,12 @@ class VibrationService {
     try {
       await HapticFeedback.mediumImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración media', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración media',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -48,7 +62,12 @@ class VibrationService {
     try {
       await HapticFeedback.heavyImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración pesada', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración pesada',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -59,7 +78,12 @@ class VibrationService {
     try {
       await HapticFeedback.selectionClick();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de selección', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de selección',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -72,7 +96,12 @@ class VibrationService {
       await Future.delayed(const Duration(milliseconds: 80));
       await lightImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de éxito', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de éxito',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -87,7 +116,96 @@ class VibrationService {
       await Future.delayed(const Duration(milliseconds: 80));
       await lightImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de logro', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de logro',
+        e,
+        stackTrace,
+      );
+    }
+  }
+
+  /// Vibra cuando se desbloquea un logro (patrón tipo Duolingo)
+  /// Usa vibraciones del sistema nativas para máxima percepción
+  /// Funciona incluso en modo silencio (vibraciones del sistema no dependen del modo silencio)
+  Future<void> vibrateOnAchievementDuolingoStyle() async {
+    if (!isVibrationEnabled()) {
+      _logger.d('VibrationService: Vibración deshabilitada por el usuario');
+      return;
+    }
+
+    try {
+      _logger.d(
+        'VibrationService: Iniciando vibración Duolingo style con vibraciones del sistema',
+      );
+
+      // Intentar usar vibraciones del sistema nativas (Android)
+      if (Platform.isAndroid) {
+        try {
+          // Patrón tipo Duolingo mejorado según especificaciones:
+          // 1. Pulse corto: 60ms, intensidad media (amplitud 128)
+          // 2. Pausa: 40ms
+          // 3. Doble pulse rápido: 50ms cada uno, intensidad media-baja (amplitud 100), pausa 30ms entre ellos
+          // 4. Pausa: 80ms (antes del final)
+          // 5. Pulse final: 80ms, intensidad baja (amplitud 70)
+          // Formato: [vibración, pausa, vibración, pausa, ...]
+          final pattern = [60, 40, 50, 30, 50, 80, 80];
+          // Amplitudes: [media, 0, media-baja, 0, media-baja, 0, baja]
+          // 0 = pausa, 128 = media, 100 = media-baja, 70 = baja
+          final amplitudes = [128, 0, 100, 0, 100, 0, 70];
+
+          await _vibrationChannel.invokeMethod('vibratePattern', {
+            'pattern': pattern.map((e) => e.toInt()).toList(),
+            'amplitudes': amplitudes,
+          });
+
+          _logger.d(
+            'VibrationService: Vibración Duolingo style con sistema nativo completada',
+          );
+          return;
+        } catch (e) {
+          _logger.d(
+            'VibrationService: Error con vibración nativa, usando HapticFeedback: $e',
+          );
+          // Continuar con fallback
+        }
+      }
+
+      // Fallback: HapticFeedback secuencial (simulando el patrón especificado)
+      _logger.d('VibrationService: Usando HapticFeedback como fallback');
+
+      // 1. Pulse corto: 60ms, intensidad media
+      await mediumImpact();
+      await Future.delayed(const Duration(milliseconds: 40)); // Pausa
+
+      // 2. Doble pulse rápido: 50ms cada uno, intensidad media-baja
+      await lightImpact(); // Simula media-baja
+      await Future.delayed(
+        const Duration(milliseconds: 30),
+      ); // Pausa entre ellos
+      await lightImpact(); // Segundo pulse
+      await Future.delayed(
+        const Duration(milliseconds: 80),
+      ); // Pausa antes del final
+
+      // 3. Pulse final más suave: 80ms, intensidad baja
+      await lightImpact(); // Simula baja intensidad (más suave)
+
+      _logger.d(
+        'VibrationService: Vibración Duolingo style con HapticFeedback completada',
+      );
+    } catch (e, stackTrace) {
+      // Fallback final a método básico si hay error
+      _logger.serviceError(
+        'VibrationService',
+        'vibración Duolingo style',
+        e,
+        stackTrace,
+      );
+      _logger.d(
+        'VibrationService: Error en vibración Duolingo, usando fallback básico',
+      );
+      await vibrateOnAchievement();
     }
   }
 
@@ -100,7 +218,12 @@ class VibrationService {
       await Future.delayed(const Duration(milliseconds: 50));
       await lightImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de XP', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de XP',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -117,7 +240,12 @@ class VibrationService {
       await Future.delayed(const Duration(milliseconds: 60));
       await mediumImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de nivel', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de nivel',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -132,7 +260,12 @@ class VibrationService {
       await Future.delayed(const Duration(milliseconds: 40));
       await lightImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de trivia', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de trivia',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -142,7 +275,12 @@ class VibrationService {
     try {
       await mediumImpact();
     } catch (e, stackTrace) {
-      _logger.serviceError('VibrationService', 'vibración de error', e, stackTrace);
+      _logger.serviceError(
+        'VibrationService',
+        'vibración de error',
+        e,
+        stackTrace,
+      );
     }
   }
 

@@ -470,7 +470,7 @@ class _AchievementsGrid extends StatelessWidget {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(), // Permitir scroll como en "Todos"
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: spacing,

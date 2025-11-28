@@ -444,15 +444,6 @@
     "watchVideo": "Watch Video",
     "completeLesson": "Complete Lesson"
   },
-  "gamification": {
-    "xp": "XP",
-    "level": "Level",
-    "streak": "Streak",
-    "achievements": "Achievements",
-    "achievementUnlocked": "Achievement Unlocked!",
-    "levelUp": "Level Up!",
-    "excellent": "Excellent!"
-  },
   "home": {
     "lessons": "Lessons",
     "lessonsDescription": "View your lesson progress",
@@ -611,6 +602,7 @@
     "title": "Breastfeeding Tips",
     "progress": "Progress",
     "favorites": "Favorites",
+    "favoritesInDevelopment": "Favorites functionality in development",
     "tip": "Tip",
     "titles": {
       "complementaryFeeding": "Complementary Feeding",
@@ -1045,9 +1037,6 @@
     "subtitle": "Your lactation assistant",
     "quickQuestions": "Quick questions"
   },
-  "tips": {
-    "favoritesInDevelopment": "Favorites functionality in development"
-  },
   "videos": {
     "playError": "Error playing video: {error}",
     "@playError": {
@@ -1104,6 +1093,13 @@
     "alimentacionComplementaria": "Complementary Feeding"
   },
   "gamification": {
+    "xp": "XP",
+    "level": "Level",
+    "streak": "Streak",
+    "achievements": "Achievements",
+    "achievementUnlocked": "Achievement Unlocked!",
+    "levelUp": "Level Up!",
+    "excellent": "Excellent!",
     "messages": {
       "excellentWork": "Excellent work! 🎉",
       "closeToLevelUp": "You're very close to leveling up",

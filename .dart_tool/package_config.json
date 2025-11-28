@@ -188,6 +188,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "confetti",
+      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/confetti-0.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "connectivity_plus",
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/connectivity_plus-5.0.2",
       "packageUri": "lib/",

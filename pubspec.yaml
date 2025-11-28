@@ -89,6 +89,7 @@ dependencies:
   local_auth: ^2.3.0
   audioplayers: ^6.0.0
   logger: ^2.6.2
+  confetti: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -220,9 +221,7 @@ flutter:
    - assets/logo/icono.png
     # Gamification assets
    - assets/animations/Happy_Dog.json
-   - assets/images/badges/birrete.png
-   - assets/images/badges/logro.png
-   - assets/images/badges/medalla.png
+   - assets/images/badges/
    # Translation files
    - assets/translations/
    # Sound files
