@@ -46,15 +46,15 @@
 29. `badge_three_months.png` - **Achievement:** `three_months` - "Tres Meses" (90 días usando la app)
 30. `badge_six_months.png` - **Achievement:** `six_months` - "Seis Meses" (180 días usando la app)
 
-## Badges Pendientes de Implementar (2 badges) 🔄
+## Badges Pendientes de Implementar (2 badges) ✅
 
-### Logros de Lecciones - 2 badges 🔄
+### Logros de Lecciones - 2 badges ✅
 1. `badge_lessons_7.png` - **Achievement:** `lessons_7` - "Estudiante Avanzada" (7 lecciones)
 2. `badge_lessons_all.png` - **Achievement:** `lessons_all` - "Experta en Lactancia" (14 lecciones - todas)
 
 ## Resumen
 - **Total de badges existentes:** 29 badges ✅
-- **Total de badges pendientes de implementar:** 2 badges 🔄
+- **Total de badges pendientes de implementar:** 2 badges ✅
 - **Total de badges finales:** 31 badges (cuando se completen los pendientes)
 
 ## Nota sobre Logros No Implementados

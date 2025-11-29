@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math' as math;
@@ -59,9 +58,11 @@ class AchievementUnlockedDialog extends StatefulWidget {
 }
 
 class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late ConfettiController _confettiController;
   late AnimationController _rotationController;
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -73,6 +74,21 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
       vsync: this,
       duration: const Duration(seconds: 4),
     )..repeat();
+
+    // Controlador para la animación de escala del card completo
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    // Animación de escala con curva elástica (de pequeño a grande)
+    _scaleAnimation = CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.elasticOut,
+    );
+
+    // Iniciar animación de escala
+    _scaleController.forward();
 
     // Iniciar confeti después de un pequeño delay
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -86,6 +102,7 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
   void dispose() {
     _confettiController.dispose();
     _rotationController.dispose();
+    _scaleController.dispose();
     super.dispose();
   }
 
@@ -129,197 +146,196 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
             ),
           ),
         ),
-        // Diálogo centrado
+        // Diálogo centrado con animación de escala
         Center(
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF3498DB), Color(0xFF2ECC71)],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                    spreadRadius: 5,
+          child: AnimatedBuilder(
+            animation: _scaleAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Dialog(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FadeInDown(
-                    duration: const Duration(milliseconds: 500),
-                    child: Text(
-                      '🎉 ¡Logro Desbloqueado!',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 32,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 700),
-                    delay: const Duration(milliseconds: 200),
-                    child: Container(
-                      width: 160,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(80),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 30,
-                            offset: const Offset(0, 15),
-                            spreadRadius: 2,
-                          ),
-                        ],
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF3498DB), Color(0xFF2ECC71)],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Efecto de brillo "Sunburst" girando (más visible y mágico)
-                          AnimatedBuilder(
-                            animation: _rotationController,
-                            builder: (context, child) {
-                              return Transform.rotate(
-                                angle: _rotationController.value * 2 * math.pi,
-                                child: Opacity(
-                                  opacity:
-                                      0.25, // Aumentado de 0.1 a 0.25 para más visibilidad
-                                  child: CustomPaint(
-                                    size: const Size(160, 160),
-                                    painter: _SunburstPainter(),
-                                  ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '🎉 ¡Logro Desbloqueado!',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          width: 220,
+                          height: 220,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(110),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.25),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Efecto de brillo "Sunburst" girando (estilo Clash Royale elegante)
+                              AnimatedBuilder(
+                                animation: _rotationController,
+                                builder: (context, child) {
+                                  return Transform.rotate(
+                                    angle:
+                                        _rotationController.value * 2 * math.pi,
+                                    child: Opacity(
+                                      opacity:
+                                          0.5, // Opacidad suave y agradable
+                                      child: CustomPaint(
+                                        size: const Size(220, 220),
+                                        painter: _SunburstPainter(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              // Badge/Icono (imagen más grande, menos padding)
+                              Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Center(
+                                  child:
+                                      widget.achievement.icon.startsWith(
+                                        'assets/',
+                                      )
+                                      ? Image.asset(
+                                          widget.achievement.icon,
+                                          width: 180,
+                                          height: 180,
+                                          fit: BoxFit.contain,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Icon(
+                                                  Icons.emoji_events,
+                                                  size: 120,
+                                                  color: Colors.amber[700],
+                                                );
+                                              },
+                                        )
+                                      : Text(
+                                          widget.achievement.icon,
+                                          style: const TextStyle(fontSize: 100),
+                                        ),
                                 ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
-                          // Badge/Icono
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: widget.achievement.icon.startsWith('assets/')
-                                ? Image.asset(
-                                    widget.achievement.icon,
-                                    width: 140,
-                                    height: 140,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.emoji_events,
-                                        size: 100,
-                                        color: Colors.amber[700],
-                                      );
-                                    },
-                                  )
-                                : Text(
-                                    widget.achievement.icon,
-                                    style: const TextStyle(fontSize: 80),
-                                  ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          widget.achievement.title.tr(),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 700),
-                    delay: const Duration(milliseconds: 400),
-                    child: Text(
-                      widget.achievement.title,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 700),
-                    delay: const Duration(milliseconds: 500),
-                    child: Text(
-                      widget.achievement.description,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 700),
-                    delay: const Duration(milliseconds: 600),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, color: Colors.white, size: 20),
-                          const SizedBox(width: 4),
-                          Text(
-                            '+${widget.xpReward} XP',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.achievement.description.tr(),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '+${widget.xpReward} XP',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF3498DB),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: Text(
+                            'gamification.messages.great'.tr(),
                             style: GoogleFonts.quicksand(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 700),
-                    delay: const Duration(milliseconds: 700),
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF3498DB),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      child: Text(
-                        'gamification.messages.great'.tr(),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -327,125 +343,145 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
   }
 }
 
-/// Painter para el efecto de brillo "Sunburst" mejorado y más mágico
 class _SunburstPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // Capa 1: Gradiente radial central más intenso y mágico
+    // Capa 1: Halo exterior suave (resplandor base sutil)
+    final outerHaloGradient = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = RadialGradient(
+        colors: [
+          Colors.amber.withValues(alpha: 0.08),
+          Colors.yellow.withValues(alpha: 0.05),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 1.1));
+    canvas.drawCircle(center, radius * 1.05, outerHaloGradient);
+
+    // Capa 2: Gradiente radial central suave (núcleo dorado)
     final centralGradient = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
         colors: [
-          Colors.amber.withValues(alpha: 0.6), // Más brillante en el centro
-          Colors.orange.withValues(alpha: 0.5),
-          Colors.yellow.withValues(alpha: 0.4),
-          Colors.orange.withValues(alpha: 0.2),
+          Colors.yellow.withValues(alpha: 0.6),
+          Colors.amber.withValues(alpha: 0.5),
+          Colors.orange.withValues(alpha: 0.3),
           Colors.transparent,
         ],
-        stops: const [0.0, 0.2, 0.4, 0.7, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+        stops: const [0.0, 0.3, 0.6, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.5));
+    canvas.drawCircle(center, radius * 0.5, centralGradient);
 
-    // Capa 2: Rayos principales brillantes (20 rayos para más densidad)
-    for (int i = 0; i < 20; i++) {
-      final angle = (i * math.pi * 2) / 20;
-      final startRadius = radius * 0.4; // Más cerca del centro
-      final endRadius = radius * 0.98; // Hasta el borde
+    // Capa 3: Rayos principales con ancho variable (delgados al inicio, gruesos al final)
+    // Estilo Clash Royale: empiezan pequeños y se expanden hacia afuera
+    for (int i = 0; i < 16; i++) {
+      final angle = (i * math.pi * 2) / 16;
+      final startRadius = radius * 0.3;
+      final endRadius = radius * 0.98;
 
-      final startX = center.dx + math.cos(angle) * startRadius;
-      final startY = center.dy + math.sin(angle) * startRadius;
-      final endX = center.dx + math.cos(angle) * endRadius;
-      final endY = center.dy + math.sin(angle) * endRadius;
+      // Ancho del rayo: delgado al inicio, grueso al final
+      const startWidth = 2.0; // Delgado al inicio
+      const endWidth = 10.0; // Grueso al final
 
-      // Rayos principales con gradiente de color (más brillante en el centro)
-      final rayRect = Rect.fromPoints(
-        Offset(startX, startY),
-        Offset(endX, endY),
-      );
+      // Calcular los puntos para formar un trapecio (rayo con ancho variable)
+      // Necesitamos calcular el ángulo perpendicular para el ancho
+      final perpAngle = angle + (math.pi / 2);
 
+      // Puntos del inicio (cerca del centro) - más delgados
+      final startX1 =
+          center.dx +
+          math.cos(angle) * startRadius +
+          math.cos(perpAngle) * (startWidth / 2);
+      final startY1 =
+          center.dy +
+          math.sin(angle) * startRadius +
+          math.sin(perpAngle) * (startWidth / 2);
+      final startX2 =
+          center.dx +
+          math.cos(angle) * startRadius +
+          math.cos(perpAngle) * (-startWidth / 2);
+      final startY2 =
+          center.dy +
+          math.sin(angle) * startRadius +
+          math.sin(perpAngle) * (-startWidth / 2);
+
+      // Puntos del final (cerca del borde) - más gruesos
+      final endX1 =
+          center.dx +
+          math.cos(angle) * endRadius +
+          math.cos(perpAngle) * (endWidth / 2);
+      final endY1 =
+          center.dy +
+          math.sin(angle) * endRadius +
+          math.sin(perpAngle) * (endWidth / 2);
+      final endX2 =
+          center.dx +
+          math.cos(angle) * endRadius +
+          math.cos(perpAngle) * (-endWidth / 2);
+      final endY2 =
+          center.dy +
+          math.sin(angle) * endRadius +
+          math.sin(perpAngle) * (-endWidth / 2);
+
+      // Crear el path del trapecio (rayo con ancho variable)
+      final rayPath = Path()
+        ..moveTo(startX1, startY1)
+        ..lineTo(endX1, endY1)
+        ..lineTo(endX2, endY2)
+        ..lineTo(startX2, startY2)
+        ..close();
+
+      // Rayos con gradiente suave desde el centro hacia afuera
       final rayGradient = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
+        begin: Alignment.center,
+        end: Alignment(math.cos(angle).toDouble(), math.sin(angle).toDouble()),
         colors: [
-          Colors.amber.withValues(alpha: 0.5),
+          Colors.yellow.withValues(alpha: 0.7),
+          Colors.amber.withValues(alpha: 0.6),
           Colors.orange.withValues(alpha: 0.4),
-          Colors.yellow.withValues(alpha: 0.2),
+          Colors.orange.withValues(alpha: 0.1),
         ],
+        stops: const [0.0, 0.3, 0.7, 1.0],
       );
 
       final rayPaint = Paint()
-        ..shader = rayGradient.createShader(rayRect)
-        ..strokeWidth =
-            5 // Más gruesos
-        ..strokeCap = StrokeCap.round;
+        ..shader = rayGradient.createShader(
+          Rect.fromPoints(Offset(startX1, startY1), Offset(endX2, endY2)),
+        )
+        ..style = PaintingStyle.fill;
 
-      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), rayPaint);
+      canvas.drawPath(rayPath, rayPaint);
     }
 
-    // Capa 3: Rayos secundarios más sutiles entre los principales
-    for (int i = 0; i < 20; i++) {
-      final angle = (i * math.pi * 2) / 20;
-      final secondaryAngle = angle + (math.pi / 20);
-      final startRadius = radius * 0.45;
-      final endRadius = radius * 0.92;
+    // Capa 4: Puntos blancos brillantes en el perímetro (como pequeñas luces)
+    for (int i = 0; i < 16; i++) {
+      final angle = (i * math.pi * 2) / 16;
+      final pointX = center.dx + math.cos(angle) * radius * 0.96;
+      final pointY = center.dy + math.sin(angle) * radius * 0.96;
 
-      final secStartX = center.dx + math.cos(secondaryAngle) * startRadius;
-      final secStartY = center.dy + math.sin(secondaryAngle) * startRadius;
-      final secEndX = center.dx + math.cos(secondaryAngle) * endRadius;
-      final secEndY = center.dy + math.sin(secondaryAngle) * endRadius;
+      // Halo suave alrededor del punto
+      final pointHaloPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.3)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(pointX, pointY), 4, pointHaloPaint);
 
-      final secondaryRayPaint = Paint()
-        ..color = Colors.yellow.withValues(alpha: 0.25)
-        ..strokeWidth = 2.5
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawLine(
-        Offset(secStartX, secStartY),
-        Offset(secEndX, secEndY),
-        secondaryRayPaint,
-      );
+      // Punto central blanco brillante
+      final pointPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.9)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(pointX, pointY), 2.5, pointPaint);
     }
 
-    // Capa 4: Círculo central brillante con gradiente mejorado
-    canvas.drawCircle(center, radius * 0.35, centralGradient);
-
-    // Capa 5: Anillos concéntricos brillantes para profundidad
-    for (int i = 1; i <= 3; i++) {
-      final ringRadius = radius * (0.5 + (i * 0.15));
-      final ringPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..color = Colors.amber
-            .withValues(alpha: 0.2 / i) // Más sutil hacia afuera
-        ..strokeWidth = 1.5;
-      canvas.drawCircle(center, ringRadius, ringPaint);
-    }
-
-    // Capa 6: Círculo exterior brillante con gradiente
+    // Capa 5: Anillo exterior sutil para definir el borde
     final outerRingPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..shader = RadialGradient(
-        colors: [
-          Colors.amber.withValues(alpha: 0.2),
-          Colors.orange.withValues(alpha: 0.1),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..strokeWidth = 3;
-    canvas.drawCircle(center, radius * 0.95, outerRingPaint);
-
-    // Capa 7: Puntos brillantes en los extremos de los rayos principales
-    for (int i = 0; i < 20; i++) {
-      final angle = (i * math.pi * 2) / 20;
-      final pointX = center.dx + math.cos(angle) * radius * 0.95;
-      final pointY = center.dy + math.sin(angle) * radius * 0.95;
-
-      final pointPaint = Paint()
-        ..color = Colors.amber.withValues(alpha: 0.4)
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(pointX, pointY), 3, pointPaint);
-    }
+      ..color = Colors.amber.withValues(alpha: 0.3)
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, radius * 0.98, outerRingPaint);
   }
 
   @override

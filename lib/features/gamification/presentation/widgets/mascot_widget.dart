@@ -174,7 +174,7 @@ class MascotWidget extends StatelessWidget {
                         // Nivel
                         _buildStatItem(
                           icon: Icons.star,
-                          label: 'Nivel',
+                          label: 'gamification.level'.tr(),
                           value: '${profile.currentLevel}',
                           color: messageColor,
                         ),
@@ -183,7 +183,7 @@ class MascotWidget extends StatelessWidget {
                         if (profile.currentStreak > 0)
                           _buildStatItem(
                             icon: Icons.local_fire_department,
-                            label: 'Racha',
+                            label: 'companion.streak'.tr(),
                             value: '${profile.currentStreak}',
                             color: const Color(0xFFFF6B35),
                           ),

@@ -211,7 +211,7 @@ class CompanionDailyChallengeSection extends StatelessWidget {
                       ? 'companion.youWonXP'.tr(
                           namedArgs: {'xp': challenge.xpReward.toString()},
                         )
-                      : '${'companion.reward'.tr()}: ${challenge.xpReward} XP',
+                      : '${'companion.reward'.tr()}: ${challenge.xpReward} ${'gamification.xp'.tr()}',
                   style: GoogleFonts.quicksand(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,

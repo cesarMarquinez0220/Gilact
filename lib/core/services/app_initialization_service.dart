@@ -172,56 +172,62 @@ class AppInitializationService {
       if (currentContext == null || !currentContext.mounted) return;
 
       // Intentar obtener el LactationProvider del contexto actual
+      final logger = getIt<AppLogger>();
+      LactationProvider? lactationProvider;
+
       try {
-        final lactationProvider = Provider.of<LactationProvider>(
+        lactationProvider = Provider.of<LactationProvider>(
           currentContext,
           listen: false,
         );
-        final logger = getIt<AppLogger>();
+      } catch (e) {
+        // Provider no disponible en el contexto actual
+        // Esto es normal cuando se llama desde una ruta diferente
+        // Esperar un poco más e intentar nuevamente
         logger.d(
-          'AppInitializationService: Refrescando datos de lactancia desde contexto...',
+          'AppInitializationService: Provider no encontrado, esperando...',
         );
+
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Verificar nuevamente que el contexto sigue montado
+        final retryContext = navigatorKey.currentContext;
+        if (retryContext == null || !retryContext.mounted) {
+          logger.d(
+            'AppInitializationService: Contexto no disponible después del retry',
+          );
+          return;
+        }
+
+        try {
+          lactationProvider = Provider.of<LactationProvider>(
+            retryContext,
+            listen: false,
+          );
+        } catch (e2) {
+          // Si aún no está disponible, simplemente retornar sin error
+          // HomePage se encargará de refrescar en su initState
+          logger.d(
+            'AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
+          );
+          return;
+        }
+      }
+
+      // Si llegamos aquí, el provider está disponible (si no, habríamos hecho return)
+      logger.d('AppInitializationService: Refrescando datos de lactancia...');
+      try {
         await lactationProvider.refreshTodayData();
         await lactationProvider.loadWeekData();
         logger.success(
           'AppInitializationService: Datos de lactancia refrescados',
         );
-        return;
       } catch (e, stackTrace) {
-        final logger = getIt<AppLogger>();
         logger.w(
-          'AppInitializationService: Error obteniendo provider del contexto',
+          'AppInitializationService: Error al refrescar datos',
           e,
           stackTrace,
         );
-        // Si no está disponible aún, esperar un poco más e intentar nuevamente
-        await Future.delayed(const Duration(milliseconds: 300));
-
-        // Verificar nuevamente que el contexto sigue montado
-        final retryContext = navigatorKey.currentContext;
-        if (retryContext == null || !retryContext.mounted) return;
-
-        try {
-          final lactationProvider = Provider.of<LactationProvider>(
-            retryContext,
-            listen: false,
-          );
-          logger.d(
-            'AppInitializationService: Refrescando datos de lactancia (segundo intento)...',
-          );
-          await lactationProvider.refreshTodayData();
-          await lactationProvider.loadWeekData();
-          logger.success(
-            'AppInitializationService: Datos de lactancia refrescados (segundo intento)',
-          );
-          return;
-        } catch (e2, stackTrace2) {
-          logger.w(
-            'AppInitializationService: Provider aún no disponible, HomePage refrescará en initState',
-            e2,
-            stackTrace2,
-          );
-        }
       }
     } catch (e, stackTrace) {
       final logger = getIt<AppLogger>();

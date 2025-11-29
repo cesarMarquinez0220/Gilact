@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/user_gamification_profile.dart';
 import '../../domain/services/streak_service.dart';
 import '../../domain/entities/daily_streak.dart';
@@ -58,14 +59,13 @@ class StreakWidget extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -74,8 +74,8 @@ class StreakWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
               color: streakColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
@@ -83,7 +83,7 @@ class StreakWidget extends StatelessWidget {
             child: Center(
               child: Text(
                 streakEmoji,
-                style: const TextStyle(fontSize: 32),
+                style: const TextStyle(fontSize: 28),
               ),
             ),
           ),
@@ -97,7 +97,7 @@ class StreakWidget extends StatelessWidget {
                     Icon(streakIcon, color: streakColor, size: 20),
                     const SizedBox(width: 4),
                     Text(
-                      'Racha',
+                      'companion.streak'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -108,7 +108,7 @@ class StreakWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${profile.currentStreak} días',
+                  '${profile.currentStreak} ${'companion.days'.tr()}',
                   style: GoogleFonts.quicksand(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -136,7 +136,7 @@ class StreakWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '${profile.restDaysAvailable} días\nde descanso',
+                '${profile.restDaysAvailable} ${'companion.restDays'.tr()}',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.quicksand(
                   fontSize: 10,

@@ -171,48 +171,53 @@ class AppSettingsCardWidget extends StatelessWidget {
   String _getLanguageDisplayName(String code) {
     switch (code) {
       case 'es':
-        return 'Español';
+        return 'settings.spanish'.tr();
       case 'en':
-        return 'English';
+        return 'settings.english'.tr();
       default:
-        return 'Español';
+        return 'settings.spanish'.tr();
     }
   }
 
   void _showLanguageSelector(BuildContext context) {
-    final currentLanguage = localSettings['language'] ?? 'es';
-
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      isScrollControlled: true,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'settings.selectLanguage'.tr(),
-              style: GoogleFonts.quicksand(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        // Padding solo arriba y a los lados.
+        // Abajo ponemos 0 o algo pequeño fijo, porque el SafeArea se encarga del resto.
+        padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'settings.selectLanguage'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            _buildLanguageOption(
-              context,
-              'es',
-              'settings.spanish'.tr(),
-              currentLanguage,
-            ),
-            _buildLanguageOption(
-              context,
-              'en',
-              'settings.english'.tr(),
-              currentLanguage,
-            ),
-          ],
+              const SizedBox(height: 20),
+              _buildLanguageOption(
+                context,
+                'es',
+                'settings.spanish'.tr(),
+                localSettings['language'] ?? 'es',
+              ),
+              _buildLanguageOption(
+                context,
+                'en',
+                'settings.english'.tr(),
+                localSettings['language'] ?? 'es',
+              ),
+              // Solo un pequeño espacio estético fijo al final (no calculado)
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );
@@ -226,12 +231,28 @@ class AppSettingsCardWidget extends StatelessWidget {
   ) {
     final isSelected = currentLanguage == code;
     return ListTile(
-      title: Text(name),
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        Icons.language,
+        color: isSelected ? const Color(0xFF03A696) : const Color(0xFF7F8C8D),
+      ),
+      title: Text(
+        name,
+        style: GoogleFonts.quicksand(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? const Color(0xFF03A696) : const Color(0xFF2C3E50),
+        ),
+      ),
       trailing: isSelected
           ? const Icon(Icons.check, color: Color(0xFF03A696))
           : null,
       onTap: () async {
-        Navigator.pop(context);
+        if (isSelected) {
+          Navigator.of(context).pop();
+          return;
+        }
+
+        Navigator.of(context).pop();
         onSettingChanged('language', code);
 
         // Cambiar idioma en EasyLocalization

@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../entities/daily_challenge.dart';
 import '../entities/user_gamification_profile.dart';
 import '../../../lactation/data/services/lactation_service.dart';
@@ -169,8 +170,8 @@ class DailyChallengeService {
     availableChallenges.add(
       DailyChallenge(
         id: 'streak_week',
-        title: 'Racha de Semana',
-        description: 'Mantén una racha de 7 días consecutivos',
+        title: 'gamification.dailyChallenges.weekStreak.title'.tr(),
+        description: 'gamification.dailyChallenges.weekStreak.description'.tr(),
         type: DailyChallengeType.streak,
         requiredValue: 7,
         xpReward: 100,
@@ -186,8 +187,8 @@ class DailyChallengeService {
     availableChallenges.add(
       DailyChallenge(
         id: 'streak_month',
-        title: 'Racha de Mes',
-        description: 'Mantén una racha de 30 días consecutivos',
+        title: 'gamification.dailyChallenges.monthStreak.title'.tr(),
+        description: 'gamification.dailyChallenges.monthStreak.description'.tr(),
         type: DailyChallengeType.streak,
         requiredValue: 30,
         xpReward: 500,

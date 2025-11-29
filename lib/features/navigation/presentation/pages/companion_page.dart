@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -25,6 +26,8 @@ import '../widgets/companion_mascot_wrapper.dart';
 import '../widgets/companion_new_achievements_animation.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
+import '../../../gamification/domain/services/gamification_service.dart';
+import '../../../gamification/domain/services/user_statistics_service.dart';
 
 /// Página dedicada a la compañera de gamificación
 class CompanionPage extends StatelessWidget {
@@ -58,6 +61,52 @@ class CompanionPage extends StatelessWidget {
               currentGamificationState is! GamificationLoading) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               gamificationBloc.add(LoadGamificationProfile(validUserId));
+            });
+          } else if (currentGamificationState is GamificationLoaded) {
+            // Detectar logros cuando se carga la página (para logros de tiempo como "Primera Semana")
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              try {
+                final gamificationRepository = getIt<GamificationRepository>();
+                final gamificationService = GamificationService(
+                  repository: gamificationRepository,
+                );
+                final userStatisticsService = getIt<UserStatisticsService>();
+                final userStats = await userStatisticsService.getUserStatistics(
+                  validUserId,
+                );
+
+                final achievements = await gamificationService
+                    .detectAndUnlockAchievements(
+                  userId: validUserId,
+                  totalLactationRecords: userStats.totalLactationRecords,
+                  completeLactationRecords: userStats.completeLactationRecords,
+                  totalLessonsCompleted: userStats.totalLessonsCompleted,
+                  babyWeightRecords: userStats.babyWeightRecords,
+                  hasNocturnalRecord: userStats.hasNocturnalRecord,
+                  dailyRecordsToday: userStats.dailyRecordsToday,
+                  babySleepRecords: userStats.babySleepRecords,
+                  perfectTrivias: userStats.perfectTrivias,
+                  nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+                  daysUsingApp: userStats.daysUsingApp,
+                );
+
+                // Mostrar diálogo si hay logros nuevos
+                if (achievements.isRight()) {
+                  final newAchievements = achievements.getOrElse(() => []);
+                  if (newAchievements.isNotEmpty && context.mounted) {
+                    AchievementUnlockedDialog.show(
+                      context,
+                      newAchievements.first,
+                      newAchievements.first.xpReward,
+                    );
+                  }
+                }
+              } catch (e) {
+                // Ignorar errores en la detección de logros
+                if (kDebugMode) {
+                  print('Error detectando logros en companion page: $e');
+                }
+              }
             });
           }
 

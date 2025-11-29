@@ -301,40 +301,43 @@ class _AchievementDetailsDialogContentState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icono del logro
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.amber[100],
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.amber[300]!, width: 3),
+          // Icono del logro (tamaño aumentado y centrado)
+          Center(
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.amber[100],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.amber[300]!, width: 3),
+              ),
+              child: widget.isAssetPath
+                  ? Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Image.asset(
+                        widget.achievement.icon,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.emoji_events,
+                            size: 60,
+                            color: Colors.amber[700],
+                          );
+                        },
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        widget.achievement.icon,
+                        style: const TextStyle(fontSize: 60),
+                      ),
+                    ),
             ),
-            child: widget.isAssetPath
-                ? Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Image.asset(
-                      widget.achievement.icon,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.emoji_events,
-                          size: 40,
-                          color: Colors.amber[700],
-                        );
-                      },
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      widget.achievement.icon,
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                  ),
           ),
           const SizedBox(height: 16),
           // Título
           Text(
-            widget.achievement.title,
+            widget.achievement.title.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
               fontSize: 20,
@@ -345,7 +348,7 @@ class _AchievementDetailsDialogContentState
           const SizedBox(height: 12),
           // Descripción
           Text(
-            widget.achievement.description,
+            widget.achievement.description.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(fontSize: 14, color: Colors.grey[700]),
           ),
@@ -366,12 +369,14 @@ class _AchievementDetailsDialogContentState
                     children: [
                       Icon(Icons.lock, color: Colors.grey[700], size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        'Objetivos para desbloquear:',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                      Expanded(
+                        child: Text(
+                          'gamification.achievementObjectivesTitle'.tr(),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          ),
                         ),
                       ),
                     ],
@@ -388,7 +393,7 @@ class _AchievementDetailsDialogContentState
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Cargando progreso...',
+                          'gamification.loadingProgress'.tr(),
                           style: GoogleFonts.quicksand(
                             fontSize: 13,
                             color: Colors.grey[600],
@@ -401,6 +406,7 @@ class _AchievementDetailsDialogContentState
                       _progressDescription.isNotEmpty
                           ? _progressDescription
                           : widget.initialProgressDescription,
+                      textAlign: TextAlign.left,
                       style: GoogleFonts.quicksand(
                         fontSize: 13,
                         color: Colors.grey[700],

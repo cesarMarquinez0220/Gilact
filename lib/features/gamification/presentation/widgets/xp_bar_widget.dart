@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/user_gamification_profile.dart';
 import '../../domain/services/level_service.dart';
 
@@ -18,11 +19,27 @@ class XPBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = profile.levelProgress;
     final tierEmoji = _levelService.getLevelTierEmoji(profile.currentLevel);
-    final tierName = _levelService.getLevelTier(profile.currentLevel);
+    final tierNameKey = _levelService.getLevelTier(profile.currentLevel);
+    final tierName = tierNameKey.tr();
+
+    // Obtener el badge del nivel (mapear a los badges disponibles)
+    String levelBadgePath;
+    if (profile.currentLevel >= 20) {
+      levelBadgePath = 'assets/images/badges/badge_level_20.png';
+    } else if (profile.currentLevel >= 15) {
+      levelBadgePath = 'assets/images/badges/badge_level_15.png';
+    } else if (profile.currentLevel >= 10) {
+      levelBadgePath = 'assets/images/badges/badge_level_10.png';
+    } else if (profile.currentLevel >= 5) {
+      levelBadgePath = 'assets/images/badges/badge_level_5.png';
+    } else if (profile.currentLevel >= 3) {
+      levelBadgePath = 'assets/images/badges/badge_level_3.png';
+    } else {
+      levelBadgePath = 'assets/images/badges/badge_level_1.png';
+    }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -42,16 +59,34 @@ class XPBarWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    tierEmoji,
-                    style: const TextStyle(fontSize: 24),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(
+                      levelBadgePath,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(
+                          child: Text(
+                            tierEmoji,
+                            style: const TextStyle(fontSize: 28),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Nivel ${profile.currentLevel}',
+                        '${'gamification.level'.tr()} ${profile.currentLevel}',
                         style: GoogleFonts.quicksand(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

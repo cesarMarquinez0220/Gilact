@@ -229,7 +229,7 @@ class _XPInfoButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.info_outline, color:  Color(0xFF03A696), size: 20),
+            const Icon(Icons.info_outline, color: Color(0xFF03A696), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -243,7 +243,7 @@ class _XPInfoButton extends StatelessWidget {
             ),
             const Icon(
               Icons.arrow_forward_ios,
-              color:  Color(0xFF03A696),
+              color: Color(0xFF03A696),
               size: 16,
             ),
           ],
@@ -253,184 +253,270 @@ class _XPInfoButton extends StatelessWidget {
   }
 
   void _showXPInfoDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF03A696), Color(0xFF26A69A), Color(0xFF4DB6AC)],
-            ),
-          ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        // Quitamos el padding inferior manual y usamos padding simétrico básico
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: SafeArea(
+          // SafeArea: Esto arregla que el botón salga detrás de la barra de navegación
+          top: false, // No necesitamos proteger arriba
+          bottom: true, // Sí necesitamos proteger abajo
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 1. Manija visual
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // 2. Título
               Row(
                 children: [
-                  const Icon(Icons.star, color: Colors.white, size: 28),
-                  const SizedBox(width: 12),
+                  const Icon(Icons.star_rounded, color: Colors.amber, size: 28),
+                  const SizedBox(width: 8),
                   Text(
                     'companion.howToEarnXP'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: const Color(0xFF2C3E50),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              _XPInfoItem(
-                'companion.quickRecord'.tr(),
-                'companion.baseXP'.tr(namedArgs: {'xp': '10'}),
-                'companion.firstOfDay'.tr(),
-              ),
-              _XPInfoItem(
-                'companion.fullRecord'.tr(),
-                'companion.baseXP'.tr(namedArgs: {'xp': '20'}),
-                'companion.firstOfDaySleep'.tr(),
-              ),
-              _XPInfoItem(
-                'companion.completeLesson'.tr(),
-                'companion.baseXP'.tr(namedArgs: {'xp': '30'}),
-                'companion.firstLessonOfDay'.tr(),
-              ),
-              _XPInfoItem(
-                'companion.completeTrivia'.tr(),
-                'companion.perQuestion'.tr(),
-                'companion.allCorrect'.tr(),
-              ),
-              _XPInfoItem(
-                'companion.weightRecord'.tr(),
-                'companion.baseXP'.tr(namedArgs: {'xp': '15'}),
-                '',
-              ),
-              _XPInfoItem(
-                'companion.sleepRecord'.tr(),
-                'companion.baseXP'.tr(namedArgs: {'xp': '10'}),
-                '',
-              ),
               const SizedBox(height: 16),
+
+              // 3. Grid de Acciones Diarias
+              _buildSectionTitle('companion.dailyActions'.tr()),
+              const SizedBox(height: 10),
+
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                childAspectRatio: 2.7,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildCompactXPItem(
+                    Icons.flash_on,
+                    'companion.quickRecord',
+                    '10',
+                  ),
+                  _buildCompactXPItem(
+                    Icons.edit_note,
+                    'companion.fullRecord',
+                    '20',
+                  ),
+                  _buildCompactXPItem(
+                    Icons.school,
+                    'companion.completeLesson',
+                    '30',
+                  ),
+                  _buildCompactXPItem(
+                    Icons.quiz,
+                    'companion.completeTrivia',
+                    '5',
+                  ),
+                  _buildCompactXPItem(
+                    Icons.monitor_weight,
+                    'companion.weightRecord',
+                    '15',
+                  ),
+                  _buildCompactXPItem(
+                    Icons.bedtime,
+                    'companion.sleepRecord',
+                    '10',
+                  ),
+                ],
+              ),
+
+              // --- AJUSTE DE ESPACIO ---
+              // Aquí controlas la distancia entre el Grid y los Bonos.
+              // Estaba muy grande o ausente, con 12px se ve limpio y unido.
+              const SizedBox(height: 12),
+
+              // 4. Sección de Bonos
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF3498DB).withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${'companion.specialBonuses'.tr()}:',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: Color(0xFF3498DB),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'companion.specialBonuses'.tr(),
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF3498DB),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• ${'companion.milestones'.tr()}\n'
-                      '• ${'companion.streaks'.tr()}\n'
-                      '• ${'companion.unlockedAchievementsBonus'.tr()}',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
+                    const SizedBox(height: 12),
+                    _buildBonusRow(
+                      'companion.dailyStreaks'.tr(),
+                      'companion.streaks'.tr().split(':')[1].trim(),
+                    ),
+                    _buildBonusRow(
+                      'companion.recordMilestones'.tr(),
+                      'companion.milestones'.tr().split(':')[1].trim(),
+                    ),
+                    _buildBonusRow(
+                      'companion.unlockedAchievements'.tr(),
+                      'companion.unlockedAchievementsBonus'
+                          .tr()
+                          .split(':')[1]
+                          .trim(),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(foregroundColor: Colors.white),
+
+              // Botón Entendido
+              // Al estar dentro del SafeArea, este botón subirá automáticamente
+              // si hay una barra de navegación en el celular.
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2ECC71),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                   child: Text(
                     'companion.understood'.tr(),
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
+
+              // Un pequeño margen extra al final para que no pegue con el borde de la pantalla
+              const SizedBox(height: 10),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class _XPInfoItem extends StatelessWidget {
-  final String action;
-  final String baseXP;
-  final String bonus;
+  // Widgets auxiliares para limpiar el código
+  Widget _buildSectionTitle(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: GoogleFonts.quicksand(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey[600],
+        ),
+      ),
+    );
+  }
 
-  const _XPInfoItem(this.action, this.baseXP, this.bonus);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  Widget _buildCompactXPItem(IconData icon, String labelKey, String xpValue) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 6, right: 12),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
+          Icon(icon, size: 20, color: const Color(0xFF3498DB)),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      action,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      baseXP,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                if (bonus.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      bonus,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
+                Text(
+                  labelKey.tr(),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'companion.baseXP'.tr(namedArgs: {'xp': xpValue}),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBonusRow(String label, String xp) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.quicksand(fontSize: 13, color: Colors.black87),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              xp,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.quicksand(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF3498DB),
+              ),
             ),
           ),
         ],
@@ -466,7 +552,8 @@ class _AchievementsGrid extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = screenWidth < 360 ? 3 : 4;
     final spacing = screenWidth < 360 ? 8.0 : 12.0;
-    final aspectRatio = screenWidth < 360 ? 0.9 : 0.85;
+    // Ajustado para badges más grandes (60x60 + texto) - reducido para evitar overflow
+    final aspectRatio = screenWidth < 360 ? 0.65 : 0.6;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -522,7 +609,8 @@ class _AllAchievementsGrid extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = screenWidth < 360 ? 3 : 4;
     final spacing = screenWidth < 360 ? 8.0 : 12.0;
-    final aspectRatio = screenWidth < 360 ? 0.9 : 0.85;
+    // Ajustado para badges más grandes (60x60 + texto) - reducido para evitar overflow
+    final aspectRatio = screenWidth < 360 ? 0.65 : 0.6;
 
     return GridView.builder(
       shrinkWrap: true,

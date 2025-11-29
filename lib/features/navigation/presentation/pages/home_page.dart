@@ -355,20 +355,55 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCompactXPBar(UserGamificationProfile profile) {
     final levelService = LevelService();
     final progress = profile.levelProgress;
-    final tierEmoji = levelService.getLevelTierEmoji(profile.currentLevel);
-    final tierName = levelService.getLevelTier(profile.currentLevel);
+    final tierNameKey = levelService.getLevelTier(profile.currentLevel);
+    final tierName = tierNameKey.tr();
+
+    // Obtener el badge del nivel (mapear a los badges disponibles)
+    String levelBadgePath;
+    if (profile.currentLevel >= 20) {
+      levelBadgePath = 'assets/images/badges/badge_level_20.png';
+    } else if (profile.currentLevel >= 15) {
+      levelBadgePath = 'assets/images/badges/badge_level_15.png';
+    } else if (profile.currentLevel >= 10) {
+      levelBadgePath = 'assets/images/badges/badge_level_10.png';
+    } else if (profile.currentLevel >= 5) {
+      levelBadgePath = 'assets/images/badges/badge_level_5.png';
+    } else if (profile.currentLevel >= 3) {
+      levelBadgePath = 'assets/images/badges/badge_level_3.png';
+    } else {
+      levelBadgePath = 'assets/images/badges/badge_level_1.png';
+    }
 
     return Row(
       children: [
-        // Emoji y nivel
-        Text(tierEmoji, style: const TextStyle(fontSize: 20)),
+        // Badge del nivel
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Image.asset(
+            levelBadgePath,
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              final tierEmoji = levelService.getLevelTierEmoji(profile.currentLevel);
+              return Center(
+                child: Text(tierEmoji, style: const TextStyle(fontSize: 20)),
+              );
+            },
+          ),
+        ),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Nivel ${profile.currentLevel}',
+              '${'gamification.level'.tr()} ${profile.currentLevel}',
               style: GoogleFonts.quicksand(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -1524,56 +1559,105 @@ class _HomePageState extends State<HomePage> {
     BuildContext context,
     LactationProvider lactationProvider,
   ) {
+    // Verificar si hay registros hoy
+    final hasRecords = lactationProvider.todayRecords.isNotEmpty;
+    final isLoading = lactationProvider.isLoading;
+    
     return Column(
       children: [
-        Text(
-          'Próxima toma en',
-          style: GoogleFonts.quicksand(
-            fontSize: 16,
-            color: const Color(0xFF7F8C8D),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          lactationProvider.isLoading
-              ? '...'
-              : lactationProvider.getNextFeedTime(),
-          style: GoogleFonts.quicksand(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF03A696),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF03A696).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+        if (!hasRecords && !isLoading)
+          // Mensaje cuando no hay registros
+          Column(
             children: [
-              const Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Color(0xFF03A696),
-              ),
-              const SizedBox(width: 4),
               Text(
-                lactationProvider.isLoading
-                    ? 'Cargando...'
-                    : '${lactationProvider.getFeedStatus()}. ${lactationProvider.getDurationInfo()}',
+                '¡Comienza tu registro!',
                 style: GoogleFonts.quicksand(
-                  fontSize: 12,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                   color: const Color(0xFF03A696),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Registra tu primera toma de lactancia',
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  color: const Color(0xFF7F8C8D),
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
+          )
+        else
+          // Timer normal cuando hay registros
+          Column(
+            children: [
+              Text(
+                'Próxima toma en',
+                style: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  color: const Color(0xFF7F8C8D),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isLoading
+                    ? '...'
+                    : lactationProvider.getNextFeedTime(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF03A696),
+                ),
+              ),
+            ],
           ),
-        ),
+        const SizedBox(height: 12),
+        // Banner de progreso solo si hay registros
+        if (hasRecords && !isLoading)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF03A696).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Color(0xFF03A696),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${lactationProvider.getFeedStatus()}. ${lactationProvider.getDurationInfo()}',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    color: const Color(0xFF03A696),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (isLoading)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF03A696).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Cargando...',
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                color: const Color(0xFF03A696),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }

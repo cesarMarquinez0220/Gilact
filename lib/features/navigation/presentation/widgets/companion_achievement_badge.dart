@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../gamification/domain/entities/achievement.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import 'companion_achievement_dialog.dart';
@@ -47,68 +48,71 @@ class CompanionAchievementBadge extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // Contenido principal del badge con layout fijo
+                  // Contenido principal del badge con layout centrado
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        // Icono/Badge con tamaño y posición fijos
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Opacity(
-                        opacity: isUnlocked ? 1.0 : 0.5,
-                        child: isAssetPath
-                            ? Image.asset(
-                                achievement.icon,
-                                width: 40,
-                                height: 40,
-                                    fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    Icons.emoji_events,
-                                        size: 32,
-                                    color: isUnlocked
-                                        ? Colors.amber[700]
-                                        : Colors.grey[600],
-                                  );
-                                },
-                              )
-                                : Center(
-                                    child: Text(
-                                achievement.icon,
-                                style: TextStyle(
-                                        fontSize: 30,
-                                        color: isUnlocked
-                                            ? null
-                                            : Colors.grey[600],
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Icono/Badge con tamaño aumentado y centrado
+                        Center(
+                          child: SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: Opacity(
+                              opacity: isUnlocked ? 1.0 : 0.5,
+                              child: isAssetPath
+                                  ? Image.asset(
+                                      achievement.icon,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.emoji_events,
+                                          size: 48,
+                                          color: isUnlocked
+                                              ? Colors.amber[700]
+                                              : Colors.grey[600],
+                                        );
+                                      },
+                                    )
+                                  : Center(
+                                      child: Text(
+                                        achievement.icon,
+                                        style: TextStyle(
+                                          fontSize: 45,
+                                          color: isUnlocked
+                                              ? null
+                                              : Colors.grey[600],
+                                        ),
                                       ),
                                     ),
-                                ),
-                              ),
-                      ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        // Título centrado con altura fija
+                        // Título centrado
                         Flexible(
-                        child: Text(
-                          achievement.title,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.quicksand(
+                          child: Text(
+                            achievement.title.tr(),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
                               fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: isUnlocked
-                                ? const Color(0xFF2C3E50)
-                                : Colors.grey[600],
+                              fontWeight: FontWeight.w600,
+                              color: isUnlocked
+                                  ? const Color(0xFF2C3E50)
+                                  : Colors.grey[600],
                               height: 1.1,
                             ),
                           ),
                         ),
                       ],
-                      ),
+                    ),
                   ),
                   // Overlay de bloqueo si no está desbloqueado
                   if (!isUnlocked)

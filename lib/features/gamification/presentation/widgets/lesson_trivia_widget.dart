@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,10 +10,14 @@ import '../../../../core/services/vibration_service.dart';
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/services/xp_calculation_service.dart';
+import '../../domain/services/gamification_service.dart';
+import '../../domain/services/user_statistics_service.dart';
+import '../../domain/repositories/gamification_repository.dart';
 import '../../presentation/bloc/gamification_bloc.dart';
 import '../../presentation/bloc/gamification_event.dart';
 import 'xp_celebration_animation.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../presentation/widgets/achievement_unlocked_dialog.dart';
 
 /// Widget que muestra una trivia después de completar una lección
 class LessonTriviaWidget extends StatefulWidget {
@@ -199,6 +204,54 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
       // Recargar el perfil para actualizar la UI
       await Future.delayed(const Duration(milliseconds: 200));
       gamificationBloc.add(LoadGamificationProfile(widget.userId));
+
+      // Detectar logros nuevos después de completar la lección
+      await Future.delayed(const Duration(milliseconds: 300));
+      try {
+        final gamificationRepository = getIt<GamificationRepository>();
+        final gamificationService = GamificationService(
+          repository: gamificationRepository,
+        );
+        final userStatisticsService = getIt<UserStatisticsService>();
+        final userStats = await userStatisticsService.getUserStatistics(
+          widget.userId,
+        );
+
+        final achievements = await gamificationService.detectAndUnlockAchievements(
+          userId: widget.userId,
+          totalLactationRecords: userStats.totalLactationRecords,
+          completeLactationRecords: userStats.completeLactationRecords,
+          totalLessonsCompleted: userStats.totalLessonsCompleted,
+          babyWeightRecords: userStats.babyWeightRecords,
+          hasNocturnalRecord: userStats.hasNocturnalRecord,
+          dailyRecordsToday: userStats.dailyRecordsToday,
+          babySleepRecords: userStats.babySleepRecords,
+          perfectTrivias: userStats.perfectTrivias,
+          nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+          daysUsingApp: userStats.daysUsingApp,
+        );
+
+        // Mostrar diálogo si hay logros nuevos
+        if (achievements.isRight()) {
+          final newAchievements = achievements.getOrElse(() => []);
+          if (newAchievements.isNotEmpty && mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && context.mounted) {
+                AchievementUnlockedDialog.show(
+                  context,
+                  newAchievements.first,
+                  newAchievements.first.xpReward,
+                );
+              }
+            });
+          }
+        }
+      } catch (e) {
+        // Ignorar errores en la detección de logros para no interrumpir el flujo
+        if (kDebugMode) {
+          print('Error detectando logros después de lección: $e');
+        }
+      }
 
       // Vibración y sonido de éxito usando los servicios mejorados
       final vibrationService = getIt<VibrationService>();

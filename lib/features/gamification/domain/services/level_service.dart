@@ -83,11 +83,12 @@ class LevelService {
 
   /// Obtiene el rango del nivel (Bronce, Plata, Oro, Diamante)
   String getLevelTier(int level) {
-    if (level >= 1 && level <= 5) return 'Bronce';
-    if (level >= 6 && level <= 10) return 'Plata';
-    if (level >= 11 && level <= 20) return 'Oro';
-    if (level >= 21) return 'Diamante';
-    return 'Principiante';
+    // Devolvemos la clave de traducción; la UI aplicará .tr()
+    if (level >= 1 && level <= 5) return 'gamification.tiers.bronze';
+    if (level >= 6 && level <= 10) return 'gamification.tiers.silver';
+    if (level >= 11 && level <= 20) return 'gamification.tiers.gold';
+    if (level >= 21) return 'gamification.tiers.diamond';
+    return 'gamification.tiers.beginner';
   }
 
   /// Obtiene el emoji del rango
