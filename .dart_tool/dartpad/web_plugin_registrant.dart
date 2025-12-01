@@ -17,6 +17,7 @@ import 'package:firebase_performance_web/firebase_performance_web.dart';
 import 'package:flutter_inappwebview_web/web/main.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
 import 'package:package_info_plus/src/package_info_plus_web.dart';
+import 'package:rive_native/rive_native_plugin_web.dart';
 import 'package:shared_preferences_web/shared_preferences_web.dart';
 import 'package:video_player_web/video_player_web.dart';
 import 'package:wakelock_plus/src/wakelock_plus_web_plugin.dart';
@@ -35,6 +36,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   InAppWebViewFlutterPlugin.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);
   PackageInfoPlusWebPlugin.registerWith(registrar);
+  RiveNativePlugin.registerWith(registrar);
   SharedPreferencesPlugin.registerWith(registrar);
   VideoPlayerPlugin.registerWith(registrar);
   WakelockPlusWebPlugin.registerWith(registrar);

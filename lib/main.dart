@@ -37,12 +37,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'features/gamification/presentation/bloc/gamification_bloc.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:rive/rive.dart';
 
 //flutter_native_splash:
 // color: "#03A696"
 // image: "assets/images/splash.png"
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Rive antes de usar cualquier animación Rive
+  try {
+    await RiveNative.init();
+  } catch (e) {
+    // Si falla, continuar sin Rive (no crítico)
+    debugPrint('Error al inicializar Rive: $e');
+  }
 
   // Inicializar EasyLocalization
   await EasyLocalization.ensureInitialized();

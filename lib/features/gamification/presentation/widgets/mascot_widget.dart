@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
+import 'package:rive/rive.dart'
+    as rive
+    show
+        RiveWidgetBuilder,
+        RiveWidget,
+        RiveWidgetController,
+        FileLoader,
+        ArtboardSelector,
+        StateMachineSelector,
+        RiveLoading,
+        RiveFailed,
+        RiveLoaded,
+        Fit,
+        Factory;
 import '../../domain/entities/user_gamification_profile.dart';
 
 /// Widget mejorado que muestra el muñequito animado con información de gamificación
@@ -19,9 +33,24 @@ class MascotWidget extends StatelessWidget {
     this.onTap,
   });
 
+  /// Mapea el estado de la mascota al estado de la state machine de Rive
+  String _getRiveState(String mascotState) {
+    switch (mascotState) {
+      case 'worried':
+        return 'worried';
+      case 'happy':
+      case 'celebrating':
+      case 'supporting':
+      case 'thinking':
+        return 'happy';
+      case 'sleeping':
+      default:
+        return 'idle';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    String animationPath;
     String message;
     Color messageColor;
     Color cardGradientStart;
@@ -29,35 +58,30 @@ class MascotWidget extends StatelessWidget {
 
     switch (profile.mascotState) {
       case 'celebrating':
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.excellentWork'.tr();
         messageColor = const Color(0xFFE74C3C);
         cardGradientStart = const Color(0xFFFFE5E5);
         cardGradientEnd = Colors.white;
         break;
       case 'thinking':
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.closeToLevelUp'.tr();
         messageColor = const Color(0xFF3498DB);
         cardGradientStart = const Color(0xFFE3F2FD);
         cardGradientEnd = Colors.white;
         break;
       case 'worried':
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.streakAtRisk'.tr();
         messageColor = const Color(0xFFF39C12);
         cardGradientStart = const Color(0xFFFFF3E0);
         cardGradientEnd = Colors.white;
         break;
       case 'supporting':
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.takeYourTime'.tr();
         messageColor = const Color(0xFF3498DB);
         cardGradientStart = const Color(0xFFE3F2FD);
         cardGradientEnd = Colors.white;
         break;
       case 'sleeping':
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.restWell'.tr();
         messageColor = Colors.grey;
         cardGradientStart = const Color(0xFFF5F5F5);
@@ -65,7 +89,6 @@ class MascotWidget extends StatelessWidget {
         break;
       case 'happy':
       default:
-        animationPath = 'assets/animations/Happy_Dog.json';
         message = 'gamification.messages.helloHowAreYou'.tr();
         messageColor = const Color(0xFF2ECC71);
         cardGradientStart = const Color(0xFFE8F5E9);
@@ -125,7 +148,7 @@ class MascotWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    // Animación de la mascota
+                    // Animación de la mascota con Rive
                     FadeIn(
                       duration: const Duration(milliseconds: 800),
                       child: Container(
@@ -141,11 +164,10 @@ class MascotWidget extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Lottie.asset(
-                          animationPath,
-                          fit: BoxFit.contain,
-                          repeat: true,
-                          animate: true,
+                        child: _BabyRiveAnimation(
+                          state: _getRiveState(profile.mascotState),
+                          babyStage: profile.babyStage,
+                          size: size,
                         ),
                       ),
                     ),
@@ -320,5 +342,379 @@ class MascotWidget extends StatelessWidget {
       default:
         return Icons.mood;
     }
+  }
+}
+
+/// Widget helper para mostrar la animación Rive del bebé
+class _BabyRiveAnimation extends StatefulWidget {
+  final String state; // 'idle', 'happy', 'worried'
+  final String babyStage; // 'baby_born', 'baby_3months', 'baby_6months'
+  final double size;
+
+  const _BabyRiveAnimation({
+    required this.state,
+    required this.babyStage,
+    required this.size,
+  });
+
+  @override
+  State<_BabyRiveAnimation> createState() => _BabyRiveAnimationState();
+}
+
+class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
+  late final rive.FileLoader _fileLoader;
+  rive.RiveWidgetController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileLoader = rive.FileLoader.fromAsset(
+      'assets/animations/baby_born.riv',
+      riveFactory: rive.Factory.rive,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    _fileLoader.dispose();
+    super.dispose();
+  }
+
+  void _updateState(String newState) {
+    if (_controller == null) return;
+
+    // Obtener la máquina de estados del controlador
+    final stateMachine = _controller!.stateMachine;
+    if (stateMachine == null) return;
+
+    // Si es baby_6months, solo usar idle (no tiene happy/worried)
+    final stateToUse = widget.babyStage == 'baby_6months' ? 'idle' : newState;
+
+    // Mapear el estado a un valor numérico para el input "state"
+    // 0 = idle, 1 = happy, 2 = worried (ajustar según tu configuración en Rive)
+    double stateValue = 0.0;
+    switch (stateToUse) {
+      case 'happy':
+        stateValue = 1.0;
+        break;
+      case 'worried':
+        stateValue = 2.0;
+        break;
+      case 'idle':
+      default:
+        stateValue = 0.0;
+        break;
+    }
+
+    // Buscar y establecer el valor del input "state"
+    try {
+      // Acceder a los inputs de la máquina de estados
+      // En Rive 0.14.0-dev, los inputs se acceden a través de stateMachine.inputs
+      for (var i = 0; i < stateMachine.inputs.length; i++) {
+        final input = stateMachine.inputs[i];
+        if (input.name == 'state') {
+          // Establecer el valor del input numérico
+          // Usar dynamic para evitar problemas de tipo en tiempo de compilación
+          try {
+            // Intentar establecer el valor usando reflexión o método directo
+            (input as dynamic).value = stateValue;
+            if (kDebugMode) {
+              print(
+                '✅ Estado Rive actualizado: $stateToUse (valor: $stateValue)',
+              );
+            }
+            break;
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ Error estableciendo valor del input: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error actualizando estado Rive: $e');
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(_BabyRiveAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.state != widget.state ||
+        oldWidget.babyStage != widget.babyStage) {
+      _updateState(widget.state);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (kDebugMode) {
+      print(
+        '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}',
+      );
+    }
+
+    // Intentar cargar el artboard solicitado, con fallback al primer artboard disponible
+    return rive.RiveWidgetBuilder(
+      fileLoader: _fileLoader,
+      artboardSelector: rive.ArtboardSelector.byName(widget.babyStage),
+      stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+      builder: (context, state) {
+        if (state is rive.RiveLoading) {
+          if (kDebugMode) {
+            print('⏳ Rive cargando artboard: ${widget.babyStage}...');
+          }
+          return SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state is rive.RiveFailed) {
+          if (kDebugMode) {
+            print(
+              '❌ Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
+            );
+            // Si el error es que no se encuentra el artboard, intentar con baby_born
+            if (state.error.toString().contains('not found') &&
+                widget.babyStage != 'baby_born') {
+              print('🔄 Intentando fallback a artboard "baby_born"...');
+            }
+          }
+
+          // Si el artboard solicitado no existe, intentar sin especificar artboard (usará el por defecto)
+          if (state.error.toString().contains('not found')) {
+            if (kDebugMode) {
+              print('🔄 Intentando usar el artboard por defecto...');
+            }
+            return rive.RiveWidgetBuilder(
+              fileLoader: _fileLoader,
+              // Sin artboardSelector, usará el artboard por defecto del archivo
+              stateMachineSelector: rive.StateMachineSelector.byName(
+                'State Machine 1',
+              ),
+              builder: (context, fallbackState) {
+                if (fallbackState is rive.RiveLoading) {
+                  return SizedBox(
+                    width: widget.size,
+                    height: widget.size,
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (fallbackState is rive.RiveFailed) {
+                  if (kDebugMode) {
+                    print('❌ Fallback también falló: ${fallbackState.error}');
+                  }
+                  return SizedBox(
+                    width: widget.size,
+                    height: widget.size,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red),
+                        if (kDebugMode)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Error: ${fallbackState.error}',
+                              style: const TextStyle(fontSize: 10),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (fallbackState is rive.RiveLoaded) {
+                  if (kDebugMode) {
+                    print('✅ Fallback exitoso: usando el artboard por defecto');
+                    // Intentar obtener información del artboard cargado
+                    try {
+                      final artboard = fallbackState.controller.artboard;
+                      print('   📋 Artboard cargado: ${artboard.name}');
+
+                      // Intentar listar todos los artboards disponibles
+                      try {
+                        final riveFile = fallbackState.controller.file;
+                        print(
+                          '   📚 Intentando listar artboards disponibles...',
+                        );
+                        // Nota: La API de Rive puede variar, intentamos acceder de diferentes formas
+                        try {
+                          // Intentar acceder a los artboards a través del archivo
+                          final artboards = (riveFile as dynamic).artboards;
+                          if (artboards != null) {
+                            if (artboards is List && artboards.isNotEmpty) {
+                              print(
+                                '   📚 Artboards disponibles en el archivo:',
+                              );
+                              for (var i = 0; i < artboards.length; i++) {
+                                final ab = artboards[i];
+                                final name = (ab as dynamic).name;
+                                print('      ${i + 1}. "$name"');
+                              }
+                            } else {
+                              print(
+                                '      ⚠️ La lista de artboards está vacía',
+                              );
+                            }
+                          } else {
+                            print(
+                              '      ⚠️ No se pudieron obtener los artboards del archivo',
+                            );
+                          }
+                        } catch (e) {
+                          print('      ⚠️ Error al acceder a artboards: $e');
+                          print(
+                            '      💡 Tip: Verifica los nombres de los artboards en Rive',
+                          );
+                        }
+                      } catch (e) {
+                        print('   ⚠️ No se pudo acceder al archivo Rive: $e');
+                      }
+                    } catch (e) {
+                      if (kDebugMode) {
+                        print(
+                          '   ⚠️ No se pudo obtener el nombre del artboard: $e',
+                        );
+                      }
+                    }
+                  }
+                  _controller = fallbackState.controller;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      _updateState(widget.state);
+                    }
+                  });
+                  return SizedBox(
+                    width: widget.size,
+                    height: widget.size,
+                    child: rive.RiveWidget(
+                      controller: fallbackState.controller,
+                      fit: rive.Fit.contain,
+                    ),
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            );
+          }
+
+          // Si no es un error de artboard no encontrado, mostrar el error
+          return SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red),
+                if (kDebugMode)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Error: ${state.error}',
+                      style: const TextStyle(fontSize: 10),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }
+
+        if (state is rive.RiveLoaded) {
+          if (kDebugMode) {
+            print('✅ Rive cargado exitosamente');
+            print('   Artboard solicitado: ${widget.babyStage}');
+            print('   State Machine: State Machine 1');
+            print('   Controller: ${state.controller}');
+            print(
+              '   State Machine del controller: ${state.controller.stateMachine}',
+            );
+
+            // Intentar listar todos los artboards disponibles
+            try {
+              final artboard = state.controller.artboard;
+              if (artboard != null) {
+                print('   📋 Artboard actual cargado: ${artboard.name}');
+              }
+
+              // Intentar acceder al archivo Rive para listar todos los artboards
+              try {
+                final riveFile = state.controller.file;
+                print('   📚 Intentando listar artboards disponibles...');
+                // Nota: La API de Rive puede variar, intentamos acceder de diferentes formas
+                try {
+                  // Intentar acceder a los artboards a través del archivo
+                  final artboards = (riveFile as dynamic).artboards;
+                  if (artboards != null) {
+                    if (artboards is List && artboards.isNotEmpty) {
+                      print('   📚 Artboards disponibles en el archivo:');
+                      for (var i = 0; i < artboards.length; i++) {
+                        final ab = artboards[i];
+                        final name = (ab as dynamic).name;
+                        print('      ${i + 1}. "$name"');
+                      }
+                    } else {
+                      print('      ⚠️ La lista de artboards está vacía');
+                    }
+                  } else {
+                    print(
+                      '      ⚠️ No se pudieron obtener los artboards del archivo',
+                    );
+                  }
+                } catch (e) {
+                  print('      ⚠️ Error al acceder a artboards: $e');
+                  print(
+                    '      💡 Tip: Verifica los nombres de los artboards en Rive',
+                  );
+                }
+              } catch (e) {
+                print('   ⚠️ No se pudo acceder al archivo Rive: $e');
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('   ⚠️ Error al obtener información de artboards: $e');
+              }
+            }
+          }
+
+          // Guardar el controlador para poder actualizar el estado
+          _controller = state.controller;
+
+          // Actualizar el estado después de que se carga
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              if (kDebugMode) {
+                print(
+                  '🔄 PostFrameCallback: actualizando estado a ${widget.state}',
+                );
+              }
+              _updateState(widget.state);
+            }
+          });
+
+          return SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: rive.RiveWidget(
+              controller: state.controller,
+              fit: rive.Fit.contain,
+            ),
+          );
+        }
+
+        if (kDebugMode) {
+          print('⚠️ Estado desconocido de Rive: ${state.runtimeType}');
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 }

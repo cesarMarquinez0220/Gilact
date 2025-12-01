@@ -28,7 +28,7 @@ class GamificationLocalDataSource {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         // Tabla de perfil de gamificación
         await db.execute('''
@@ -45,6 +45,7 @@ class GamificationLocalDataSource {
             new_achievements TEXT NOT NULL DEFAULT '[]',
             mascot_state TEXT NOT NULL DEFAULT 'happy',
             mascot_level INTEGER NOT NULL DEFAULT 1,
+            baby_stage TEXT NOT NULL DEFAULT 'baby_born',
             daily_xp TEXT NOT NULL DEFAULT '{}',
             completed_daily_challenges TEXT NOT NULL DEFAULT '{}',
             rest_days_used INTEGER NOT NULL DEFAULT 0,
@@ -128,6 +129,26 @@ class GamificationLocalDataSource {
             if (kDebugMode) {
               print(
                 '⚠️ Columna completed_daily_challenges ya existe o error: $e',
+              );
+            }
+          }
+        }
+        if (oldVersion < 4) {
+          // Agregar columna baby_stage
+          try {
+            await db.execute(
+              'ALTER TABLE user_gamification_profile ADD COLUMN baby_stage TEXT NOT NULL DEFAULT \'baby_born\'',
+            );
+            if (kDebugMode) {
+              print(
+                '✅ Migración v4: Columna baby_stage agregada',
+              );
+            }
+          } catch (e) {
+            // Si la columna ya existe, ignorar el error
+            if (kDebugMode) {
+              print(
+                '⚠️ Columna baby_stage ya existe o error: $e',
               );
             }
           }
@@ -247,6 +268,7 @@ class GamificationLocalDataSource {
       'new_achievements': jsonEncode(profile.newAchievements),
       'mascot_state': profile.mascotState,
       'mascot_level': profile.mascotLevel,
+      'baby_stage': profile.babyStage,
       'daily_xp': jsonEncode(
         profile.dailyXP.map((key, value) => MapEntry(key, value)),
       ),
@@ -295,6 +317,7 @@ class GamificationLocalDataSource {
           : [],
       mascotState: map['mascot_state'] as String,
       mascotLevel: map['mascot_level'] as int,
+      babyStage: map['baby_stage'] as String? ?? 'baby_born',
       dailyXP: (jsonDecode(map['daily_xp'] as String) as Map<String, dynamic>)
           .map((key, value) => MapEntry(key, value as int)),
       completedDailyChallenges: map['completed_daily_challenges'] != null

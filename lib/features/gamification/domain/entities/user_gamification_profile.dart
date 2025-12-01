@@ -15,6 +15,7 @@ class UserGamificationProfile extends Equatable {
   final List<String> newAchievements; // IDs de logros nuevos no vistos (para notificación roja)
   final String mascotState; // Estado actual del muñequito
   final int mascotLevel; // Nivel del muñequito (crece con el usuario)
+  final String babyStage; // Etapa del bebé: 'baby_born', 'baby_3months', 'baby_6months'
   final Map<String, int> dailyXP; // XP ganado por día (últimos 30 días)
   final Map<String, DateTime> completedDailyChallenges; // Desafíos diarios completados (challengeId -> fecha de completado)
 
@@ -45,6 +46,7 @@ class UserGamificationProfile extends Equatable {
     this.newAchievements = const [],
     this.mascotState = 'happy',
     this.mascotLevel = 1,
+    this.babyStage = 'baby_born',
     this.dailyXP = const {},
     this.completedDailyChallenges = const {},
     this.restDaysUsed = 0,
@@ -72,6 +74,7 @@ class UserGamificationProfile extends Equatable {
         newAchievements,
         mascotState,
         mascotLevel,
+        babyStage,
         dailyXP,
         completedDailyChallenges,
         restDaysUsed,
@@ -98,6 +101,7 @@ class UserGamificationProfile extends Equatable {
     List<String>? newAchievements,
     String? mascotState,
     int? mascotLevel,
+    String? babyStage,
     Map<String, int>? dailyXP,
     Map<String, DateTime>? completedDailyChallenges,
     int? restDaysUsed,
@@ -123,6 +127,7 @@ class UserGamificationProfile extends Equatable {
       newAchievements: newAchievements ?? this.newAchievements,
       mascotState: mascotState ?? this.mascotState,
       mascotLevel: mascotLevel ?? this.mascotLevel,
+      babyStage: babyStage ?? this.babyStage,
       dailyXP: dailyXP ?? this.dailyXP,
       completedDailyChallenges: completedDailyChallenges ?? this.completedDailyChallenges,
       restDaysUsed: restDaysUsed ?? this.restDaysUsed,

@@ -259,6 +259,7 @@ class GamificationRemoteDataSource {
       'newAchievements': profile.newAchievements,
       'mascotState': profile.mascotState,
       'mascotLevel': profile.mascotLevel,
+      'babyStage': profile.babyStage,
       'dailyXP': profile.dailyXP.map((key, value) => MapEntry(key, value)),
       'completedDailyChallenges': profile.completedDailyChallenges.map(
         (key, value) => MapEntry(key, Timestamp.fromDate(value)),
@@ -304,6 +305,7 @@ class GamificationRemoteDataSource {
               [],
       mascotState: data['mascotState'] as String? ?? 'happy',
       mascotLevel: data['mascotLevel'] as int? ?? 1,
+      babyStage: data['babyStage'] as String? ?? 'baby_born',
       dailyXP: (data['dailyXP'] as Map<String, dynamic>?)
               ?.map((key, value) => MapEntry(key, value as int)) ??
           {},

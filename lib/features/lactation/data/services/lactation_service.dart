@@ -177,163 +177,197 @@ class LactationService {
   /// SIEMPRE guarda localmente primero, luego sincroniza con Firestore si hay conexión
   Future<String> saveRecord(LactationRecord record) async {
     try {
-      // PASO 1: SIEMPRE guardar localmente primero
+      // PASO 1: SIEMPRE guardar localmente primero (rápido, offline-first)
       await _localDatabase.insertRecord(record);
       if (kDebugMode) {
         _logger.success(
-          'Registro de lactancia guardado localmente: ${record.id}',
+          'LactationService.saveRecord → Registro guardado LOCALMENTE (offline-first): ${record.id}',
         );
       }
 
-      // PASO 1.5: Agregar XP y detectar badges (GAMIFICACIÓN)
-      // Se ejecuta después de guardar para tener el conteo correcto
-      try {
-        await _addGamificationXP(record);
-      } catch (e, stackTrace) {
-        if (kDebugMode) {
-          _logger.w('Error agregando gamificación (no crítico)', e, stackTrace);
-        }
-      }
-
-      // PASO 1.6: Programar notificación de lactancia según la edad del bebé
-      try {
-        final notificationService = LactationNotificationService();
-        // Obtener nombre del bebé y fecha de nacimiento si está disponible
-        String? babyName;
-        DateTime? babyBirthDate;
+      // PASO 2: Lanzar procesos secundarios en background (no bloquear UI)
+      Future.microtask(() async {
         try {
-          final userDocId = await getUserDocumentId();
-          if (userDocId != null) {
-            final userDoc = await _firestore
-                .collection('Users')
-                .doc(userDocId)
-                .get();
-            if (userDoc.exists) {
-              final situationData = userDoc.data();
-              if (situationData != null && situationData['situacion'] != null) {
-                final situacionDoc = await _firestore
+          // 2.1 Gamificación (XP, logros, badges)
+          if (kDebugMode) {
+            _logger.d(
+              'LactationService.saveRecord → Iniciando gamificación en background para registro: ${record.id}',
+            );
+          }
+          try {
+            await _addGamificationXP(record);
+          } catch (e, stackTrace) {
+            if (kDebugMode) {
+              _logger.w(
+                'Error agregando gamificación (no crítico)',
+                e,
+                stackTrace,
+              );
+            }
+          }
+
+          // 2.2 Programar notificación de lactancia según la edad del bebé
+          try {
+            final notificationService = LactationNotificationService();
+            // Obtener nombre del bebé y fecha de nacimiento si está disponible
+            String? babyName;
+            DateTime? babyBirthDate;
+            try {
+              final userDocId = await getUserDocumentId();
+              if (userDocId != null) {
+                final userDoc = await _firestore
                     .collection('Users')
                     .doc(userDocId)
-                    .collection('situaciones')
-                    .doc(situationData['situacion'] as String)
                     .get();
-                if (situacionDoc.exists) {
-                  final situacionData = situacionDoc.data();
-                  if (situacionData != null) {
-                    babyName = situacionData['nombre_bebe'] as String?;
-                    // Intentar obtener fecha de nacimiento
-                    final birthDateValue = situacionData['birthDate'];
-                    if (birthDateValue != null) {
-                      if (birthDateValue is DateTime) {
-                        babyBirthDate = birthDateValue;
-                      } else if (birthDateValue is String) {
-                        babyBirthDate = DateTime.tryParse(birthDateValue);
-                      } else if (birthDateValue is Timestamp) {
-                        babyBirthDate = birthDateValue.toDate();
-                      }
-                    }
-                    // Si no se encontró birthDate, intentar con fecha nacimiento bebe
-                    if (babyBirthDate == null) {
-                      final fechaNacimientoBebe =
-                          situacionData['fecha nacimiento bebe'];
-                      if (fechaNacimientoBebe != null) {
-                        if (fechaNacimientoBebe is String) {
-                          babyBirthDate = DateTime.tryParse(
-                            fechaNacimientoBebe,
-                          );
+                if (userDoc.exists) {
+                  final situationData = userDoc.data();
+                  if (situationData != null &&
+                      situationData['situacion'] != null) {
+                    final situacionDoc = await _firestore
+                        .collection('Users')
+                        .doc(userDocId)
+                        .collection('situaciones')
+                        .doc(situationData['situacion'] as String)
+                        .get();
+                    if (situacionDoc.exists) {
+                      final situacionData = situacionDoc.data();
+                      if (situacionData != null) {
+                        babyName = situacionData['nombre_bebe'] as String?;
+                        // Intentar obtener fecha de nacimiento
+                        final birthDateValue = situacionData['birthDate'];
+                        if (birthDateValue != null) {
+                          if (birthDateValue is DateTime) {
+                            babyBirthDate = birthDateValue;
+                          } else if (birthDateValue is String) {
+                            babyBirthDate = DateTime.tryParse(birthDateValue);
+                          } else if (birthDateValue is Timestamp) {
+                            babyBirthDate = birthDateValue.toDate();
+                          }
+                        }
+                        // Si no se encontró birthDate, intentar con fecha nacimiento bebe
+                        if (babyBirthDate == null) {
+                          final fechaNacimientoBebe =
+                              situacionData['fecha nacimiento bebe'];
+                          if (fechaNacimientoBebe != null) {
+                            if (fechaNacimientoBebe is String) {
+                              babyBirthDate = DateTime.tryParse(
+                                fechaNacimientoBebe,
+                              );
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               }
+            } catch (e, stackTrace) {
+              if (kDebugMode) {
+                _logger.w(
+                  'Error obteniendo información del bebé (no crítico)',
+                  e,
+                  stackTrace,
+                );
+              }
+            }
+
+            // Calcular intervalo basado en la edad del bebé
+            final interval =
+                LactationNotificationService.calculateLactationInterval(
+                  babyBirthDate,
+                );
+            final intervalHours = interval.inHours;
+            final intervalMinutes = interval.inMinutes.remainder(60);
+            final intervalText = intervalMinutes > 0
+                ? '${intervalHours}h ${intervalMinutes}m'
+                : '${intervalHours}h';
+
+            await notificationService.scheduleLactationReminder(
+              lastFeedTime: record.timestamp,
+              babyName: babyName,
+              babyBirthDate: babyBirthDate,
+            );
+            if (kDebugMode) {
+              _logger.success(
+                'Notificación de lactancia programada para $intervalText después',
+              );
+            }
+          } catch (e, stackTrace) {
+            if (kDebugMode) {
+              _logger.w(
+                'Error programando notificación de lactancia (no crítico)',
+                e,
+                stackTrace,
+              );
             }
           }
-        } catch (e, stackTrace) {
-          if (kDebugMode) {
-            _logger.w(
-              'Error obteniendo información del bebé (no crítico)',
-              e,
-              stackTrace,
-            );
+
+          // 2.3 Sincronizar con Firestore / cola de sync (también en background)
+          try {
+            final isConnected = await _connectivityService.isConnected();
+            if (isConnected) {
+              try {
+                final collection = await _lactationCollection;
+                final docRef = await collection.add(record.toMap());
+
+                // Marcar como sincronizado
+                await _localDatabase.markAsSynced(record.id, docRef.id);
+
+                if (kDebugMode) {
+                  _logger.success(
+                    'Registro de lactancia sincronizado con Firestore: ${docRef.id}',
+                  );
+                }
+              } catch (e, stackTrace) {
+                // Si falla Firestore, el registro queda local para sincronizar después
+                if (kDebugMode) {
+                  _logger.w(
+                    'Error guardando en Firestore, quedará pendiente de sincronización',
+                    e,
+                    stackTrace,
+                  );
+                }
+
+                // Agregar a cola de sincronización
+                await _addToSyncQueue(record, SyncOperationType.create);
+              }
+            } else {
+              if (kDebugMode) {
+                _logger.d(
+                  'Sin conexión: Registro guardado localmente, se sincronizará cuando haya conexión',
+                );
+              }
+
+              await _addToSyncQueue(record, SyncOperationType.create);
+            }
+          } catch (e, stackTrace) {
+            if (kDebugMode) {
+              _logger.w(
+                'Error en sincronización de registro de lactancia (no crítico)',
+                e,
+                stackTrace,
+              );
+            }
           }
-        }
-
-        // Calcular intervalo basado en la edad del bebé
-        final interval =
-            LactationNotificationService.calculateLactationInterval(
-              babyBirthDate,
-            );
-        final intervalHours = interval.inHours;
-        final intervalMinutes = interval.inMinutes.remainder(60);
-        final intervalText = intervalMinutes > 0
-            ? '${intervalHours}h ${intervalMinutes}m'
-            : '${intervalHours}h';
-
-        await notificationService.scheduleLactationReminder(
-          lastFeedTime: record.timestamp,
-          babyName: babyName,
-          babyBirthDate: babyBirthDate,
-        );
-        if (kDebugMode) {
-          _logger.success(
-            'Notificación de lactancia programada para $intervalText después',
-          );
-        }
-      } catch (e, stackTrace) {
-        if (kDebugMode) {
-          _logger.w(
-            'Error programando notificación de lactancia (no crítico)',
-            e,
-            stackTrace,
-          );
-        }
-      }
-
-      // PASO 2: Si hay conexión, intentar guardar en Firestore inmediatamente
-      final isConnected = await _connectivityService.isConnected();
-      if (isConnected) {
-        try {
-          final collection = await _lactationCollection;
-          final docRef = await collection.add(record.toMap());
-
-          // Marcar como sincronizado
-          await _localDatabase.markAsSynced(record.id, docRef.id);
 
           if (kDebugMode) {
             _logger.success(
-              'Registro de lactancia sincronizado con Firestore: ${docRef.id}',
+              'LactationService.saveRecord → Procesos secundarios completados para: ${record.id}',
             );
           }
-
-          return docRef.id;
         } catch (e, stackTrace) {
-          // Si falla Firestore, el registro queda local para sincronizar después
           if (kDebugMode) {
-            _logger.w(
-              'Error guardando en Firestore, quedará pendiente de sincronización',
+            _logger.e(
+              'LactationService.saveRecord → Error inesperado en procesos secundarios',
               e,
               stackTrace,
             );
           }
-
-          // Agregar a cola de sincronización
-          await _addToSyncQueue(record, SyncOperationType.create);
-
-          return record.id; // Retornar ID local
         }
-      } else {
-        // Sin conexión: agregar a cola de sincronización
-        if (kDebugMode) {
-          _logger.d(
-            'Sin conexión: Registro guardado localmente, se sincronizará cuando haya conexión',
-          );
-        }
+      });
 
-        await _addToSyncQueue(record, SyncOperationType.create);
-
-        return record.id; // Retornar ID local
-      }
+      // IMPORTANTE: devolver rápido el ID local para que la UI siga fluida
+      return record.id;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         _logger.e('Error guardando registro de lactancia', e, stackTrace);

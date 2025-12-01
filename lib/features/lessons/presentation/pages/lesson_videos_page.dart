@@ -43,6 +43,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   bool _isInitialLoad = true;
   bool _isLoadingProgress = false;
   static const _progressLoadCooldown = Duration(seconds: 3);
+  // Estado de trivias completadas para cada lección (IDs de lecciones)
+  Set<int> _completedTriviaLessons = {};
 
   @override
   void initState() {
@@ -50,12 +52,55 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     WidgetsBinding.instance.addObserver(this);
     _initializeProviders();
     _loadVideos();
-    // Cargar progreso solo si no se ha cargado antes (verificar si el provider ya tiene datos)
+    // Cargar progreso y estado de trivias solo si no se ha cargado antes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _isInitialLoad) {
+      if (!mounted) return;
+      if (_isInitialLoad) {
         _loadProgressIfNeeded();
       }
+      _loadTriviaStatus();
     });
+  }
+
+  /// Carga de una sola vez qué lecciones ya tienen trivia completada
+  Future<void> _loadTriviaStatus() async {
+    try {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is! AuthAuthenticated) {
+        setState(() {
+          _completedTriviaLessons = {};
+        });
+        return;
+      }
+
+      final userId = authState.user.id;
+      final gamificationService = GetIt.instance<GamificationService>();
+
+      final completedLessonIdsStr = await gamificationService
+          .getCompletedTriviaLessonIds(userId);
+
+      final completedLessonIds = completedLessonIdsStr
+          .map((id) => int.tryParse(id))
+          .whereType<int>()
+          .toSet();
+
+      if (!mounted) return;
+
+      setState(() {
+        _completedTriviaLessons = completedLessonIds;
+      });
+
+      _logger.d(
+        'Trivias completadas cargadas: ${_completedTriviaLessons.toList()..sort()}',
+      );
+    } catch (e, stackTrace) {
+      _logger.w('Error cargando estado de trivias completadas', e, stackTrace);
+      if (mounted) {
+        setState(() {
+          _completedTriviaLessons = {};
+        });
+      }
+    }
   }
 
   @override
@@ -340,17 +385,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                 _buildHeader(),
 
                 // Contenido principal - Camino de lecciones
-                Expanded(
-                  child: _videos == null
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : _buildLessonPath(),
-                ),
+                // Ya no mostramos un loader explícito aquí; la página entra de inmediato.
+                // El camino se dibuja en cuanto haya datos en memoria.
+                Expanded(child: _buildLessonPath()),
               ],
             ),
           ),
@@ -417,7 +454,13 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   }
 
   Widget _buildLessonPath() {
-    if (_videos == null || _videos!.isEmpty) {
+    // Mientras los videos se cargan en background, mostramos un contenedor vacío
+    // para que la transición sea inmediata y sin indicadores de carga.
+    if (_videos == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (_videos!.isEmpty) {
       return const Center(
         child: Text(
           'No hay lecciones disponibles',
@@ -445,106 +488,91 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   }
 
   Widget _buildLessonSection(int lessonId, List<Video> videos) {
-    return FutureBuilder<bool>(
-      future: _isPreviousLessonTriviaCompleted(lessonId),
-      builder: (context, snapshot) {
-        final isLocked = lessonId > 1 && (snapshot.data ?? false) == false;
+    // La primera lección siempre está disponible
+    final bool isLocked =
+        lessonId > 1 && !_completedTriviaLessons.contains(lessonId - 1);
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Título de la lección
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 15,
-                ),
-                decoration: BoxDecoration(
-                  color: isLocked
-                      ? Colors.grey.withValues(alpha: 0.3)
-                      : Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color: isLocked
-                        ? Colors.grey.withValues(alpha: 0.5)
-                        : Colors.white.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título de la lección
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            decoration: BoxDecoration(
+              color: isLocked
+                  ? Colors.grey.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: isLocked
+                    ? Colors.grey.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${'lessons.lesson'.tr()} $lessonId',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isLocked ? Colors.grey[300] : Colors.white,
-                            ),
-                          ),
-                        ),
-                        if (isLocked)
-                          const Icon(Icons.lock, color: Colors.grey, size: 20),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      _getSubtitleForLesson(lessonId),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        color: isLocked
-                            ? Colors.grey[400]
-                            : Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    if (isLocked) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'trivia.completePrevious'.tr(),
+                    Expanded(
+                      child: Text(
+                        '${'lessons.lesson'.tr()} $lessonId',
                         style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          color: Colors.orange[300],
-                          fontStyle: FontStyle.italic,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isLocked ? Colors.grey[300] : Colors.white,
                         ),
                       ),
-                    ],
+                    ),
+                    if (isLocked)
+                      const Icon(Icons.lock, color: Colors.grey, size: 20),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Camino de videos (bloqueado si la lección está bloqueada)
-              Opacity(
-                opacity: isLocked ? 0.5 : 1.0,
-                child: IgnorePointer(
-                  ignoring: isLocked,
-                  child: _buildVideoPath(videos),
+                const SizedBox(height: 5),
+                Text(
+                  _getSubtitleForLesson(lessonId),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    color: isLocked
+                        ? Colors.grey[400]
+                        : Colors.white.withValues(alpha: 0.8),
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Botón de trivia (requisito antes de avanzar)
-              if (!isLocked) _buildTriviaButton(lessonId, videos),
-            ],
+                if (isLocked) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'trivia.completePrevious'.tr(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: Colors.orange[300],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        );
-      },
+
+          const SizedBox(height: 20),
+
+          // Camino de videos (bloqueado si la lección está bloqueada)
+          Opacity(
+            opacity: isLocked ? 0.5 : 1.0,
+            child: IgnorePointer(
+              ignoring: isLocked,
+              child: _buildVideoPath(videos),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Botón de trivia (requisito antes de avanzar)
+          if (!isLocked) _buildTriviaButton(lessonId, videos),
+        ],
+      ),
     );
-  }
-
-  Future<bool> _isPreviousLessonTriviaCompleted(int currentLessonId) async {
-    // La primera lección siempre está disponible
-    if (currentLessonId == 1) return true;
-
-    // Verificar si la trivia de la lección anterior está completada
-    final previousLessonId = currentLessonId - 1;
-    return await _isTriviaCompleted(previousLessonId);
   }
 
   Widget _buildVideoPath(List<Video> videos) {
@@ -819,65 +847,45 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   }
 
   Widget _buildTriviaButton(int lessonId, List<Video> videos) {
-    return FutureBuilder<bool>(
-      future: _isTriviaCompleted(lessonId),
-      builder: (context, snapshot) {
-        final isCompleted = snapshot.data ?? false;
-        final allVideosCompleted = videos.every(
-          (video) => _isVideoCompletedFromFirestore(video.videoId),
-        );
-
-        // Solo mostrar el botón si todos los videos están completados
-        if (!allVideosCompleted) {
-          return const SizedBox.shrink();
-        }
-
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          child: ElevatedButton.icon(
-            onPressed: () => _showTrivia(lessonId),
-            icon: Icon(
-              isCompleted ? Icons.check_circle : Icons.quiz,
-              color: Colors.white,
-            ),
-            label: Text(
-              isCompleted
-                  ? 'trivia.completed'.tr()
-                  : 'trivia.completeToAdvance'.tr(),
-              style: GoogleFonts.quicksand(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isCompleted
-                  ? Colors.green.withValues(alpha: 0.8)
-                  : const Color(0xFF3498DB),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-            ),
-          ),
-        );
-      },
+    final isCompleted = _completedTriviaLessons.contains(lessonId);
+    final allVideosCompleted = videos.every(
+      (video) => _isVideoCompletedFromFirestore(video.videoId),
     );
-  }
 
-  Future<bool> _isTriviaCompleted(int lessonId) async {
-    try {
-      final authState = context.read<AuthBloc>().state;
-      if (authState is! AuthAuthenticated) return false;
-
-      final gamificationService = GetIt.instance<GamificationService>();
-      return await gamificationService.isTriviaCompleted(
-        authState.user.id,
-        lessonId.toString(),
-      );
-    } catch (e) {
-      return false;
+    // Solo mostrar el botón si todos los videos están completados
+    if (!allVideosCompleted) {
+      return const SizedBox.shrink();
     }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      child: ElevatedButton.icon(
+        onPressed: () => _showTrivia(lessonId),
+        icon: Icon(
+          isCompleted ? Icons.check_circle : Icons.quiz,
+          color: Colors.white,
+        ),
+        label: Text(
+          isCompleted
+              ? 'trivia.completed'.tr()
+              : 'trivia.completeToAdvance'.tr(),
+          style: GoogleFonts.quicksand(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isCompleted
+              ? Colors.green.withValues(alpha: 0.8)
+              : const Color(0xFF3498DB),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _showTrivia(int lessonId) async {
@@ -887,8 +895,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final userId = authState.user.id;
     final lessonIdStr = lessonId.toString();
 
-    // Verificar si ya está completada
-    final isCompleted = await _isTriviaCompleted(lessonId);
+    // Verificar si ya está completada (usando el estado en memoria)
+    final isCompleted = _completedTriviaLessons.contains(lessonId);
 
     if (!mounted) return;
 
@@ -907,9 +915,11 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       lessonId: lessonIdStr,
       userId: userId,
       onComplete: () {
-        // Refrescar la UI después de completar
+        // Marcar trivia como completada en memoria y refrescar UI
         if (mounted) {
-          setState(() {});
+          setState(() {
+            _completedTriviaLessons.add(lessonId);
+          });
         }
       },
     );

@@ -10,10 +10,11 @@ import '../../domain/services/xp_calculation_service.dart';
 import '../../domain/services/level_service.dart';
 import '../../domain/services/streak_service.dart';
 import '../../domain/services/achievement_service.dart';
+import '../../domain/services/gamification_service.dart';
+import '../../../../core/di/injection.dart';
 
 /// BLoC para gestionar el estado de gamificación
-class GamificationBloc
-    extends Bloc<GamificationEvent, GamificationState> {
+class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
   final GamificationRepository _repository;
   final XPCalculationService _xpService = XPCalculationService();
   final LevelService _levelService = LevelService();
@@ -21,8 +22,8 @@ class GamificationBloc
   final AchievementService _achievementService = AchievementService();
 
   GamificationBloc({required GamificationRepository repository})
-      : _repository = repository,
-        super(const GamificationInitial()) {
+    : _repository = repository,
+      super(const GamificationInitial()) {
     on<LoadGamificationProfile>(_onLoadGamificationProfile);
     on<AddXP>(_onAddXP);
     on<UpdateStreak>(_onUpdateStreak);
@@ -62,19 +63,17 @@ class GamificationBloc
       emit(GamificationLoaded(profile: newProfile));
     } else {
       // Cargar logros desbloqueados
-      final achievements =
-          _achievementService.getUnlockedAchievements(profile);
-      emit(GamificationLoaded(
-        profile: profile,
-        unlockedAchievements: achievements,
-      ));
+      final achievements = _achievementService.getUnlockedAchievements(profile);
+      emit(
+        GamificationLoaded(
+          profile: profile,
+          unlockedAchievements: achievements,
+        ),
+      );
     }
   }
 
-  Future<void> _onAddXP(
-    AddXP event,
-    Emitter<GamificationState> emit,
-  ) async {
+  Future<void> _onAddXP(AddXP event, Emitter<GamificationState> emit) async {
     if (state is! GamificationLoaded) return;
 
     final currentState = state as GamificationLoaded;
@@ -95,7 +94,8 @@ class GamificationBloc
       // 3. Actualizar racha
       final currentStreak = await _repository.getStreak(currentProfile.userId);
       DailyStreak? updatedStreak;
-      if (currentStreak.isRight() && currentStreak.getOrElse(() => null) != null) {
+      if (currentStreak.isRight() &&
+          currentStreak.getOrElse(() => null) != null) {
         final streak = currentStreak.getOrElse(() => null)!;
         updatedStreak = _streakService.updateStreakOnActivity(
           streak,
@@ -104,9 +104,7 @@ class GamificationBloc
         await _repository.saveStreak(updatedStreak);
       } else {
         // Crear nueva racha
-        updatedStreak = DailyStreak(
-          userId: currentProfile.userId,
-        );
+        updatedStreak = DailyStreak(userId: currentProfile.userId);
         updatedStreak = _streakService.updateStreakOnActivity(
           updatedStreak,
           event.transaction.timestamp,
@@ -142,10 +140,13 @@ class GamificationBloc
             streakBonus.amount,
           );
           await _repository.saveProfile(profileWithBonus);
-          emit(currentState.copyWith(
-            profile: profileWithBonus,
-            leveledUp: leveledUp || profileWithBonus.currentLevel > previousLevel,
-          ));
+          emit(
+            currentState.copyWith(
+              profile: profileWithBonus,
+              leveledUp:
+                  leveledUp || profileWithBonus.currentLevel > previousLevel,
+            ),
+          );
           return;
         }
       }
@@ -153,17 +154,25 @@ class GamificationBloc
       // 6. Guardar perfil actualizado
       await _repository.saveProfile(profileWithStreak);
 
-      // 7. Actualizar estado de mascota
-      final mascotState = _determineMascotState(profileWithStreak, updatedStreak);
+      // 7. Obtener conteo de registros de lactancia de hoy
+      final gamificationService = getIt<GamificationService>();
+      final todayRecordsCount = await gamificationService
+          .getTodayCompleteRecordsCount(currentProfile.userId);
+
+      // 8. Actualizar estado de mascota (considerando registros de hoy)
+      final mascotState = _determineMascotState(
+        profileWithStreak,
+        updatedStreak,
+        lactationRecordsToday: todayRecordsCount,
+      );
       final profileWithMascot = profileWithStreak.copyWith(
         mascotState: mascotState,
       );
       await _repository.saveProfile(profileWithMascot);
 
-      emit(currentState.copyWith(
-        profile: profileWithMascot,
-        leveledUp: leveledUp,
-      ));
+      emit(
+        currentState.copyWith(profile: profileWithMascot, leveledUp: leveledUp),
+      );
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error agregando XP: $e');
@@ -182,35 +191,34 @@ class GamificationBloc
     final currentProfile = currentState.profile;
 
     final streakResult = await _repository.getStreak(currentProfile.userId);
-    streakResult.fold(
-      (error) => emit(GamificationError(error)),
-      (streak) async {
-        if (streak == null) {
-          final newStreak = DailyStreak(userId: currentProfile.userId);
-          final updatedStreak = _streakService.updateStreakOnActivity(
-            newStreak,
-            event.activityTimestamp,
-          );
-          await _repository.saveStreak(updatedStreak);
-        } else {
-          final updatedStreak = _streakService.updateStreakOnActivity(
-            streak,
-            event.activityTimestamp,
-          );
-          await _repository.saveStreak(updatedStreak);
+    streakResult.fold((error) => emit(GamificationError(error)), (
+      streak,
+    ) async {
+      if (streak == null) {
+        final newStreak = DailyStreak(userId: currentProfile.userId);
+        final updatedStreak = _streakService.updateStreakOnActivity(
+          newStreak,
+          event.activityTimestamp,
+        );
+        await _repository.saveStreak(updatedStreak);
+      } else {
+        final updatedStreak = _streakService.updateStreakOnActivity(
+          streak,
+          event.activityTimestamp,
+        );
+        await _repository.saveStreak(updatedStreak);
 
-          final updatedProfile = currentProfile.copyWith(
-            currentStreak: updatedStreak.currentStreak,
-            lastActivityDate: updatedStreak.lastActivityDate,
-            streakStartDate: updatedStreak.streakStartDate,
-            updatedAt: DateTime.now(),
-          );
-          await _repository.saveProfile(updatedProfile);
+        final updatedProfile = currentProfile.copyWith(
+          currentStreak: updatedStreak.currentStreak,
+          lastActivityDate: updatedStreak.lastActivityDate,
+          streakStartDate: updatedStreak.streakStartDate,
+          updatedAt: DateTime.now(),
+        );
+        await _repository.saveProfile(updatedProfile);
 
-          emit(currentState.copyWith(profile: updatedProfile));
-        }
-      },
-    );
+        emit(currentState.copyWith(profile: updatedProfile));
+      }
+    });
   }
 
   Future<void> _onUseRestDay(
@@ -223,30 +231,33 @@ class GamificationBloc
     final currentProfile = currentState.profile;
 
     if (!currentProfile.canUseRestDay) {
-      emit(const GamificationError('No puedes usar más días de descanso esta semana'));
+      emit(
+        const GamificationError(
+          'No puedes usar más días de descanso esta semana',
+        ),
+      );
       return;
     }
 
     final streakResult = await _repository.getStreak(currentProfile.userId);
-    streakResult.fold(
-      (error) => emit(GamificationError(error)),
-      (streak) async {
-        if (streak == null) return;
+    streakResult.fold((error) => emit(GamificationError(error)), (
+      streak,
+    ) async {
+      if (streak == null) return;
 
-        final updatedStreak = _streakService.useRestDay(streak, DateTime.now());
-        await _repository.saveStreak(updatedStreak);
+      final updatedStreak = _streakService.useRestDay(streak, DateTime.now());
+      await _repository.saveStreak(updatedStreak);
 
-        final updatedProfile = currentProfile.copyWith(
-          restDaysUsed: updatedStreak.restDaysUsedThisWeek,
-          restDaysAvailable: 3 - updatedStreak.restDaysUsedThisWeek,
-          lastRestDayUsed: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        await _repository.saveProfile(updatedProfile);
+      final updatedProfile = currentProfile.copyWith(
+        restDaysUsed: updatedStreak.restDaysUsedThisWeek,
+        restDaysAvailable: 3 - updatedStreak.restDaysUsedThisWeek,
+        lastRestDayUsed: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _repository.saveProfile(updatedProfile);
 
-        emit(currentState.copyWith(profile: updatedProfile));
-      },
-    );
+      emit(currentState.copyWith(profile: updatedProfile));
+    });
   }
 
   Future<void> _onActivatePauseMode(
@@ -259,26 +270,27 @@ class GamificationBloc
     final currentProfile = currentState.profile;
 
     final streakResult = await _repository.getStreak(currentProfile.userId);
-    streakResult.fold(
-      (error) => emit(GamificationError(error)),
-      (streak) async {
-        if (streak == null) return;
+    streakResult.fold((error) => emit(GamificationError(error)), (
+      streak,
+    ) async {
+      if (streak == null) return;
 
-        final updatedStreak =
-            _streakService.activatePauseMode(streak, DateTime.now());
-        await _repository.saveStreak(updatedStreak);
+      final updatedStreak = _streakService.activatePauseMode(
+        streak,
+        DateTime.now(),
+      );
+      await _repository.saveStreak(updatedStreak);
 
-        final updatedProfile = currentProfile.copyWith(
-          isPauseModeActive: true,
-          pauseModeStartDate: DateTime.now(),
-          mascotState: 'supporting',
-          updatedAt: DateTime.now(),
-        );
-        await _repository.saveProfile(updatedProfile);
+      final updatedProfile = currentProfile.copyWith(
+        isPauseModeActive: true,
+        pauseModeStartDate: DateTime.now(),
+        mascotState: 'supporting',
+        updatedAt: DateTime.now(),
+      );
+      await _repository.saveProfile(updatedProfile);
 
-        emit(currentState.copyWith(profile: updatedProfile));
-      },
-    );
+      emit(currentState.copyWith(profile: updatedProfile));
+    });
   }
 
   Future<void> _onDeactivatePauseMode(
@@ -291,26 +303,27 @@ class GamificationBloc
     final currentProfile = currentState.profile;
 
     final streakResult = await _repository.getStreak(currentProfile.userId);
-    streakResult.fold(
-      (error) => emit(GamificationError(error)),
-      (streak) async {
-        if (streak == null) return;
+    streakResult.fold((error) => emit(GamificationError(error)), (
+      streak,
+    ) async {
+      if (streak == null) return;
 
-        final updatedStreak =
-            _streakService.deactivatePauseMode(streak, DateTime.now());
-        await _repository.saveStreak(updatedStreak);
+      final updatedStreak = _streakService.deactivatePauseMode(
+        streak,
+        DateTime.now(),
+      );
+      await _repository.saveStreak(updatedStreak);
 
-        final updatedProfile = currentProfile.copyWith(
-          isPauseModeActive: false,
-          pauseModeStartDate: null,
-          mascotState: 'happy',
-          updatedAt: DateTime.now(),
-        );
-        await _repository.saveProfile(updatedProfile);
+      final updatedProfile = currentProfile.copyWith(
+        isPauseModeActive: false,
+        pauseModeStartDate: null,
+        mascotState: 'happy',
+        updatedAt: DateTime.now(),
+      );
+      await _repository.saveProfile(updatedProfile);
 
-        emit(currentState.copyWith(profile: updatedProfile));
-      },
-    );
+      emit(currentState.copyWith(profile: updatedProfile));
+    });
   }
 
   Future<void> _onSyncWithFirestore(
@@ -388,11 +401,13 @@ class GamificationBloc
       );
       await _repository.saveProfile(updatedProfile);
 
-      emit(currentState.copyWith(
-        profile: updatedProfile,
-        unlockedAchievements: updatedUnlockedAchievements,
-        newlyUnlockedAchievements: newAchievements,
-      ));
+      emit(
+        currentState.copyWith(
+          profile: updatedProfile,
+          unlockedAchievements: updatedUnlockedAchievements,
+          newlyUnlockedAchievements: newAchievements,
+        ),
+      );
     }
   }
 
@@ -403,20 +418,28 @@ class GamificationBloc
   ) async {
     try {
       await _repository.saveProfile(event.profile);
-      
+
       if (state is GamificationLoaded) {
         final currentState = state as GamificationLoaded;
-        final achievements = _achievementService.getUnlockedAchievements(event.profile);
-        emit(currentState.copyWith(
-          profile: event.profile,
-          unlockedAchievements: achievements,
-        ));
+        final achievements = _achievementService.getUnlockedAchievements(
+          event.profile,
+        );
+        emit(
+          currentState.copyWith(
+            profile: event.profile,
+            unlockedAchievements: achievements,
+          ),
+        );
       } else {
-        final achievements = _achievementService.getUnlockedAchievements(event.profile);
-        emit(GamificationLoaded(
-          profile: event.profile,
-          unlockedAchievements: achievements,
-        ));
+        final achievements = _achievementService.getUnlockedAchievements(
+          event.profile,
+        );
+        emit(
+          GamificationLoaded(
+            profile: event.profile,
+            unlockedAchievements: achievements,
+          ),
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -428,8 +451,14 @@ class GamificationBloc
 
   String _determineMascotState(
     UserGamificationProfile profile,
-    DailyStreak streak,
-  ) {
+    DailyStreak streak, {
+    int? lactationRecordsToday,
+  }) {
+    // Si no hay registros de lactancia hoy, el bebé está preocupado
+    if (lactationRecordsToday != null && lactationRecordsToday == 0) {
+      return 'worried';
+    }
+
     if (profile.isPauseModeActive) return 'supporting';
 
     final streakStatus = _streakService.checkStreakStatus(streak);
@@ -451,4 +480,3 @@ class GamificationBloc
     }
   }
 }
-

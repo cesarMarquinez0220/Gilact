@@ -5,11 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../gamification/domain/services/gamification_service.dart';
 
 class LeccionesProvider extends ChangeNotifier {
   final Set<int> _leccionesCompletadas = {};
   final Map<int, double> _progresoVideos = {};
   final AppLogger _logger = getIt<AppLogger>();
+  GamificationService? _gamificationService;
 
   // Claves para SharedPreferences
   static const String _keyLeccionesCompletadas = 'lecciones_completadas';
@@ -18,6 +20,49 @@ class LeccionesProvider extends ChangeNotifier {
   LeccionesProvider() {
     // No cargar progreso automáticamente - se cargará desde MainNavigationPage
     _logger.d('LeccionesProvider inicializado (sin carga automática)');
+    // Obtener GamificationService de forma lazy para evitar dependencias circulares
+    try {
+      _gamificationService = getIt<GamificationService>();
+    } catch (e) {
+      _logger.w('GamificationService no disponible aún, se intentará más tarde');
+    }
+  }
+
+  /// Obtiene el número de lecciones completadas
+  int get completedLessonsCount => _leccionesCompletadas.length;
+
+  /// Notifica a GamificationService sobre cambios en lecciones completadas
+  Future<void> _notifyLessonsCompletedChanged() async {
+    if (_gamificationService == null) {
+      try {
+        _gamificationService = getIt<GamificationService>();
+      } catch (e) {
+        _logger.w('GamificationService no disponible para actualizar etapa del bebé');
+        return;
+      }
+    }
+
+    final completedCount = _leccionesCompletadas.length;
+    if (completedCount == 0) return;
+
+    try {
+      final authUser = FirebaseAuth.instance.currentUser;
+      if (authUser == null) return;
+
+      final result = await _gamificationService!.updateBabyStage(
+        userId: authUser.uid,
+        completedLessons: completedCount,
+      );
+
+      result.fold(
+        (error) => _logger.w('Error actualizando etapa del bebé: $error'),
+        (profile) => _logger.d(
+          'Etapa del bebé actualizada: ${profile.babyStage} ($completedCount lecciones)',
+        ),
+      );
+    } catch (e, stackTrace) {
+      _logger.e('Error notificando cambio de lecciones completadas', e, stackTrace);
+    }
   }
 
   bool isLeccionCompletada(int videoId) {
@@ -29,12 +74,18 @@ class LeccionesProvider extends ChangeNotifier {
   }
 
   void marcarLeccionCompletada(int videoId) {
+    final wasAlreadyCompleted = _leccionesCompletadas.contains(videoId);
     _leccionesCompletadas.add(videoId);
     _progresoVideos[videoId] = 100.0;
     _guardarProgreso();
 
     // Precargar el siguiente video cuando se completa una lección
     _preloadNextVideo(videoId);
+
+    // Notificar cambio en lecciones completadas (Observer Pattern)
+    if (!wasAlreadyCompleted) {
+      _notifyLessonsCompletedChanged();
+    }
 
     notifyListeners();
   }
@@ -50,8 +101,14 @@ class LeccionesProvider extends ChangeNotifier {
     _progresoVideos[videoId] = progreso;
 
     // Si el progreso es 100%, marcar como completada
+    final wasAlreadyCompleted = _leccionesCompletadas.contains(videoId);
     if (progreso >= 100.0) {
       _leccionesCompletadas.add(videoId);
+      
+      // Notificar cambio en lecciones completadas si es nueva
+      if (!wasAlreadyCompleted) {
+        _notifyLessonsCompletedChanged();
+      }
     }
 
     _guardarProgreso();
@@ -229,6 +286,10 @@ class LeccionesProvider extends ChangeNotifier {
       }
 
       _logger.d('Progreso cargado desde Firestore: ${_leccionesCompletadas.length} videos completados');
+      
+      // Notificar cambio en lecciones completadas después de cargar desde Firestore
+      _notifyLessonsCompletedChanged();
+      
       notifyListeners();
     } catch (e, stackTrace) {
       _logger.e('Error cargando progreso desde Firestore', e, stackTrace);

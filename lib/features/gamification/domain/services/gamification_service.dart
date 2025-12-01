@@ -9,6 +9,7 @@ import 'xp_calculation_service.dart';
 import 'level_service.dart';
 import 'streak_service.dart';
 import 'achievement_service.dart';
+import 'baby_stage_service.dart';
 import '../../../lessons/domain/repositories/lesson_repository.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../../core/di/injection.dart';
@@ -21,6 +22,7 @@ class GamificationService {
   final LevelService _levelService = LevelService();
   final StreakService _streakService = StreakService();
   final AchievementService _achievementService = AchievementService();
+  final BabyStageService _babyStageService = BabyStageService();
 
   GamificationService({required GamificationRepository repository})
     : _repository = repository;
@@ -235,6 +237,27 @@ class GamificationService {
     }
   }
 
+  /// Obtiene el conjunto de IDs de lecciones cuya trivia ya fue completada
+  /// Se usa para cargar el estado de todas las lecciones de una sola vez
+  Future<Set<String>> getCompletedTriviaLessonIds(String userId) async {
+    try {
+      final transactionsResult = await _repository.getXPTransactions(userId);
+      return transactionsResult.fold(
+        (error) => <String>{},
+        (transactions) => transactions
+            .where(
+              (transaction) =>
+                  transaction.source == XPSource.triviaCompleted &&
+                  transaction.sourceId != null,
+            )
+            .map((t) => t.sourceId!)
+            .toSet(),
+      );
+    } catch (e) {
+      return <String>{};
+    }
+  }
+
   /// Agrega XP y actualiza el perfil
   Future<Either<String, UserGamificationProfile>> _addXPAndUpdateProfile(
     String userId,
@@ -307,10 +330,14 @@ class GamificationService {
             return Right(profileWithBonus);
           }
 
-          // 6. Determinar estado de mascota
+          // 6. Obtener conteo de registros de lactancia de hoy
+          final todayRecordsCount = await getTodayCompleteRecordsCount(userId);
+
+          // 7. Determinar estado de mascota (considerando registros de hoy)
           final mascotState = _determineMascotState(
             profileWithStreak,
             nonNullStreak,
+            lactationRecordsToday: todayRecordsCount,
           );
           final finalProfile = profileWithStreak.copyWith(
             mascotState: mascotState,
@@ -409,10 +436,17 @@ class GamificationService {
   }
 
   /// Determina el estado de la mascota
+  /// Considera registros de lactancia del día y estado de la racha
   String _determineMascotState(
     UserGamificationProfile profile,
-    DailyStreak streak,
-  ) {
+    DailyStreak streak, {
+    int? lactationRecordsToday,
+  }) {
+    // Si no hay registros de lactancia hoy, el bebé está preocupado
+    if (lactationRecordsToday != null && lactationRecordsToday == 0) {
+      return 'worried';
+    }
+
     if (profile.isPauseModeActive) return 'supporting';
 
     final streakStatus = _streakService.checkStreakStatus(streak);
@@ -430,6 +464,48 @@ class GamificationService {
         return 'supporting';
       case StreakStatus.noActivity:
         return 'sleeping';
+    }
+  }
+
+  /// Actualiza la etapa del bebé según lecciones completadas
+  Future<Either<String, UserGamificationProfile>> updateBabyStage({
+    required String userId,
+    required int completedLessons,
+  }) async {
+    try {
+      final profileResult = await _repository.getProfile(userId);
+      return profileResult.fold(
+        (error) => Left('Error obteniendo perfil: $error'),
+        (profile) async {
+          if (profile == null) {
+            return const Left('Perfil no encontrado');
+          }
+
+          // Calcular nueva etapa
+          final newStage = _babyStageService.calculateBabyStage(
+            completedLessons,
+          );
+
+          // Si la etapa no cambió, retornar perfil sin modificar
+          if (profile.babyStage == newStage) {
+            return Right(profile);
+          }
+
+          // Actualizar perfil con nueva etapa
+          final updatedProfile = profile.copyWith(
+            babyStage: newStage,
+            updatedAt: DateTime.now(),
+          );
+
+          await _repository.saveProfile(updatedProfile);
+          return Right(updatedProfile);
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error actualizando etapa del bebé: $e');
+      }
+      return Left('Error actualizando etapa del bebé: $e');
     }
   }
 

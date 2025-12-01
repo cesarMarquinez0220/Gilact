@@ -12,6 +12,7 @@ import '../../../videos/data/services/video_interaction_service.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
 import '../../../auth/domain/services/credentials_cache_service.dart';
+import '../../../gamification/domain/services/gamification_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -260,6 +261,21 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
       // Configurar estado inicial de lecciones (solo primera habilitada)
       _setupInitialLessonState();
+
+      // Precargar estado de trivias completadas para que la pantalla de lecciones sea fluida
+      try {
+        final gamificationService = getIt<GamificationService>();
+        await gamificationService.getCompletedTriviaLessonIds(finalUserId);
+        _logger.d(
+          'MainNavigationPage: Estado de trivias completadas precargado para $finalUserId',
+        );
+      } catch (e, stackTrace) {
+        _logger.w(
+          'MainNavigationPage: Error precargando trivias completadas (no crítico)',
+          e,
+          stackTrace,
+        );
+      }
 
       _logger.success('MainNavigationPage: Datos inicializados correctamente');
     } catch (e, stackTrace) {
