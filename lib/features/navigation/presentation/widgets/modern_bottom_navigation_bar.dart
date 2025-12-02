@@ -106,8 +106,8 @@ class ModernBottomNavigationBar extends StatelessWidget {
                 _buildNavItemWithBadge(
                   context,
                   1,
-                  Icons.pets_outlined,
-                  Icons.pets,
+                  Icons.emoji_events_outlined,
+                  Icons.emoji_events,
                   'navigation.companion'.tr(),
                 ),
                 _buildNavItem(

@@ -390,7 +390,9 @@ class _HomePageState extends State<HomePage> {
             height: 40,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              final tierEmoji = levelService.getLevelTierEmoji(profile.currentLevel);
+              final tierEmoji = levelService.getLevelTierEmoji(
+                profile.currentLevel,
+              );
               return Center(
                 child: Text(tierEmoji, style: const TextStyle(fontSize: 20)),
               );
@@ -1562,7 +1564,7 @@ class _HomePageState extends State<HomePage> {
     // Verificar si hay registros hoy
     final hasRecords = lactationProvider.todayRecords.isNotEmpty;
     final isLoading = lactationProvider.isLoading;
-    
+
     return Column(
       children: [
         if (!hasRecords && !isLoading)
@@ -1602,9 +1604,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                isLoading
-                    ? '...'
-                    : lactationProvider.getNextFeedTime(),
+                isLoading ? '...' : lactationProvider.getNextFeedTime(),
                 style: GoogleFonts.quicksand(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,

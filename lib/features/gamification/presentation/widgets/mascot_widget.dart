@@ -365,13 +365,56 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
   late final rive.FileLoader _fileLoader;
   rive.RiveWidgetController? _controller;
 
+  /// Obtiene la ruta del archivo Rive según la etapa del bebé
+  String _getRiveFilePath(String babyStage) {
+    switch (babyStage) {
+      case 'baby_born':
+        return 'assets/animations/0meses.riv';
+      case 'baby_3months':
+        return 'assets/animations/3meses.riv';
+      case 'baby_6months':
+        return 'assets/animations/6meses.riv';
+      default:
+        return 'assets/animations/0meses.riv';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    final filePath = _getRiveFilePath(widget.babyStage);
+    if (kDebugMode) {
+      print('📁 MascotWidget: Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}');
+    }
     _fileLoader = rive.FileLoader.fromAsset(
-      'assets/animations/baby_born.riv',
+      filePath,
       riveFactory: rive.Factory.rive,
     );
+  }
+
+  @override
+  void didUpdateWidget(_BabyRiveAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Si cambió la etapa del bebé, necesitamos recargar el archivo
+    if (oldWidget.babyStage != widget.babyStage) {
+      if (kDebugMode) {
+        print(
+          '🔄 MascotWidget: Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
+        );
+      }
+      _fileLoader.dispose();
+      final filePath = _getRiveFilePath(widget.babyStage);
+      _fileLoader = rive.FileLoader.fromAsset(
+        filePath,
+        riveFactory: rive.Factory.rive,
+      );
+      // Resetear el controlador para que se recargue con el nuevo archivo
+      _controller = null;
+    }
+    // Si cambió el estado, actualizar
+    if (oldWidget.state != widget.state && _controller != null) {
+      _updateState(widget.state);
+    }
   }
 
   @override
@@ -386,7 +429,6 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
 
     // Obtener la máquina de estados del controlador
     final stateMachine = _controller!.stateMachine;
-    if (stateMachine == null) return;
 
     // Si es baby_6months, solo usar idle (no tiene happy/worried)
     final stateToUse = widget.babyStage == 'baby_6months' ? 'idle' : newState;
@@ -439,14 +481,6 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
     }
   }
 
-  @override
-  void didUpdateWidget(_BabyRiveAnimation oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.state != widget.state ||
-        oldWidget.babyStage != widget.babyStage) {
-      _updateState(widget.state);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -456,10 +490,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
       );
     }
 
-    // Intentar cargar el artboard solicitado, con fallback al primer artboard disponible
+    // Cada archivo Rive tiene un solo artboard, así que no necesitamos especificar el artboard
+    // El archivo correcto ya se carga según la etapa del bebé
     return rive.RiveWidgetBuilder(
       fileLoader: _fileLoader,
-      artboardSelector: rive.ArtboardSelector.byName(widget.babyStage),
+      // No especificamos artboardSelector porque cada archivo solo tiene un artboard
       stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
       builder: (context, state) {
         if (state is rive.RiveLoading) {
@@ -476,137 +511,10 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
         if (state is rive.RiveFailed) {
           if (kDebugMode) {
             print(
-              '❌ Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
-            );
-            // Si el error es que no se encuentra el artboard, intentar con baby_born
-            if (state.error.toString().contains('not found') &&
-                widget.babyStage != 'baby_born') {
-              print('🔄 Intentando fallback a artboard "baby_born"...');
-            }
-          }
-
-          // Si el artboard solicitado no existe, intentar sin especificar artboard (usará el por defecto)
-          if (state.error.toString().contains('not found')) {
-            if (kDebugMode) {
-              print('🔄 Intentando usar el artboard por defecto...');
-            }
-            return rive.RiveWidgetBuilder(
-              fileLoader: _fileLoader,
-              // Sin artboardSelector, usará el artboard por defecto del archivo
-              stateMachineSelector: rive.StateMachineSelector.byName(
-                'State Machine 1',
-              ),
-              builder: (context, fallbackState) {
-                if (fallbackState is rive.RiveLoading) {
-                  return SizedBox(
-                    width: widget.size,
-                    height: widget.size,
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if (fallbackState is rive.RiveFailed) {
-                  if (kDebugMode) {
-                    print('❌ Fallback también falló: ${fallbackState.error}');
-                  }
-                  return SizedBox(
-                    width: widget.size,
-                    height: widget.size,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red),
-                        if (kDebugMode)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Error: ${fallbackState.error}',
-                              style: const TextStyle(fontSize: 10),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (fallbackState is rive.RiveLoaded) {
-                  if (kDebugMode) {
-                    print('✅ Fallback exitoso: usando el artboard por defecto');
-                    // Intentar obtener información del artboard cargado
-                    try {
-                      final artboard = fallbackState.controller.artboard;
-                      print('   📋 Artboard cargado: ${artboard.name}');
-
-                      // Intentar listar todos los artboards disponibles
-                      try {
-                        final riveFile = fallbackState.controller.file;
-                        print(
-                          '   📚 Intentando listar artboards disponibles...',
-                        );
-                        // Nota: La API de Rive puede variar, intentamos acceder de diferentes formas
-                        try {
-                          // Intentar acceder a los artboards a través del archivo
-                          final artboards = (riveFile as dynamic).artboards;
-                          if (artboards != null) {
-                            if (artboards is List && artboards.isNotEmpty) {
-                              print(
-                                '   📚 Artboards disponibles en el archivo:',
-                              );
-                              for (var i = 0; i < artboards.length; i++) {
-                                final ab = artboards[i];
-                                final name = (ab as dynamic).name;
-                                print('      ${i + 1}. "$name"');
-                              }
-                            } else {
-                              print(
-                                '      ⚠️ La lista de artboards está vacía',
-                              );
-                            }
-                          } else {
-                            print(
-                              '      ⚠️ No se pudieron obtener los artboards del archivo',
-                            );
-                          }
-                        } catch (e) {
-                          print('      ⚠️ Error al acceder a artboards: $e');
-                          print(
-                            '      💡 Tip: Verifica los nombres de los artboards en Rive',
-                          );
-                        }
-                      } catch (e) {
-                        print('   ⚠️ No se pudo acceder al archivo Rive: $e');
-                      }
-                    } catch (e) {
-                      if (kDebugMode) {
-                        print(
-                          '   ⚠️ No se pudo obtener el nombre del artboard: $e',
-                        );
-                      }
-                    }
-                  }
-                  _controller = fallbackState.controller;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      _updateState(widget.state);
-                    }
-                  });
-                  return SizedBox(
-                    width: widget.size,
-                    height: widget.size,
-                    child: rive.RiveWidget(
-                      controller: fallbackState.controller,
-                      fit: rive.Fit.contain,
-                    ),
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
+              '❌ MascotWidget: Rive falló al cargar archivo para etapa "${widget.babyStage}": ${state.error}',
             );
           }
-
-          // Si no es un error de artboard no encontrado, mostrar el error
+          // Mostrar error
           return SizedBox(
             width: widget.size,
             height: widget.size,

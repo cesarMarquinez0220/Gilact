@@ -455,17 +455,17 @@
   "companion": {
     "mascotMessages": {
       "keepGoing": "Keep it up, you're doing great! 🌟",
-      "everyRecordCounts": "Every record counts, you're doing a great job 👏",
+      "everyRecordCounts": "Everything adds up! You're doing great ✨",
       "yourWellbeing": "Remember: your wellbeing is the most important 💕",
       "youAreAdvancing": "You're advancing incredibly! 🎉",
       "takeYourTime": "Take your time, there's no rush ⏰",
-      "youAreSuperMom": "You're a super mom, keep it up! 💪"
+      "youAreSuperMom": "You're a super mom, keep it up! 🚀"
     },
     "title": "Companion",
     "level": "Level",
     "streak": "Streak",
     "achievements": "Achievements",
-    "headerTitle": "Your Companion",
+    "headerTitle": "My Progress",
     "headerSubtitle": "Your support on this journey",
     "errorLoadingCompanion": "Error loading companion",
     "dailyChallenge": "Daily Challenge",
@@ -1308,6 +1308,24 @@
         },
         "lost": "Take your time. We'll be here when you return 💙",
         "noActivity": "Start your first streak today!"
+      },
+      "babyStage": {
+        "upgradeTitle": "Your baby has grown!",
+        "upgradeMessage": "Congratulations!",
+        "upgradeDescription": "You've completed {lessons} lessons and your baby is now {newStage} 🎉",
+        "@upgradeDescription": {
+          "placeholders": {
+            "lessons": {
+              "type": "int"
+            },
+            "newStage": {
+              "type": "String"
+            }
+          }
+        },
+        "born": "Newborn",
+        "3months": "3 Months",
+        "6months": "6 Months"
       }
     }
   },

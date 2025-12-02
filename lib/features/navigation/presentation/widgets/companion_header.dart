@@ -90,7 +90,7 @@ class CompanionHeader extends StatelessWidget {
               ],
             ),
             child: Icon(
-              Icons.pets,
+              Icons.emoji_events,
               color: Colors.white,
               size: isSmallScreen ? 28 : 32,
             ),

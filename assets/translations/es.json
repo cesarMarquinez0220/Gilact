@@ -473,17 +473,17 @@
   "companion": {
     "mascotMessages": {
       "keepGoing": "¡Sigue así, lo estás haciendo genial! 🌟",
-      "everyRecordCounts": "Cada registro cuenta, estás haciendo un gran trabajo 👏",
+      "everyRecordCounts": "¡Todo suma! Lo haces genial ✨",
       "yourWellbeing": "Recuerda: tu bienestar es lo más importante 💕",
       "youAreAdvancing": "¡Estás avanzando increíblemente! 🎉",
       "takeYourTime": "Tómate tu tiempo, no hay prisa ⏰",
-      "youAreSuperMom": "Eres una super mamá, sigue así! 💪"
+      "youAreSuperMom": "Eres una super mamá, sigue así! 🚀"
     },
     "title": "Compañera",
     "level": "Nivel",
     "streak": "Racha",
     "achievements": "Logros",
-    "headerTitle": "Tu Compañera",
+    "headerTitle": "Mi Progreso",
     "headerSubtitle": "Tu apoyo en este viaje",
     "errorLoadingCompanion": "Error cargando compañera",
     "dailyChallenge": "Desafío del Día",
@@ -1320,6 +1320,24 @@
         },
         "lost": "Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙",
         "noActivity": "¡Comienza tu primera racha hoy!"
+      },
+      "babyStage": {
+        "upgradeTitle": "¡Tu bebé ha crecido!",
+        "upgradeMessage": "¡Felicidades!",
+        "upgradeDescription": "Has completado {lessons} lecciones y tu bebé ahora tiene {newStage} 🎉",
+        "@upgradeDescription": {
+          "placeholders": {
+            "lessons": {
+              "type": "int"
+            },
+            "newStage": {
+              "type": "String"
+            }
+          }
+        },
+        "born": "Recién Nacido",
+        "3months": "3 Meses",
+        "6months": "6 Meses"
       }
     }
   },

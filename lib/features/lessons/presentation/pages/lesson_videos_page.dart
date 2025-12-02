@@ -16,6 +16,11 @@ import '../../../videos/domain/entities/video.dart' as video_entity;
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
 import '../../../gamification/domain/services/gamification_service.dart';
+import '../../../gamification/presentation/bloc/gamification_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_event.dart';
+import '../../../gamification/presentation/bloc/gamification_state.dart';
+import '../../../gamification/presentation/widgets/baby_stage_upgrade_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -300,8 +305,51 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       setState(() {
         lastCompletedLesson = videoId;
       });
-      // Actualizar el provider
-      context.read<LeccionesProvider>().marcarLeccionCompletada(videoId);
+      // Obtener el perfil actual antes de actualizar para comparar la etapa
+      final gamificationBloc = context.read<GamificationBloc>();
+      final currentState = gamificationBloc.state;
+      String? previousStage;
+      if (currentState is GamificationLoaded) {
+        previousStage = currentState.profile.babyStage;
+      }
+      
+      // Actualizar el provider y obtener el perfil actualizado si la etapa cambió
+      final updatedProfile = await context
+          .read<LeccionesProvider>()
+          .marcarLeccionCompletadaWithProfileUpdate(videoId);
+      
+      // Si la etapa del bebé cambió, actualizar el GamificationBloc y mostrar diálogo
+      if (updatedProfile != null && mounted) {
+        final newStage = updatedProfile.babyStage;
+        
+        // Verificar si la etapa realmente cambió
+        if (previousStage != null && previousStage != newStage) {
+          // Actualizar el bloc
+          gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
+          _logger.d(
+            'Etapa del bebé actualizada: $previousStage -> $newStage',
+          );
+          
+          // Mostrar diálogo de celebración después de un pequeño delay
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            // Obtener el conteo de lecciones únicas (no videos)
+            final completedLessons = await context
+                .read<LeccionesProvider>()
+                .getCompletedLessonsCountUnique();
+            
+            BabyStageUpgradeDialog.show(
+              context,
+              newStage: newStage,
+              previousStage: previousStage,
+              completedLessons: completedLessons,
+            );
+          }
+        } else {
+          // Solo actualizar el bloc sin mostrar diálogo
+          gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
+        }
+      }
     } else if (result == false) {
       // Si result es false, significa que se presionó "Reproducir siguiente"
       // Asegurar que la orientación landscape se mantenga durante la transición

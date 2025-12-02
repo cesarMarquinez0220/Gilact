@@ -30,11 +30,21 @@ import '../../../gamification/domain/services/gamification_service.dart';
 import '../../../gamification/domain/services/user_statistics_service.dart';
 
 /// Página dedicada a la compañera de gamificación
-class CompanionPage extends StatelessWidget {
+class CompanionPage extends StatefulWidget {
   const CompanionPage({super.key});
 
   @override
+  State<CompanionPage> createState() => _CompanionPageState();
+}
+
+class _CompanionPageState extends State<CompanionPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // Mantener el estado para evitar recargas al cambiar de pestaña
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Necesario para AutomaticKeepAliveClientMixin
     return SafeArea(
       child: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, userState) {
@@ -57,60 +67,15 @@ class CompanionPage extends StatelessWidget {
           final gamificationBloc = context.read<GamificationBloc>();
           final currentGamificationState = gamificationBloc.state;
 
+          // Cargar perfil de gamificación si no está cargado
+          // Hacerlo inmediatamente en lugar de esperar PostFrameCallback para evitar el parpadeo
           if (currentGamificationState is! GamificationLoaded &&
               currentGamificationState is! GamificationLoading) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              gamificationBloc.add(LoadGamificationProfile(validUserId));
-            });
-          } else if (currentGamificationState is GamificationLoaded) {
-            // Detectar logros cuando se carga la página (para logros de tiempo como "Primera Semana")
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              try {
-                final gamificationRepository = getIt<GamificationRepository>();
-                final gamificationService = GamificationService(
-                  repository: gamificationRepository,
-                );
-                final userStatisticsService = getIt<UserStatisticsService>();
-                final userStats = await userStatisticsService.getUserStatistics(
-                  validUserId,
-                );
-
-                final achievements = await gamificationService
-                    .detectAndUnlockAchievements(
-                  userId: validUserId,
-                  totalLactationRecords: userStats.totalLactationRecords,
-                  completeLactationRecords: userStats.completeLactationRecords,
-                  totalLessonsCompleted: userStats.totalLessonsCompleted,
-                  babyWeightRecords: userStats.babyWeightRecords,
-                  hasNocturnalRecord: userStats.hasNocturnalRecord,
-                  dailyRecordsToday: userStats.dailyRecordsToday,
-                  babySleepRecords: userStats.babySleepRecords,
-                  perfectTrivias: userStats.perfectTrivias,
-                  nocturnalRecordsCount: userStats.nocturnalRecordsCount,
-                  daysUsingApp: userStats.daysUsingApp,
-                );
-
-                // Mostrar diálogo si hay logros nuevos
-                if (achievements.isRight()) {
-                  final newAchievements = achievements.getOrElse(() => []);
-                  if (newAchievements.isNotEmpty && context.mounted) {
-                    AchievementUnlockedDialog.show(
-                      context,
-                      newAchievements.first,
-                      newAchievements.first.xpReward,
-                    );
-                  }
-                }
-              } catch (e) {
-                // Ignorar errores en la detección de logros
-                if (kDebugMode) {
-                  print('Error detectando logros en companion page: $e');
-                }
-              }
-            });
+            // Cargar inmediatamente para evitar el estado de carga visible
+            gamificationBloc.add(LoadGamificationProfile(validUserId));
           }
 
-          // Calcular padding bottom responsive
+          // Calcular padding bottom responsive ANTES de construir el contenido
           final bottomPadding = MediaQuery.of(context).padding.bottom;
           final screenHeight = MediaQuery.of(context).size.height;
           final screenWidth = MediaQuery.of(context).size.width;
@@ -130,152 +95,271 @@ class CompanionPage extends StatelessWidget {
           // Padding bottom total = altura barra + margen + espacio extra
           final totalBottomPadding = barHeight + barBottomMargin + 20;
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 20,
-              bottom: totalBottomPadding,
-            ),
-            child: Column(
-              children: [
-                // Header
-                FadeInDown(
-                  duration: const Duration(milliseconds: 600),
-                  child: _buildHeader(context),
-                ),
-                const SizedBox(height: 20),
-                // Mascota principal
-                BlocBuilder<GamificationBloc, GamificationState>(
-                  builder: (context, gamificationState) {
-                    if (gamificationState is GamificationLoaded) {
-                      // Tamaño responsive de la mascota
-                      final mascotSize = isShortScreen ? 150.0 : 180.0;
-                      return FadeInUp(
-                        duration: const Duration(milliseconds: 800),
-                        child: CompanionMascotWrapper(
-                          profile: gamificationState.profile,
-                          size: mascotSize,
-                        ),
-                      );
-                    } else if (gamificationState is GamificationLoading) {
-                      return _buildLoadingMascot();
-                    } else if (gamificationState is GamificationError) {
-                      return _buildErrorState(gamificationState.message);
-                    }
-                    return _buildLoadingMascot();
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Información de gamificación
-                BlocBuilder<GamificationBloc, GamificationState>(
-                  builder: (context, gamificationState) {
-                    if (gamificationState is GamificationLoaded) {
-                      // Mostrar animación de logros nuevos si hay
-                      final newAchievements =
-                          gamificationState.profile.newAchievements;
-                      if (newAchievements.isNotEmpty) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          CompanionNewAchievementsAnimation.show(
-                            context,
-                            gamificationState.profile,
-                            validUserId,
-                          );
-                        });
-                      }
-
-                      // Manejar level up con vibración y sonido mejorados
-                      if (gamificationState.leveledUp) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          final VibrationService vibrationService =
-                              getIt<VibrationService>();
-                          final SoundService soundService =
-                              getIt<SoundService>();
-                          vibrationService.vibrateOnLevelUp();
-                          soundService
-                              .playLevelUpSound(); // Usar sonido específico de level up
-                        });
-                      }
-
-                      return Column(
-                        children: [
-                          // Barra de XP
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 1000),
-                            child: XPBarWidget(
-                              profile: gamificationState.profile,
-                            ),
-                          ),
-                          SizedBox(height: isShortScreen ? 12 : 15),
-                          // Widget de racha
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 1200),
-                            child: FutureBuilder<DailyStreak?>(
-                              future: _getStreak(validUserId),
-                              builder: (context, snapshot) {
-                                return StreakWidget(
-                                  profile: gamificationState.profile,
-                                  streak: snapshot.data,
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(height: isShortScreen ? 16 : 20),
-                          // Sección de Incentivos (Desafío del Día)
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 1300),
-                            child: FutureBuilder<DailyChallenge>(
-                              future: _getDailyChallenge(
-                                gamificationState.profile,
-                                validUserId,
-                              ),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                                final challenge = snapshot.data;
-                                if (challenge == null) {
-                                  return const SizedBox.shrink();
-                                }
-                                return CompanionDailyChallengeSection(
-                                  profile: gamificationState.profile,
-                                  challenge: challenge,
-                                  userId: validUserId,
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(height: isShortScreen ? 16 : 20),
-                          // Sección de Logros/Badges
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 1400),
-                            child: CompanionAchievementsSection(
-                              profile: gamificationState.profile,
-                              unlockedAchievements:
-                                  gamificationState.unlockedAchievements,
-                            ),
-                          ),
-                          SizedBox(height: isShortScreen ? 16 : 20),
-                          // Estadísticas resumidas (más arriba ahora)
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 1600),
-                            child: CompanionStatsSummary(
-                              profile: gamificationState.profile,
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
-            ),
+          // Mostrar el contenido incluso si está cargando (el BlocBuilder manejará el estado de carga)
+          // Esto evita el parpadeo blanco al cambiar de pestaña
+          return _buildMainContent(
+            context,
+            currentGamificationState,
+            validUserId,
+            isShortScreen,
+            totalBottomPadding,
           );
         },
+      ),
+    );
+  }
+
+  /// Construye el contenido principal de la página
+  Widget _buildMainContent(
+    BuildContext context,
+    GamificationState currentGamificationState,
+    String validUserId,
+    bool isShortScreen,
+    double totalBottomPadding,
+  ) {
+    // Detectar logros cuando se carga la página (solo si ya está cargado)
+    if (currentGamificationState is GamificationLoaded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          final gamificationRepository = getIt<GamificationRepository>();
+          final gamificationService = GamificationService(
+            repository: gamificationRepository,
+          );
+          final userStatisticsService = getIt<UserStatisticsService>();
+          final userStats = await userStatisticsService.getUserStatistics(
+            validUserId,
+          );
+
+          final achievements = await gamificationService
+              .detectAndUnlockAchievements(
+                userId: validUserId,
+                totalLactationRecords: userStats.totalLactationRecords,
+                completeLactationRecords: userStats.completeLactationRecords,
+                totalLessonsCompleted: userStats.totalLessonsCompleted,
+                babyWeightRecords: userStats.babyWeightRecords,
+                hasNocturnalRecord: userStats.hasNocturnalRecord,
+                dailyRecordsToday: userStats.dailyRecordsToday,
+                babySleepRecords: userStats.babySleepRecords,
+                perfectTrivias: userStats.perfectTrivias,
+                nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+                daysUsingApp: userStats.daysUsingApp,
+              );
+
+          // Mostrar diálogo si hay logros nuevos
+          if (achievements.isRight()) {
+            final newAchievements = achievements.getOrElse(() => []);
+            if (newAchievements.isNotEmpty && context.mounted) {
+              AchievementUnlockedDialog.show(
+                context,
+                newAchievements.first,
+                newAchievements.first.xpReward,
+              );
+            }
+          }
+        } catch (e) {
+          // Ignorar errores en la detección de logros
+          if (kDebugMode) {
+            print('Error detectando logros en companion page: $e');
+          }
+        }
+      });
+    }
+
+    return SingleChildScrollView(
+      // Usar physics para optimizar el scroll y reducir reconstrucciones
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: totalBottomPadding,
+      ),
+      child: Column(
+        children: [
+          // Header - siempre visible para evitar parpadeo
+          FadeInDown(
+            duration: const Duration(milliseconds: 600),
+            child: _buildHeader(context),
+          ),
+          const SizedBox(height: 20),
+          // Mascota principal
+          // Usar RepaintBoundary para evitar reconstrucciones durante el scroll
+          RepaintBoundary(
+            child: BlocBuilder<GamificationBloc, GamificationState>(
+              builder: (context, gamificationState) {
+                if (gamificationState is GamificationLoaded) {
+                  // Tamaño responsive de la mascota
+                  final mascotSize = isShortScreen ? 150.0 : 180.0;
+                  return FadeInUp(
+                    duration: const Duration(milliseconds: 800),
+                    child: CompanionMascotWrapper(
+                      profile: gamificationState.profile,
+                      size: mascotSize,
+                    ),
+                  );
+                } else if (gamificationState is GamificationLoading) {
+                  // Mientras carga, mostrar placeholder en lugar de spinner
+                  return _buildLoadingMascot();
+                } else if (gamificationState is GamificationError) {
+                  return _buildErrorState(gamificationState.message);
+                }
+                // Estado inicial: mostrar placeholder mientras se carga
+                return _buildLoadingMascot();
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Información de gamificación
+          // Mostrar placeholder mientras carga para evitar parpadeo blanco
+          BlocBuilder<GamificationBloc, GamificationState>(
+            builder: (context, gamificationState) {
+              if (gamificationState is GamificationLoaded) {
+                // Mostrar animación de logros nuevos si hay
+                final newAchievements =
+                    gamificationState.profile.newAchievements;
+                if (newAchievements.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    CompanionNewAchievementsAnimation.show(
+                      context,
+                      gamificationState.profile,
+                      validUserId,
+                    );
+                  });
+                }
+
+                // Manejar level up con vibración y sonido mejorados
+                if (gamificationState.leveledUp) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    final VibrationService vibrationService =
+                        getIt<VibrationService>();
+                    final SoundService soundService = getIt<SoundService>();
+                    vibrationService.vibrateOnLevelUp();
+                    soundService
+                        .playLevelUpSound(); // Usar sonido específico de level up
+                  });
+                }
+
+                return Column(
+                  children: [
+                    // Barra de XP
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 1000),
+                      child: XPBarWidget(profile: gamificationState.profile),
+                    ),
+                    SizedBox(height: isShortScreen ? 12 : 15),
+                    // Widget de racha
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 1200),
+                      child: FutureBuilder<DailyStreak?>(
+                        future: _getStreak(validUserId),
+                        builder: (context, snapshot) {
+                          return StreakWidget(
+                            profile: gamificationState.profile,
+                            streak: snapshot.data,
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: isShortScreen ? 16 : 20),
+                    // Sección de Incentivos (Desafío del Día)
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 1300),
+                      child: FutureBuilder<DailyChallenge>(
+                        future: _getDailyChallenge(
+                          gamificationState.profile,
+                          validUserId,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          final challenge = snapshot.data;
+                          if (challenge == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return CompanionDailyChallengeSection(
+                            profile: gamificationState.profile,
+                            challenge: challenge,
+                            userId: validUserId,
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: isShortScreen ? 16 : 20),
+                    // Sección de Logros/Badges
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 1400),
+                      child: CompanionAchievementsSection(
+                        profile: gamificationState.profile,
+                        unlockedAchievements:
+                            gamificationState.unlockedAchievements,
+                      ),
+                    ),
+                    SizedBox(height: isShortScreen ? 16 : 20),
+                    // Estadísticas resumidas (más arriba ahora)
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 1600),
+                      child: CompanionStatsSummary(
+                        profile: gamificationState.profile,
+                      ),
+                    ),
+                  ],
+                );
+              } else if (gamificationState is GamificationLoading) {
+                // Mientras carga, mostrar placeholders en lugar de nada
+                // Esto evita el parpadeo blanco
+                return Column(
+                  children: [
+                    // Placeholder para barra de XP
+                    Container(
+                      height: 60,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    // Placeholder para racha
+                    Container(
+                      height: 80,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              // Estado inicial: mostrar placeholders
+              return Column(
+                children: [
+                  Container(
+                    height: 60,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    height: 80,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -363,10 +447,7 @@ class CompanionPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(25),
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.2),
@@ -395,10 +476,7 @@ class CompanionPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.white, width: 2),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.2),
@@ -436,7 +514,7 @@ class CompanionPage extends StatelessWidget {
               ],
             ),
             child: Icon(
-              Icons.pets,
+              Icons.emoji_events,
               color: Colors.white,
               size: isSmallScreen ? 28 : 32,
             ),
@@ -517,25 +595,26 @@ class CompanionPage extends StatelessWidget {
   void _testAchievementDialog(BuildContext context) {
     final achievementService = AchievementService();
     final allAchievements = achievementService.getAllAchievements();
-    
+
     if (allAchievements.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No hay logros disponibles')),
       );
       return;
     }
-    
+
     // Buscar un logro con badge específico para la prueba
     // Intentar encontrar uno de los milestones, niveles, o daily_3 (Día Activo)
     final testAchievement = allAchievements.firstWhere(
-      (a) => a.id == 'daily_3' ||  // Día Activo
-             a.id == 'milestone_10' || 
-             a.id == 'level_3' || 
-             a.id == 'streak_7' ||
-             a.id == 'complete_25',
+      (a) =>
+          a.id == 'daily_3' || // Día Activo
+          a.id == 'milestone_10' ||
+          a.id == 'level_3' ||
+          a.id == 'streak_7' ||
+          a.id == 'complete_25',
       orElse: () => allAchievements.first,
     );
-    
+
     AchievementUnlockedDialog.show(
       context,
       testAchievement,
@@ -548,19 +627,20 @@ class CompanionPage extends StatelessWidget {
   void _testRealAchievementUnlock(BuildContext context) {
     final gamificationBloc = context.read<GamificationBloc>();
     final currentState = gamificationBloc.state;
-    
+
     if (currentState is! GamificationLoaded) return;
-    
+
     final achievementService = AchievementService();
     final allAchievements = achievementService.getAllAchievements();
-    
+
     // Buscar un logro que no esté desbloqueado
     final unlockedIds = currentState.profile.unlockedAchievements.toSet();
     final testAchievement = allAchievements.firstWhere(
-      (a) => !unlockedIds.contains(a.id) && 
-             (a.id == 'daily_3' ||  // Día Activo
-              a.id == 'milestone_10' || 
-              a.id == 'level_3' || 
+      (a) =>
+          !unlockedIds.contains(a.id) &&
+          (a.id == 'daily_3' || // Día Activo
+              a.id == 'milestone_10' ||
+              a.id == 'level_3' ||
               a.id == 'streak_7' ||
               a.id == 'complete_25'),
       orElse: () => allAchievements.firstWhere(
@@ -568,7 +648,7 @@ class CompanionPage extends StatelessWidget {
         orElse: () => allAchievements.first,
       ),
     );
-    
+
     // Agregar el logro al perfil
     final updatedUnlockedAchievements = [
       ...currentState.profile.unlockedAchievements,
@@ -578,16 +658,16 @@ class CompanionPage extends StatelessWidget {
       ...currentState.profile.newAchievements,
       testAchievement.id,
     ];
-    
+
     final updatedProfile = currentState.profile.copyWith(
       unlockedAchievements: updatedUnlockedAchievements,
       newAchievements: updatedNewAchievements,
       updatedAt: DateTime.now(),
     );
-    
+
     // Actualizar el perfil
     gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
-    
+
     // Mostrar el diálogo de logro desbloqueado
     Future.delayed(const Duration(milliseconds: 300), () {
       if (context.mounted) {

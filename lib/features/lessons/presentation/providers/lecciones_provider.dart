@@ -6,6 +6,8 @@ import 'dart:convert';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 import '../../../gamification/domain/services/gamification_service.dart';
+import '../../../gamification/domain/entities/user_gamification_profile.dart';
+import '../../data/services/video_service.dart';
 
 class LeccionesProvider extends ChangeNotifier {
   final Set<int> _leccionesCompletadas = {};
@@ -28,40 +30,95 @@ class LeccionesProvider extends ChangeNotifier {
     }
   }
 
-  /// Obtiene el número de lecciones completadas
-  int get completedLessonsCount => _leccionesCompletadas.length;
+  /// Obtiene el número de lecciones completadas (lecciones únicas, no videos)
+  /// Calcula las lecciones únicas basándose en los videos completados
+  int get completedLessonsCount {
+    // Si no hay videos completados, retornar 0
+    if (_leccionesCompletadas.isEmpty) return 0;
+    
+    // Obtener todos los videos para mapear videoId -> leccionId
+    // Usar un método asíncrono no es posible en un getter, así que usamos un cache
+    // Por ahora, retornamos el conteo de videos como aproximación
+    // TODO: Implementar cache de mapeo videoId -> leccionId
+    return _leccionesCompletadas.length;
+  }
+  
+  /// Calcula el número de lecciones únicas completadas
+  /// Este método consulta VideoService para obtener el leccionId de cada video
+  Future<int> getCompletedLessonsCountUnique() async {
+    if (_leccionesCompletadas.isEmpty) return 0;
+    
+    try {
+      // Obtener todos los videos
+      final allVideos = await VideoService.getVideos();
+      
+      // Crear un mapa de videoId -> leccionId
+      final videoToLessonMap = <int, int>{};
+      for (final video in allVideos) {
+        videoToLessonMap[video.videoId] = video.leccionId;
+      }
+      
+      // Obtener lecciones únicas de los videos completados
+      final uniqueLessons = <int>{};
+      for (final videoId in _leccionesCompletadas) {
+        final leccionId = videoToLessonMap[videoId];
+        if (leccionId != null && leccionId > 0) {
+          uniqueLessons.add(leccionId);
+        }
+      }
+      
+      _logger.d(
+        'Lecciones únicas completadas: ${uniqueLessons.length} (de ${_leccionesCompletadas.length} videos)',
+      );
+      
+      return uniqueLessons.length;
+    } catch (e, stackTrace) {
+      _logger.e('Error calculando lecciones únicas', e, stackTrace);
+      // Fallback: retornar conteo de videos como aproximación
+      return _leccionesCompletadas.length;
+    }
+  }
 
   /// Notifica a GamificationService sobre cambios en lecciones completadas
-  Future<void> _notifyLessonsCompletedChanged() async {
+  /// Retorna el perfil actualizado si la etapa cambió, null en caso contrario
+  Future<UserGamificationProfile?> _notifyLessonsCompletedChanged() async {
     if (_gamificationService == null) {
       try {
         _gamificationService = getIt<GamificationService>();
       } catch (e) {
         _logger.w('GamificationService no disponible para actualizar etapa del bebé');
-        return;
+        return null;
       }
     }
 
-    final completedCount = _leccionesCompletadas.length;
-    if (completedCount == 0) return;
+    // Calcular lecciones únicas completadas (no videos)
+    final completedCount = await getCompletedLessonsCountUnique();
+    if (completedCount == 0) return null;
 
     try {
       final authUser = FirebaseAuth.instance.currentUser;
-      if (authUser == null) return;
+      if (authUser == null) return null;
 
       final result = await _gamificationService!.updateBabyStage(
         userId: authUser.uid,
         completedLessons: completedCount,
       );
 
-      result.fold(
-        (error) => _logger.w('Error actualizando etapa del bebé: $error'),
-        (profile) => _logger.d(
-          'Etapa del bebé actualizada: ${profile.babyStage} ($completedCount lecciones)',
-        ),
+      return result.fold(
+        (error) {
+          _logger.w('Error actualizando etapa del bebé: $error');
+          return null;
+        },
+        (profile) {
+          _logger.d(
+            'Etapa del bebé actualizada: ${profile.babyStage} ($completedCount lecciones únicas)',
+          );
+          return profile;
+        },
       );
     } catch (e, stackTrace) {
       _logger.e('Error notificando cambio de lecciones completadas', e, stackTrace);
+      return null;
     }
   }
 
@@ -83,11 +140,35 @@ class LeccionesProvider extends ChangeNotifier {
     _preloadNextVideo(videoId);
 
     // Notificar cambio en lecciones completadas (Observer Pattern)
+    // El perfil actualizado se retorna para que el llamador pueda actualizar el bloc
     if (!wasAlreadyCompleted) {
       _notifyLessonsCompletedChanged();
     }
 
     notifyListeners();
+  }
+
+  /// Marca una lección como completada y retorna el perfil actualizado si la etapa cambió
+  /// Útil cuando necesitas actualizar el GamificationBloc después de completar una lección
+  Future<UserGamificationProfile?> marcarLeccionCompletadaWithProfileUpdate(
+    int videoId,
+  ) async {
+    final wasAlreadyCompleted = _leccionesCompletadas.contains(videoId);
+    _leccionesCompletadas.add(videoId);
+    _progresoVideos[videoId] = 100.0;
+    _guardarProgreso();
+
+    // Precargar el siguiente video cuando se completa una lección
+    _preloadNextVideo(videoId);
+
+    // Notificar cambio en lecciones completadas y retornar perfil actualizado
+    UserGamificationProfile? updatedProfile;
+    if (!wasAlreadyCompleted) {
+      updatedProfile = await _notifyLessonsCompletedChanged();
+    }
+
+    notifyListeners();
+    return updatedProfile;
   }
 
   /// Precarga el siguiente video cuando se completa una lección

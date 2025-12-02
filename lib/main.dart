@@ -89,7 +89,7 @@ void main() async {
 
   // Configurar inyección de dependencias
   await configureDependencies();
-  
+
   // Usar logger de GetIt después de configureDependencies
   final appLogger = getIt<AppLogger>();
 
@@ -97,7 +97,11 @@ void main() async {
   try {
     await _initializeNotificationServices();
   } catch (e, stackTrace) {
-    appLogger.w('Error al inicializar servicios de notificación (no crítico)', e, stackTrace);
+    appLogger.w(
+      'Error al inicializar servicios de notificación (no crítico)',
+      e,
+      stackTrace,
+    );
   }
 
   // Registrar handler para mensajes en background
@@ -107,7 +111,11 @@ void main() async {
   try {
     await _initializePushNotificationService();
   } catch (e, stackTrace) {
-    appLogger.w('Error al inicializar servicio de push (no crítico)', e, stackTrace);
+    appLogger.w(
+      'Error al inicializar servicio de push (no crítico)',
+      e,
+      stackTrace,
+    );
   }
 
   // Inicializar el manejador de notificaciones
@@ -117,7 +125,11 @@ void main() async {
   try {
     AppInitializationService.startPeriodicNotificationVerification();
   } catch (e, stackTrace) {
-    appLogger.w('Error al iniciar verificación periódica de notificaciones (no crítico)', e, stackTrace);
+    appLogger.w(
+      'Error al iniciar verificación periódica de notificaciones (no crítico)',
+      e,
+      stackTrace,
+    );
   }
 
   // Inicializar servicio de sincronización offline con callbacks (no bloquea si falla)
@@ -138,7 +150,11 @@ void main() async {
 
     appLogger.success('Servicio de sincronización offline iniciado');
   } catch (e, stackTrace) {
-    appLogger.w('Error al inicializar servicio de sincronización (no crítico)', e, stackTrace);
+    appLogger.w(
+      'Error al inicializar servicio de sincronización (no crítico)',
+      e,
+      stackTrace,
+    );
   }
 
   runApp(const MyApp());
@@ -192,7 +208,11 @@ void _showSyncNotification(int count, bool success) {
     } catch (e, stackTrace) {
       try {
         final logger = getIt<AppLogger>();
-        logger.e('Error mostrando notificación de sincronización', e, stackTrace);
+        logger.e(
+          'Error mostrando notificación de sincronización',
+          e,
+          stackTrace,
+        );
       } catch (_) {
         // Si GetIt no está disponible, ignorar
       }

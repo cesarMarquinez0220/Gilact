@@ -91,6 +91,8 @@ dependencies:
   logger: ^2.6.2
   confetti: ^0.7.0
   rive: ^0.14.0-dev.6
+  flutter_svg: ^2.0.10+1
+  simple_shadow: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -174,6 +176,7 @@ flutter:
    - assets/images/bebe0.png
    - assets/images/bebe1.png
    - assets/images/bebe2.png
+   - assets/images/nube.svg
    - assets/images/lecciones_camino/Homevideo.png
    - assets/images/lecciones_camino/Softvideo.png
    - assets/images/lecciones_camino/Writingvideo.png
@@ -222,7 +225,9 @@ flutter:
    - assets/logo/icono.png
     # Gamification assets
    - assets/animations/Happy_Dog.json
-   - assets/animations/baby_born.riv
+   - assets/animations/0meses.riv
+   - assets/animations/3meses.riv
+   - assets/animations/6meses.riv
    - assets/images/badges/
    # Translation files
    - assets/translations/
