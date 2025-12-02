@@ -480,6 +480,8 @@
       "youAreSuperMom": "Eres una super mamá, sigue así! 🚀"
     },
     "title": "Compañera",
+    "prepartumMessage": "¡Tu viaje está comenzando!",
+    "prepartumSubmessage": "Completa lecciones y trivias para ganar XP y desbloquear logros mientras esperas a tu bebé.",
     "level": "Nivel",
     "streak": "Racha",
     "achievements": "Logros",
@@ -988,7 +990,15 @@
     "greatDayArrived": "¡El gran día ha llegado! Prepárate para conocer a tu bebé.",
     "verySoon": "¡Falta muy poco! Tu bebé está casi aquí.",
     "oneMonthLeft": "Un mes más y tendrás a tu bebé en brazos. ¡Ánimo!",
-    "stayStrong": "Mantente fuerte, el gran día se acerca."
+    "stayStrong": "Mantente fuerte, el gran día se acerca.",
+    "dayArrived": "¡El día llegó!",
+    "completePostpartumInfo": "Es hora de completar tu información postparto",
+    "updateToPostpartum": "Actualizar a Postparto",
+    "updateToPostpartumConfirm": "¿Estás segura de que quieres actualizar tu perfil a postparto? Esto te permitirá registrar información de tu bebé.",
+    "congratulationsTitle": "¡Felicidades!",
+    "congratulationsMessage": "¡Tu bebé ha llegado! Ahora puedes registrar toda la información sobre tu bebé y comenzar a usar todas las funcionalidades de la app.",
+    "congratulationsCareMessage": "Recuerda cuidarte y descansar. Este es un momento especial para ti y tu bebé.",
+    "registerBaby": "Registrar Bebé"
   },
   "onboarding": {
     "babyName": "Nombre del Bebé",

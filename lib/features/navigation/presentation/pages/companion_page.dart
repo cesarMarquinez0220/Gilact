@@ -95,6 +95,13 @@ class _CompanionPageState extends State<CompanionPage>
           // Padding bottom total = altura barra + margen + espacio extra
           final totalBottomPadding = barHeight + barBottomMargin + 20;
 
+          // Determinar si es postparto
+          final isPostPartum = userState is UserProfileLoaded
+              ? userState.profile.isPostPartum
+              : (userState is UserProfileUpdated
+                    ? userState.profile.isPostPartum
+                    : true);
+
           // Mostrar el contenido incluso si está cargando (el BlocBuilder manejará el estado de carga)
           // Esto evita el parpadeo blanco al cambiar de pestaña
           return _buildMainContent(
@@ -103,6 +110,7 @@ class _CompanionPageState extends State<CompanionPage>
             validUserId,
             isShortScreen,
             totalBottomPadding,
+            isPostPartum,
           );
         },
       ),
@@ -116,6 +124,7 @@ class _CompanionPageState extends State<CompanionPage>
     String validUserId,
     bool isShortScreen,
     double totalBottomPadding,
+    bool isPostPartum,
   ) {
     // Detectar logros cuando se carga la página (solo si ya está cargado)
     if (currentGamificationState is GamificationLoaded) {
@@ -182,32 +191,80 @@ class _CompanionPageState extends State<CompanionPage>
             child: _buildHeader(context),
           ),
           const SizedBox(height: 20),
-          // Mascota principal
+          // Mascota principal (solo para postparto)
           // Usar RepaintBoundary para evitar reconstrucciones durante el scroll
-          RepaintBoundary(
-            child: BlocBuilder<GamificationBloc, GamificationState>(
-              builder: (context, gamificationState) {
-                if (gamificationState is GamificationLoaded) {
-                  // Tamaño responsive de la mascota
-                  final mascotSize = isShortScreen ? 150.0 : 180.0;
-                  return FadeInUp(
-                    duration: const Duration(milliseconds: 800),
-                    child: CompanionMascotWrapper(
-                      profile: gamificationState.profile,
-                      size: mascotSize,
-                    ),
-                  );
-                } else if (gamificationState is GamificationLoading) {
-                  // Mientras carga, mostrar placeholder en lugar de spinner
+          if (isPostPartum)
+            RepaintBoundary(
+              child: BlocBuilder<GamificationBloc, GamificationState>(
+                builder: (context, gamificationState) {
+                  if (gamificationState is GamificationLoaded) {
+                    // Tamaño responsive de la mascota
+                    final mascotSize = isShortScreen ? 150.0 : 180.0;
+                    return FadeInUp(
+                      duration: const Duration(milliseconds: 800),
+                      child: CompanionMascotWrapper(
+                        profile: gamificationState.profile,
+                        size: mascotSize,
+                      ),
+                    );
+                  } else if (gamificationState is GamificationLoading) {
+                    // Mientras carga, mostrar placeholder en lugar de spinner
+                    return _buildLoadingMascot();
+                  } else if (gamificationState is GamificationError) {
+                    return _buildErrorState(gamificationState.message);
+                  }
+                  // Estado inicial: mostrar placeholder mientras se carga
                   return _buildLoadingMascot();
-                } else if (gamificationState is GamificationError) {
-                  return _buildErrorState(gamificationState.message);
-                }
-                // Estado inicial: mostrar placeholder mientras se carga
-                return _buildLoadingMascot();
-              },
+                },
+              ),
+            )
+          else
+            // Para preparto, mostrar un mensaje motivacional en lugar de la mascota
+            FadeInUp(
+              duration: const Duration(milliseconds: 800),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.favorite,
+                      color: const Color(0xFFf093fb),
+                      size: 64,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'companion.prepartumMessage'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2C3E50),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'companion.prepartumSubmessage'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        color: const Color(0xFF7F8C8D),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 20),
           // Información de gamificación
           // Mostrar placeholder mientras carga para evitar parpadeo blanco
@@ -268,6 +325,7 @@ class _CompanionPageState extends State<CompanionPage>
                         future: _getDailyChallenge(
                           gamificationState.profile,
                           validUserId,
+                          isPostPartum: isPostPartum,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -701,13 +759,30 @@ Future<DailyStreak?> _getStreak(String userId) async {
 /// Obtiene el desafío del día
 Future<DailyChallenge> _getDailyChallenge(
   UserGamificationProfile profile,
-  String userId,
-) async {
+  String userId, {
+  bool isPostPartum = true,
+}) async {
   try {
     final dailyChallengeService = getIt<DailyChallengeService>();
-    return await dailyChallengeService.getDailyChallenge(profile, userId);
+    return await dailyChallengeService.getDailyChallenge(
+      profile,
+      userId,
+      isPostPartum: isPostPartum,
+    );
   } catch (e) {
-    // Fallback: desafío por defecto
+    // Fallback: desafío por defecto (solo lecciones para preparto)
+    if (!isPostPartum) {
+      return const DailyChallenge(
+        id: 'default',
+        title: 'Día de Aprendizaje',
+        description: 'Completa una lección hoy',
+        type: DailyChallengeType.lesson,
+        requiredValue: 1,
+        xpReward: 60,
+        progress: 0,
+        icon: '📚',
+      );
+    }
     return const DailyChallenge(
       id: 'default',
       title: 'Objetivo Diario',

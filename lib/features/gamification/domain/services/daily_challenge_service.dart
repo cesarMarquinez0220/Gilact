@@ -26,69 +26,74 @@ class DailyChallengeService {
 
   /// Obtiene el desafío del día adaptativo
   /// Optimizado para usar métodos específicos en lugar de getUserStatistics completo
+  /// [isPostPartum] indica si el usuario es postparto (para excluir desafíos de lactancia si es preparto)
   Future<DailyChallenge> getDailyChallenge(
     UserGamificationProfile profile,
-    String userId,
-  ) async {
+    String userId, {
+    bool isPostPartum = true, // Por defecto asumimos postparto para mantener compatibilidad
+  }) async {
     final List<DailyChallenge> availableChallenges = [];
     final now = DateTime.now();
 
-    // OPTIMIZACIÓN: Obtener solo los datos necesarios en lugar de todas las estadísticas
-    final todayRecords = await _lactationService.getRecordsForDate(now);
-    final dailyRecordsToday = todayRecords.length;
+    // Solo agregar desafíos de lactancia si el usuario es postparto
+    if (isPostPartum) {
+      // OPTIMIZACIÓN: Obtener solo los datos necesarios en lugar de todas las estadísticas
+      final todayRecords = await _lactationService.getRecordsForDate(now);
+      final dailyRecordsToday = todayRecords.length;
 
-    // Desafíos de Lactancia (siempre disponibles y repetibles)
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'lactation_3_records',
-        title: 'Objetivo Diario: 3 Registros',
-        description: 'Registra 3 tomas de lactancia hoy',
-        type: DailyChallengeType.lactation,
-        requiredValue: 3,
-        xpReward: 30,
-        progress: dailyRecordsToday,
-        icon: '📝',
-      ),
-    );
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'lactation_5_records',
-        title: 'Objetivo Diario: 5 Registros',
-        description: 'Registra 5 tomas de lactancia hoy',
-        type: DailyChallengeType.lactation,
-        requiredValue: 5,
-        xpReward: 50,
-        progress: dailyRecordsToday,
-        icon: '📝',
-      ),
-    );
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'lactation_8_records',
-        title: 'Objetivo Diario: 8 Registros',
-        description: 'Registra 8 tomas de lactancia hoy',
-        type: DailyChallengeType.lactation,
-        requiredValue: 8,
-        xpReward: 75,
-        progress: dailyRecordsToday,
-        icon: '🎯',
-      ),
-    );
+      // Desafíos de Lactancia (solo para postparto)
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'lactation_3_records',
+          title: 'Objetivo Diario: 3 Registros',
+          description: 'Registra 3 tomas de lactancia hoy',
+          type: DailyChallengeType.lactation,
+          requiredValue: 3,
+          xpReward: 30,
+          progress: dailyRecordsToday,
+          icon: '📝',
+        ),
+      );
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'lactation_5_records',
+          title: 'Objetivo Diario: 5 Registros',
+          description: 'Registra 5 tomas de lactancia hoy',
+          type: DailyChallengeType.lactation,
+          requiredValue: 5,
+          xpReward: 50,
+          progress: dailyRecordsToday,
+          icon: '📝',
+        ),
+      );
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'lactation_8_records',
+          title: 'Objetivo Diario: 8 Registros',
+          description: 'Registra 8 tomas de lactancia hoy',
+          type: DailyChallengeType.lactation,
+          requiredValue: 8,
+          xpReward: 75,
+          progress: dailyRecordsToday,
+          icon: '🎯',
+        ),
+      );
 
-    // Desafíos de Registros Completos (siempre disponibles y repetibles)
-    final todayCompleteRecords = await _getTodayCompleteRecordsCount(userId);
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'complete_2_records',
-        title: 'Registros Detallados',
-        description: 'Completa 2 registros de lactancia con todos los detalles',
-        type: DailyChallengeType.completeLactation,
-        requiredValue: 2,
-        xpReward: 40,
-        progress: todayCompleteRecords,
-        icon: '📋',
-      ),
-    );
+      // Desafíos de Registros Completos (solo para postparto)
+      final todayCompleteRecords = await _getTodayCompleteRecordsCount(userId);
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'complete_2_records',
+          title: 'Registros Detallados',
+          description: 'Completa 2 registros de lactancia con todos los detalles',
+          type: DailyChallengeType.completeLactation,
+          requiredValue: 2,
+          xpReward: 40,
+          progress: todayCompleteRecords,
+          icon: '📋',
+        ),
+      );
+    }
 
     // Desafíos de Lecciones (solo si hay lecciones pendientes)
     final lessonsResult = await _lessonRepository.getAllLessons();
@@ -132,35 +137,37 @@ class DailyChallengeService {
       );
     }
 
-    // Desafíos de Peso (siempre disponibles y repetibles)
-    final todayWeightRecords = await _getTodayWeightRecordsCount(userId);
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'record_baby_weight',
-        title: 'Control de Crecimiento',
-        description: 'Registra el peso de tu bebé hoy',
-        type: DailyChallengeType.babyWeight,
-        requiredValue: 1,
-        xpReward: 25,
-        progress: todayWeightRecords,
-        icon: '⚖️',
-      ),
-    );
+    // Desafíos de Peso (solo para postparto)
+    if (isPostPartum) {
+      final todayWeightRecords = await _getTodayWeightRecordsCount(userId);
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'record_baby_weight',
+          title: 'Control de Crecimiento',
+          description: 'Registra el peso de tu bebé hoy',
+          type: DailyChallengeType.babyWeight,
+          requiredValue: 1,
+          xpReward: 25,
+          progress: todayWeightRecords,
+          icon: '⚖️',
+        ),
+      );
 
-    // Desafíos de Sueño (siempre disponibles y repetibles)
-    final todaySleepRecords = await _getTodaySleepRecordsCount(userId);
-    availableChallenges.add(
-      DailyChallenge(
-        id: 'record_baby_sleep',
-        title: 'Noches Tranquilas',
-        description: 'Registra el sueño de tu bebé hoy',
-        type: DailyChallengeType.babySleep,
-        requiredValue: 1,
-        xpReward: 20,
-        progress: todaySleepRecords,
-        icon: '😴',
-      ),
-    );
+      // Desafíos de Sueño (solo para postparto)
+      final todaySleepRecords = await _getTodaySleepRecordsCount(userId);
+      availableChallenges.add(
+        DailyChallenge(
+          id: 'record_baby_sleep',
+          title: 'Noches Tranquilas',
+          description: 'Registra el sueño de tu bebé hoy',
+          type: DailyChallengeType.babySleep,
+          requiredValue: 1,
+          xpReward: 20,
+          progress: todaySleepRecords,
+          icon: '😴',
+        ),
+      );
+    }
 
     // Desafíos de Racha (siempre disponibles)
     // Racha de Semana: 7 días

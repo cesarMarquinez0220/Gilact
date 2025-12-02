@@ -13,6 +13,7 @@ import 'dart:ui';
 import '../../../../alerta_dialoge.dart';
 import '../../../../main.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/notification_record_tracker.dart';
 import '../../../../core/di/injection.dart';
 
 /// Página de registro diario de sueño del bebé (llamada desde notificación 8 AM)
@@ -188,6 +189,14 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
 
       // Guardar localmente
       await sleepOfflineDataSource.saveRecord(sleepRecord);
+      
+      // Marcar que se guardó un registro para cancelar notificaciones de reenvío
+      try {
+        final tracker = NotificationRecordTracker();
+        await tracker.markSleepRecordSaved();
+      } catch (e) {
+        // Ignorar errores silenciosamente
+      }
 
       // Si hay conexión, guardar también en Firestore
       final connectivityService = ConnectivityService();

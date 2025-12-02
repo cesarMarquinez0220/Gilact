@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../user/presentation/bloc/user_profile_bloc.dart';
 
 /// Widget para el contador de cuenta regresiva del embarazo
 class CountdownCard extends StatefulWidget {
   final String expectedBirthDate;
   final VoidCallback? onCountdownReached;
+  final VoidCallback? onUpdateToPostpartum;
 
   const CountdownCard({
     super.key,
     this.expectedBirthDate = '2026-01-12T00:00:00.000',
     this.onCountdownReached,
+    this.onUpdateToPostpartum,
   });
 
   @override
@@ -152,6 +156,9 @@ class _CountdownCardState extends State<CountdownCard> {
       return _buildPastDueDisplay();
     } else if (daysLeft == 0 && hoursLeft <= 0) {
       return _buildTodayDisplay();
+    } else if (daysLeft <= 5) {
+      // Mostrar botón cuando faltan 4-5 días o menos
+      return _buildActiveCountdownWithButton(_currentDifference!);
     } else {
       return _buildActiveCountdown(_currentDifference!);
     }
@@ -173,7 +180,7 @@ class _CountdownCardState extends State<CountdownCard> {
           const Icon(Icons.celebration, color: Color(0xFF27AE60), size: 32),
           const SizedBox(height: 10),
           Text(
-            '¡El día llegó!',
+            'countdown.dayArrived'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -182,13 +189,28 @@ class _CountdownCardState extends State<CountdownCard> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Es hora de completar tu información postparto',
+            'countdown.completePostpartumInfo'.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
               fontSize: 12,
               color: const Color(0xFF7F8C8D),
             ),
           ),
+          const SizedBox(height: 15),
+          if (widget.onUpdateToPostpartum != null)
+            ElevatedButton.icon(
+              onPressed: widget.onUpdateToPostpartum,
+              icon: const Icon(Icons.update, size: 18),
+              label: Text('countdown.updateToPostpartum'.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF27AE60),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -267,6 +289,29 @@ class _CountdownCardState extends State<CountdownCard> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActiveCountdownWithButton(Duration difference) {
+    return Column(
+      children: [
+        _buildActiveCountdown(difference),
+        const SizedBox(height: 15),
+        if (widget.onUpdateToPostpartum != null)
+          ElevatedButton.icon(
+            onPressed: widget.onUpdateToPostpartum,
+            icon: const Icon(Icons.update, size: 18),
+            label: Text('countdown.updateToPostpartum'.tr()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF27AE60),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

@@ -1,9 +1,10 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/predefined_question.dart';
+import '../../domain/services/predefined_questions_service.dart';
 import '../bloc/chatbot_bloc.dart';
 
 class ChatbotPage extends StatefulWidget {
@@ -16,49 +17,42 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
-  final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  // Pool de preguntas sugeridas dinámicas
-  final List<String> _suggestionPool = [
-    '¿Qué es el calostro?',
-    '¿Cómo inicio la lactancia?',
-    '¿Cómo mejorar el agarre?',
-    '¿Cuántas veces debe comer un bebé?',
-    '¿Qué es la mastitis?',
-    '¿Cómo guardar leche materna?',
-    '¿Qué beneficios tiene la lactancia?',
-    '¿Cómo tratar grietas en los pezones?',
-    '¿Cuánto tiempo dura la lactancia?',
-    '¿Qué debo comer durante la lactancia?',
-    '¿Puedo tomar medicamentos?',
-    '¿Cómo saber si mi bebé come suficiente?',
-  ];
-
-  late List<String> _currentSuggestions;
+  final PredefinedQuestionsService _questionsService = PredefinedQuestionsService();
+  
+  // Preguntas actualmente mostradas
+  List<PredefinedQuestion> _currentQuestions = [];
+  // IDs de preguntas que ya se han mostrado (para rotación)
+  final Set<String> _shownQuestionIds = {};
+  // ID de la última pregunta seleccionada (para mostrar preguntas relacionadas)
+  String? _lastSelectedQuestionId;
 
   @override
   void initState() {
     super.initState();
-    _currentSuggestions = _getRandomSuggestions(3);
+    _loadInitialQuestions();
   }
 
-  List<String> _getRandomSuggestions(int count) {
-    final random = Random();
-    final suggestions = List<String>.from(_suggestionPool);
-    suggestions.shuffle(random);
-    return suggestions.take(count).toList();
-  }
-
-  void _refreshSuggestions() {
+  void _loadInitialQuestions() {
     setState(() {
-      _currentSuggestions = _getRandomSuggestions(3);
+      _currentQuestions = _questionsService.getRandomQuestions(count: 3);
+      _shownQuestionIds.addAll(_currentQuestions.map((q) => q.id));
+    });
+  }
+
+  void _refreshQuestions() {
+    setState(() {
+      _currentQuestions = _questionsService.getRotatedQuestions(
+        _shownQuestionIds.toList(),
+        count: 3,
+      );
+      _shownQuestionIds.addAll(_currentQuestions.map((q) => q.id));
+      _lastSelectedQuestionId = null; // Resetear para mostrar preguntas generales
     });
   }
 
   @override
   void dispose() {
-    _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -75,26 +69,32 @@ class _ChatbotPageState extends State<ChatbotPage> {
     });
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
-
+  void _selectQuestion(PredefinedQuestion question) {
     final bloc = context.read<ChatbotBloc>();
     final currentState = bloc.state;
     final List<ChatMessage> messages = currentState is ChatbotLoaded
         ? currentState.messages
         : [];
 
-    bloc.add(
-      SendMessage(
-        question: _messageController.text.trim(),
-        userId: widget.userId ?? 'default_user',
-        messages: messages,
-      ),
-    );
+    // Enviar mensaje con respuesta predefinida
+    bloc.add(SendMessage(
+      question: question.question,
+      userId: widget.userId ?? 'default_user',
+      messages: messages,
+      predefinedAnswer: question.answer, // Pasar la respuesta predefinida
+    ));
 
-    _messageController.clear();
+    // Actualizar preguntas mostradas con preguntas relacionadas
+    setState(() {
+      _lastSelectedQuestionId = question.id;
+      _currentQuestions = _questionsService.getRelatedQuestions(
+        question.id,
+        limit: 3,
+      );
+      _shownQuestionIds.addAll(_currentQuestions.map((q) => q.id));
+    });
+
     _scrollToBottom();
-    _refreshSuggestions(); // Refrescar sugerencias al enviar mensaje
   }
 
   @override
@@ -140,10 +140,16 @@ class _ChatbotPageState extends State<ChatbotPage> {
                             child: state is ChatbotLoaded
                                 ? (state.messages.isEmpty
                                       ? _EmptyChatWidget(
-                                          suggestions: _currentSuggestions,
-                                          onRefresh: _refreshSuggestions,
+                                          questions: _currentQuestions,
+                                          onRefresh: _refreshQuestions,
+                                          onQuestionSelected: _selectQuestion,
                                         )
-                                      : _buildMessageList(state.messages))
+                                      : _buildMessageList(
+                                          state.messages,
+                                          _currentQuestions,
+                                          _refreshQuestions,
+                                          _selectQuestion,
+                                        ))
                                 : state is ChatbotLoading
                                 ? const Center(
                                     child: CircularProgressIndicator(
@@ -152,11 +158,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                     ),
                                   )
                                 : _EmptyChatWidget(
-                                    suggestions: _currentSuggestions,
-                                    onRefresh: _refreshSuggestions,
+                                    questions: _currentQuestions,
+                                    onRefresh: _refreshQuestions,
+                                    onQuestionSelected: _selectQuestion,
                                   ),
                           ),
-                          _buildInputField(),
                         ],
                       ),
                     );
@@ -252,14 +258,83 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildMessageList(List<ChatMessage> messages) {
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        return _buildMessageBubble(messages[index]);
-      },
+  Widget _buildMessageList(
+    List<ChatMessage> messages,
+    List<PredefinedQuestion> currentQuestions,
+    VoidCallback onRefresh,
+    Function(PredefinedQuestion) onQuestionSelected,
+  ) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              return _buildMessageBubble(messages[index]);
+            },
+          ),
+        ),
+        // Mostrar preguntas relacionadas después de los mensajes
+        if (currentQuestions.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.white.withValues(alpha: 0.05),
+                ],
+              ),
+              border: Border(
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Preguntas relacionadas',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: onRefresh,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.refresh_rounded, size: 16, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Otras preguntas',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...currentQuestions.map(
+                  (question) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _buildQuestionChip(question, onQuestionSelected),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
@@ -361,115 +436,68 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildInputField() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
+  Widget _buildQuestionChip(
+    PredefinedQuestion question,
+    Function(PredefinedQuestion) onTap,
+  ) {
+    return InkWell(
+      onTap: () => onTap(question),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -2),
+            ),
           ],
         ),
-        border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _messageController,
-                onSubmitted: (_) => _sendMessage(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                question.question,
                 style: GoogleFonts.quicksand(
+                  fontSize: 14,
                   color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Escribe tu pregunta...',
-                  hintStyle: GoogleFonts.quicksand(
-                    color: Colors.white70,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1A365D), Color(0xFF4FD1C7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4FD1C7).withValues(alpha: 0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.white70,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(26),
-                onTap: _sendMessage,
-                child: const Icon(
-                  Icons.send_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _EmptyChatWidget extends StatelessWidget {
-  final List<String> suggestions;
+  final List<PredefinedQuestion> questions;
   final VoidCallback onRefresh;
+  final Function(PredefinedQuestion) onQuestionSelected;
 
-  const _EmptyChatWidget({required this.suggestions, required this.onRefresh});
+  const _EmptyChatWidget({
+    required this.questions,
+    required this.onRefresh,
+    required this.onQuestionSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -538,7 +566,7 @@ class _EmptyChatWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'chatbot.quickQuestions'.tr(),
+                  'Preguntas frecuentes',
                   style: GoogleFonts.quicksand(
                     fontSize: 12,
                     color: Colors.white70,
@@ -561,10 +589,10 @@ class _EmptyChatWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            ...suggestions.map(
-              (suggestion) => Padding(
+            ...questions.map(
+              (question) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _buildSuggestionChip(context, suggestion),
+                child: _buildQuestionChip(context, question),
               ),
             ),
           ],
@@ -573,13 +601,9 @@ class _EmptyChatWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSuggestionChip(BuildContext context, String text) {
+  Widget _buildQuestionChip(BuildContext context, PredefinedQuestion question) {
     return InkWell(
-      onTap: () {
-        context.read<ChatbotBloc>().add(
-          SendMessage(question: text, userId: 'default_user', messages: const []),
-        );
-      },
+      onTap: () => onQuestionSelected(question),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
@@ -606,7 +630,7 @@ class _EmptyChatWidget extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                text,
+                question.question,
                 style: GoogleFonts.quicksand(
                   fontSize: 14,
                   color: Colors.white,

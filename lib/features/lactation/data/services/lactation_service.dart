@@ -6,6 +6,7 @@ import '../../data/datasources/lactation_database.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/sync_queue_service.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/notification_record_tracker.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../main.dart' as app_main;
 import '../../../gamification/domain/services/gamification_service.dart';
@@ -183,6 +184,14 @@ class LactationService {
         _logger.success(
           'LactationService.saveRecord → Registro guardado LOCALMENTE (offline-first): ${record.id}',
         );
+      }
+      
+      // Marcar que se guardó un registro para cancelar notificaciones de reenvío
+      try {
+        final tracker = NotificationRecordTracker();
+        await tracker.markLactationRecordSaved();
+      } catch (e) {
+        // Ignorar errores silenciosamente
       }
 
       // PASO 2: Lanzar procesos secundarios en background (no bloquear UI)

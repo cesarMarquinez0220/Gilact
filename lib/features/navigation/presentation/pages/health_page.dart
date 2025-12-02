@@ -10,6 +10,7 @@ import '../../../lactation/data/datasources/baby_weight_offline_local_data_sourc
 import '../../../lactation/domain/entities/baby_weight_record.dart';
 import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
 import '../../../lactation/domain/entities/sleep_record.dart';
+import '../../../user/presentation/bloc/user_profile_bloc.dart';
 
 /// Página de salud del bebé con diseño mejorado y funcionalidades adicionales
 class HealthPage extends StatefulWidget {
@@ -64,132 +65,134 @@ class _HealthPageState extends State<HealthPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-            child: Row(
-              children: [
-                Text(
-                  'health.title'.tr(),
-                  style: GoogleFonts.quicksand(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => _loadRecentData(),
-                  icon: const Icon(Icons.refresh, color: Colors.white),
-                  tooltip: 'health.refresh'.tr(),
-                ),
-              ],
-            ),
-          ),
-          // Contenido scrollable
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: BlocBuilder<UserProfileBloc, UserProfileState>(
+        builder: (context, userState) {
+          // Determinar si es preparto o postparto
+          bool isPrePartum = false;
+          bool isPostPartum = false;
+          
+          if (userState is UserProfileLoaded) {
+            isPrePartum = userState.profile.isPrePartum;
+            isPostPartum = userState.profile.isPostPartum;
+          } else if (userState is UserProfileUpdated) {
+            isPrePartum = userState.profile.isPrePartum;
+            isPostPartum = userState.profile.isPostPartum;
+          }
+
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                child: Row(
                   children: [
-                    // Sección: Seguimiento de Crecimiento
-                    _buildSectionTitle('health.growthTracking'.tr()),
-                    const SizedBox(height: 12),
-                    _buildEnhancedHealthCard(
-                      context,
-                      title: 'health.babyWeight'.tr(),
-                      subtitle: 'health.babyWeightDescription'.tr(),
-                      icon: Icons.monitor_weight_rounded,
-                      color: const Color(0xFF4CAF50),
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/baby-weight-form');
-                      },
-                      lastRecord: _lastWeightRecord != null
-                          ? '${'health.last'.tr()} ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
-                          : 'lactation.calendar.noRecordsText'.tr(),
-                      recordDate: _lastWeightRecord?.recordedAt,
-                      badge: _lastWeightRecord != null ? 'health.active'.tr() : null,
+                    Text(
+                      'health.title'.tr(),
+                      style: GoogleFonts.quicksand(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Sección: Bienestar Diario
-                    _buildSectionTitle('health.dailyWellness'.tr()),
-                    const SizedBox(height: 12),
-                    _buildEnhancedHealthCard(
-                      context,
-                      title: 'health.sleep'.tr(),
-                      subtitle: 'health.sleepDescription'.tr(),
-                      icon: Icons.bedtime_rounded,
-                      color: const Color(0xFFFF9800),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DailySleepFormPage(),
-                          ),
-                        );
-                      },
-                      lastRecord: _lastSleepRecord != null
-                          ? '${'health.last'.tr()} ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
-                          : 'lactation.calendar.noRecordsText'.tr(),
-                      recordDate: _lastSleepRecord?.sleepStartTime,
-                      badge: _lastSleepRecord != null ? 'health.active'.tr() : null,
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => _loadRecentData(),
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      tooltip: 'health.refresh'.tr(),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Sección: Asistencia
-                    _buildSectionTitle('health.assistanceHelp'.tr()),
-                    const SizedBox(height: 12),
-                    _buildEnhancedHealthCard(
-                      context,
-                      title: 'health.assistant'.tr(),
-                      subtitle: 'health.assistantDescription'.tr(),
-                      icon: Icons.smart_toy_rounded,
-                      color: const Color(0xFF03A696),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) =>
-                                  GetIt.instance<ChatbotBloc>(),
-                              child: const ChatbotPage(),
-                            ),
-                          ),
-                        );
-                      },
-                      lastRecord: 'health.available247'.tr(),
-                      badge: 'health.new'.tr(),
-                      badgeColor: Colors.blue,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Sección: Emergencias
-                    _buildSectionTitle('health.emergencies'.tr()),
-                    const SizedBox(height: 12),
-                    _buildEnhancedHealthCard(
-                      context,
-                      title: 'health.emergencyContacts'.tr(),
-                      subtitle: 'health.emergencyContactsDescription'.tr(),
-                      icon: Icons.emergency_rounded,
-                      color: const Color(0xFFF44336),
-                      onTap: () {
-                        _showEmergencyContacts(context);
-                      },
-                      lastRecord: 'health.alwaysAvailable'.tr(),
-                      badge: 'health.important'.tr(),
-                      badgeColor: Colors.red,
-                    ),
-                    const SizedBox(height: 100), // Espacio para el bottom bar
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
+              // Contenido scrollable
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Solo mostrar "Seguimiento de Crecimiento" si es postparto
+                        if (isPostPartum) ...[
+                          _buildSectionTitle('health.growthTracking'.tr()),
+                          const SizedBox(height: 12),
+                          _buildEnhancedHealthCard(
+                            context,
+                            title: 'health.babyWeight'.tr(),
+                            subtitle: 'health.babyWeightDescription'.tr(),
+                            icon: Icons.monitor_weight_rounded,
+                            color: const Color(0xFF4CAF50),
+                            onTap: () {
+                              Navigator.of(context).pushNamed('/baby-weight-form');
+                            },
+                            lastRecord: _lastWeightRecord != null
+                                ? '${'health.last'.tr()} ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                                : 'lactation.calendar.noRecordsText'.tr(),
+                            recordDate: _lastWeightRecord?.recordedAt,
+                            badge: _lastWeightRecord != null ? 'health.active'.tr() : null,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Solo mostrar "Bienestar Diario" si es postparto
+                        if (isPostPartum) ...[
+                          _buildSectionTitle('health.dailyWellness'.tr()),
+                          const SizedBox(height: 12),
+                          _buildEnhancedHealthCard(
+                            context,
+                            title: 'health.sleep'.tr(),
+                            subtitle: 'health.sleepDescription'.tr(),
+                            icon: Icons.bedtime_rounded,
+                            color: const Color(0xFFFF9800),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const DailySleepFormPage(),
+                                ),
+                              );
+                            },
+                            lastRecord: _lastSleepRecord != null
+                                ? '${'health.last'.tr()} ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                                : 'lactation.calendar.noRecordsText'.tr(),
+                            recordDate: _lastSleepRecord?.sleepStartTime,
+                            badge: _lastSleepRecord != null ? 'health.active'.tr() : null,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Sección: Asistencia (para ambos perfiles)
+                        _buildSectionTitle('health.assistanceHelp'.tr()),
+                        const SizedBox(height: 12),
+                        _buildEnhancedHealthCard(
+                          context,
+                          title: 'health.assistant'.tr(),
+                          subtitle: 'health.assistantDescription'.tr(),
+                          icon: Icons.smart_toy_rounded,
+                          color: const Color(0xFF03A696),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider(
+                                  create: (context) =>
+                                      GetIt.instance<ChatbotBloc>(),
+                                  child: const ChatbotPage(),
+                                ),
+                              ),
+                            );
+                          },
+                          lastRecord: 'health.available247'.tr(),
+                          badge: 'health.new'.tr(),
+                          badgeColor: Colors.blue,
+                        ),
+                        const SizedBox(height: 100), // Espacio para el bottom bar
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -395,142 +398,4 @@ class _HealthPageState extends State<HealthPage> {
     }
   }
 
-  void _showEmergencyContacts(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.emergency_rounded, color: Colors.red[700], size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'health.emergencyContactsTitle'.tr(),
-              style: GoogleFonts.quicksand(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.red[700],
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'health.emergencyContactMessage'.tr(),
-              style: GoogleFonts.quicksand(
-                fontSize: 14,
-                color: const Color(0xFF7F8C8D),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _buildEmergencyContactItem(
-              'health.emergenciesLabel'.tr(),
-              '911',
-              Icons.phone,
-              Colors.red,
-              () {
-                // Llamar a emergencias
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildEmergencyContactItem(
-              'health.pediatrician'.tr(),
-              'health.contactPediatrician'.tr(),
-              Icons.local_hospital,
-              const Color(0xFF03A696),
-              () {
-                // Abrir contactos del pediatra
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildEmergencyContactItem(
-              'health.breastfeedingLine'.tr(),
-              '0800-LACTANCIA',
-              Icons.support_agent,
-              Colors.blue,
-              () {
-                // Llamar a línea de lactancia
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'common.close'.tr(),
-              style: GoogleFonts.quicksand(
-                color: const Color(0xFF03A696),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmergencyContactItem(
-    String title,
-    String contact,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF2C3E50),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      contact,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 12,
-                        color: const Color(0xFF7F8C8D),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.phone, color: color, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

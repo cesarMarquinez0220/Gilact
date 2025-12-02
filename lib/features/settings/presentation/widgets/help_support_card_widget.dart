@@ -24,13 +24,17 @@ class HelpSupportCardWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmallScreen = constraints.maxWidth < 400;
-        final maxWidth = constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
+        final maxWidth = constraints.maxWidth > 600
+            ? 600.0
+            : constraints.maxWidth;
 
         return Container(
           width: double.infinity,
           constraints: BoxConstraints(maxWidth: maxWidth),
           margin: EdgeInsets.symmetric(
-            horizontal: constraints.maxWidth > 600 ? (constraints.maxWidth - 600) / 2 : 0,
+            horizontal: constraints.maxWidth > 600
+                ? (constraints.maxWidth - 600) / 2
+                : 0,
           ),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -174,10 +178,12 @@ class HelpSupportCardWidget extends StatelessWidget {
   void _showPrivacyPolicy(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('helpSupport.privacy'.tr(), style: GoogleFonts.quicksand()),
+        content: Text(
+          'helpSupport.privacy'.tr(),
+          style: GoogleFonts.quicksand(),
+        ),
         backgroundColor: const Color(0xFF03A696),
       ),
     );
   }
 }
-

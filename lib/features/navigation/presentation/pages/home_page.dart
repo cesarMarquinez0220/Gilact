@@ -988,41 +988,30 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeatureGrid(BuildContext context, bool isPostPartum) {
-    if (isPostPartum) {
-      // Para postparto: Tips e Historial en fila
-      return Row(
-        children: [
-          Expanded(
-            child: HomeFeatureCard(
-              title: 'home.tips'.tr(),
-              icon: Icons.lightbulb,
-              description: 'home.tipsDescription'.tr(),
-              onTap: () => NavigationService.navigateToTips(context),
-              color: AppColorService.getFeatureColor('Tips'),
-            ),
+    // Para ambos perfiles: Tips e Historial en fila
+    return Row(
+      children: [
+        Expanded(
+          child: HomeFeatureCard(
+            title: 'home.tips'.tr(),
+            icon: Icons.lightbulb,
+            description: 'home.tipsDescription'.tr(),
+            onTap: () => NavigationService.navigateToTips(context),
+            color: AppColorService.getFeatureColor('Tips'),
           ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: HomeFeatureCard(
-              title: 'home.history'.tr(),
-              icon: Icons.video_library,
-              description: 'home.historyDescription'.tr(),
-              onTap: () => NavigationService.navigateToUserVideos(context),
-              color: AppColorService.getFeatureColor('Historial'),
-            ),
+        ),
+        const SizedBox(width: 15),
+        Expanded(
+          child: HomeFeatureCard(
+            title: 'home.history'.tr(),
+            icon: Icons.video_library,
+            description: 'home.historyDescription'.tr(),
+            onTap: () => NavigationService.navigateToUserVideos(context),
+            color: AppColorService.getFeatureColor('Historial'),
           ),
-        ],
-      );
-    } else {
-      // Para preparto: solo Tips
-      return HomeFeatureCard(
-        title: 'home.tips'.tr(),
-        icon: Icons.lightbulb,
-        description: 'home.tipsDescription'.tr(),
-        onTap: () => NavigationService.navigateToTips(context),
-        color: AppColorService.getFeatureColor('Tips'),
-      );
-    }
+        ),
+      ],
+    );
   }
 
   Widget _buildProfileSections(BuildContext context, UserProfileState state) {
@@ -1138,6 +1127,226 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Maneja la actualización manual de preparto a postparto
+  void _handleUpdateToPostpartum(BuildContext context, UserProfileState state) {
+    if (state is UserProfileLoaded || state is UserProfileUpdated) {
+      final profile = (state as dynamic).profile;
+
+      // Solo hacer la transición si aún está en preparto
+      if (profile.isPrePartum && !profile.isPostPartum) {
+        _logger.d('HomePage: Usuario actualizando manualmente a postparto...');
+
+        // Mostrar diálogo de confirmación
+        showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.celebration, color: Colors.amber[700], size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'countdown.updateToPostpartum'.tr(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              'countdown.updateToPostpartumConfirm'.tr(),
+              style: GoogleFonts.quicksand(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(
+                  'common.close'.tr(),
+                  style: GoogleFonts.quicksand(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+
+                  // Actualizar situación del usuario
+                  context.read<UserProfileBloc>().add(
+                    UpdateUserSituationRequested(
+                      userId: profile.id,
+                      isPrePartum: false,
+                      isPostPartum: true,
+                      situationData: {
+                        ...?profile.situationData,
+                        'transitionDate': DateTime.now().toIso8601String(),
+                        'manualUpdate': true,
+                      },
+                    ),
+                  );
+
+                  // Mostrar pantalla de felicitaciones
+                  _showCongratulationsScreen(context, profile.id);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF03A696),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'countdown.updateToPostpartum'.tr(),
+                  style: GoogleFonts.quicksand(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  /// Muestra la pantalla de felicitaciones cuando se actualiza a postparto
+  void _showCongratulationsScreen(BuildContext context, String userId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF2C5F5D), // Azul teal oscuro
+                Color(0xFF1A365D), // Azul marino oscuro
+                Color(0xFF4FD1C7), // Verde azulado medio vibrante
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icono de celebración animado
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.celebration,
+                        color: Colors.white,
+                        size: 64,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              // Título
+              Text(
+                'countdown.congratulationsTitle'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // Mensaje principal
+              Text(
+                'countdown.congratulationsMessage'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.9),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              // Mensaje adicional de cuidado
+              Text(
+                'countdown.congratulationsCareMessage'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 14,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              // Botón de acción
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  // Navegar al formulario de postparto
+                  Navigator.of(context).pushNamed('/postpartum-form');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF03A696),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 8,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add_circle_outline, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      'countdown.registerBaby'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Construye la sección del contador con manejo de casos
   Widget _buildCountdownSection(BuildContext context, UserProfileState state) {
     // Evitar "flash" del mensaje de Información Pendiente:
@@ -1216,6 +1425,9 @@ class _HomePageState extends State<HomePage> {
         expectedBirthDate: expectedBirthDate,
         onCountdownReached: () {
           _handleCountdownReached(context, state);
+        },
+        onUpdateToPostpartum: () {
+          _handleUpdateToPostpartum(context, state);
         },
       );
     } else {

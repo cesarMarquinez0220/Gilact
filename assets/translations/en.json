@@ -462,6 +462,8 @@
       "youAreSuperMom": "You're a super mom, keep it up! 🚀"
     },
     "title": "Companion",
+    "prepartumMessage": "Your journey is beginning!",
+    "prepartumSubmessage": "Complete lessons and trivias to earn XP and unlock achievements while you wait for your baby.",
     "level": "Level",
     "streak": "Streak",
     "achievements": "Achievements",
@@ -549,7 +551,12 @@
     "selectAnswer": "Select an answer",
     "xpEarned": "XP Earned",
     "totalXP": "Total XP",
-    "continue": "Continue"
+    "continue": "Continue",
+    "repeatTrivia": "Repeat Trivia"
+  },
+  "companion": {
+    "prepartumMessage": "Your journey is beginning!",
+    "prepartumSubmessage": "Complete lessons and trivias to earn XP and unlock achievements while you wait for your baby."
   },
   "health": {
     "title": "Health",
@@ -979,7 +986,15 @@
     "greatDayArrived": "The great day has arrived! Get ready to meet your baby.",
     "verySoon": "Very soon! Your baby is almost here.",
     "oneMonthLeft": "One more month and you'll have your baby in your arms. Keep going!",
-    "stayStrong": "Stay strong, the great day is approaching."
+    "stayStrong": "Stay strong, the great day is approaching.",
+    "dayArrived": "The day has arrived!",
+    "completePostpartumInfo": "It's time to complete your postpartum information",
+    "updateToPostpartum": "Update to Postpartum",
+    "updateToPostpartumConfirm": "Are you sure you want to update your profile to postpartum? This will allow you to register your baby's information.",
+    "congratulationsTitle": "Congratulations!",
+    "congratulationsMessage": "Your baby has arrived! Now you can register all your baby's information and start using all the app's features.",
+    "congratulationsCareMessage": "Remember to take care of yourself and rest. This is a special moment for you and your baby.",
+    "registerBaby": "Register Baby"
   },
   "onboarding": {
     "babyName": "Baby Name",

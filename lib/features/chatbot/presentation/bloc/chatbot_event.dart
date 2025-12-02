@@ -11,15 +11,17 @@ class SendMessage extends ChatbotEvent {
   final String question;
   final String userId;
   final List<ChatMessage> messages;
+  final String? predefinedAnswer; // Respuesta predefinida (opcional)
 
   const SendMessage({
     required this.question,
     required this.userId,
     required this.messages,
+    this.predefinedAnswer,
   });
 
   @override
-  List<Object> get props => [question, userId, messages];
+  List<Object?> get props => [question, userId, messages, predefinedAnswer];
 }
 
 class LoadChatHistory extends ChatbotEvent {

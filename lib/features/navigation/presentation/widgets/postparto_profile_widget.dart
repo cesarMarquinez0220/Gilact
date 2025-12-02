@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -263,7 +264,7 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
                     ),
                     _buildInfoRow(
                       'baby.data.birthDate'.tr(),
-                      widget.userProfile.babyInfo!.birthDate,
+                      _formatBirthDate(context, widget.userProfile.babyInfo!.birthDate),
                     ),
                     _buildInfoRow(
                       'baby.data.birthPlace'.tr(),
@@ -288,6 +289,26 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         ),
       ),
     );
+  }
+
+  /// Formatea la fecha de nacimiento a un formato legible
+  String _formatBirthDate(BuildContext context, String birthDateStr) {
+    try {
+      // Intentar parsear la fecha
+      final birthDate = DateTime.parse(birthDateStr);
+      
+      // Formatear según el locale
+      final locale = context.locale.toString();
+      final dateFormat = DateFormat.yMMMMd(locale);
+      
+      return dateFormat.format(birthDate);
+    } catch (e) {
+      // Si falla el parseo, devolver la fecha original
+      if (kDebugMode) {
+        print('Error formateando fecha de nacimiento: $e');
+      }
+      return birthDateStr;
+    }
   }
 
   Widget _buildInfoRow(String label, String value) {

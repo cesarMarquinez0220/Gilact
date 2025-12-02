@@ -53,6 +53,33 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       return;
     }
 
+    // Si hay una respuesta predefinida, usarla directamente sin llamar a la API
+    if (event.predefinedAnswer != null && event.predefinedAnswer!.isNotEmpty) {
+      final currentMessages = event.messages.isNotEmpty
+          ? event.messages
+          : (state is ChatbotLoaded
+              ? (state as ChatbotLoaded).messages
+              : <ChatMessage>[]);
+
+      final userMessage = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: event.question,
+        isUser: true,
+        timestamp: DateTime.now(),
+      );
+
+      final botMessage = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString() + '_bot',
+        text: event.predefinedAnswer!,
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+
+      final finalMessages = [...currentMessages, userMessage, botMessage];
+      emit(ChatbotLoaded(finalMessages));
+      return;
+    }
+
     // Añadir mensaje del usuario al estado actual
     final currentMessages = state is ChatbotLoaded
         ? (state as ChatbotLoaded).messages

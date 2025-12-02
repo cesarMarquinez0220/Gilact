@@ -14,6 +14,7 @@ import '../providers/video_images_provider.dart';
 import '../../../videos/presentation/pages/video_player_page.dart';
 import '../../../videos/domain/entities/video.dart' as video_entity;
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../gamification/presentation/widgets/lesson_trivia_widget.dart';
 import '../../../gamification/domain/services/gamification_service.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
@@ -68,6 +69,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   }
 
   /// Carga de una sola vez qué lecciones ya tienen trivia completada
+  /// Para usuarios preparto, no carga trivias completadas para permitir repetición
   Future<void> _loadTriviaStatus() async {
     try {
       final authState = context.read<AuthBloc>().state;
@@ -79,6 +81,26 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       }
 
       final userId = authState.user.id;
+      
+      // Verificar si el usuario es preparto
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final userProfileState = userProfileBloc.state;
+      final isPrePartum = userProfileState is UserProfileLoaded
+          ? userProfileState.profile.isPrePartum
+          : (userProfileState is UserProfileUpdated
+              ? userProfileState.profile.isPrePartum
+              : false);
+
+      // Si es preparto, no cargar trivias completadas para permitir repetición
+      if (isPrePartum) {
+        if (!mounted) return;
+        setState(() {
+          _completedTriviaLessons = {};
+        });
+        _logger.d('Usuario preparto: trivias siempre disponibles para repetición');
+        return;
+      }
+
       final gamificationService = GetIt.instance<GamificationService>();
 
       final completedLessonIdsStr = await gamificationService
@@ -895,7 +917,18 @@ class _LessonVideosPageState extends State<LessonVideosPage>
   }
 
   Widget _buildTriviaButton(int lessonId, List<Video> videos) {
-    final isCompleted = _completedTriviaLessons.contains(lessonId);
+    // Verificar si el usuario es preparto
+    final userProfileBloc = context.read<UserProfileBloc>();
+    final userProfileState = userProfileBloc.state;
+    final isPrePartum = userProfileState is UserProfileLoaded
+        ? userProfileState.profile.isPrePartum
+        : (userProfileState is UserProfileUpdated
+            ? userProfileState.profile.isPrePartum
+            : false);
+
+    // Para preparto, siempre permitir hacer trivias (repetibles)
+    // Para postparto, verificar si está completada
+    final isCompleted = !isPrePartum && _completedTriviaLessons.contains(lessonId);
     final allVideosCompleted = videos.every(
       (video) => _isVideoCompletedFromFirestore(video.videoId),
     );
@@ -914,9 +947,11 @@ class _LessonVideosPageState extends State<LessonVideosPage>
           color: Colors.white,
         ),
         label: Text(
-          isCompleted
-              ? 'trivia.completed'.tr()
-              : 'trivia.completeToAdvance'.tr(),
+          isPrePartum
+              ? 'trivia.repeatTrivia'.tr()
+              : (isCompleted
+                  ? 'trivia.completed'.tr()
+                  : 'trivia.completeToAdvance'.tr()),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -943,11 +978,22 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final userId = authState.user.id;
     final lessonIdStr = lessonId.toString();
 
-    // Verificar si ya está completada (usando el estado en memoria)
-    final isCompleted = _completedTriviaLessons.contains(lessonId);
+    // Verificar si el usuario es preparto
+    final userProfileBloc = context.read<UserProfileBloc>();
+    final userProfileState = userProfileBloc.state;
+    final isPrePartum = userProfileState is UserProfileLoaded
+        ? userProfileState.profile.isPrePartum
+        : (userProfileState is UserProfileUpdated
+            ? userProfileState.profile.isPrePartum
+            : false);
+
+    // Verificar si ya está completada (solo para postparto)
+    final isCompleted = !isPrePartum && _completedTriviaLessons.contains(lessonId);
 
     if (!mounted) return;
 
+    // Para preparto, siempre permitir hacer trivias (repetibles)
+    // Para postparto, mostrar mensaje si ya está completada
     if (isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -958,15 +1004,19 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       return;
     }
 
-    await LessonTriviaWidget.show(
+      await LessonTriviaWidget.show(
       context,
       lessonId: lessonIdStr,
       userId: userId,
       onComplete: () {
         // Marcar trivia como completada en memoria y refrescar UI
+        // Solo para postparto (preparto puede repetir)
         if (mounted) {
           setState(() {
-            _completedTriviaLessons.add(lessonId);
+            // Solo agregar a completadas si NO es preparto
+            if (!isPrePartum) {
+              _completedTriviaLessons.add(lessonId);
+            }
           });
         }
       },

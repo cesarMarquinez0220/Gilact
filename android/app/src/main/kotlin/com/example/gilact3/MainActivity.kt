@@ -22,6 +22,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val NOTIFICATION_CHANNEL = "notification_permissions"
     private val NATIVE_ALARM_CHANNEL = "native_alarm_scheduler"
     private val VIBRATION_CHANNEL = "system_vibration"
+    private val NOTIFICATION_RECORD_TRACKER_CHANNEL = "notification_record_tracker"
     private var isSecureFlagEnabled = false
     private var eventSink: EventChannel.EventSink? = null
 
@@ -133,6 +134,33 @@ class MainActivity : FlutterFragmentActivity() {
                 }
             }
         )
+        
+        // Configurar MethodChannel para rastreo de registros y cancelación de reenvíos
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NOTIFICATION_RECORD_TRACKER_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "markSleepRecordSaved" -> {
+                    try {
+                        val prefs = getSharedPreferences("sleep_notifications", Context.MODE_PRIVATE)
+                        prefs.edit().putLong("last_sleep_record_time", System.currentTimeMillis()).apply()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("ERROR", e.message, null)
+                    }
+                }
+                "markLactationRecordSaved" -> {
+                    try {
+                        val prefs = getSharedPreferences("lactation_notifications", Context.MODE_PRIVATE)
+                        prefs.edit().putLong("last_lactation_record_time", System.currentTimeMillis()).apply()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("ERROR", e.message, null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
         
         // Configurar MethodChannel para vibraciones del sistema
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VIBRATION_CHANNEL).setMethodCallHandler { call, result ->

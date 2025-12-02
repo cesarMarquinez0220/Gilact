@@ -495,7 +495,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
     return rive.RiveWidgetBuilder(
       fileLoader: _fileLoader,
       // No especificamos artboardSelector porque cada archivo solo tiene un artboard
-      stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+      stateMachineSelector: rive.StateMachineSelector.byName('Bebe_StateMachine'),
       builder: (context, state) {
         if (state is rive.RiveLoading) {
           if (kDebugMode) {

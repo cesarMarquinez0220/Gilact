@@ -4,10 +4,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 import 'notification_handler.dart';
 import 'sleep_notification_service.dart';
+import 'lactation_service.dart';
 
 /// Servicio para manejar notificaciones de recordatorio de lactancia
 /// Programa notificaciones cuando pasan 2 horas desde la última toma
@@ -119,12 +122,41 @@ class LactationNotificationService {
   }
 
   /// Programar notificación de lactancia según la edad del bebé
+  /// Solo se programa si el usuario es postparto
   Future<void> scheduleLactationReminder({
     required DateTime lastFeedTime,
     String? babyName,
     DateTime? babyBirthDate,
   }) async {
     await initialize();
+
+    // Verificar si el usuario es postparto antes de programar
+    try {
+      final lactationService = LactationService(
+        FirebaseFirestore.instance,
+        FirebaseAuth.instance,
+      );
+
+      final isPostpartum = await lactationService.hasPostpartumSituation();
+
+      if (!isPostpartum) {
+        _logger.w(
+          'LactationNotificationService: Usuario no es postparto, no se programará notificación',
+        );
+        return;
+      }
+
+      _logger.d(
+        'LactationNotificationService: Usuario es postparto, programando notificación',
+      );
+    } catch (e, stackTrace) {
+      _logger.w(
+        'LactationNotificationService: Error verificando situación',
+        e,
+        stackTrace,
+      );
+      return;
+    }
 
     // Verificar permisos de notificación
     final bool? granted = await _notifications
