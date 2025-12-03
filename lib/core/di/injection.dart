@@ -71,6 +71,7 @@ import '../../features/gamification/domain/services/gamification_service.dart';
 import '../../features/gamification/domain/services/user_statistics_service.dart';
 import '../../features/gamification/domain/services/daily_challenge_service.dart';
 import '../../features/gamification/presentation/bloc/gamification_bloc.dart';
+import '../../features/gamification/presentation/services/achievement_queue_service.dart';
 
 // Growth Tracking Data Sources
 import '../../features/lactation/data/datasources/baby_weight_offline_local_data_source.dart';
@@ -235,6 +236,9 @@ Future<void> configureDependencies() async {
       getIt<GamificationService>(),
     ),
   );
+
+  // Achievement Queue Service (singleton para mantener la cola)
+  getIt.registerSingleton<AchievementQueueService>(AchievementQueueService());
 
   // Providers
   getIt.registerFactory<LactationProvider>(

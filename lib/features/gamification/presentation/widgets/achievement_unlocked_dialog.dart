@@ -24,12 +24,13 @@ class AchievementUnlockedDialog extends StatefulWidget {
       _AchievementUnlockedDialogState();
 
   /// Muestra el diálogo
-  static void show(
+  /// Retorna un Future que se completa cuando el diálogo se cierra
+  static Future<void> show(
     BuildContext context,
     Achievement achievement,
     int xpReward, {
     bool withVibration = true,
-  }) {
+  }) async {
     // Vibración y sonido de éxito al mostrar el logro (usando servicios)
     if (withVibration) {
       final SoundService soundService = getIt<SoundService>();
@@ -43,7 +44,7 @@ class AchievementUnlockedDialog extends StatefulWidget {
       });
     }
 
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(

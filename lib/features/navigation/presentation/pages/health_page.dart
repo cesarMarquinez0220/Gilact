@@ -14,6 +14,7 @@ import '../../../lactation/domain/entities/sleep_record.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../widgets/home_feature_card.dart';
 import '../providers/health_provider.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Página de salud del bebé con diseño mejorado y funcionalidades adicionales
 class HealthPage extends StatefulWidget {
@@ -63,7 +64,7 @@ class _HealthPageState extends State<HealthPage> {
         builder: (context, userState) {
           // Determinar si es postparto
           bool isPostPartum = false;
-          
+
           if (userState is UserProfileLoaded) {
             isPostPartum = userState.profile.isPostPartum;
           } else if (userState is UserProfileUpdated) {
@@ -75,187 +76,179 @@ class _HealthPageState extends State<HealthPage> {
               final lastWeightRecord = healthProvider.lastWeightRecord;
               final lastSleepRecord = healthProvider.lastSleepRecord;
 
+              final screenWidth = MediaQuery.of(context).size.width;
+              final screenHeight = MediaQuery.of(context).size.height;
+              final isSmallScreen = screenWidth < 360;
+              final isShortScreen = screenHeight < 700;
+
               return Column(
                 children: [
-                  // Header modernizado con consistencia visual
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF667eea), // Azul púrpura
-                          Color(0xFF764ba2), // Púrpura
-                          Color(0xFFf093fb), // Rosa claro
-                        ],
-                        stops: [0.0, 0.6, 1.0],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF667eea).withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                          spreadRadius: 2,
-                        ),
-                      ],
+                  // Header consistente con padding igual a Companion
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 20,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'health.title'.tr(),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
-                                      offset: const Offset(1, 1),
-                                      blurRadius: 3,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'health.subtitle'.tr(),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.95),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Icono de salud
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.2),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.favorite,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              // Contenido scrollable
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Solo mostrar "Seguimiento de Crecimiento" si es postparto
-                        if (isPostPartum) ...[
-                          _buildSectionTitle('health.growthTracking'.tr()),
-                          const SizedBox(height: 12),
-                          _buildHealthCardWithRecords(
-                            context,
-                            title: 'health.babyWeight'.tr(),
-                            subtitle: 'health.babyWeightDescription'.tr(),
-                            icon: Icons.monitor_weight_rounded,
-                            color: const Color(0xFF4CAF50),
-                            onTap: () async {
-                              final result = await Navigator.of(context).pushNamed('/baby-weight-form');
-                              // Recargar datos cuando se vuelve de guardar un registro
-                              if (result == true || result != null) {
-                                healthProvider.refresh();
-                              }
-                            },
-                            lastRecord: lastWeightRecord != null
-                                ? '${'health.last'.tr()} ${lastWeightRecord!.weight.toStringAsFixed(2)} kg'
-                                : 'lactation.calendar.noRecordsText'.tr(),
-                            recordDate: lastWeightRecord?.recordedAt,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        // Solo mostrar "Bienestar Diario" si es postparto
-                        if (isPostPartum) ...[
-                          _buildSectionTitle('health.dailyWellness'.tr()),
-                          const SizedBox(height: 12),
-                          _buildHealthCardWithRecords(
-                            context,
-                            title: 'health.sleep'.tr(),
-                            subtitle: 'health.sleepDescription'.tr(),
-                            icon: Icons.bedtime_rounded,
-                            color: const Color(0xFFFF9800),
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const DailySleepFormPage(),
-                                ),
-                              );
-                              // Recargar datos cuando se vuelve de guardar un registro
-                              if (result == true || result != null) {
-                                healthProvider.refresh();
-                              }
-                            },
-                            lastRecord: lastSleepRecord != null
-                                ? '${'health.last'.tr()} ${lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
-                                : 'lactation.calendar.noRecordsText'.tr(),
-                            recordDate: lastSleepRecord?.sleepStartTime,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        // Sección: Asistencia (para ambos perfiles)
-                        _buildSectionTitle('health.assistanceHelp'.tr()),
-                        const SizedBox(height: 12),
-                        HomeFeatureCard(
-                          title: 'health.assistant'.tr(),
-                          icon: Icons.smart_toy_rounded,
-                          description: 'health.assistantDescription'.tr(),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BlocProvider(
-                                  create: (context) =>
-                                      GetIt.instance<ChatbotBloc>(),
-                                  child: const ChatbotPage(),
-                                ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
                               ),
-                            );
-                          },
-                          color: const Color(0xFF03A696),
+                              child: Icon(
+                                Icons.favorite_rounded,
+                                color: Colors.white,
+                                size: isSmallScreen ? 22 : 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'health.title'.tr(),
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: isSmallScreen ? 22 : 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: isShortScreen ? 2 : 4),
+                                  Text(
+                                    'health.subtitle'.tr(),
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: isSmallScreen ? 13 : 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 100), // Espacio para el bottom bar
+                        SizedBox(height: isShortScreen ? 12 : 16),
+                        // Separador inferior completamente blanco
+                        Container(height: 1, color: Colors.white),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ],
-          );
+                  // Contenido scrollable
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Solo mostrar "Seguimiento de Crecimiento" si es postparto
+                            if (isPostPartum) ...[
+                              _buildSectionTitle('health.growthTracking'.tr()),
+                              const SizedBox(height: 12),
+                              _buildHealthCardWithRecords(
+                                context,
+                                title: 'health.babyWeight'.tr(),
+                                subtitle: 'health.babyWeightDescription'.tr(),
+                                icon: Icons.monitor_weight_rounded,
+                                color: const Color(0xFF4CAF50),
+                                onTap: () async {
+                                  final result = await Navigator.of(
+                                    context,
+                                  ).pushNamed('/baby-weight-form');
+                                  // Recargar datos cuando se vuelve de guardar un registro
+                                  if (result == true || result != null) {
+                                    healthProvider.refresh();
+                                  }
+                                },
+                                lastRecord: lastWeightRecord != null
+                                    ? '${'health.last'.tr()} ${lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                                    : 'lactation.calendar.noRecordsText'.tr(),
+                                recordDate: lastWeightRecord?.recordedAt,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // Solo mostrar "Bienestar Diario" si es postparto
+                            if (isPostPartum) ...[
+                              _buildSectionTitle('health.dailyWellness'.tr()),
+                              const SizedBox(height: 12),
+                              _buildHealthCardWithRecords(
+                                context,
+                                title: 'health.sleep'.tr(),
+                                subtitle: 'health.sleepDescription'.tr(),
+                                icon: Icons.bedtime_rounded,
+                                color: const Color(0xFFFF9800),
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const DailySleepFormPage(),
+                                    ),
+                                  );
+                                  // Recargar datos cuando se vuelve de guardar un registro
+                                  if (result == true || result != null) {
+                                    healthProvider.refresh();
+                                  }
+                                },
+                                lastRecord: lastSleepRecord != null
+                                    ? '${'health.last'.tr()} ${lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                                    : 'lactation.calendar.noRecordsText'.tr(),
+                                recordDate: lastSleepRecord?.sleepStartTime,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // Sección: Asistencia (para ambos perfiles)
+                            _buildSectionTitle('health.assistanceHelp'.tr()),
+                            const SizedBox(height: 12),
+                            HomeFeatureCard(
+                              title: 'health.assistant'.tr(),
+                              icon: Icons.smart_toy_rounded,
+                              description: 'health.assistantDescription'.tr(),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BlocProvider(
+                                      create: (context) =>
+                                          GetIt.instance<ChatbotBloc>(),
+                                      child: const ChatbotPage(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              color: const Color(0xFF03A696),
+                            ),
+                            const SizedBox(
+                              height: 100,
+                            ), // Espacio para el bottom bar
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
             },
           );
         },
@@ -412,5 +405,4 @@ class _HealthPageState extends State<HealthPage> {
       return '${date.day}/${date.month}/${date.year}';
     }
   }
-
 }

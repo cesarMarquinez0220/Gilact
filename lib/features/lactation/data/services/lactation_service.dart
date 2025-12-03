@@ -11,8 +11,12 @@ import '../../../../core/di/injection.dart';
 import '../../../../main.dart' as app_main;
 import '../../../gamification/domain/services/gamification_service.dart';
 import '../../../gamification/domain/services/user_statistics_service.dart';
-import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
+import '../../../gamification/domain/services/xp_calculation_service.dart';
+import '../../../gamification/presentation/services/achievement_queue_service.dart';
+import '../../../gamification/presentation/bloc/gamification_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_event.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'lactation_notification_service.dart';
 
 /// Servicio unificado para manejar todos los registros de lactancia en Firestore
@@ -185,7 +189,7 @@ class LactationService {
           'LactationService.saveRecord → Registro guardado LOCALMENTE (offline-first): ${record.id}',
         );
       }
-      
+
       // Marcar que se guardó un registro para cancelar notificaciones de reenvío
       try {
         final tracker = NotificationRecordTracker();
@@ -414,22 +418,102 @@ class LactationService {
       final isFirstOfDay = todayRecords == 1;
 
       // Agregar XP (registro rápido o completo según el tipo)
-      if (record.tipoRegistro == 'completo') {
-        await _gamificationService!.addXPForCompleteLactation(
-          userId: userId,
-          recordId: record.id,
-          timestamp: record.timestamp,
-          includesSleep: record.incluyeSueno,
-          isFirstOfDay: isFirstOfDay,
+      if (kDebugMode) {
+        _logger.d(
+          '📊 [LactationService] Agregando XP para registro: ${record.tipoRegistro}',
         );
-      } else {
-        await _gamificationService!.addXPForQuickLactation(
-          userId: userId,
-          recordId: record.id,
-          timestamp: record.timestamp,
-          isFirstOfDay: isFirstOfDay,
-        );
+        _logger.d('   └─ userId: $userId');
+        _logger.d('   └─ recordId: ${record.id}');
+        _logger.d('   └─ isFirstOfDay: $isFirstOfDay');
+        if (record.tipoRegistro == 'completo') {
+          _logger.d('   └─ includesSleep: ${record.incluyeSueno}');
+        }
       }
+
+      final xpResult = record.tipoRegistro == 'completo'
+          ? await _gamificationService!.addXPForCompleteLactation(
+              userId: userId,
+              recordId: record.id,
+              timestamp: record.timestamp,
+              includesSleep: record.incluyeSueno,
+              isFirstOfDay: isFirstOfDay,
+            )
+          : await _gamificationService!.addXPForQuickLactation(
+              userId: userId,
+              recordId: record.id,
+              timestamp: record.timestamp,
+              isFirstOfDay: isFirstOfDay,
+            );
+
+      // NOTIFICAR AL BLOC INMEDIATAMENTE (antes de guardar en BD)
+      // Esto permite actualización optimista de la UI
+      try {
+        final context = app_main.navigatorKey.currentContext;
+        if (context != null) {
+          // Calcular la transacción de XP localmente
+          final xpService = XPCalculationService();
+          final transaction = record.tipoRegistro == 'completo'
+              ? xpService.calculateXPForCompleteLactation(
+                  userId: userId,
+                  recordId: record.id,
+                  timestamp: record.timestamp,
+                  includesSleep: record.incluyeSueno,
+                  isFirstOfDay: isFirstOfDay,
+                )
+              : xpService.calculateXPForQuickLactation(
+                  userId: userId,
+                  recordId: record.id,
+                  timestamp: record.timestamp,
+                  isFirstOfDay: isFirstOfDay,
+                );
+
+          // Notificar al bloc INMEDIATAMENTE para actualización optimista
+          final gamificationBloc = context.read<GamificationBloc>();
+          gamificationBloc.add(AddXP(transaction));
+
+          if (kDebugMode) {
+            final expectedXP = record.tipoRegistro == 'completo' ? 20 : 10;
+            final bonusXP = isFirstOfDay ? 5 : 0;
+            final totalExpectedXP = expectedXP + bonusXP;
+            _logger.success(
+              '✅ [LactationService] GamificationBloc notificado inmediatamente con ${transaction.amount} XP',
+            );
+            _logger.d(
+              '   └─ XP esperado: $totalExpectedXP (base: $expectedXP + bonus: $bonusXP)',
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            _logger.w(
+              '   └─ No hay contexto disponible para notificar al bloc',
+            );
+          }
+        }
+      } catch (e, stackTrace) {
+        if (kDebugMode) {
+          _logger.w(
+            'Error notificando al GamificationBloc (no crítico)',
+            e,
+            stackTrace,
+          );
+        }
+      }
+
+      // Guardar XP en BD en background (no bloquea la UI)
+      xpResult.fold(
+        (error) {
+          if (kDebugMode) {
+            _logger.e('❌ [LactationService] Error guardando XP en BD: $error');
+          }
+        },
+        (updatedProfile) {
+          if (kDebugMode) {
+            _logger.d(
+              '✅ [LactationService] XP guardado en BD: ${updatedProfile.totalXP} XP, Nivel ${updatedProfile.currentLevel}',
+            );
+          }
+        },
+      );
 
       // Verificar y otorgar bonus por milestone de registros
       final milestoneResult = await _gamificationService!
@@ -499,14 +583,34 @@ class LactationService {
         final newAchievements = achievements.getOrElse(() => []);
         if (newAchievements.isNotEmpty &&
             app_main.navigatorKey.currentContext != null) {
-          // Mostrar el primer badge desbloqueado
-          final firstAchievement = newAchievements.first;
+          // Recargar el perfil de gamificación en el bloc para actualizar la UI
+          final context = app_main.navigatorKey.currentContext!;
+          try {
+            final gamificationBloc = context.read<GamificationBloc>();
+            gamificationBloc.add(LoadGamificationProfile(userId));
+
+            if (kDebugMode) {
+              _logger.d(
+                '🔄 [LactationService] GamificationBloc recargado después de desbloquear ${newAchievements.length} logro(s)',
+              );
+            }
+          } catch (e, stackTrace) {
+            if (kDebugMode) {
+              _logger.w(
+                'Error recargando GamificationBloc (no crítico)',
+                e,
+                stackTrace,
+              );
+            }
+          }
+
+          // Mostrar logros uno a la vez usando el servicio de cola
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (app_main.navigatorKey.currentContext != null) {
-              AchievementUnlockedDialog.show(
+              final achievementQueueService = getIt<AchievementQueueService>();
+              achievementQueueService.queueAchievements(
                 app_main.navigatorKey.currentContext!,
-                firstAchievement,
-                firstAchievement.xpReward,
+                newAchievements,
               );
             }
           });

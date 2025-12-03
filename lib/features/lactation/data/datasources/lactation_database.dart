@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/lactation_record.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -172,6 +173,24 @@ class LactationDatabase {
 
   Future<void> insertRecord(LactationRecord record) async {
     final db = await database;
+
+    // Verificar si el registro ya existe para evitar duplicados
+    final existingRecord = await db.query(
+      'lactation_records',
+      where: 'id = ?',
+      whereArgs: [record.id],
+      limit: 1,
+    );
+
+    if (existingRecord.isNotEmpty) {
+      if (kDebugMode) {
+        print(
+          '⚠️ [LactationDatabase] Registro duplicado detectado, omitiendo inserción: ${record.id}',
+        );
+      }
+      return; // Ya existe, no insertar de nuevo
+    }
+
     final map = record.toMap();
 
     // Convertir tipos incompatibles con SQLite
@@ -199,6 +218,10 @@ class LactationDatabase {
       map,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    if (kDebugMode) {
+      print('✅ [LactationDatabase] Registro insertado: ${record.id}');
+    }
   }
 
   /// Marca un registro como sincronizado
@@ -281,10 +304,22 @@ class LactationDatabase {
       orderBy: 'timestamp ASC',
     );
 
-    return List.generate(
-      maps.length,
-      (i) => LactationRecord.fromMap(maps[i], maps[i]['id']),
-    );
+    // Convertir a registros y eliminar duplicados por ID
+    final records = <String, LactationRecord>{};
+    for (final map in maps) {
+      final recordId = map['id'] as String;
+      if (!records.containsKey(recordId)) {
+        records[recordId] = LactationRecord.fromMap(map, recordId);
+      }
+    }
+
+    if (kDebugMode && maps.length != records.length) {
+      print(
+        '⚠️ [LactationDatabase] Duplicados detectados: ${maps.length} registros, ${records.length} únicos',
+      );
+    }
+
+    return records.values.toList();
   }
 
   Future<List<LactationRecord>> getRecordsForWeek(DateTime startOfWeek) async {

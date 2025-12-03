@@ -392,6 +392,12 @@ class GamificationService {
         );
 
         if (newAchievements.isNotEmpty) {
+          if (kDebugMode) {
+            print(
+              '🎉 [GamificationService] ${newAchievements.length} logro(s) nuevo(s) detectado(s): ${newAchievements.map((a) => a.id).join(", ")}',
+            );
+          }
+
           // Agregar XP por logros
           for (final achievement in newAchievements) {
             final xpTransaction = _xpService.calculateXPForAchievement(
@@ -401,6 +407,12 @@ class GamificationService {
               timestamp: DateTime.now(),
             );
             await _repository.saveXPTransaction(xpTransaction);
+
+            if (kDebugMode) {
+              print(
+                '   └─ Logro "${achievement.id}": ${achievement.xpReward} XP agregado',
+              );
+            }
           }
 
           // Actualizar perfil con logros desbloqueados
@@ -408,6 +420,12 @@ class GamificationService {
             ...profile.unlockedAchievements,
             ...newAchievements.map((a) => a.id),
           ];
+
+          if (kDebugMode) {
+            print(
+              '   └─ Logros desbloqueados actualizados: ${updatedAchievementIds.length} total (antes: ${profile.unlockedAchievements.length})',
+            );
+          }
 
           // Agregar logros nuevos a la lista de no vistos (para notificación roja)
           final newAchievementIds = newAchievements.map((a) => a.id).toList();
@@ -423,6 +441,18 @@ class GamificationService {
             updatedAt: DateTime.now(),
           );
           await _repository.saveProfile(updatedProfile);
+
+          if (kDebugMode) {
+            print(
+              '✅ [GamificationService] Perfil guardado con logros desbloqueados',
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print(
+              'ℹ️ [GamificationService] No se detectaron logros nuevos. Logros actuales: ${profile.unlockedAchievements.length}',
+            );
+          }
         }
 
         return Right(newAchievements);

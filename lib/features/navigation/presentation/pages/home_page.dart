@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,6 +28,7 @@ import 'dart:async';
 import '../../../onboarding/data/services/user_subcollections_service.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_state.dart';
+import '../../../gamification/presentation/bloc/gamification_event.dart';
 import '../../../gamification/domain/repositories/gamification_repository.dart';
 import '../../../gamification/domain/entities/daily_streak.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
@@ -56,6 +58,9 @@ class _HomePageState extends State<HomePage> {
       final provider = context.read<LactationProvider>();
       provider.loadTodayData();
       provider.loadWeekData();
+
+      // Cargar perfil de gamificación inmediatamente para actualización instantánea
+      _loadGamificationProfileIfNeeded();
     });
 
     // Escuchar cambios de conectividad
@@ -76,6 +81,40 @@ class _HomePageState extends State<HomePage> {
     _connectivityService.isConnected().then((isConnected) {
       _wasOffline = !isConnected;
     });
+  }
+
+  /// Carga el perfil de gamificación si es necesario
+  void _loadGamificationProfileIfNeeded() {
+    if (!mounted) return;
+
+    try {
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final userState = userProfileBloc.state;
+
+      String? userId;
+      if (userState is UserProfileLoaded) {
+        userId = userState.profile.id;
+      } else if (userState is UserProfileUpdated) {
+        userId = userState.profile.id;
+      }
+
+      if (userId != null && userId.isNotEmpty) {
+        final gamificationBloc = context.read<GamificationBloc>();
+        final currentState = gamificationBloc.state;
+
+        // Solo cargar si no está ya cargado o si el userId no coincide
+        if (currentState is! GamificationLoaded) {
+          gamificationBloc.add(LoadGamificationProfile(userId));
+        } else if (currentState.profile.userId != userId) {
+          gamificationBloc.add(LoadGamificationProfile(userId));
+        }
+      }
+    } catch (e) {
+      // Ignorar errores silenciosamente
+      if (kDebugMode) {
+        _logger.w('Error cargando perfil de gamificación: $e');
+      }
+    }
   }
 
   /// Recarga los datos cuando se restaura la conexión
@@ -288,6 +327,18 @@ class _HomePageState extends State<HomePage> {
 
     return BlocBuilder<GamificationBloc, GamificationState>(
       builder: (context, gamificationState) {
+        // Cargar perfil inmediatamente si no está cargado
+        if (gamificationState is! GamificationLoaded &&
+            gamificationState is! GamificationLoading) {
+          // Cargar inmediatamente sin esperar PostFrameCallback
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final gamificationBloc = context.read<GamificationBloc>();
+              gamificationBloc.add(LoadGamificationProfile(validUserId));
+            }
+          });
+        }
+
         if (gamificationState is GamificationLoaded) {
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 0),
@@ -1584,10 +1635,7 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             // Calendario horizontal con countdown integrado
-            _buildIntegratedCalendarAndCountdown(
-              context,
-              lactationProvider,
-            ),
+            _buildIntegratedCalendarAndCountdown(context, lactationProvider),
 
             const SizedBox(height: 20),
 

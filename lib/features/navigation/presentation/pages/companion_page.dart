@@ -25,9 +25,11 @@ import '../widgets/companion_stats_summary.dart';
 import '../widgets/companion_mascot_wrapper.dart';
 import '../widgets/companion_new_achievements_animation.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
+import '../../../gamification/presentation/services/achievement_queue_service.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
 import '../../../gamification/domain/services/gamification_service.dart';
 import '../../../gamification/domain/services/user_statistics_service.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Página dedicada a la compañera de gamificación
 class CompanionPage extends StatefulWidget {
@@ -158,10 +160,27 @@ class _CompanionPageState extends State<CompanionPage>
           if (achievements.isRight()) {
             final newAchievements = achievements.getOrElse(() => []);
             if (newAchievements.isNotEmpty && context.mounted) {
-              AchievementUnlockedDialog.show(
+              // Recargar el perfil de gamificación en el bloc para actualizar la UI
+              try {
+                final gamificationBloc = context.read<GamificationBloc>();
+                gamificationBloc.add(LoadGamificationProfile(validUserId));
+
+                if (kDebugMode) {
+                  print(
+                    '🔄 [CompanionPage] GamificationBloc recargado después de desbloquear ${newAchievements.length} logro(s)',
+                  );
+                }
+              } catch (e) {
+                if (kDebugMode) {
+                  print('Error recargando GamificationBloc: $e');
+                }
+              }
+
+              // Mostrar logros uno a la vez usando el servicio de cola
+              final achievementQueueService = getIt<AchievementQueueService>();
+              achievementQueueService.queueAchievements(
                 context,
-                newAchievements.first,
-                newAchievements.first.xpReward,
+                newAchievements,
               );
             }
           }
@@ -429,156 +448,62 @@ class _CompanionPageState extends State<CompanionPage>
     final isSmallScreen = screenWidth < 360;
     final isShortScreen = screenHeight < 700;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isSmallScreen ? 20 : 24,
-        vertical: isShortScreen ? 16 : 20,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF667eea), // Azul púrpura
-            Color(0xFF764ba2), // Púrpura
-            Color(0xFFf093fb), // Rosa claro
-          ],
-          stops: [0.0, 0.6, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF667eea).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'companion.headerTitle'.tr(),
-                  style: GoogleFonts.quicksand(
-                    fontSize: isSmallScreen ? 24 : 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        offset: const Offset(1, 1),
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: isShortScreen ? 4 : 6),
-                Text(
-                  'companion.headerSubtitle'.tr(),
-                  style: GoogleFonts.quicksand(
-                    fontSize: isSmallScreen ? 14 : 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.95),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Botones de prueba para ver el diálogo de logro (MÁS VISIBLES)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Botón 1: Solo mostrar diálogo
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _testAchievementDialog(context),
-                    borderRadius: BorderRadius.circular(25),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.emoji_events,
-                        color: Colors.amber[700],
-                        size: isSmallScreen ? 22 : 24,
-                      ),
-                    ),
-                  ),
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
               ),
-              // Botón 2: Simular desbloqueo real
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _testRealAchievementUnlock(context),
-                  borderRadius: BorderRadius.circular(25),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
+              child: Icon(
+                Icons.emoji_events_rounded,
+                color: Colors.white,
+                size: isSmallScreen ? 22 : 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'companion.headerTitle'.tr(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: isSmallScreen ? 22 : 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
                           color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                          offset: const Offset(0, 1),
+                          blurRadius: 2,
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.star,
-                      color: Colors.orange[700],
-                      size: isSmallScreen ? 22 : 24,
+                  ),
+                  SizedBox(height: isShortScreen ? 2 : 4),
+                  Text(
+                    'companion.headerSubtitle'.tr(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: isSmallScreen ? 13 : 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-          Container(
-            width: isSmallScreen ? 56 : 64,
-            height: isSmallScreen ? 56 : 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.2),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.4),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
             ),
-            child: Icon(
-              Icons.emoji_events,
-              color: Colors.white,
-              size: isSmallScreen ? 28 : 32,
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        SizedBox(height: isShortScreen ? 12 : 16),
+        // Separador inferior completamente blanco
+        Container(height: 1, color: Colors.white),
+      ],
     );
   }
 

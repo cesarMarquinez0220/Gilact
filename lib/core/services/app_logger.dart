@@ -32,22 +32,23 @@ class AppLogger {
   }
 
   /// Verifica si el llamador viene de la carpeta core
-  bool _isFromCoreFolder() {
-    try {
-      final stackTrace = StackTrace.current;
-      final stackString = stackTrace.toString();
-      return stackString.contains('/core/') || 
-             stackString.contains('\\core\\') ||
-             stackString.contains('package:gilact/core/');
-    } catch (_) {
-      return false;
-    }
-  }
+  // bool _isFromCoreFolder() {
+  //   try {
+  //     final stackTrace = StackTrace.current;
+  //     final stackString = stackTrace.toString();
+  //     return stackString.contains('/core/') ||
+  //         stackString.contains('\\core\\') ||
+  //         stackString.contains('package:gilact/core/');
+  //   } catch (_) {
+  //     return false;
+  //   }
+  // }
 
   /// Log de debug (solo en modo debug)
   /// Omite logs que vengan de la carpeta core para reducir ruido
   void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    if (kDebugMode && !_isFromCoreFolder()) {
+    // if (kDebugMode && !_isFromCoreFolder()) {
+    if (kDebugMode) {
       _logger.d(message, error: error, stackTrace: stackTrace);
     }
   }
@@ -75,7 +76,8 @@ class AppLogger {
   /// Log de éxito (para acciones exitosas)
   /// Omite logs que vengan de la carpeta core para reducir ruido
   void success(dynamic message) {
-    if (kDebugMode && !_isFromCoreFolder()) {
+    // if (kDebugMode && !_isFromCoreFolder()) {
+    if (kDebugMode) {
       _logger.t('✅ $message');
     }
   }
@@ -97,7 +99,8 @@ class AppLogger {
   /// Log de operación exitosa en servicios
   /// Omite logs que vengan de la carpeta core para reducir ruido
   void serviceSuccess(String serviceName, String operation) {
-    if (kDebugMode && !_isFromCoreFolder()) {
+    // if (kDebugMode && !_isFromCoreFolder()) {
+    if (kDebugMode) {
       _logger.d('✅ [$serviceName] $operation completado exitosamente');
     }
   }

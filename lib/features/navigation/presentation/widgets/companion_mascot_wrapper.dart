@@ -311,9 +311,12 @@ class _BabyRiveAnimation extends StatefulWidget {
 }
 
 class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   late final rive.FileLoader _fileLoader;
   rive.RiveWidgetController? _controller;
+  final GlobalKey _widgetKey = GlobalKey();
+  bool _isVisible = true;
+  Timer? _visibilityCheckTimer;
 
   @override
   bool get wantKeepAlive => true; // Mantener el estado vivo para evitar reconstrucciones
@@ -335,6 +338,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final filePath = _getRiveFilePath(widget.babyStage);
     if (kDebugMode) {
       print(
@@ -345,6 +349,125 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
       filePath,
       riveFactory: rive.Factory.rive,
     );
+
+    // Iniciar verificación periódica de visibilidad
+    _startVisibilityCheck();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Pausar animación cuando la app está en background
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _pauseAnimation();
+    } else if (state == AppLifecycleState.resumed && _isVisible) {
+      _resumeAnimation();
+    }
+  }
+
+  /// Inicia la verificación periódica de visibilidad
+  void _startVisibilityCheck() {
+    _visibilityCheckTimer?.cancel();
+    _visibilityCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (
+      _,
+    ) {
+      _checkVisibility();
+    });
+  }
+
+  /// Verifica si el widget está visible en el viewport
+  void _checkVisibility() {
+    if (!mounted || _controller == null) return;
+
+    final context = _widgetKey.currentContext;
+    if (context == null) {
+      if (_isVisible) {
+        setState(() {
+          _isVisible = false;
+        });
+        _pauseAnimation();
+      }
+      return;
+    }
+
+    final renderObject = context.findRenderObject();
+    if (renderObject == null || !renderObject.attached) {
+      if (_isVisible) {
+        setState(() {
+          _isVisible = false;
+        });
+        _pauseAnimation();
+      }
+      return;
+    }
+
+    final renderBox = renderObject as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    // Obtener el tamaño de la pantalla
+    final screenSize = MediaQuery.of(context).size;
+    final screenHeight = screenSize.height;
+    final screenWidth = screenSize.width;
+
+    // Calcular si el widget está dentro del viewport
+    // Considerar un margen de 100px fuera de la pantalla como "no visible"
+    const margin = 100.0;
+    final isInViewport =
+        position.dx + size.width + margin > 0 &&
+        position.dx - margin < screenWidth &&
+        position.dy + size.height + margin > 0 &&
+        position.dy - margin < screenHeight;
+
+    if (isInViewport != _isVisible) {
+      setState(() {
+        _isVisible = isInViewport;
+      });
+
+      if (_isVisible) {
+        _resumeAnimation();
+      } else {
+        _pauseAnimation();
+      }
+    }
+  }
+
+  /// Pausa la animación Rive
+  void _pauseAnimation() {
+    if (_controller == null) return;
+
+    try {
+      // En Rive, la animación se pausa automáticamente cuando el widget no se renderiza
+      // Usamos Visibility con maintainAnimation: false para que no se actualice
+      if (kDebugMode) {
+        print('⏸️ Animación Rive pausada (fuera del viewport)');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error pausando animación Rive: $e');
+      }
+    }
+  }
+
+  /// Reanuda la animación Rive
+  void _resumeAnimation() {
+    if (_controller == null) return;
+
+    try {
+      // La animación se reanudará automáticamente cuando el widget vuelva a ser visible
+      if (kDebugMode) {
+        print('▶️ Animación Rive reanudada (dentro del viewport)');
+      }
+      // Actualizar el estado para que la animación continúe
+      if (mounted) {
+        _updateState(widget.state);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error reanudando animación Rive: $e');
+      }
+    }
   }
 
   @override
@@ -374,6 +497,8 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _visibilityCheckTimer?.cancel();
     // No desechar _controller manualmente - RiveWidget lo maneja automáticamente
     // Desecharlo manualmente causa un error de doble disposición
     _fileLoader.dispose();
@@ -546,6 +671,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
           width: widget.size,
           height: widget.size,
           child: rive.RiveWidget(
+            key: _widgetKey,
             controller: state.controller,
             fit: rive.Fit.contain,
           ),
@@ -562,227 +688,240 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
     if (kDebugMode) {
       print(
-        '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}',
+        '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}, visible=$_isVisible',
       );
     }
 
     // Cada archivo Rive tiene un solo artboard, así que no necesitamos especificar el artboard
     // El archivo correcto ya se carga según la etapa del bebé
     // Usar RepaintBoundary para aislar completamente la animación
+    // Usar Visibility para pausar cuando no está visible
+    // Nota: No podemos usar maintainSize: true con maintainAnimation: false
+    // En su lugar, usamos maintainState: true para mantener el estado pero pausar la animación
     return RepaintBoundary(
-      child: rive.RiveWidgetBuilder(
-        fileLoader: _fileLoader,
-        // No especificamos artboardSelector porque cada archivo solo tiene un artboard
-        stateMachineSelector: rive.StateMachineSelector.byName(
-          'Bebe_StateMachine',
-        ),
-        builder: (context, state) {
-          if (state is rive.RiveLoading) {
-            if (kDebugMode) {
-              print('⏳ Rive cargando artboard: ${widget.babyStage}...');
-            }
-            return SizedBox(
-              width: widget.size,
-              height: widget.size,
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          if (state is rive.RiveFailed) {
-            if (kDebugMode) {
-              print(
-                '❌ Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
-              );
-              // Si el error es que no se encuentra el artboard, intentar con baby_born
-              if (state.error.toString().contains('not found') &&
-                  widget.babyStage != 'baby_born') {
-                print('🔄 Intentando fallback a artboard "baby_born"...');
+      key: _widgetKey,
+      child: Visibility(
+        visible: _isVisible,
+        maintainState: true,
+        maintainSize: false, // No mantener tamaño cuando no está visible
+        maintainAnimation:
+            false, // No mantener animación cuando no está visible
+        maintainInteractivity: false,
+        child: rive.RiveWidgetBuilder(
+          fileLoader: _fileLoader,
+          // No especificamos artboardSelector porque cada archivo solo tiene un artboard
+          stateMachineSelector: rive.StateMachineSelector.byName(
+            'Bebe_StateMachine',
+          ),
+          builder: (context, state) {
+            if (state is rive.RiveLoading) {
+              if (kDebugMode) {
+                print('⏳ Rive cargando artboard: ${widget.babyStage}...');
               }
+              return SizedBox(
+                width: widget.size,
+                height: widget.size,
+                child: const Center(child: CircularProgressIndicator()),
+              );
             }
 
-            // Si el artboard solicitado no existe, intentar con artboards alternativos en orden
-            if (state.error.toString().contains('not found')) {
+            if (state is rive.RiveFailed) {
               if (kDebugMode) {
                 print(
-                  '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
+                  '❌ Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
                 );
+                // Si el error es que no se encuentra el artboard, intentar con baby_born
+                if (state.error.toString().contains('not found') &&
+                    widget.babyStage != 'baby_born') {
+                  print('🔄 Intentando fallback a artboard "baby_born"...');
+                }
               }
 
-              // Lista de artboards a intentar en orden de prioridad
-              final fallbackArtboards = <String>[];
-              if (widget.babyStage == 'baby_6months') {
-                // Si se solicita baby_6months y no existe, intentar baby_3months y luego baby_born
-                fallbackArtboards.addAll(['baby_3months', 'baby_born']);
-              } else if (widget.babyStage == 'baby_3months') {
-                // Si se solicita baby_3months y no existe, intentar baby_born
-                fallbackArtboards.add('baby_born');
-              } else {
-                // Si se solicita baby_born y no existe, usar el artboard por defecto
-                fallbackArtboards.add('baby_born');
-              }
-
-              // Intentar cargar el primer artboard de fallback
-              if (fallbackArtboards.isNotEmpty) {
-                final fallbackArtboard = fallbackArtboards.first;
+              // Si el artboard solicitado no existe, intentar con artboards alternativos en orden
+              if (state.error.toString().contains('not found')) {
                 if (kDebugMode) {
                   print(
-                    '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
+                    '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
                   );
+                }
+
+                // Lista de artboards a intentar en orden de prioridad
+                final fallbackArtboards = <String>[];
+                if (widget.babyStage == 'baby_6months') {
+                  // Si se solicita baby_6months y no existe, intentar baby_3months y luego baby_born
+                  fallbackArtboards.addAll(['baby_3months', 'baby_born']);
+                } else if (widget.babyStage == 'baby_3months') {
+                  // Si se solicita baby_3months y no existe, intentar baby_born
+                  fallbackArtboards.add('baby_born');
+                } else {
+                  // Si se solicita baby_born y no existe, usar el artboard por defecto
+                  fallbackArtboards.add('baby_born');
+                }
+
+                // Intentar cargar el primer artboard de fallback
+                if (fallbackArtboards.isNotEmpty) {
+                  final fallbackArtboard = fallbackArtboards.first;
+                  if (kDebugMode) {
+                    print(
+                      '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
+                    );
+                  }
+                  return rive.RiveWidgetBuilder(
+                    fileLoader: _fileLoader,
+                    artboardSelector: rive.ArtboardSelector.byName(
+                      fallbackArtboard,
+                    ),
+                    stateMachineSelector: rive.StateMachineSelector.byName(
+                      'State Machine 1',
+                    ),
+                    builder: (context, fallbackState) {
+                      if (fallbackState is rive.RiveFailed) {
+                        // Si el fallback también falla, intentar sin especificar artboard
+                        if (kDebugMode) {
+                          print(
+                            '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
+                          );
+                        }
+                        return rive.RiveWidgetBuilder(
+                          fileLoader: _fileLoader,
+                          stateMachineSelector: rive
+                              .StateMachineSelector.byName('State Machine 1'),
+                          builder: (context, defaultState) {
+                            return _buildRiveWidget(defaultState, 'default');
+                          },
+                        );
+                      }
+                      return _buildRiveWidget(fallbackState, fallbackArtboard);
+                    },
+                  );
+                }
+
+                // Si no hay fallbacks, usar el artboard por defecto
+                if (kDebugMode) {
+                  print('🔄 Usando el artboard por defecto del archivo...');
                 }
                 return rive.RiveWidgetBuilder(
                   fileLoader: _fileLoader,
-                  artboardSelector: rive.ArtboardSelector.byName(
-                    fallbackArtboard,
-                  ),
                   stateMachineSelector: rive.StateMachineSelector.byName(
                     'State Machine 1',
                   ),
                   builder: (context, fallbackState) {
-                    if (fallbackState is rive.RiveFailed) {
-                      // Si el fallback también falla, intentar sin especificar artboard
-                      if (kDebugMode) {
-                        print(
-                          '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
-                        );
-                      }
-                      return rive.RiveWidgetBuilder(
-                        fileLoader: _fileLoader,
-                        stateMachineSelector: rive.StateMachineSelector.byName(
-                          'State Machine 1',
-                        ),
-                        builder: (context, defaultState) {
-                          return _buildRiveWidget(defaultState, 'default');
-                        },
+                    if (fallbackState is rive.RiveLoading) {
+                      return SizedBox(
+                        width: widget.size,
+                        height: widget.size,
+                        child: const Center(child: CircularProgressIndicator()),
                       );
                     }
-                    return _buildRiveWidget(fallbackState, fallbackArtboard);
+
+                    if (fallbackState is rive.RiveFailed) {
+                      if (kDebugMode) {
+                        print(
+                          '❌ Fallback también falló: ${fallbackState.error}',
+                        );
+                      }
+                      return SizedBox(
+                        width: widget.size,
+                        height: widget.size,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            if (kDebugMode)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Error: ${fallbackState.error}',
+                                  style: const TextStyle(fontSize: 10),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return _buildRiveWidget(fallbackState, 'default');
                   },
                 );
               }
 
-              // Si no hay fallbacks, usar el artboard por defecto
-              if (kDebugMode) {
-                print('🔄 Usando el artboard por defecto del archivo...');
-              }
-              return rive.RiveWidgetBuilder(
-                fileLoader: _fileLoader,
-                stateMachineSelector: rive.StateMachineSelector.byName(
-                  'State Machine 1',
+              // Si no es un error de artboard no encontrado, mostrar el error
+              return SizedBox(
+                width: widget.size,
+                height: widget.size,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red),
+                    if (kDebugMode)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Error: ${state.error}',
+                          style: const TextStyle(fontSize: 10),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
                 ),
-                builder: (context, fallbackState) {
-                  if (fallbackState is rive.RiveLoading) {
-                    return SizedBox(
-                      width: widget.size,
-                      height: widget.size,
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  if (fallbackState is rive.RiveFailed) {
-                    if (kDebugMode) {
-                      print('❌ Fallback también falló: ${fallbackState.error}');
-                    }
-                    return SizedBox(
-                      width: widget.size,
-                      height: widget.size,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.red),
-                          if (kDebugMode)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Error: ${fallbackState.error}',
-                                style: const TextStyle(fontSize: 10),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return _buildRiveWidget(fallbackState, 'default');
-                },
               );
             }
 
-            // Si no es un error de artboard no encontrado, mostrar el error
-            return SizedBox(
-              width: widget.size,
-              height: widget.size,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red),
-                  if (kDebugMode)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Error: ${state.error}',
-                        style: const TextStyle(fontSize: 10),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                ],
-              ),
-            );
-          }
-
-          if (state is rive.RiveLoaded) {
-            if (kDebugMode) {
-              print('✅ Rive cargado exitosamente');
-              print('   Etapa del bebé: ${widget.babyStage}');
-              print(
-                '   Archivo cargado: ${_getRiveFilePath(widget.babyStage)}',
-              );
-              try {
-                final artboard = state.controller.artboard;
-                print('   📋 Artboard cargado: ${artboard.name}');
-              } catch (e) {
-                // Ignorar error al obtener nombre del artboard
-              }
-            }
-
-            // Guardar el controlador para poder actualizar el estado
-            _controller = state.controller;
-
-            // Actualizar el estado después de que se carga
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                if (kDebugMode) {
-                  print(
-                    '🔄 PostFrameCallback: actualizando estado a ${widget.state}',
-                  );
+            if (state is rive.RiveLoaded) {
+              if (kDebugMode) {
+                print('✅ Rive cargado exitosamente');
+                print('   Etapa del bebé: ${widget.babyStage}');
+                print(
+                  '   Archivo cargado: ${_getRiveFilePath(widget.babyStage)}',
+                );
+                try {
+                  final artboard = state.controller.artboard;
+                  print('   📋 Artboard cargado: ${artboard.name}');
+                } catch (e) {
+                  // Ignorar error al obtener nombre del artboard
                 }
-                _updateState(widget.state);
               }
-            });
 
-            // Usar múltiples capas de optimización para evitar warnings de buffer
-            // 1. RepaintBoundary aísla el renderizado
-            // 2. ClipRect previene overflow de renderizado
-            // 3. SizedBox limita el área de renderizado
-            return RepaintBoundary(
-              child: ClipRect(
-                child: SizedBox(
-                  width: widget.size,
-                  height: widget.size,
-                  child: rive.RiveWidget(
-                    controller: state.controller,
-                    fit: rive.Fit.contain,
+              // Guardar el controlador para poder actualizar el estado
+              _controller = state.controller;
+
+              // Actualizar el estado después de que se carga
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  if (kDebugMode) {
+                    print(
+                      '🔄 PostFrameCallback: actualizando estado a ${widget.state}',
+                    );
+                  }
+                  _updateState(widget.state);
+                }
+              });
+
+              // Usar múltiples capas de optimización para evitar warnings de buffer
+              // 1. RepaintBoundary aísla el renderizado
+              // 2. ClipRect previene overflow de renderizado
+              // 3. SizedBox limita el área de renderizado
+              return RepaintBoundary(
+                child: ClipRect(
+                  child: SizedBox(
+                    width: widget.size,
+                    height: widget.size,
+                    child: rive.RiveWidget(
+                      controller: state.controller,
+                      fit: rive.Fit.contain,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          if (kDebugMode) {
-            print('⚠️ Estado desconocido de Rive: ${state.runtimeType}');
-          }
-          return const SizedBox.shrink();
-        },
+            if (kDebugMode) {
+              print('⚠️ Estado desconocido de Rive: ${state.runtimeType}');
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

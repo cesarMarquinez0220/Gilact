@@ -40,6 +40,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     with TickerProviderStateMixin {
   final AppLogger _logger = getIt<AppLogger>();
   int _currentIndex = 0;
+  late PageController _pageController;
 
   // Animación controllers
   late AnimationController _backgroundController;
@@ -48,6 +49,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   @override
   void initState() {
     super.initState();
+
+    // Inicializar PageController para swipe navigation
+    _pageController = PageController(initialPage: _currentIndex);
 
     // Inicializar animaciones
     _backgroundController = AnimationController(
@@ -68,6 +72,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   @override
   void dispose() {
+    _pageController.dispose();
     _backgroundController.dispose();
     _pulseController.dispose();
     super.dispose();
@@ -89,36 +94,25 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                 colors: [Color(0xFF667eea), Color(0xFF764ba2)],
               ),
             ),
-            child: Stack(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
               children: [
                 // Home (índice 0)
-                Visibility(
-                  visible: _currentIndex == 0,
-                  maintainState: false, // Desmontar cuando no está visible
-                  child: const HomePageWrapper(),
-                ),
+                const HomePageWrapper(),
                 // Companion (índice 1)
-                // Usar maintainState: true para evitar recargar el perfil cada vez
-                // Esto previene el parpadeo/blanco al cambiar de pestaña
-                Visibility(
-                  visible: _currentIndex == 1,
-                  maintainState: true, // Mantener el estado para evitar recargas
-                  child: const CompanionPage(),
-                ),
+                // Usar AutomaticKeepAliveClientMixin en CompanionPage para mantener estado
+                const CompanionPage(),
                 // Health (índice 2)
-                Visibility(
-                  visible: _currentIndex == 2,
-                  maintainState: false, // Desmontar cuando no está visible
-                  child: const HealthPage(),
-                ),
+                const HealthPage(),
                 // Profile (índice 3)
-                Visibility(
-                  visible: _currentIndex == 3,
-                  maintainState: false, // Desmontar cuando no está visible
-                  child: BlocProvider<SettingsBloc>(
-                    create: (context) => getIt<SettingsBloc>(),
-                    child: const ProfileSettingsPage(),
-                  ),
+                BlocProvider<SettingsBloc>(
+                  create: (context) => getIt<SettingsBloc>(),
+                  child: const ProfileSettingsPage(),
                 ),
               ],
             ),
@@ -134,10 +128,12 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                 // Solo actualizar si es diferente del índice actual
                 if (index == _currentIndex) return;
 
-                // Cambiar directamente al índice seleccionado
-                setState(() {
-                  _currentIndex = index;
-                });
+                // Animar al índice seleccionado usando PageController
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               },
             ),
           ),

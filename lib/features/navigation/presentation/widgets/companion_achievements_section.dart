@@ -326,11 +326,7 @@ class _XPInfoButton extends StatelessWidget {
                     'companion.completeLesson',
                     '30',
                   ),
-                  _buildCompactXPItem(
-                    Icons.quiz,
-                    'companion.completeTrivia',
-                    '5',
-                  ),
+                  _buildTriviaXPItem(),
                   _buildCompactXPItem(
                     Icons.monitor_weight,
                     'companion.weightRecord',
@@ -483,6 +479,51 @@ class _XPInfoButton extends StatelessWidget {
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Widget especial para mostrar el sistema de XP de trivia
+  /// Muestra que se otorgan 5 XP por pregunta correcta + 20 XP bonus si todas son correctas
+  Widget _buildTriviaXPItem() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.quiz, size: 20, color: const Color(0xFF3498DB)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'companion.completeTrivia'.tr(),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'companion.triviaXPInfo'.tr(),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

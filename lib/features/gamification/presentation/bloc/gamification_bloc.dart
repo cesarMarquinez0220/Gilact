@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'gamification_event.dart';
@@ -80,10 +81,8 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
     final currentProfile = currentState.profile;
 
     try {
-      // 1. Guardar transacción de XP (offline-first)
-      await _repository.saveXPTransaction(event.transaction);
-
-      // 2. Actualizar perfil con nuevo XP y nivel
+      // ACTUALIZACIÓN OPTIMISTA: Actualizar UI inmediatamente
+      // 1. Calcular nuevo XP y nivel sin esperar operaciones de BD
       final previousLevel = currentProfile.currentLevel;
       final updatedProfile = _levelService.updateLevelAfterXP(
         currentProfile,
@@ -91,28 +90,33 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
       );
       final leveledUp = updatedProfile.currentLevel > previousLevel;
 
-      // 3. Actualizar racha
-      final currentStreak = await _repository.getStreak(currentProfile.userId);
-      DailyStreak? updatedStreak;
-      if (currentStreak.isRight() &&
-          currentStreak.getOrElse(() => null) != null) {
-        final streak = currentStreak.getOrElse(() => null)!;
+      // 2. Actualizar racha optimistamente (usar racha actual del estado)
+      final currentStreakDays = currentProfile.currentStreak;
+      final lastActivityDate = currentProfile.lastActivityDate;
+      final streakStartDate = currentProfile.streakStartDate;
+
+      // Calcular nueva racha localmente
+      DailyStreak updatedStreak;
+      if (lastActivityDate != null && streakStartDate != null) {
+        final existingStreak = DailyStreak(
+          userId: currentProfile.userId,
+          currentStreak: currentStreakDays,
+          lastActivityDate: lastActivityDate,
+          streakStartDate: streakStartDate,
+        );
         updatedStreak = _streakService.updateStreakOnActivity(
-          streak,
+          existingStreak,
           event.transaction.timestamp,
         );
-        await _repository.saveStreak(updatedStreak);
       } else {
-        // Crear nueva racha
-        updatedStreak = DailyStreak(userId: currentProfile.userId);
+        final newStreak = DailyStreak(userId: currentProfile.userId);
         updatedStreak = _streakService.updateStreakOnActivity(
-          updatedStreak,
+          newStreak,
           event.transaction.timestamp,
         );
-        await _repository.saveStreak(updatedStreak);
       }
 
-      // 4. Actualizar perfil con nueva racha
+      // 3. Actualizar perfil con nueva racha (optimista)
       final profileWithStreak = updatedProfile.copyWith(
         currentStreak: updatedStreak.currentStreak,
         lastActivityDate: updatedStreak.lastActivityDate,
@@ -120,58 +124,78 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
         updatedAt: DateTime.now(),
       );
 
-      // 5. Verificar bonus de racha
-      XPTransaction? streakBonus;
-      if (updatedStreak.currentStreak == 3 ||
-          updatedStreak.currentStreak == 7 ||
-          updatedStreak.currentStreak == 30 ||
-          updatedStreak.currentStreak == 60 ||
-          updatedStreak.currentStreak == 100) {
-        streakBonus = _xpService.calculateStreakBonus(
-          userId: currentProfile.userId,
-          streakDays: updatedStreak.currentStreak,
-          timestamp: DateTime.now(),
-        );
-
-        if (streakBonus != null) {
-          await _repository.saveXPTransaction(streakBonus);
-          final profileWithBonus = _levelService.updateLevelAfterXP(
-            profileWithStreak,
-            streakBonus.amount,
-          );
-          await _repository.saveProfile(profileWithBonus);
-          emit(
-            currentState.copyWith(
-              profile: profileWithBonus,
-              leveledUp:
-                  leveledUp || profileWithBonus.currentLevel > previousLevel,
-            ),
-          );
-          return;
-        }
-      }
-
-      // 6. Guardar perfil actualizado
-      await _repository.saveProfile(profileWithStreak);
-
-      // 7. Obtener conteo de registros de lactancia de hoy
-      final gamificationService = getIt<GamificationService>();
-      final todayRecordsCount = await gamificationService
-          .getTodayCompleteRecordsCount(currentProfile.userId);
-
-      // 8. Actualizar estado de mascota (considerando registros de hoy)
-      final mascotState = _determineMascotState(
-        profileWithStreak,
-        updatedStreak,
-        lactationRecordsToday: todayRecordsCount,
-      );
-      final profileWithMascot = profileWithStreak.copyWith(
-        mascotState: mascotState,
-      );
-      await _repository.saveProfile(profileWithMascot);
-
+      // 4. EMITIR ESTADO INMEDIATAMENTE (actualización optimista)
       emit(
-        currentState.copyWith(profile: profileWithMascot, leveledUp: leveledUp),
+        currentState.copyWith(profile: profileWithStreak, leveledUp: leveledUp),
+      );
+
+      // OPERACIONES EN BACKGROUND (no bloquean la UI)
+      // Guardar transacción y actualizar perfil en segundo plano
+      // NO emitir aquí porque el handler ya terminó - solo guardar en BD
+      unawaited(
+        (() async {
+          try {
+            // 1. Guardar transacción de XP
+            await _repository.saveXPTransaction(event.transaction);
+
+            // 2. Guardar racha actualizada
+            await _repository.saveStreak(updatedStreak);
+
+            // 3. Verificar bonus de racha
+            XPTransaction? streakBonus;
+            if (updatedStreak.currentStreak == 3 ||
+                updatedStreak.currentStreak == 7 ||
+                updatedStreak.currentStreak == 30 ||
+                updatedStreak.currentStreak == 60 ||
+                updatedStreak.currentStreak == 100) {
+              streakBonus = _xpService.calculateStreakBonus(
+                userId: currentProfile.userId,
+                streakDays: updatedStreak.currentStreak,
+                timestamp: DateTime.now(),
+              );
+
+              if (streakBonus != null) {
+                await _repository.saveXPTransaction(streakBonus);
+                final profileWithBonus = _levelService.updateLevelAfterXP(
+                  profileWithStreak,
+                  streakBonus.amount,
+                );
+                await _repository.saveProfile(profileWithBonus);
+
+                // Si hay bonus, recargar el perfil usando un nuevo evento
+                // en lugar de emitir directamente
+                add(LoadGamificationProfile(currentProfile.userId));
+                return;
+              }
+            }
+
+            // 4. Obtener conteo de registros de lactancia de hoy
+            final gamificationService = getIt<GamificationService>();
+            final todayRecordsCount = await gamificationService
+                .getTodayCompleteRecordsCount(currentProfile.userId);
+
+            // 5. Actualizar estado de mascota
+            final mascotState = _determineMascotState(
+              profileWithStreak,
+              updatedStreak,
+              lactationRecordsToday: todayRecordsCount,
+            );
+            final profileWithMascot = profileWithStreak.copyWith(
+              mascotState: mascotState,
+            );
+            await _repository.saveProfile(profileWithMascot);
+
+            // No emitir aquí - el estado ya fue actualizado optimistamente
+            // Si necesitamos actualizar el estado de la mascota, podemos
+            // recargar el perfil, pero solo si es necesario
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ Error en operaciones de background al agregar XP: $e');
+            }
+            // No emitir error aquí para no interrumpir la UI
+            // La actualización optimista ya se mostró
+          }
+        })(),
       );
     } catch (e) {
       if (kDebugMode) {

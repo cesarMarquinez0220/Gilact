@@ -3,7 +3,8 @@ import '../entities/xp_transaction.dart';
 /// Servicio para calcular XP según diferentes acciones
 /// Diseñado para ser ajustable basándose en análisis de datos
 class XPCalculationService {
-  static final XPCalculationService _instance = XPCalculationService._internal();
+  static final XPCalculationService _instance =
+      XPCalculationService._internal();
   factory XPCalculationService() => _instance;
   XPCalculationService._internal();
 
@@ -36,7 +37,8 @@ class XPCalculationService {
 
   // BONUSES POR TRIVIA
   static const int _bonusTriviaPerQuestion = 5; // XP por pregunta correcta
-  static const int _bonusTriviaPerfect = 20; // Bonus adicional si todas correctas
+  static const int _bonusTriviaPerfect =
+      20; // Bonus adicional si todas correctas
 
   /// Calcula XP para un registro rápido de lactancia
   XPTransaction calculateXPForQuickLactation({
@@ -294,7 +296,7 @@ class XPCalculationService {
     required DateTime timestamp,
   }) {
     int xp = correctAnswers * _bonusTriviaPerQuestion;
-    
+
     // Bonus adicional si todas las respuestas son correctas
     if (correctAnswers == totalQuestions) {
       xp += _bonusTriviaPerfect;
@@ -306,8 +308,8 @@ class XPCalculationService {
       amount: xp,
       source: XPSource.triviaCompleted,
       sourceId: lessonId,
-      bonusReason: correctAnswers == totalQuestions 
-          ? 'trivia_perfect' 
+      bonusReason: correctAnswers == totalQuestions
+          ? 'trivia_perfect'
           : 'trivia_$correctAnswers/$totalQuestions',
       timestamp: timestamp,
     );
@@ -336,4 +338,3 @@ class XPCalculationService {
     }
   }
 }
-

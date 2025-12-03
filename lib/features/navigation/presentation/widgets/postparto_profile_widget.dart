@@ -150,8 +150,17 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
 
       // DATOS DE PRUEBA: Solo generar datos de prueba de peso si no hay datos reales
       // NO generar datos de prueba de lactancia si no hay registros reales
+      // Parsear el peso al nacer de String a double
+      double? birthWeight;
+      if (widget.userProfile.babyInfo?.weight != null) {
+        birthWeight = double.tryParse(widget.userProfile.babyInfo!.weight);
+      }
       final finalAnalysis = !hasRealWeightData
-          ? _generateTestData(birthDate, includeFeedingData: hasRealFeedingData)
+          ? _generateTestData(
+              birthDate,
+              birthWeight: birthWeight,
+              includeFeedingData: hasRealFeedingData,
+            )
           : analysis;
 
       if (kDebugMode) {
@@ -211,82 +220,85 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
 
   Widget _buildBabyInfo() {
     return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withValues(alpha: 0.25),
-              Colors.white.withValues(alpha: 0.15),
-            ],
-          ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.3),
-            width: 1,
-          ),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      'baby.data.title'.tr(),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 23,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            offset: const Offset(1, 1),
-                            blurRadius: 2,
-                          ),
-                        ],
-                      ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Text(
+                    'baby.data.title'.tr(),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 23,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(1, 1),
+                          blurRadius: 2,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  if (widget.userProfile.babyInfo != null) ...[
-                    _buildInfoRow(
-                      'baby.data.name'.tr(),
-                      widget.userProfile.babyInfo!.name,
+                ),
+                const SizedBox(height: 20),
+                if (widget.userProfile.babyInfo != null) ...[
+                  _buildInfoRow(
+                    'baby.data.name'.tr(),
+                    widget.userProfile.babyInfo!.name,
+                  ),
+                  _buildInfoRow(
+                    'baby.data.gestationalAge'.tr(),
+                    '${widget.userProfile.babyInfo!.gestationalAge} ${'baby.data.weeks'.tr()}',
+                  ),
+                  _buildInfoRow(
+                    'baby.data.birthDate'.tr(),
+                    _formatBirthDate(
+                      context,
+                      widget.userProfile.babyInfo!.birthDate,
                     ),
-                    _buildInfoRow(
-                      'baby.data.gestationalAge'.tr(),
-                      '${widget.userProfile.babyInfo!.gestationalAge} ${'baby.data.weeks'.tr()}',
+                  ),
+                  _buildInfoRow(
+                    'baby.data.birthPlace'.tr(),
+                    widget.userProfile.babyInfo!.birthPlace,
+                  ),
+                  _buildInfoRow(
+                    'baby.data.weight'.tr(),
+                    '${widget.userProfile.babyInfo!.weight} kg',
+                  ),
+                ] else ...[
+                  Center(
+                    child: Text(
+                      'baby.data.noInfoAvailable'.tr(),
+                      style: const TextStyle(color: Colors.white70),
                     ),
-                    _buildInfoRow(
-                      'baby.data.birthDate'.tr(),
-                      _formatBirthDate(context, widget.userProfile.babyInfo!.birthDate),
-                    ),
-                    _buildInfoRow(
-                      'baby.data.birthPlace'.tr(),
-                      widget.userProfile.babyInfo!.birthPlace,
-                    ),
-                    _buildInfoRow(
-                      'baby.data.weight'.tr(),
-                      '${widget.userProfile.babyInfo!.weight} kg',
-                    ),
-                  ] else ...[
-                    Center(
-                      child: Text(
-                        'baby.data.noInfoAvailable'.tr(),
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   /// Formatea la fecha de nacimiento a un formato legible
@@ -294,11 +306,11 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
     try {
       // Intentar parsear la fecha
       final birthDate = DateTime.parse(birthDateStr);
-      
+
       // Formatear según el locale
       final locale = context.locale.toString();
       final dateFormat = DateFormat.yMMMMd(locale);
-      
+
       return dateFormat.format(birthDate);
     } catch (e) {
       // Si falla el parseo, devolver la fecha original
@@ -342,19 +354,25 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
   }
 
   /// Genera datos de prueba para visualizar las gráficas
+  /// [birthWeight] - Peso al nacer del bebé (en kg). Si es null, usa 3.2 kg como default
   /// [includeFeedingData] - Si es false, NO genera datos de lactancia (para usuarios sin registros reales)
   GrowthTrendAnalysis _generateTestData(
     DateTime birthDate, {
+    double? birthWeight,
     bool includeFeedingData = false,
   }) {
     if (kDebugMode) {
       print('🧪 _generateTestData: Generando datos de prueba...');
       print('   - Fecha de nacimiento: $birthDate');
+      print('   - Peso al nacer: ${birthWeight ?? 3.2} kg');
       print('   - Incluir datos de lactancia: $includeFeedingData');
     }
 
     final today = DateTime.now();
     final testData = <WeightTrendData>[];
+
+    // Usar el peso al nacer del bebé si está disponible, sino usar 3.2 kg como default
+    final baseWeight = birthWeight ?? 3.2;
 
     // Generar datos para los últimos 30 días
     for (int i = 29; i >= 0; i--) {
@@ -367,16 +385,25 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
       final whoService = WHOPercentilesService();
       final percentiles = whoService.getAllPercentiles(ageInDays);
 
-      // Simular peso que crece gradualmente (empezando en 3.2 kg y creciendo ~20g por día)
+      // Simular peso que crece gradualmente desde el peso al nacer
       // Solo agregar peso real cada 3-4 días para simular registros reales
       double? actualWeight;
       if (i % 3 == 0 || i == 0) {
-        // Peso inicial aproximado: 3.2 kg + crecimiento diario
-        const baseWeight = 3.2;
-        const growthPerDay = 0.020; // 20g por día
-        actualWeight = baseWeight + (ageInDays * growthPerDay);
+        // Peso inicial: peso al nacer + crecimiento diario
+        // Los bebés recién nacidos pueden perder un poco de peso los primeros días,
+        // luego ganan aproximadamente 20-30g por día
+        const growthPerDay = 0.025; // 25g por día (promedio)
+        // Para los primeros 7 días, considerar pérdida inicial de peso
+        double weightAdjustment = 0.0;
+        if (ageInDays <= 7) {
+          // Pérdida inicial típica del 5-10% del peso al nacer
+          weightAdjustment =
+              -(baseWeight * 0.05) + (ageInDays * 0.01 * baseWeight);
+        }
+        actualWeight =
+            baseWeight + weightAdjustment + (ageInDays * growthPerDay);
         // Asegurar que esté dentro de un rango razonable
-        actualWeight = actualWeight.clamp(2.5, 8.0);
+        actualWeight = actualWeight.clamp(2.0, 10.0);
       }
 
       // SOLO simular volumen de leche si includeFeedingData es true
@@ -450,7 +477,10 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
         ),
         child: const Center(
           child: CircularProgressIndicator(color: Colors.white),

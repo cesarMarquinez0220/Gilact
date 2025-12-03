@@ -15,9 +15,9 @@ import '../../domain/services/user_statistics_service.dart';
 import '../../domain/repositories/gamification_repository.dart';
 import '../../presentation/bloc/gamification_bloc.dart';
 import '../../presentation/bloc/gamification_event.dart';
+import '../../presentation/services/achievement_queue_service.dart';
 import 'xp_celebration_animation.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../presentation/widgets/achievement_unlocked_dialog.dart';
 
 /// Widget que muestra una trivia después de completar una lección
 class LessonTriviaWidget extends StatefulWidget {
@@ -188,6 +188,21 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
     // Calcular XP total para la animación
     _totalXP = triviaTransaction.amount + lessonTransaction.amount;
 
+    // Logs para debugging del cálculo de XP
+    if (kDebugMode) {
+      print('📊 [LessonTriviaWidget] Cálculo de XP:');
+      print('   └─ Preguntas totales: ${_questions.length}');
+      print('   └─ Respuestas correctas: $_correctAnswers');
+      print(
+        '   └─ XP Trivia: ${triviaTransaction.amount} (${_correctAnswers} × 5 + ${_correctAnswers == _questions.length ? 20 : 0} bonus)',
+      );
+      print('   └─ XP Lección: ${lessonTransaction.amount}');
+      print('   └─ XP Total mostrado: $_totalXP');
+      print(
+        '   └─ Nota: El registro rápido (10 XP) se agrega por separado cuando se hace el registro',
+      );
+    }
+
     // Obtener el bloc y agregar XP
     final gamificationBloc = context.read<GamificationBloc>();
 
@@ -217,19 +232,20 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           widget.userId,
         );
 
-        final achievements = await gamificationService.detectAndUnlockAchievements(
-          userId: widget.userId,
-          totalLactationRecords: userStats.totalLactationRecords,
-          completeLactationRecords: userStats.completeLactationRecords,
-          totalLessonsCompleted: userStats.totalLessonsCompleted,
-          babyWeightRecords: userStats.babyWeightRecords,
-          hasNocturnalRecord: userStats.hasNocturnalRecord,
-          dailyRecordsToday: userStats.dailyRecordsToday,
-          babySleepRecords: userStats.babySleepRecords,
-          perfectTrivias: userStats.perfectTrivias,
-          nocturnalRecordsCount: userStats.nocturnalRecordsCount,
-          daysUsingApp: userStats.daysUsingApp,
-        );
+        final achievements = await gamificationService
+            .detectAndUnlockAchievements(
+              userId: widget.userId,
+              totalLactationRecords: userStats.totalLactationRecords,
+              completeLactationRecords: userStats.completeLactationRecords,
+              totalLessonsCompleted: userStats.totalLessonsCompleted,
+              babyWeightRecords: userStats.babyWeightRecords,
+              hasNocturnalRecord: userStats.hasNocturnalRecord,
+              dailyRecordsToday: userStats.dailyRecordsToday,
+              babySleepRecords: userStats.babySleepRecords,
+              perfectTrivias: userStats.perfectTrivias,
+              nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+              daysUsingApp: userStats.daysUsingApp,
+            );
 
         // Mostrar diálogo si hay logros nuevos
         if (achievements.isRight()) {
@@ -237,10 +253,12 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           if (newAchievements.isNotEmpty && mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted && context.mounted) {
-                AchievementUnlockedDialog.show(
+                // Mostrar logros uno a la vez usando el servicio de cola
+                final achievementQueueService =
+                    getIt<AchievementQueueService>();
+                achievementQueueService.queueAchievements(
                   context,
-                  newAchievements.first,
-                  newAchievements.first.xpReward,
+                  newAchievements,
                 );
               }
             });

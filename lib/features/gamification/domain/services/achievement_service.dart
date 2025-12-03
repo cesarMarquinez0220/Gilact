@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../entities/achievement.dart';
 import '../entities/user_gamification_profile.dart';
 
@@ -428,6 +429,11 @@ class AchievementService {
             case 'milestone_250':
             case 'milestone_500':
               shouldUnlock = totalLactationRecords >= achievement.requiredValue;
+              if (kDebugMode && achievement.id == 'milestone_10') {
+                print(
+                  '🔍 [AchievementService] Verificando milestone_10: totalLactationRecords=$totalLactationRecords, requiredValue=${achievement.requiredValue}, shouldUnlock=$shouldUnlock',
+                );
+              }
               break;
             // Registros completos
             case 'complete_25':
