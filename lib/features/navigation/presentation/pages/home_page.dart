@@ -289,42 +289,39 @@ class _HomePageState extends State<HomePage> {
     return BlocBuilder<GamificationBloc, GamificationState>(
       builder: (context, gamificationState) {
         if (gamificationState is GamificationLoaded) {
-          return FadeInUp(
-            duration: const Duration(milliseconds: 800),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 0),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Barra de XP compacta (horizontal)
-                  _buildCompactXPBar(gamificationState.profile),
-                  const SizedBox(height: 12),
-                  // Divider sutil
-                  Container(height: 1, color: Colors.grey[200]),
-                  const SizedBox(height: 12),
-                  // Racha compacta (horizontal)
-                  FutureBuilder<DailyStreak?>(
-                    future: _getStreak(validUserId),
-                    builder: (context, snapshot) {
-                      return _buildCompactStreak(
-                        gamificationState.profile,
-                        snapshot.data,
-                      );
-                    },
-                  ),
-                ],
-              ),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 0),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Barra de XP compacta (horizontal)
+                _buildCompactXPBar(gamificationState.profile),
+                const SizedBox(height: 12),
+                // Divider sutil
+                Container(height: 1, color: Colors.grey[200]),
+                const SizedBox(height: 12),
+                // Racha compacta (horizontal)
+                FutureBuilder<DailyStreak?>(
+                  future: _getStreak(validUserId),
+                  builder: (context, snapshot) {
+                    return _buildCompactStreak(
+                      gamificationState.profile,
+                      snapshot.data,
+                    );
+                  },
+                ),
+              ],
             ),
           );
         } else if (gamificationState is GamificationLoading) {
@@ -858,13 +855,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           const SizedBox(height: 20),
           // Header modernizado movido al contenido scrolleable
-          FadeInDown(
-            duration: const Duration(milliseconds: 1000),
-            child: ModernHeader(
-              userName: NavigationService.getUserName(state),
-              onNavigateToLessons: () =>
-                  NavigationService.navigateToLessons(context),
-            ),
+          ModernHeader(
+            userName: NavigationService.getUserName(state),
+            onNavigateToLessons: () =>
+                NavigationService.navigateToLessons(context),
           ),
           const SizedBox(height: 20),
           _buildHomeContentSections(context, state),
@@ -1590,21 +1584,15 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             // Calendario horizontal con countdown integrado
-            FadeInUp(
-              duration: const Duration(milliseconds: 800),
-              child: _buildIntegratedCalendarAndCountdown(
-                context,
-                lactationProvider,
-              ),
+            _buildIntegratedCalendarAndCountdown(
+              context,
+              lactationProvider,
             ),
 
             const SizedBox(height: 20),
 
             // Resumen del día actual (más compacto)
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: _buildCompactTodaySummary(context, lactationProvider),
-            ),
+            _buildCompactTodaySummary(context, lactationProvider),
           ],
         );
       },
@@ -1646,17 +1634,14 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 30),
 
           // Botón inteligente de registro de lactancia
-          FadeInUp(
-            duration: const Duration(milliseconds: 1200),
-            child: SmartLactationButton(
-              onSuccess: () async {
-                _logger.d('onSuccess: Refrescando datos...');
-                // Refrescar datos después de registrar lactancia
-                await lactationProvider.refreshTodayData();
-                await lactationProvider.loadWeekData();
-                _logger.d('onSuccess: Datos refrescados');
-              },
-            ),
+          SmartLactationButton(
+            onSuccess: () async {
+              _logger.d('onSuccess: Refrescando datos...');
+              // Refrescar datos después de registrar lactancia
+              await lactationProvider.refreshTodayData();
+              await lactationProvider.loadWeekData();
+              _logger.d('onSuccess: Datos refrescados');
+            },
           ),
         ],
       ),

@@ -106,15 +106,21 @@ class UpdateProfileUseCase implements UseCase<User, UpdateProfileParams> {
 }
 
 @injectable
-class DeleteAccountUseCase implements UseCaseNoParams<void> {
+class DeleteAccountUseCase implements UseCase<void, DeleteAccountParams> {
   final AuthRepository repository;
 
   DeleteAccountUseCase(this.repository);
 
   @override
-  Future<Either<Failure, void>> call() async {
-    return await repository.deleteAccount();
+  Future<Either<Failure, void>> call(DeleteAccountParams params) async {
+    return await repository.deleteAccount(password: params.password);
   }
+}
+
+class DeleteAccountParams {
+  final String? password;
+
+  const DeleteAccountParams({this.password});
 }
 
 // Parámetros para los casos de uso

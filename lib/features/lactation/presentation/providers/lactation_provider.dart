@@ -11,6 +11,7 @@ class LactationProvider extends ChangeNotifier {
   final LactationService _lactationService;
   final AppLogger _logger = getIt<AppLogger>();
   Timer? _timer;
+  bool _disposed = false;
 
   LactationProvider(this._lactationService) {
     // Iniciar el temporizador automático
@@ -37,14 +38,18 @@ class LactationProvider extends ChangeNotifier {
 
   /// Carga los datos del día actual
   Future<void> loadTodayData() async {
+    if (_disposed) return;
+    
     try {
       _logger.d('loadTodayData: Iniciando carga...');
       _isLoading = true;
       _errorMessage = null;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
 
       final today = DateTime.now();
       final records = await _lactationService.getRecordsForDate(today);
+
+      if (_disposed) return;
 
       _logger.d('loadTodayData: Registros encontrados: ${records.length}');
       for (final record in records) {
@@ -57,10 +62,14 @@ class LactationProvider extends ChangeNotifier {
       // Actualizar intervalo dinámico basado en edad del bebé
       await _updateLactationInterval();
 
+      if (_disposed) return;
+
       _isLoading = false;
       notifyListeners();
       _logger.d('loadTodayData: Datos cargados y notificados');
     } catch (e, stackTrace) {
+      if (_disposed) return;
+      
       _errorMessage = 'Error cargando datos: $e';
       _isLoading = false;
       notifyListeners();
@@ -111,6 +120,8 @@ class LactationProvider extends ChangeNotifier {
 
   /// Carga los registros de la semana actual
   Future<void> loadWeekData() async {
+    if (_disposed) return;
+    
     try {
       final now = DateTime.now();
       final todayWeekday = now.weekday; // Lunes=1, Domingo=7
@@ -138,6 +149,9 @@ class LactationProvider extends ChangeNotifier {
       final records = await _lactationService.getRecordsForWeek(
         startOfWeekMidnight,
       );
+      
+      if (_disposed) return;
+      
       _weekRecords = records;
 
       _logger.d('Registros cargados: ${records.length}');
@@ -145,8 +159,9 @@ class LactationProvider extends ChangeNotifier {
         _logger.d('  - ${record.fechaRegistro}');
       }
 
-      notifyListeners();
+      if (!_disposed) notifyListeners();
     } catch (e, stackTrace) {
+      if (_disposed) return;
       _logger.e('Error cargando datos de la semana', e, stackTrace);
     }
   }
@@ -189,11 +204,17 @@ class LactationProvider extends ChangeNotifier {
         'addRecord: Guardando registro... Fecha: ${record.fechaRegistro}',
       );
       await _lactationService.saveRecord(record);
+      if (_disposed) return;
+      
       _logger.success('addRecord: Registro guardado exitosamente');
       // Recargar datos después de agregar
       await loadTodayData();
+      if (_disposed) return;
+      
       _logger.d('addRecord: Datos recargados');
     } catch (e, stackTrace) {
+      if (_disposed) return;
+      
       _errorMessage = 'Error guardando registro: $e';
       notifyListeners();
       _logger.e('addRecord: Error guardando', e, stackTrace);
@@ -202,11 +223,17 @@ class LactationProvider extends ChangeNotifier {
 
   /// Actualiza un registro existente
   Future<void> updateRecord(String recordId, LactationRecord record) async {
+    if (_disposed) return;
+    
     try {
       await _lactationService.updateRecord(recordId, record);
+      if (_disposed) return;
+      
       // Recargar datos después de actualizar
       await loadTodayData();
     } catch (e) {
+      if (_disposed) return;
+      
       _errorMessage = 'Error actualizando registro: $e';
       notifyListeners();
     }
@@ -214,11 +241,17 @@ class LactationProvider extends ChangeNotifier {
 
   /// Elimina un registro
   Future<void> deleteRecord(String recordId) async {
+    if (_disposed) return;
+    
     try {
       await _lactationService.deleteRecord(recordId);
+      if (_disposed) return;
+      
       // Recargar datos después de eliminar
       await loadTodayData();
     } catch (e) {
+      if (_disposed) return;
+      
       _errorMessage = 'Error eliminando registro: $e';
       notifyListeners();
     }
@@ -335,13 +368,17 @@ class LactationProvider extends ChangeNotifier {
     _todayStats = null;
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   /// Inicia el timer automático que actualiza el temporizador cada minuto
   void _startAutoRefreshTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (_disposed) {
+        _timer?.cancel();
+        return;
+      }
       _logger.d('Timer: Actualizando temporizador...');
       // Notificar a los listeners para que el widget se reconstruya
       // y el temporizador se actualice automáticamente
@@ -351,6 +388,7 @@ class LactationProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     // Cancelar el timer antes de eliminar el provider
     _timer?.cancel();
     // Limpiar el estado antes de eliminar el provider

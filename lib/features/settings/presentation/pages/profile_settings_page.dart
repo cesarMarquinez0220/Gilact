@@ -65,6 +65,261 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     }
   }
 
+  void _showPasswordDialogForReauthentication(BuildContext context) {
+    final passwordController = TextEditingController();
+    bool isProcessing = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                // La cuenta fue eliminada exitosamente
+                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'account.deleteAccountSuccess'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                    backgroundColor: const Color(0xFF03A696),
+                    duration: const Duration(seconds: 3),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                  ),
+                );
+              } else if (state is AuthFailure) {
+                setDialogState(() {
+                  isProcessing = false;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      state.message,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                  ),
+                );
+              } else if (state is AuthLoading) {
+                setDialogState(() {
+                  isProcessing = true;
+                });
+              }
+            },
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Reautenticación Requerida',
+                style: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Para eliminar tu cuenta, necesitamos verificar tu identidad. Por favor, ingresa tu contraseña:',
+                    style: GoogleFonts.quicksand(),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    enabled: !isProcessing,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      prefixIcon: const Icon(Icons.lock),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  if (isProcessing) ...[
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF03A696)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.quicksand(
+                      color: const Color(0xFF7F8C8D),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () {
+                          final password = passwordController.text.trim();
+                          if (password.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Por favor ingresa tu contraseña'),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // Intentar eliminar cuenta con la contraseña
+                          context.read<AuthBloc>().add(
+                            DeleteAccountRequested(password: password),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                  child: isProcessing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'Eliminar',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _handleDeleteAccount() async {
+    try {
+      // Mostrar diálogo de confirmación
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'account.deleteAccountConfirmTitle'.tr(),
+            style: GoogleFonts.quicksand(
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+          content: Text(
+            'account.deleteAccountConfirmMessage'.tr(),
+            style: GoogleFonts.quicksand(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'account.cancel'.tr(),
+                style: GoogleFonts.quicksand(
+                  color: const Color(0xFF7F8C8D),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'account.delete'.tr(),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true || !mounted) return;
+
+      // Mostrar loading (se cerrará automáticamente cuando el BlocListener reciba el resultado)
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF03A696)),
+          ),
+        ),
+      );
+
+      // Eliminar cuenta usando AuthBloc
+      // El BlocListener cerrará el loading y navegará al login cuando termine
+      context.read<AuthBloc>().add(const DeleteAccountRequested());
+    } catch (e) {
+      if (mounted) {
+        // Cerrar loading si está abierto
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error al eliminar cuenta: ${e.toString()}',
+              style: GoogleFonts.quicksand(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
+  }
+
   void _handleSignOut() async {
     try {
       showDialog(
@@ -76,6 +331,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           ),
         ),
       );
+
+      // Resetear UserProfileBloc antes de cerrar sesión
+      context.read<UserProfileBloc>().add(const ResetUserProfileRequested());
+      
+      // Esperar un momento para que el reset se complete
+      await Future.delayed(const Duration(milliseconds: 100));
 
       await FirebaseAuth.instance.signOut();
 
@@ -138,25 +399,101 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocListener<SettingsBloc, SettingsState>(
-        listener: (context, state) {
-          if (state is LocalSettingsLoaded) {
-            setState(() {
-              _localSettings = state.settings;
-              _appVersion = state.settings['appVersion'] ?? '1.0.0';
-            });
-          } else if (state is LocalSettingUpdated) {
-            // Recargar configuraciones después de actualizar
-            _loadLocalSettings();
-          } else if (state is SettingsFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<SettingsBloc, SettingsState>(
+            listener: (context, state) {
+              if (state is LocalSettingsLoaded) {
+                setState(() {
+                  _localSettings = state.settings;
+                  _appVersion = state.settings['appVersion'] ?? '1.0.0';
+                });
+              } else if (state is LocalSettingUpdated) {
+                // Recargar configuraciones después de actualizar
+                _loadLocalSettings();
+              } else if (state is SettingsFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                // Cerrar el diálogo de loading si está abierto
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+                
+                // La cuenta fue eliminada exitosamente, navegar al login
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
+                
+                // Mostrar mensaje de éxito después de un pequeño delay
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'account.deleteAccountSuccess'.tr(),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                        backgroundColor: const Color(0xFF03A696),
+                        duration: const Duration(seconds: 3),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        margin: const EdgeInsets.all(16),
+                      ),
+                    );
+                  }
+                });
+              } else if (state is AuthFailure) {
+                // Cerrar el diálogo de loading si está abierto
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+                
+                // Si el error es que requiere reautenticación, mostrar diálogo para pedir contraseña
+                if (state.message.contains('REQUIRES_RECENT_LOGIN') || 
+                    state.message.contains('reautenticación')) {
+                  _showPasswordDialogForReauthentication(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        state.message,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 3),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: const EdgeInsets.all(16),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
         child: Column(
           children: [
             // Header personalizado
@@ -240,7 +577,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 // Sección: Cuenta
                 _buildSectionTitle('account.title'.tr(), constraints),
                 const SizedBox(height: 12),
-                AccountCardWidget(onSignOut: _handleSignOut),
+                AccountCardWidget(
+                  onSignOut: _handleSignOut,
+                  onDeleteAccount: _handleDeleteAccount,
+                ),
 
                 const SizedBox(height: 20),
 

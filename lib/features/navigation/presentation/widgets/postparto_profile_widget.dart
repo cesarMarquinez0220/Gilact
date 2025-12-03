@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui';
@@ -141,13 +140,18 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         print('   - Días con volumen de leche: ${dataWithVolume.length}');
       }
 
-      // DATOS DE PRUEBA: Si no hay datos con peso real, generar datos de prueba
+      // Verificar si hay datos reales
       final hasRealWeightData = analysis.trendData.any(
         (data) => data.actualWeight != null,
       );
+      final hasRealFeedingData = analysis.trendData.any(
+        (data) => data.feedingVolume != null && data.feedingVolume! > 0,
+      );
 
+      // DATOS DE PRUEBA: Solo generar datos de prueba de peso si no hay datos reales
+      // NO generar datos de prueba de lactancia si no hay registros reales
       final finalAnalysis = !hasRealWeightData
-          ? _generateTestData(birthDate)
+          ? _generateTestData(birthDate, includeFeedingData: hasRealFeedingData)
           : analysis;
 
       if (kDebugMode) {
@@ -191,27 +195,22 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1500),
-      child: Column(
-        children: [
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        _buildBabyInfo(),
+        const SizedBox(height: 20),
+        // Sección de tendencias
+        if (widget.userProfile.babyInfo != null) ...[
+          _buildTrendSection(),
           const SizedBox(height: 20),
-          _buildBabyInfo(),
-          const SizedBox(height: 20),
-          // Sección de tendencias
-          if (widget.userProfile.babyInfo != null) ...[
-            _buildTrendSection(),
-            const SizedBox(height: 20),
-          ],
         ],
-      ),
+      ],
     );
   }
 
   Widget _buildBabyInfo() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1500),
-      child: Container(
+    return Container(
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -287,8 +286,7 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   /// Formatea la fecha de nacimiento a un formato legible
@@ -344,10 +342,15 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
   }
 
   /// Genera datos de prueba para visualizar las gráficas
-  GrowthTrendAnalysis _generateTestData(DateTime birthDate) {
+  /// [includeFeedingData] - Si es false, NO genera datos de lactancia (para usuarios sin registros reales)
+  GrowthTrendAnalysis _generateTestData(
+    DateTime birthDate, {
+    bool includeFeedingData = false,
+  }) {
     if (kDebugMode) {
       print('🧪 _generateTestData: Generando datos de prueba...');
       print('   - Fecha de nacimiento: $birthDate');
+      print('   - Incluir datos de lactancia: $includeFeedingData');
     }
 
     final today = DateTime.now();
@@ -376,10 +379,11 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         actualWeight = actualWeight.clamp(2.5, 8.0);
       }
 
-      // Simular volumen de leche (aumenta con la edad)
+      // SOLO simular volumen de leche si includeFeedingData es true
+      // (es decir, solo si hay registros reales de lactancia)
       double? feedingVolume;
       int? feedingFrequency;
-      if (i % 2 == 0 || i == 0) {
+      if (includeFeedingData && (i % 2 == 0 || i == 0)) {
         // Volumen aumenta con la edad del bebé
         double baseVolume;
         if (ageInDays <= 7) {

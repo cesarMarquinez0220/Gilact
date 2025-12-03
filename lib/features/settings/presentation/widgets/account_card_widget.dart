@@ -133,15 +133,7 @@ class AccountCardWidget extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'account.featureInDevelopment'.tr(),
-                    style: GoogleFonts.quicksand(),
-                  ),
-                  backgroundColor: Colors.orange,
-                ),
-              );
+              onDeleteAccount?.call();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

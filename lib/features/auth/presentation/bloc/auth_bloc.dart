@@ -261,13 +261,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await _deleteAccountUseCase();
+    final result = await _deleteAccountUseCase(
+      DeleteAccountParams(password: event.password),
+    );
 
-    result.fold((failure) => emit(AuthFailure(failure.message)), (_) async {
-      // Limpiar sesión offline al eliminar cuenta
-      await _offlineSessionService.clearSession();
-      emit(const AuthUnauthenticated());
-    });
+    await result.fold(
+      (failure) async {
+        emit(AuthFailure(failure.message));
+      },
+      (_) async {
+        // Limpiar sesión offline al eliminar cuenta
+        await _offlineSessionService.clearSession();
+        emit(const AuthUnauthenticated());
+      },
+    );
   }
 
   /// Verificar sesión offline al iniciar app

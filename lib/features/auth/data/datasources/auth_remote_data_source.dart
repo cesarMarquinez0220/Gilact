@@ -30,7 +30,7 @@ abstract class AuthRemoteDataSource {
 
   Future<UserModel> updateProfile({required String name, String? photoUrl});
 
-  Future<void> deleteAccount();
+  Future<void> deleteAccount({String? password});
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -167,10 +167,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> resetPassword({required String email}) async {
     try {
+      _logger.d('AuthRemoteDataSource: Enviando email de restablecimiento a: $email');
       await _firebaseAuth.sendPasswordResetEmail(email: email);
+      _logger.success('AuthRemoteDataSource: Email de restablecimiento enviado exitosamente');
     } on FirebaseAuthException catch (e) {
+      _logger.e('AuthRemoteDataSource: Error de Firebase Auth al enviar email de restablecimiento', e);
       throw AuthException(message: _getAuthErrorMessage(e.code));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.e('AuthRemoteDataSource: Error inesperado al enviar email de restablecimiento', e, stackTrace);
       throw ServerException(message: 'Error inesperado: ${e.toString()}');
     }
   }
@@ -233,21 +237,114 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({String? password}) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) {
         throw const AuthException(message: 'No hay usuario autenticado');
       }
 
-      // Eliminar de Firestore
-      await _firestore.collection('Users').doc(user.uid).delete();
+      final userId = user.uid;
+      final userEmail = user.email;
+      _logger.d('AuthRemoteDataSource: Iniciando eliminación de cuenta para usuario: $userId');
 
-      // Eliminar cuenta de Firebase Auth
-      await user.delete();
+      // IMPORTANTE: Primero eliminar de Firebase Auth, luego de Firestore
+      // Si eliminamos primero de Firestore y falla Auth, quedamos en estado inconsistente
+      
+      // Intentar eliminar de Firebase Auth primero
+      try {
+        _logger.d('AuthRemoteDataSource: Eliminando cuenta de Firebase Auth...');
+        await user.delete();
+        _logger.success('AuthRemoteDataSource: Cuenta eliminada de Firebase Auth exitosamente');
+      } on FirebaseAuthException catch (e) {
+        _logger.e('AuthRemoteDataSource: Error al eliminar de Firebase Auth', e);
+        
+        // Si el error es que requiere login reciente, intentar reautenticarse si tenemos la contraseña
+        if (e.code == 'requires-recent-login') {
+          if (password != null && password.isNotEmpty && userEmail != null) {
+            _logger.d('AuthRemoteDataSource: Intentando reautenticación con contraseña proporcionada...');
+            try {
+              // Reautenticar al usuario
+              final credential = EmailAuthProvider.credential(
+                email: userEmail,
+                password: password,
+              );
+              await user.reauthenticateWithCredential(credential);
+              _logger.success('AuthRemoteDataSource: Reautenticación exitosa, intentando eliminar nuevamente...');
+              
+              // Intentar eliminar nuevamente después de reautenticarse
+              await user.delete();
+              _logger.success('AuthRemoteDataSource: Cuenta eliminada de Firebase Auth exitosamente después de reautenticación');
+            } catch (reauthError) {
+              _logger.e('AuthRemoteDataSource: Error en reautenticación', reauthError);
+              // Si la reautenticación falla, lanzar error específico
+              if (reauthError is FirebaseAuthException) {
+                throw AuthException(
+                  message: 'Contraseña incorrecta. Por favor, verifica tu contraseña e intenta nuevamente.',
+                );
+              }
+              throw AuthException(
+                message: 'Error al reautenticarse. Por favor, cierra sesión e inicia sesión de nuevo.',
+              );
+            }
+          } else {
+            // No tenemos contraseña, lanzar error para que la UI la solicite
+            _logger.w('AuthRemoteDataSource: Se requiere login reciente pero no se proporcionó contraseña');
+            throw AuthException(
+              message: 'REQUIRES_RECENT_LOGIN: Se requiere reautenticación para eliminar la cuenta. Por favor, ingresa tu contraseña.',
+            );
+          }
+        } else {
+          throw AuthException(message: _getAuthErrorMessage(e.code));
+        }
+      }
+
+      // Si la eliminación de Auth fue exitosa, eliminar de Firestore
+      try {
+        _logger.d('AuthRemoteDataSource: Eliminando datos de Firestore...');
+        
+        // Buscar el documento del usuario (puede estar por UID o por email)
+        String? userDocId;
+        
+        // Intentar buscar por UID primero
+        final docByUid = await _firestore.collection('Users').doc(userId).get();
+        if (docByUid.exists) {
+          userDocId = userId;
+        } else if (user.email != null) {
+          // Si no existe por UID, buscar por email
+          final querySnapshot = await _firestore
+              .collection('Users')
+              .where('email', isEqualTo: user.email)
+              .limit(1)
+              .get();
+          
+          if (querySnapshot.docs.isNotEmpty) {
+            userDocId = querySnapshot.docs.first.id;
+          }
+        }
+
+        if (userDocId != null) {
+          await _firestore.collection('Users').doc(userDocId).delete();
+          _logger.success('AuthRemoteDataSource: Datos eliminados de Firestore exitosamente');
+        } else {
+          _logger.w('AuthRemoteDataSource: No se encontró documento en Firestore para eliminar');
+        }
+      } catch (e, stackTrace) {
+        // Si falla Firestore pero Auth ya se eliminó, solo loguear el error
+        // La cuenta ya está eliminada de Auth, que es lo más importante
+        _logger.e('AuthRemoteDataSource: Error al eliminar de Firestore (cuenta ya eliminada de Auth)', e, stackTrace);
+        // No lanzar error aquí porque la cuenta ya se eliminó de Auth
+      }
+
+      _logger.success('AuthRemoteDataSource: Proceso de eliminación de cuenta completado');
+    } on AuthException {
+      // Re-lanzar AuthException sin modificar
+      rethrow;
     } on FirebaseAuthException catch (e) {
+      _logger.e('AuthRemoteDataSource: Error de Firebase Auth al eliminar cuenta', e);
       throw AuthException(message: _getAuthErrorMessage(e.code));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.e('AuthRemoteDataSource: Error inesperado al eliminar cuenta', e, stackTrace);
       throw ServerException(message: 'Error inesperado: ${e.toString()}');
     }
   }

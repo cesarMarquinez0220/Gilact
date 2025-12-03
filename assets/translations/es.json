@@ -71,7 +71,8 @@
     "featureInDevelopment": "Funcionalidad en desarrollo",
     "version": "Versión",
     "signOutSuccess": "Sesión cerrada exitosamente",
-    "signOutError": "Error al cerrar sesión"
+    "signOutError": "Error al cerrar sesión",
+    "deleteAccountSuccess": "Cuenta eliminada exitosamente"
   },
   "common": {
     "save": "Guardar",
@@ -446,6 +447,7 @@
   },
   "health": {
     "title": "Salud",
+    "subtitle": "Monitorea el bienestar de tu bebé",
     "babyWeight": "Peso del Bebé",
     "registerWeight": "Registrar Peso",
     "sleep": "Sueño",

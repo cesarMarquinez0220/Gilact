@@ -13,6 +13,7 @@ import 'features/lessons/presentation/pages/lessons_page.dart';
 import 'features/lessons/presentation/bloc/lesson_bloc.dart';
 import 'features/lessons/presentation/providers/lecciones_provider.dart';
 import 'features/lessons/presentation/providers/video_images_provider.dart';
+import 'features/navigation/presentation/providers/health_provider.dart';
 import 'features/tips/presentation/pages/tips_page.dart';
 import 'features/tips/presentation/bloc/tip_bloc.dart';
 import 'features/navigation/presentation/pages/main_navigation_page_refactored.dart';
@@ -280,6 +281,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LeccionesProvider(), lazy: false),
         ChangeNotifierProvider(
           create: (_) => VideoImagesProvider(),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HealthProvider(),
           lazy: false,
         ),
       ],

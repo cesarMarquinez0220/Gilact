@@ -212,6 +212,7 @@ class UserSubcollectionsService {
   }
 
   /// Completa el proceso de onboarding creando subcolecciones y guardando situación final
+  /// También puede usarse para actualizar de preparto a postparto
   Future<void> completeOnboardingProcess(
     String userId,
     Map<String, dynamic> formData,
@@ -219,22 +220,53 @@ class UserSubcollectionsService {
     try {
       _logger.d('Completando proceso de onboarding para usuario: $userId');
 
-      // Obtener la situación temporal
+      // Verificar si es un onboarding nuevo o una actualización
+      final existingSituation = await getUserCurrentSituation(userId);
       final tempSituation = await getTemporarySituation(userId);
-      if (tempSituation == null) {
-        throw Exception('No se encontró selección temporal de situación');
+      
+      String situationToUse;
+      bool isUpdate = false;
+
+      if (existingSituation == 'preparto' && formData['formType'] == 'postpartum') {
+        // Es una actualización de preparto a postparto
+        _logger.d('Detectada actualización de preparto a postparto');
+        situationToUse = 'postparto';
+        isUpdate = true;
+      } else if (tempSituation != null) {
+        // Es un onboarding nuevo con selección temporal
+        _logger.d('Onboarding nuevo con selección temporal: $tempSituation');
+        situationToUse = tempSituation;
+      } else {
+        // Intentar inferir la situación del tipo de formulario
+        if (formData['formType'] == 'postpartum') {
+          situationToUse = 'postparto';
+          _logger.d('Inferida situación postparto desde formType');
+        } else if (formData['formType'] == 'prepartum') {
+          situationToUse = 'preparto';
+          _logger.d('Inferida situación preparto desde formType');
+        } else {
+          throw Exception('No se encontró selección temporal de situación y no se pudo inferir del formulario');
+        }
       }
 
-      // Crear subcolecciones
-      await createUserSubcollections(userId);
+      // Crear subcolecciones si no existen
+      final hasSubcollections = await this.hasSubcollections(userId);
+      if (!hasSubcollections) {
+        _logger.d('Creando subcolecciones para usuario: $userId');
+        await createUserSubcollections(userId);
+      } else {
+        _logger.d('Subcolecciones ya existen para usuario: $userId');
+      }
 
       // Guardar la situación final con los datos del formulario
-      await saveUserSituationWithFormData(userId, tempSituation, formData);
+      await saveUserSituationWithFormData(userId, situationToUse, formData);
 
-      // Limpiar selección temporal
-      await clearTemporarySituation(userId);
+      // Limpiar selección temporal si existe
+      if (tempSituation != null) {
+        await clearTemporarySituation(userId);
+      }
 
-      _logger.success('Proceso de onboarding completado exitosamente');
+      _logger.success('Proceso de onboarding completado exitosamente (${isUpdate ? "actualización" : "nuevo"})');
     } catch (e, stackTrace) {
       _logger.e('Error completando proceso de onboarding', e, stackTrace);
       rethrow;
@@ -242,31 +274,71 @@ class UserSubcollectionsService {
   }
 
   /// Guarda la situación con los datos del formulario
+  /// Si el documento ya existe, lo actualiza; si no, lo crea
+  /// Preserva la información original cuando se actualiza de preparto a postparto
   Future<void> saveUserSituationWithFormData(
     String userId,
     String situation,
     Map<String, dynamic> formData,
   ) async {
     try {
-      final batch = _firestore.batch();
-
-      // Crear documento de selección con todos los datos organizados
       final seleccionRef = _firestore
           .collection('Users')
           .doc(userId)
           .collection('situacion')
           .doc('seleccion');
 
+      // Verificar si el documento ya existe
+      final existingDoc = await seleccionRef.get();
+      final existingData = existingDoc.data();
+      final isUpdate = existingDoc.exists;
+      final wasPrepartum = existingData != null && 
+                          existingData['situationType'] == 'preparto';
+      final isUpdatingToPostpartum = isUpdate && 
+                                     wasPrepartum && 
+                                     situation == 'postparto';
+
       // Preparar datos base
-      final seleccionData = {
+      final seleccionData = <String, dynamic>{
         'hasSelectedSituation': true,
         'situationType': situation,
         'onboardingCompleted': true,
-        'onboardingCompletedAt': Timestamp.fromDate(DateTime.now()),
-        'createdAt': Timestamp.fromDate(DateTime.now()),
         'updatedAt': Timestamp.fromDate(DateTime.now()),
         'status': 'active',
       };
+
+      // Si es un documento nuevo, agregar createdAt y onboardingCompletedAt
+      if (!isUpdate) {
+        seleccionData.addAll({
+          'onboardingCompletedAt': Timestamp.fromDate(DateTime.now()),
+          'createdAt': Timestamp.fromDate(DateTime.now()),
+        });
+      } else {
+        // Si es una actualización, preservar createdAt si existe
+        if (existingData != null && existingData['createdAt'] != null) {
+          seleccionData['createdAt'] = existingData['createdAt'];
+        } else {
+          seleccionData['createdAt'] = Timestamp.fromDate(DateTime.now());
+        }
+        
+        // Si es una actualización de preparto a postparto, preservar información original
+        if (isUpdatingToPostpartum) {
+          _logger.d('Preservando información de preparto al actualizar a postparto');
+          
+          // Preservar datos originales de preparto de forma simple
+          if (existingData != null) {
+            // Guardar solo la información esencial de preparto
+            seleccionData['prepartumData'] = {
+              'expectedBirthDate': existingData['expectedBirthDate'],
+            };
+            
+            // Fecha cuando se registró el bebé (momento de la actualización)
+            seleccionData['babyRegisteredAt'] = Timestamp.fromDate(DateTime.now());
+            
+            _logger.d('Información de preparto preservada: ${seleccionData['prepartumData']}');
+          }
+        }
+      }
 
       // Agregar datos específicos según el tipo de situación
       if (situation == 'preparto') {
@@ -287,12 +359,19 @@ class UserSubcollectionsService {
         });
       }
 
-      batch.set(seleccionRef, seleccionData);
+      // Usar set con merge: false para reemplazar completamente
+      // (pero ya preservamos los datos importantes arriba)
+      await seleccionRef.set(seleccionData, SetOptions(merge: false));
 
-      await batch.commit();
       _logger.success(
-        'Situación con datos de formulario guardada exitosamente: $situation',
+        'Situación con datos de formulario ${isUpdate ? "actualizada" : "guardada"} exitosamente: $situation',
       );
+      
+      if (isUpdatingToPostpartum) {
+        _logger.success(
+          'Actualización de preparto a postparto completada. Información original preservada.',
+        );
+      }
     } catch (e, stackTrace) {
       _logger.e(
         'Error guardando situación con datos de formulario',

@@ -71,7 +71,8 @@
     "featureInDevelopment": "Feature in development",
     "version": "Version",
     "signOutSuccess": "Session closed successfully",
-    "signOutError": "Error signing out"
+    "signOutError": "Error signing out",
+    "deleteAccountSuccess": "Account deleted successfully"
   },
   "common": {
     "save": "Save",
@@ -428,6 +429,7 @@
   },
   "health": {
     "title": "Health",
+    "subtitle": "Monitor your baby's well-being",
     "babyWeight": "Baby Weight",
     "registerWeight": "Register Weight",
     "sleep": "Sleep",
@@ -554,12 +556,9 @@
     "continue": "Continue",
     "repeatTrivia": "Repeat Trivia"
   },
-  "companion": {
-    "prepartumMessage": "Your journey is beginning!",
-    "prepartumSubmessage": "Complete lessons and trivias to earn XP and unlock achievements while you wait for your baby."
-  },
   "health": {
     "title": "Health",
+    "subtitle": "Monitor your baby's well-being",
     "babyWeight": "Baby Weight",
     "babyWeightDescription": "Register and monitor weight",
     "sleep": "Sleep Record",

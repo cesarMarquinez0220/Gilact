@@ -83,7 +83,9 @@ class UpdateProfileRequested extends AuthEvent {
 }
 
 class DeleteAccountRequested extends AuthEvent {
-  const DeleteAccountRequested();
+  final String? password;
+  
+  const DeleteAccountRequested({this.password});
 }
 
 class CheckOfflineSessionRequested extends AuthEvent {

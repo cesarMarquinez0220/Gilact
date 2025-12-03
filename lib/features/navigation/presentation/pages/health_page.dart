@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:gilact/features/lactation/presentation/pages/daily_sleep_form_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
@@ -11,6 +12,8 @@ import '../../../lactation/domain/entities/baby_weight_record.dart';
 import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
 import '../../../lactation/domain/entities/sleep_record.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
+import '../widgets/home_feature_card.dart';
+import '../providers/health_provider.dart';
 
 /// Página de salud del bebé con diseño mejorado y funcionalidades adicionales
 class HealthPage extends StatefulWidget {
@@ -21,44 +24,35 @@ class HealthPage extends StatefulWidget {
 }
 
 class _HealthPageState extends State<HealthPage> {
-  BabyWeightRecord? _lastWeightRecord;
-  SleepRecord? _lastSleepRecord;
+  bool _hasLoadedInitialData = false;
 
   @override
   void initState() {
     super.initState();
-    _loadRecentData();
   }
 
-  Future<void> _loadRecentData() async {
-    try {
-      // Cargar último registro de peso
-      final weightDataSource = BabyWeightOfflineLocalDataSource();
-      final weightRecords = await weightDataSource.getAllRecords();
-      if (weightRecords.isNotEmpty) {
-        weightRecords.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Recargar datos cuando la página se vuelve visible (útil cuando se guarda un registro)
+    // Usar addPostFrameCallback para evitar llamar notifyListeners durante el build
+    if (!_hasLoadedInitialData) {
+      _hasLoadedInitialData = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _lastWeightRecord = weightRecords.first;
-          });
+          final provider = context.read<HealthProvider>();
+          provider.loadRecentData();
         }
-      }
-
-      // Cargar último registro de sueño
-      final sleepDataSource = SleepOfflineLocalDataSource();
-      final sleepRecords = await sleepDataSource.getAllRecords();
-      if (sleepRecords.isNotEmpty) {
-        sleepRecords.sort(
-          (a, b) => b.sleepStartTime.compareTo(a.sleepStartTime),
-        );
+      });
+    } else {
+      // Si ya se cargó inicialmente, recargar cuando cambian las dependencias
+      // (útil cuando se vuelve a la página después de guardar un registro)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _lastSleepRecord = sleepRecords.first;
-          });
+          final provider = context.read<HealthProvider>();
+          provider.loadRecentData();
         }
-      }
-    } catch (e) {
-      // Si hay error, continuar sin datos recientes
+      });
     }
   }
 
@@ -67,41 +61,109 @@ class _HealthPageState extends State<HealthPage> {
     return SafeArea(
       child: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, userState) {
-          // Determinar si es preparto o postparto
-          bool isPrePartum = false;
+          // Determinar si es postparto
           bool isPostPartum = false;
           
           if (userState is UserProfileLoaded) {
-            isPrePartum = userState.profile.isPrePartum;
             isPostPartum = userState.profile.isPostPartum;
           } else if (userState is UserProfileUpdated) {
-            isPrePartum = userState.profile.isPrePartum;
             isPostPartum = userState.profile.isPostPartum;
           }
 
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-                child: Row(
-                  children: [
-                    Text(
-                      'health.title'.tr(),
-                      style: GoogleFonts.quicksand(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+          return Consumer<HealthProvider>(
+            builder: (context, healthProvider, _) {
+              final lastWeightRecord = healthProvider.lastWeightRecord;
+              final lastSleepRecord = healthProvider.lastSleepRecord;
+
+              return Column(
+                children: [
+                  // Header modernizado con consistencia visual
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF667eea), // Azul púrpura
+                          Color(0xFF764ba2), // Púrpura
+                          Color(0xFFf093fb), // Rosa claro
+                        ],
+                        stops: [0.0, 0.6, 1.0],
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF667eea).withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => _loadRecentData(),
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      tooltip: 'health.refresh'.tr(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'health.title'.tr(),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(alpha: 0.2),
+                                      offset: const Offset(1, 1),
+                                      blurRadius: 3,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'health.subtitle'.tr(),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Icono de salud
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.2),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
               // Contenido scrollable
               Expanded(
                 child: SingleChildScrollView(
@@ -114,20 +176,23 @@ class _HealthPageState extends State<HealthPage> {
                         if (isPostPartum) ...[
                           _buildSectionTitle('health.growthTracking'.tr()),
                           const SizedBox(height: 12),
-                          _buildEnhancedHealthCard(
+                          _buildHealthCardWithRecords(
                             context,
                             title: 'health.babyWeight'.tr(),
                             subtitle: 'health.babyWeightDescription'.tr(),
                             icon: Icons.monitor_weight_rounded,
                             color: const Color(0xFF4CAF50),
-                            onTap: () {
-                              Navigator.of(context).pushNamed('/baby-weight-form');
+                            onTap: () async {
+                              final result = await Navigator.of(context).pushNamed('/baby-weight-form');
+                              // Recargar datos cuando se vuelve de guardar un registro
+                              if (result == true || result != null) {
+                                healthProvider.refresh();
+                              }
                             },
-                            lastRecord: _lastWeightRecord != null
-                                ? '${'health.last'.tr()} ${_lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                            lastRecord: lastWeightRecord != null
+                                ? '${'health.last'.tr()} ${lastWeightRecord!.weight.toStringAsFixed(2)} kg'
                                 : 'lactation.calendar.noRecordsText'.tr(),
-                            recordDate: _lastWeightRecord?.recordedAt,
-                            badge: _lastWeightRecord != null ? 'health.active'.tr() : null,
+                            recordDate: lastWeightRecord?.recordedAt,
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -136,25 +201,28 @@ class _HealthPageState extends State<HealthPage> {
                         if (isPostPartum) ...[
                           _buildSectionTitle('health.dailyWellness'.tr()),
                           const SizedBox(height: 12),
-                          _buildEnhancedHealthCard(
+                          _buildHealthCardWithRecords(
                             context,
                             title: 'health.sleep'.tr(),
                             subtitle: 'health.sleepDescription'.tr(),
                             icon: Icons.bedtime_rounded,
                             color: const Color(0xFFFF9800),
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const DailySleepFormPage(),
                                 ),
                               );
+                              // Recargar datos cuando se vuelve de guardar un registro
+                              if (result == true || result != null) {
+                                healthProvider.refresh();
+                              }
                             },
-                            lastRecord: _lastSleepRecord != null
-                                ? '${'health.last'.tr()} ${_lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                            lastRecord: lastSleepRecord != null
+                                ? '${'health.last'.tr()} ${lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
                                 : 'lactation.calendar.noRecordsText'.tr(),
-                            recordDate: _lastSleepRecord?.sleepStartTime,
-                            badge: _lastSleepRecord != null ? 'health.active'.tr() : null,
+                            recordDate: lastSleepRecord?.sleepStartTime,
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -162,12 +230,10 @@ class _HealthPageState extends State<HealthPage> {
                         // Sección: Asistencia (para ambos perfiles)
                         _buildSectionTitle('health.assistanceHelp'.tr()),
                         const SizedBox(height: 12),
-                        _buildEnhancedHealthCard(
-                          context,
+                        HomeFeatureCard(
                           title: 'health.assistant'.tr(),
-                          subtitle: 'health.assistantDescription'.tr(),
                           icon: Icons.smart_toy_rounded,
-                          color: const Color(0xFF03A696),
+                          description: 'health.assistantDescription'.tr(),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -180,9 +246,7 @@ class _HealthPageState extends State<HealthPage> {
                               ),
                             );
                           },
-                          lastRecord: 'health.available247'.tr(),
-                          badge: 'health.new'.tr(),
-                          badgeColor: Colors.blue,
+                          color: const Color(0xFF03A696),
                         ),
                         const SizedBox(height: 100), // Espacio para el bottom bar
                       ],
@@ -191,6 +255,8 @@ class _HealthPageState extends State<HealthPage> {
                 ),
               ),
             ],
+          );
+            },
           );
         },
       ),
@@ -211,7 +277,7 @@ class _HealthPageState extends State<HealthPage> {
     );
   }
 
-  Widget _buildEnhancedHealthCard(
+  Widget _buildHealthCardWithRecords(
     BuildContext context, {
     required String title,
     required String subtitle,
@@ -220,162 +286,111 @@ class _HealthPageState extends State<HealthPage> {
     required VoidCallback onTap,
     String? lastRecord,
     DateTime? recordDate,
-    String? badge,
-    Color? badgeColor,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: color.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Icono con fondo degradado
-              Container(
-                width: 70,
-                height: 70,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 110,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Icono en la esquina superior derecha
+            Positioned(
+              top: 15,
+              right: 15,
+              child: Container(
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [color, color.withValues(alpha: 0.7)],
-                  ),
-                  borderRadius: BorderRadius.circular(18),
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: color.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: color.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(icon, color: Colors.white, size: 32),
+                child: Icon(icon, color: color, size: 22),
               ),
-              const SizedBox(width: 16),
-              // Información
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            ),
+
+            // Contenido principal
+            Positioned(
+              bottom: 15,
+              left: 15,
+              right: 15,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF2C3E50),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF7F8C8D),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (lastRecord != null) ...[
+                    const SizedBox(height: 4),
                     Row(
                       children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            title,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF2C3E50),
-                            ),
-                          ),
-                        ),
-                        if (badge != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: (badgeColor ?? color).withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: (badgeColor ?? color).withValues(
-                                  alpha: 0.3,
-                                ),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              badge,
-                              style: GoogleFonts.quicksand(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: badgeColor ?? color,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13,
-                        color: const Color(0xFF7F8C8D),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    if (lastRecord != null) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time_rounded,
-                            size: 14,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
                             lastRecord,
                             style: GoogleFonts.quicksand(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: Colors.grey[600],
                               fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (recordDate != null) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              _formatDate(recordDate),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 11,
-                                color: Colors.grey[500],
-                              ),
+                        ),
+                        if (recordDate != null) ...[
+                          Text(
+                            _formatDate(recordDate),
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10,
+                              color: Colors.grey[500],
                             ),
-                          ],
+                          ),
                         ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(width: 8),
-              // Flecha
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.grey[600],
-                  size: 14,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

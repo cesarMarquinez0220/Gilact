@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
 import '../../../../alerta_dialoge.dart';
+import '../../../../core/services/app_initialization_service.dart';
 
 class PostpartumFormPage extends StatefulWidget {
   const PostpartumFormPage({super.key});
@@ -210,8 +211,9 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       await subcollectionsService.completeOnboardingProcess(userId, formData);
 
       if (mounted) {
-        // Navegar automáticamente sin mostrar diálogo de éxito
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Usar AppInitializationService para cargar correctamente el perfil antes de navegar
+        // Esto asegura que el UserProfileBloc tenga los datos correctos del nuevo usuario
+        await AppInitializationService.refreshAndGoHome(context);
       }
     } catch (e) {
       if (mounted) {

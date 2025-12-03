@@ -216,6 +216,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
+                } else if (state is AuthPasswordResetSent) {
+                  // Resetear el estado de carga cuando se envía el reset de contraseña
+                  // (el diálogo maneja su propio mensaje, pero necesitamos resetear _isLoading)
+                  setState(() {
+                    _isLoading = false;
+                  });
                 } else if (state is AuthAuthenticated) {
                   setState(() {
                     _isLoading = false;
@@ -419,58 +425,161 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   void _resetPassword() {
+    final emailController = TextEditingController();
+    bool isSending = false;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Recuperar Contraseña',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Ingresa tu email para recibir instrucciones de recuperación:',
-              style: GoogleFonts.quicksand(),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                prefixIcon: const Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancelar',
-              style: GoogleFonts.quicksand(color: AppColors.textSecondary),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Funcionalidad en desarrollo'),
-                  backgroundColor: AppColors.warning,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthPasswordResetSent) {
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Se ha enviado un email con instrucciones para restablecer tu contraseña. Por favor revisa tu bandeja de entrada y carpeta de spam.',
+                      style: GoogleFonts.quicksand(),
+                    ),
+                    backgroundColor: AppColors.success,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              } else if (state is AuthFailure) {
+                setDialogState(() {
+                  isSending = false;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else if (state is AuthLoading) {
+                setDialogState(() {
+                  isSending = true;
+                });
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: Text(
-              'Enviar',
-              style: GoogleFonts.quicksand(color: Colors.white),
+            child: AlertDialog(
+              title: Text(
+                'Recuperar Contraseña',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ingresa tu email para recibir instrucciones de recuperación:',
+                    style: GoogleFonts.quicksand(),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    enabled: !isSending,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  if (isSending) ...[
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enviando solicitud...',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.quicksand(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isSending
+                      ? null
+                      : () {
+                          final email = emailController.text.trim();
+                          if (email.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Por favor ingresa tu email'),
+                                backgroundColor: AppColors.error,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // Validar formato de email básico
+                          if (!email.contains('@') || !email.contains('.')) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Por favor ingresa un email válido',
+                                ),
+                                backgroundColor: AppColors.error,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+
+                          context.read<AuthBloc>().add(
+                            ResetPasswordRequested(email: email),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.buttonDisabled,
+                  ),
+                  child: isSending
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'Enviar',
+                          style: GoogleFonts.quicksand(color: Colors.white),
+                        ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
