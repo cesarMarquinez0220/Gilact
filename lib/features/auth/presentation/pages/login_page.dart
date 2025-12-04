@@ -258,30 +258,45 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 }
               },
               child: SafeArea(
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: LoginFormWidget(
-                      emailController: _emailController,
-                      passwordController: _passwordController,
-                      saveCredentials: _saveCredentials,
-                      slideAnimation: _slideAnimation,
-                      fadeAnimation: _fadeAnimation,
-                      isLoading: _isLoading,
-                      emailError: _emailError,
-                      passwordError: _passwordError,
-                      onRecoveryTap: _resetPassword,
-                      onSignUpTap: _signUp,
-                      onRememberChanged: (value) {
-                        setState(() {
-                          _saveCredentials = value ?? false;
-                        });
-                      },
-                      onLoginPressed: _signIn,
-                      onBiometricPressed: _signInWithBiometrics,
-                      showBiometricButton: _showBiometricButton,
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Widget del formulario (reutilizable)
+                    final formWidget = Form(
+                      key: _formKey,
+                      child: LoginFormWidget(
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        saveCredentials: _saveCredentials,
+                        slideAnimation: _slideAnimation,
+                        fadeAnimation: _fadeAnimation,
+                        isLoading: _isLoading,
+                        emailError: _emailError,
+                        passwordError: _passwordError,
+                        onRecoveryTap: _resetPassword,
+                        onSignUpTap: _signUp,
+                        onRememberChanged: (value) {
+                          setState(() {
+                            _saveCredentials = value ?? false;
+                          });
+                        },
+                        onLoginPressed: _signIn,
+                        onBiometricPressed: _signInWithBiometrics,
+                        showBiometricButton: _showBiometricButton,
+                      ),
+                    );
+
+                    // En pantallas muy pequeñas, usar SingleChildScrollView directamente
+                    // En pantallas más grandes, usar Center para centrar verticalmente
+                    final isShortScreen = constraints.maxHeight < 700;
+
+                    if (isShortScreen) {
+                      return SingleChildScrollView(child: formWidget);
+                    } else {
+                      return Center(
+                        child: SingleChildScrollView(child: formWidget),
+                      );
+                    }
+                  },
                 ),
               ),
             ),

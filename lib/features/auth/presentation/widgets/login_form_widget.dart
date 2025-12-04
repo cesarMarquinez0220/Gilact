@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class LoginFormWidget extends StatefulWidget {
   final TextEditingController emailController;
@@ -44,12 +45,29 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Valores responsive para pantallas pequeñas
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    
+    final topPadding = isSmallScreen ? 20.0 : (isShortScreen ? 40.0 : 80.0);
+    final horizontalPadding = ResponsiveHelper.getResponsivePadding(context);
+    final logoSize = isSmallScreen ? 100.0 : (isShortScreen ? 120.0 : 140.0);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 26.0 : 32.0);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 15.0 : 17.0);
+    final spacingAfterLogo = isSmallScreen ? 20.0 : (isShortScreen ? 24.0 : 32.0);
+    final spacingAfterTitle = isSmallScreen ? 8.0 : 12.0;
+    final spacingBeforeForm = isSmallScreen ? 32.0 : (isShortScreen ? 40.0 : 48.0);
+    
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: isSmallScreen ? 16.0 : 24.0,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 80),
+          SizedBox(height: topPadding),
 
           // Logo y título
           AnimatedBuilder(
@@ -63,14 +81,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   children: [
                     Image.asset(
                       'assets/images/logo-completo2.png',
-                      height: 140,
-                      width: 140,
+                      height: logoSize,
+                      width: logoSize,
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: spacingAfterLogo),
                     Text(
                       'auth.login.welcomeBack'.tr(),
-                      style: const TextStyle(
-                        fontSize: 32,
+                      style: TextStyle(
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         letterSpacing: 0.5,
@@ -83,11 +101,11 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: spacingAfterTitle),
                     Text(
                       'auth.login.loginToContinue'.tr(),
-                      style: const TextStyle(
-                        fontSize: 17,
+                      style: TextStyle(
+                        fontSize: subtitleFontSize,
                         color: Colors.white70,
                         fontWeight: FontWeight.w400,
                         letterSpacing: 0.3,
@@ -99,7 +117,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             },
           ),
 
-          const SizedBox(height: 48),
+          SizedBox(height: spacingBeforeForm),
           // Formulario
           AnimatedBuilder(
             animation:
@@ -161,7 +179,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
                     // Campo de contraseña con botón biométrico al lado
                     Row(
@@ -282,7 +300,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: isSmallScreen ? 12.0 : 16.0),
 
                     // Opciones adicionales
                     Row(
@@ -349,12 +367,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: isSmallScreen ? 20.0 : 24.0),
 
                     // Botón de login
                     Container(
                       width: double.infinity,
-                      height: 56,
+                      height: ResponsiveHelper.getResponsiveButtonHeight(context),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [
@@ -412,7 +430,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: isSmallScreen ? 20.0 : 24.0),
 
                     // Enlace a registro
                     Container(

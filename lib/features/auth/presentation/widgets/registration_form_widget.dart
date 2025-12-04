@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class RegistrationFormWidget extends StatefulWidget {
   final int currentStep;
@@ -114,20 +115,35 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
   }
 
   Widget _buildStep1() {
+    // Valores responsive para pantallas pequeñas
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    
+    final topPadding = isSmallScreen ? 20.0 : (isShortScreen ? 30.0 : 40.0);
+    final horizontalPadding = ResponsiveHelper.getResponsivePadding(context);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 26.0 : 32.0);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 15.0 : 17.0);
+    final spacingAfterTitle = isSmallScreen ? 8.0 : 12.0;
+    final spacingBeforeForm = isSmallScreen ? 32.0 : (isShortScreen ? 40.0 : 48.0);
+    
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: isSmallScreen ? 16.0 : 24.0,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
+          SizedBox(height: topPadding),
 
           // Título y subtítulo
           Column(
             children: [
               Text(
                 'auth.register.createAccount'.tr(),
-                style: const TextStyle(
-                  fontSize: 32,
+                style: TextStyle(
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
@@ -140,11 +156,11 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacingAfterTitle),
               Text(
                 'auth.register.basicInfo'.tr(),
-                style: const TextStyle(
-                  fontSize: 17,
+                style: TextStyle(
+                  fontSize: subtitleFontSize,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
                   letterSpacing: 0.3,
@@ -153,7 +169,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             ],
           ),
 
-          const SizedBox(height: 48),
+          SizedBox(height: spacingBeforeForm),
 
           // Campo de nombre
           _buildTextField(
@@ -164,7 +180,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('name'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Campo de email
           _buildTextField(
@@ -176,7 +192,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('email'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Campo de contraseña
           _buildTextField(
@@ -211,7 +227,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             _buildPasswordStrengthIndicator(),
           ],
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Botón siguiente
           _buildActionButton(
@@ -220,12 +236,12 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             isLoading: widget.isLoading,
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: isSmallScreen ? 20.0 : 24.0),
 
           // Indicador de pasos
           _buildStepIndicator(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Botón de regreso al login
           _buildBackToLoginButton(),
@@ -235,20 +251,35 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
   }
 
   Widget _buildStep2() {
+    // Valores responsive para pantallas pequeñas
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    
+    final topPadding = isSmallScreen ? 20.0 : (isShortScreen ? 30.0 : 40.0);
+    final horizontalPadding = ResponsiveHelper.getResponsivePadding(context);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 26.0 : 32.0);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 15.0 : 17.0);
+    final spacingAfterTitle = isSmallScreen ? 8.0 : 12.0;
+    final spacingBeforeForm = isSmallScreen ? 32.0 : (isShortScreen ? 40.0 : 48.0);
+    
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: isSmallScreen ? 16.0 : 24.0,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
+          SizedBox(height: topPadding),
 
           // Título y subtítulo
           Column(
             children: [
               Text(
                 'auth.register.personalData'.tr(),
-                style: const TextStyle(
-                  fontSize: 32,
+                style: TextStyle(
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
@@ -261,11 +292,11 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacingAfterTitle),
               Text(
                 'auth.register.personalDataDescription'.tr(),
-                style: const TextStyle(
-                  fontSize: 17,
+                style: TextStyle(
+                  fontSize: subtitleFontSize,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
                   letterSpacing: 0.3,
@@ -274,7 +305,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             ],
           ),
 
-          const SizedBox(height: 48),
+          SizedBox(height: spacingBeforeForm),
 
           // Campo de teléfono
           _buildTextField(
@@ -286,7 +317,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('phone'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Campo de ubicación
           _buildTextField(
@@ -297,7 +328,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('location'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Fila con fecha de nacimiento y edad
           Row(
@@ -313,7 +344,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   onChanged: (value) => widget.onFieldChanged('birthDate'),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isSmallScreen ? 12.0 : 16.0),
               Expanded(
                 child: _buildTextField(
                   controller: widget.ageController,
@@ -359,20 +390,35 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
   }
 
   Widget _buildStep3() {
+    // Valores responsive para pantallas pequeñas
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    
+    final topPadding = isSmallScreen ? 20.0 : (isShortScreen ? 30.0 : 40.0);
+    final horizontalPadding = ResponsiveHelper.getResponsivePadding(context);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 26.0 : 32.0);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 15.0 : 17.0);
+    final spacingAfterTitle = isSmallScreen ? 8.0 : 12.0;
+    final spacingBeforeForm = isSmallScreen ? 32.0 : (isShortScreen ? 40.0 : 48.0);
+    
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: isSmallScreen ? 16.0 : 24.0,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
+          SizedBox(height: topPadding),
 
           // Título y subtítulo
           Column(
             children: [
               Text(
                 'auth.register.additionalInfo'.tr(),
-                style: const TextStyle(
-                  fontSize: 32,
+                style: TextStyle(
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
@@ -385,11 +431,11 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacingAfterTitle),
               Text(
                 'auth.register.additionalInfoDescription'.tr(),
-                style: const TextStyle(
-                  fontSize: 17,
+                style: TextStyle(
+                  fontSize: subtitleFontSize,
                   color: Colors.white70,
                   fontWeight: FontWeight.w400,
                   letterSpacing: 0.3,
@@ -398,7 +444,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             ],
           ),
 
-          const SizedBox(height: 48),
+          SizedBox(height: spacingBeforeForm),
 
           // Campo de nombre de la madre
           _buildTextField(
@@ -409,7 +455,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('motherName'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
 
           // Campo de número de identificación
           _buildTextField(
@@ -420,7 +466,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
             onChanged: (value) => widget.onFieldChanged('idNumber'),
           ),
 
-          const SizedBox(height: 32),
+          SizedBox(height: isSmallScreen ? 24.0 : 32.0),
 
           // Términos y condiciones
           Container(
@@ -569,9 +615,10 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     required VoidCallback onPressed,
     bool isLoading = false,
   }) {
+    final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
     return Container(
       width: double.infinity,
-      height: 56,
+      height: buttonHeight,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -630,9 +677,10 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     required String text,
     required VoidCallback onPressed,
   }) {
+    final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
     return Container(
       width: double.infinity,
-      height: 56,
+      height: buttonHeight,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
@@ -796,31 +844,37 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'auth.login.alreadyHaveAccount'.tr(),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
+          Flexible(
+            child: Text(
+              'auth.login.alreadyHaveAccount'.tr(),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-          TextButton(
-            onPressed: widget.isLoading ? null : widget.onBackToLogin,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Flexible(
+            child: TextButton(
+              onPressed: widget.isLoading ? null : widget.onBackToLogin,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-            ),
-            child: Text(
-              'auth.login.login'.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.white,
+              child: Text(
+                'auth.login.login'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                ),
               ),
             ),
           ),

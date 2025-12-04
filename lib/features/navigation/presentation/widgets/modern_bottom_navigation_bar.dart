@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:ui';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_state.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 /// Widget para la barra de navegación inferior moderna que se adapta a la navegación nativa del sistema
 class ModernBottomNavigationBar extends StatelessWidget {
@@ -23,21 +24,20 @@ class ModernBottomNavigationBar extends StatelessWidget {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final systemNavigationHeight = bottomPadding > 0 ? bottomPadding : 0;
 
-    // Calcular tamaños responsive
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360;
-    final isShortScreen = screenHeight < 700;
+    // Calcular tamaños responsive usando ResponsiveHelper
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
 
-    // Ajustar altura según tamaño de pantalla
-    final barHeight = isSmallScreen ? 80.0 : (isShortScreen ? 84.0 : 88.0);
-    final horizontalMargin = isSmallScreen ? 12.0 : 16.0;
+    // Ajustar altura según tamaño de pantalla (más compacta en pantallas pequeñas)
+    final barHeight = isSmallScreen ? 70.0 : (isShortScreen ? 76.0 : 82.0);
+    final horizontalMargin = ResponsiveHelper.getResponsivePadding(context) * 0.75;
 
     // Calcular el margen inferior dinámico
     final dynamicBottomMargin = systemNavigationHeight > 0
         ? systemNavigationHeight +
-              (isSmallScreen ? 12.0 : 16.0) // Espacio adicional según tamaño
-        : (isSmallScreen ? 24.0 : 32.0); // Margen normal según tamaño
+              (isSmallScreen ? 8.0 : 12.0) // Espacio adicional según tamaño
+        : (isSmallScreen ? 16.0 : 24.0); // Margen normal según tamaño
 
     return Container(
       margin: EdgeInsets.fromLTRB(
@@ -90,8 +90,8 @@ class ModernBottomNavigationBar extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 12 : 16,
-              vertical: isSmallScreen ? 10 : 12,
+              horizontal: isSmallScreen ? 8.0 : 12.0,
+              vertical: isSmallScreen ? 6.0 : 8.0,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -141,23 +141,25 @@ class ModernBottomNavigationBar extends StatelessWidget {
   ) {
     final isSelected = currentIndex == index;
 
-    // Calcular tamaños responsive basados en el ancho de pantalla
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
+    // Calcular tamaños responsive usando ResponsiveHelper
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
 
-    // Ajustar tamaños según el tamaño de pantalla
+    // Ajustar tamaños según el tamaño de pantalla (más compactos)
     final iconSize = isSelected
-        ? (isSmallScreen ? 22.0 : 24.0)
-        : (isSmallScreen ? 20.0 : 22.0);
-    final fontSize = isSelected
-        ? (isSmallScreen ? 10.0 : 11.0)
-        : (isSmallScreen ? 9.0 : 10.0);
+        ? (isSmallScreen ? 20.0 : (isShortScreen ? 22.0 : 24.0))
+        : (isSmallScreen ? 18.0 : (isShortScreen ? 20.0 : 22.0));
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(
+      context,
+      isSelected ? (isSmallScreen ? 9.0 : 10.0) : (isSmallScreen ? 8.5 : 9.5),
+    );
     final horizontalPadding = isSelected
-        ? (isSmallScreen ? 14.0 : 18.0)
-        : (isSmallScreen ? 10.0 : 12.0);
+        ? (isSmallScreen ? 10.0 : (isShortScreen ? 14.0 : 16.0))
+        : (isSmallScreen ? 8.0 : (isShortScreen ? 10.0 : 12.0));
     final verticalPadding = isSelected
-        ? (isSmallScreen ? 8.0 : 10.0)
-        : (isSmallScreen ? 6.0 : 8.0);
+        ? (isSmallScreen ? 4.0 : (isShortScreen ? 6.0 : 8.0))
+        : (isSmallScreen ? 3.0 : (isShortScreen ? 4.0 : 6.0));
 
     return GestureDetector(
       onTap: () => onTap(index),
@@ -185,23 +187,30 @@ class ModernBottomNavigationBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              isSelected ? activeIcon : inactiveIcon,
-              color: isSelected ? Colors.white : const Color(0xFF7F8C8D),
-              size: iconSize,
-            ),
-            SizedBox(height: isSelected ? (isSmallScreen ? 2 : 3) : 0),
-            Text(
-              label,
-              style: GoogleFonts.quicksand(
-                fontSize: fontSize,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            Flexible(
+              child: Icon(
+                isSelected ? activeIcon : inactiveIcon,
                 color: isSelected ? Colors.white : const Color(0xFF7F8C8D),
-                letterSpacing: 0.2,
+                size: iconSize,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            ),
+            if (isSelected) SizedBox(height: isSmallScreen ? 1.0 : 2.0),
+            Flexible(
+              child: Text(
+                label,
+                style: GoogleFonts.quicksand(
+                  fontSize: fontSize,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? Colors.white : const Color(0xFF7F8C8D),
+                  letterSpacing: 0.2,
+                  height: 1.0, // Reducir altura de línea para evitar overflow
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

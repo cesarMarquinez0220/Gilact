@@ -152,33 +152,48 @@ class _RegistrationPageState extends State<RegistrationPage>
 
               // Contenido principal
               SafeArea(
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: RegistrationFormWidget(
-                      currentStep: _currentStep,
-                      slideAnimation: _slideAnimation,
-                      fadeAnimation: _fadeAnimation,
-                      isLoading: context.watch<AuthBloc>().state is AuthLoading,
-                      errors: _errors,
-                      profileCompletion: _profileCompletion,
-                      onNextStep: _nextStep,
-                      onPreviousStep: _previousStep,
-                      onRegister: _register,
-                      onBirthDateTap: _selectBirthDate,
-                      onFieldChanged: _onFieldChanged,
-                      onBackToLogin: _backToLogin,
-                      nameController: _nameController,
-                      emailController: _emailController,
-                      passwordController: _passwordController,
-                      phoneController: _phoneController,
-                      locationController: _locationController,
-                      birthDateController: _birthDateController,
-                      ageController: _ageController,
-                      idNumberController: _idNumberController,
-                      motherNameController: _motherNameController,
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Widget del formulario (reutilizable)
+                    final formWidget = Form(
+                      key: _formKey,
+                      child: RegistrationFormWidget(
+                        currentStep: _currentStep,
+                        slideAnimation: _slideAnimation,
+                        fadeAnimation: _fadeAnimation,
+                        isLoading: context.watch<AuthBloc>().state is AuthLoading,
+                        errors: _errors,
+                        profileCompletion: _profileCompletion,
+                        onNextStep: _nextStep,
+                        onPreviousStep: _previousStep,
+                        onRegister: _register,
+                        onBirthDateTap: _selectBirthDate,
+                        onFieldChanged: _onFieldChanged,
+                        onBackToLogin: _backToLogin,
+                        nameController: _nameController,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        phoneController: _phoneController,
+                        locationController: _locationController,
+                        birthDateController: _birthDateController,
+                        ageController: _ageController,
+                        idNumberController: _idNumberController,
+                        motherNameController: _motherNameController,
+                      ),
+                    );
+                    
+                    // En pantallas muy pequeñas, usar SingleChildScrollView directamente
+                    // En pantallas más grandes, usar Center para centrar verticalmente
+                    final isShortScreen = constraints.maxHeight < 700;
+                    
+                    if (isShortScreen) {
+                      return SingleChildScrollView(child: formWidget);
+                    } else {
+                      return Center(
+                        child: SingleChildScrollView(child: formWidget),
+                      );
+                    }
+                  },
                 ),
               ),
             ],
