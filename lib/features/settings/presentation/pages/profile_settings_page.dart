@@ -7,6 +7,8 @@ import 'package:get_it/get_it.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_bloc.dart';
+import '../../../gamification/presentation/bloc/gamification_event.dart';
 import '../bloc/settings_bloc.dart';
 import '../widgets/user_info_card_widget.dart';
 import '../widgets/app_settings_card_widget.dart';
@@ -335,7 +337,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       // Resetear UserProfileBloc antes de cerrar sesión
       context.read<UserProfileBloc>().add(const ResetUserProfileRequested());
       
-      // Esperar un momento para que el reset se complete
+      // Resetear GamificationBloc antes de cerrar sesión
+      context.read<GamificationBloc>().add(const ResetGamificationProfile());
+      
+      // Esperar un momento para que los resets se completen
       await Future.delayed(const Duration(milliseconds: 100));
 
       await FirebaseAuth.instance.signOut();

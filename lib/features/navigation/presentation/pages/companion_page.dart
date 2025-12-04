@@ -373,6 +373,7 @@ class _CompanionPageState extends State<CompanionPage>
                         profile: gamificationState.profile,
                         unlockedAchievements:
                             gamificationState.unlockedAchievements,
+                        isPostPartum: isPostPartum,
                       ),
                     ),
                     SizedBox(height: isShortScreen ? 16 : 20),

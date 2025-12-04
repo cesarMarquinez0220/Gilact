@@ -102,10 +102,14 @@ class _HomePageState extends State<HomePage> {
         final gamificationBloc = context.read<GamificationBloc>();
         final currentState = gamificationBloc.state;
 
-        // Solo cargar si no está ya cargado o si el userId no coincide
-        if (currentState is! GamificationLoaded) {
-          gamificationBloc.add(LoadGamificationProfile(userId));
-        } else if (currentState.profile.userId != userId) {
+        // Cargar perfil si:
+        // 1. El estado es inicial (después de reset o primera carga)
+        // 2. El estado no está cargado
+        // 3. El userId no coincide con el perfil actual
+        if (currentState is GamificationInitial ||
+            currentState is! GamificationLoaded ||
+            (currentState is GamificationLoaded &&
+                currentState.profile.userId != userId)) {
           gamificationBloc.add(LoadGamificationProfile(userId));
         }
       }

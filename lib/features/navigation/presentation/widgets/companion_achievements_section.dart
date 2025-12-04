@@ -10,17 +10,22 @@ import 'companion_achievement_badge.dart';
 class CompanionAchievementsSection extends StatelessWidget {
   final UserGamificationProfile profile;
   final List<Achievement> unlockedAchievements;
+  final bool isPostPartum;
 
   const CompanionAchievementsSection({
     required this.profile,
     required this.unlockedAchievements,
+    required this.isPostPartum,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final achievementService = AchievementService();
-    final allAchievements = achievementService.getAllAchievements();
+    // Filtrar logros según el tipo de usuario
+    final allAchievements = isPostPartum
+        ? achievementService.getAllAchievements()
+        : achievementService.getAvailableAchievementsForPrepartum();
     final totalAchievements = allAchievements.length;
     final unlockedCount = unlockedAchievements.length;
     final progress = totalAchievements > 0
@@ -166,7 +171,7 @@ class CompanionAchievementsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Botón informativo "¿Cómo ganar XP?"
-          _XPInfoButton(),
+          _XPInfoButton(isPostPartum: isPostPartum),
           const SizedBox(height: 20),
           // Tabs para Desbloqueados y Todos
           DefaultTabController(
@@ -212,10 +217,14 @@ class CompanionAchievementsSection extends StatelessWidget {
 
 /// Botón informativo sobre cómo ganar XP
 class _XPInfoButton extends StatelessWidget {
+  final bool isPostPartum;
+
+  const _XPInfoButton({required this.isPostPartum});
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _showXPInfoDialog(context),
+      onTap: () => _showXPInfoDialog(context, isPostPartum),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -252,7 +261,7 @@ class _XPInfoButton extends StatelessWidget {
     );
   }
 
-  void _showXPInfoDialog(BuildContext context) {
+  void _showXPInfoDialog(BuildContext context, bool isPostPartum) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -310,34 +319,45 @@ class _XPInfoButton extends StatelessWidget {
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildCompactXPItem(
-                    Icons.flash_on,
-                    'companion.quickRecord',
-                    '10',
-                  ),
-                  _buildCompactXPItem(
-                    Icons.edit_note,
-                    'companion.fullRecord',
-                    '20',
-                  ),
-                  _buildCompactXPItem(
-                    Icons.school,
-                    'companion.completeLesson',
-                    '30',
-                  ),
-                  _buildTriviaXPItem(),
-                  _buildCompactXPItem(
-                    Icons.monitor_weight,
-                    'companion.weightRecord',
-                    '15',
-                  ),
-                  _buildCompactXPItem(
-                    Icons.bedtime,
-                    'companion.sleepRecord',
-                    '10',
-                  ),
-                ],
+                children: isPostPartum
+                    ? [
+                        // Para postparto: mostrar todas las opciones
+                        _buildCompactXPItem(
+                          Icons.flash_on,
+                          'companion.quickRecord',
+                          '10',
+                        ),
+                        _buildCompactXPItem(
+                          Icons.edit_note,
+                          'companion.fullRecord',
+                          '20',
+                        ),
+                        _buildCompactXPItem(
+                          Icons.school,
+                          'companion.completeLesson',
+                          '30',
+                        ),
+                        _buildTriviaXPItem(),
+                        _buildCompactXPItem(
+                          Icons.monitor_weight,
+                          'companion.weightRecord',
+                          '15',
+                        ),
+                        _buildCompactXPItem(
+                          Icons.bedtime,
+                          'companion.sleepRecord',
+                          '10',
+                        ),
+                      ]
+                    : [
+                        // Para preparto: solo lecciones y trivias
+                        _buildCompactXPItem(
+                          Icons.school,
+                          'companion.completeLesson',
+                          '30',
+                        ),
+                        _buildTriviaXPItem(),
+                      ],
               ),
 
               // --- AJUSTE DE ESPACIO ---
@@ -381,10 +401,13 @@ class _XPInfoButton extends StatelessWidget {
                       'companion.dailyStreaks'.tr(),
                       'companion.streaks'.tr().split(':')[1].trim(),
                     ),
-                    _buildBonusRow(
-                      'companion.recordMilestones'.tr(),
-                      'companion.milestones'.tr().split(':')[1].trim(),
-                    ),
+                    if (isPostPartum) ...[
+                      // Solo mostrar milestones de registros para postparto
+                      _buildBonusRow(
+                        'companion.recordMilestones'.tr(),
+                        'companion.milestones'.tr().split(':')[1].trim(),
+                      ),
+                    ],
                     _buildBonusRow(
                       'companion.unlockedAchievements'.tr(),
                       'companion.unlockedAchievementsBonus'

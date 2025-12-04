@@ -128,12 +128,12 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                 // Solo actualizar si es diferente del índice actual
                 if (index == _currentIndex) return;
 
-                // Animar al índice seleccionado usando PageController
-                _pageController.animateToPage(
-                  index,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
+                // Usar jumpToPage en lugar de animateToPage para evitar pasar por pantallas intermedias
+                // cuando se usa el navigation bar
+                setState(() {
+                  _currentIndex = index;
+                });
+                _pageController.jumpToPage(index);
               },
             ),
           ),

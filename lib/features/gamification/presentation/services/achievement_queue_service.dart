@@ -48,6 +48,16 @@ class AchievementQueueService {
     _isShowing = true;
     final queuedAchievement = _queue.removeAt(0);
 
+    // No mostrar animación de celebración para nivel 1 (es el nivel inicial)
+    if (queuedAchievement.achievement.id == 'level_1') {
+      // Saltar este logro y continuar con el siguiente
+      _isShowing = false;
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _processQueue();
+      });
+      return;
+    }
+
     // Mostrar el diálogo y esperar a que se cierre
     AchievementUnlockedDialog.show(
       context,

@@ -34,6 +34,7 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
     on<SyncWithFirestore>(_onSyncWithFirestore);
     on<DetectAchievements>(_onDetectAchievements);
     on<UpdateGamificationProfile>(_onUpdateGamificationProfile);
+    on<ResetGamificationProfile>(_onResetGamificationProfile);
   }
 
   Future<void> _onLoadGamificationProfile(
@@ -471,6 +472,14 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
       }
       emit(GamificationError('Error actualizando perfil: $e'));
     }
+  }
+
+  Future<void> _onResetGamificationProfile(
+    ResetGamificationProfile event,
+    Emitter<GamificationState> emit,
+  ) async {
+    // Resetear el estado a inicial
+    emit(const GamificationInitial());
   }
 
   String _determineMascotState(

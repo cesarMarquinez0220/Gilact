@@ -515,6 +515,40 @@ class AchievementService {
     return newlyUnlocked;
   }
 
+  /// Obtiene logros disponibles para usuarios preparto
+  /// Filtra logros relacionados con lactancia, peso y sueño
+  List<Achievement> getAvailableAchievementsForPrepartum() {
+    final allAchievements = getAllAchievements();
+    
+    // IDs de logros que NO están disponibles para preparto
+    final prepartumExcludedIds = {
+      // Logros diarios de lactancia
+      'daily_3',
+      'daily_5',
+      'daily_10',
+      // Milestones de lactancia
+      'milestone_10',
+      'milestone_25',
+      'milestone_50',
+      'milestone_100',
+      'milestone_250',
+      'milestone_500',
+      // Registros completos
+      'complete_25',
+      'complete_50',
+      'complete_100',
+      // Nocturnos
+      'nocturnal_10',
+      // Peso y sueño
+      'weight_10',
+      'sleep_20',
+    };
+    
+    return allAchievements
+        .where((achievement) => !prepartumExcludedIds.contains(achievement.id))
+        .toList();
+  }
+
   /// Obtiene logros desbloqueados por el usuario
   List<Achievement> getUnlockedAchievements(UserGamificationProfile profile) {
     final allAchievements = getAllAchievements();

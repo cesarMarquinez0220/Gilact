@@ -576,6 +576,7 @@
   },
   "health": {
     "title": "Salud",
+    "subtitle": "Monitorea el bienestar de tu bebé",
     "babyWeight": "Peso del Bebé",
     "babyWeightDescription": "Registra y monitorea el peso",
     "sleep": "Registro de Sueño",

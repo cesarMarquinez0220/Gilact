@@ -104,3 +104,11 @@ class UpdateGamificationProfile extends GamificationEvent {
   List<Object?> get props => [profile];
 }
 
+/// Resetea el perfil de gamificación (útil al cerrar sesión)
+class ResetGamificationProfile extends GamificationEvent {
+  const ResetGamificationProfile();
+
+  @override
+  List<Object?> get props => [];
+}
+
