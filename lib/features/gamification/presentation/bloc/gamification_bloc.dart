@@ -13,6 +13,7 @@ import '../../domain/services/streak_service.dart';
 import '../../domain/services/achievement_service.dart';
 import '../../domain/services/gamification_service.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// BLoC para gestionar el estado de gamificación
 class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
@@ -21,6 +22,7 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
   final LevelService _levelService = LevelService();
   final StreakService _streakService = StreakService();
   final AchievementService _achievementService = AchievementService();
+  final AppLogger _logger = getIt<AppLogger>();
 
   GamificationBloc({required GamificationRepository repository})
     : _repository = repository,
@@ -64,11 +66,49 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
       await _repository.saveProfile(newProfile);
       emit(GamificationLoaded(profile: newProfile));
     } else {
+      // VALIDACIÓN CRÍTICA: Recalcular nivel basándose en XP total
+      // Esto corrige cualquier inconsistencia entre nivel y XP total
+      final correctLevel = _levelService.calculateLevelFromTotalXP(
+        profile.totalXP,
+      );
+      final correctCurrentLevelXP = _levelService.calculateCurrentLevelXP(
+        profile.totalXP,
+        correctLevel,
+      );
+      final correctNextLevelXP = _levelService.calculateNextLevelXP(
+        correctLevel,
+        profile.totalXP,
+      );
+
+      // Si el nivel calculado es diferente al nivel guardado, corregirlo
+      UserGamificationProfile correctedProfile = profile;
+      if (correctLevel != profile.currentLevel ||
+          correctCurrentLevelXP != profile.currentLevelXP ||
+          correctNextLevelXP != profile.nextLevelXP) {
+        _logger.d(
+          '🔧 [GamificationBloc] Corrigiendo nivel: ${profile.currentLevel} -> $correctLevel '
+          '(XP total: ${profile.totalXP}, currentLevelXP: ${profile.currentLevelXP} -> $correctCurrentLevelXP, '
+          'nextLevelXP: ${profile.nextLevelXP} -> $correctNextLevelXP)',
+        );
+
+        correctedProfile = profile.copyWith(
+          currentLevel: correctLevel,
+          currentLevelXP: correctCurrentLevelXP,
+          nextLevelXP: correctNextLevelXP,
+          updatedAt: DateTime.now(),
+        );
+
+        // Guardar perfil corregido en background
+        unawaited(_repository.saveProfile(correctedProfile));
+      }
+
       // Cargar logros desbloqueados
-      final achievements = _achievementService.getUnlockedAchievements(profile);
+      final achievements = _achievementService.getUnlockedAchievements(
+        correctedProfile,
+      );
       emit(
         GamificationLoaded(
-          profile: profile,
+          profile: correctedProfile,
           unlockedAchievements: achievements,
         ),
       );

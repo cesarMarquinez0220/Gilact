@@ -625,6 +625,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
             ),
           ),
 
+          // Indicador de desbloqueo de bebé (se muestra siempre para lecciones 7 y 14)
+          _buildBabyUnlockIndicator(lessonId),
+
           const SizedBox(height: 20),
 
           // Camino de videos (bloqueado si la lección está bloqueada)
@@ -1055,6 +1058,101 @@ class _LessonVideosPageState extends State<LessonVideosPage>
         return 'lessons.subtitles.lesson14'.tr();
       default:
         return '';
+    }
+  }
+
+  /// Construye el indicador de desbloqueo de bebé para lecciones específicas
+  Widget _buildBabyUnlockIndicator(int lessonId) {
+    // Solo mostrar en lecciones 7 y 14 (donde se desbloquean nuevos bebés)
+    if (lessonId != 7 && lessonId != 14) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder<int>(
+      future: _getCompletedLessonsCount(),
+      builder: (context, snapshot) {
+        final completedLessons = snapshot.data ?? 0;
+        
+        // Determinar si mostrar el indicador basándose directamente en la lección y lecciones completadas
+        bool shouldShow = false;
+        if (lessonId == 7 && completedLessons < 7) {
+          // Mostrar en lección 7 si el usuario tiene menos de 7 lecciones completadas
+          shouldShow = true;
+        } else if (lessonId == 14 && completedLessons < 14) {
+          // Mostrar en lección 14 si el usuario tiene menos de 14 lecciones completadas
+          shouldShow = true;
+        }
+        
+        if (!shouldShow) {
+          return const SizedBox.shrink();
+        }
+
+        String message;
+        IconData icon;
+        if (lessonId == 7) {
+          message = 'lessons.babyUnlock.3months'.tr();
+          icon = Icons.child_care; // Bebé de 3 meses
+        } else {
+          message = 'lessons.babyUnlock.6months'.tr();
+          icon = Icons.child_friendly; // Bebé de 6 meses
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFf093fb).withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: const Color(0xFFf093fb).withValues(alpha: 0.5),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFf093fb).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: const Color(0xFFf093fb),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFf093fb),
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: const Color(0xFFf093fb).withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Obtiene el conteo de lecciones completadas
+  Future<int> _getCompletedLessonsCount() async {
+    try {
+      final leccionesProvider = context.read<LeccionesProvider>();
+      return await leccionesProvider.getCompletedLessonsCountUnique();
+    } catch (e) {
+      _logger.w('Error obteniendo conteo de lecciones: $e');
+      return 0;
     }
   }
 }

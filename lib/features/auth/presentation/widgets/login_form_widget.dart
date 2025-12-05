@@ -5,6 +5,8 @@ import '../../../../core/utils/responsive_helper.dart';
 class LoginFormWidget extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
+  final FocusNode emailFocusNode;
+  final FocusNode passwordFocusNode;
   final bool saveCredentials;
   final Animation<double>? slideAnimation;
   final Animation<double>? fadeAnimation;
@@ -22,6 +24,8 @@ class LoginFormWidget extends StatefulWidget {
     super.key,
     required this.emailController,
     required this.passwordController,
+    required this.emailFocusNode,
+    required this.passwordFocusNode,
     required this.saveCredentials,
     this.slideAnimation,
     this.fadeAnimation,
@@ -151,8 +155,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                       ),
                       child: TextField(
                         controller: widget.emailController,
+                        focusNode: widget.emailFocusNode,
                         keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
                         enabled: !widget.isLoading,
+                        onSubmitted: (_) {
+                          // Mover el foco al campo de contraseña cuando se presiona "siguiente"
+                          widget.passwordFocusNode.requestFocus();
+                        },
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -209,8 +219,16 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                             ),
                             child: TextField(
                               controller: widget.passwordController,
+                              focusNode: widget.passwordFocusNode,
                               obscureText: _obscurePassword,
+                              textInputAction: TextInputAction.done,
                               enabled: !widget.isLoading,
+                              onSubmitted: (_) {
+                                // Cuando se presiona "done" o "go" en el teclado, ejecutar login
+                                if (!widget.isLoading) {
+                                  widget.onLoginPressed();
+                                }
+                              },
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

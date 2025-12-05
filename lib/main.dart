@@ -339,7 +339,13 @@ class MyApp extends StatelessWidget {
                   locale: DevicePreview.locale(context) ?? context.locale,
                   builder: DevicePreview.appBuilder,
                   debugShowCheckedModeBanner: false,
-                  theme: ThemeData.light(),
+                  theme: ThemeData.light().copyWith(
+                    // Color de fondo que coincide con el gradiente del login
+                    // Evita el parpadeo blanco cuando se oculta el teclado en Android
+                    scaffoldBackgroundColor: const Color(0xFF2C5F5D),
+                    // Color de fondo del MaterialApp
+                    canvasColor: const Color(0xFF2C5F5D),
+                  ),
                   navigatorKey: navigatorKey,
                   localizationsDelegates: context.localizationDelegates,
                   supportedLocales: context.supportedLocales,

@@ -19,10 +19,11 @@ class LevelService {
     return (100 * level * (level + 1)) ~/ 2;
   }
 
-  /// Calcula el XP necesario para pasar del nivel actual al siguiente
+  /// Calcula el XP total necesario para alcanzar el siguiente nivel
+  /// Retorna el XP total necesario, no el XP adicional
   int getXPForNextLevel(int currentLevel) {
     if (currentLevel <= 0) return 100;
-    return 100 * (currentLevel + 1);
+    return getTotalXPForLevel(currentLevel + 1);
   }
 
   /// Calcula el nivel basándose en el XP total
@@ -40,17 +41,38 @@ class LevelService {
     return level - 1; // Retornar el nivel anterior (el que ya alcanzó)
   }
 
-  /// Calcula el XP en el nivel actual (XP total - XP del nivel anterior)
+  /// Calcula el XP en el nivel actual (XP total - XP necesario para alcanzar el nivel actual)
+  /// Siempre retorna el XP desde el inicio del nivel actual
+  /// Para nivel 1:
+  ///   - Si totalXP < 100: retorna totalXP (aún no alcanzó los 100 XP del nivel 1)
+  ///   - Si totalXP >= 100: retorna totalXP - 100 (XP desde que alcanzó nivel 1)
+  /// Para niveles superiores: retorna totalXP - XP necesario para alcanzar el nivel actual
   int calculateCurrentLevelXP(int totalXP, int currentLevel) {
-    if (currentLevel <= 1) return totalXP;
+    if (currentLevel <= 1) {
+      // Para nivel 1, si tiene menos de 100 XP, el XP en el nivel es el total
+      // Si tiene 100 o más XP, el XP en el nivel es el total menos los 100 XP del nivel 1
+      final level1XP = getTotalXPForLevel(1);
+      if (totalXP < level1XP) {
+        return totalXP; // Aún no alcanzó los 100 XP del nivel 1
+      }
+      return totalXP - level1XP; // Ya alcanzó nivel 1, calcular XP adicional
+    }
 
-    final previousLevelXP = getTotalXPForLevel(currentLevel - 1);
-    return totalXP - previousLevelXP;
+    // Para niveles superiores: restar el XP necesario para alcanzar el nivel actual
+    // No el nivel anterior, sino el nivel actual
+    final currentLevelTotalXP = getTotalXPForLevel(currentLevel);
+    return totalXP - currentLevelTotalXP;
   }
 
-  /// Calcula el XP necesario para el siguiente nivel
-  int calculateNextLevelXP(int currentLevel) {
-    return getXPForNextLevel(currentLevel);
+  /// Calcula el XP necesario para alcanzar el siguiente nivel
+  /// Retorna el XP necesario desde el inicio del nivel actual hasta el siguiente
+  /// Para nivel 1: retorna el XP necesario para llegar a nivel 2 (200)
+  /// Para nivel 2: retorna el XP necesario para llegar a nivel 3 (300)
+  int calculateNextLevelXP(int currentLevel, int totalXP) {
+    final currentLevelTotalXP = getTotalXPForLevel(currentLevel);
+    final nextLevelTotalXP = getTotalXPForLevel(currentLevel + 1);
+    // XP necesario desde el inicio del nivel actual hasta el siguiente
+    return nextLevelTotalXP - currentLevelTotalXP;
   }
 
   /// Actualiza el perfil con el nuevo nivel después de agregar XP
@@ -61,7 +83,8 @@ class LevelService {
     final newTotalXP = profile.totalXP + additionalXP;
     final newLevel = calculateLevelFromTotalXP(newTotalXP);
     final newCurrentLevelXP = calculateCurrentLevelXP(newTotalXP, newLevel);
-    final newNextLevelXP = calculateNextLevelXP(newLevel);
+    // Calcular el XP adicional necesario para el siguiente nivel
+    final newNextLevelXP = calculateNextLevelXP(newLevel, newTotalXP);
 
     // Verificar si subió de nivel
     final leveledUp = newLevel > profile.currentLevel;
@@ -70,6 +93,40 @@ class LevelService {
       _logger.d(
         'LevelService: Usuario ${profile.userId} subió de nivel ${profile.currentLevel} a $newLevel',
       );
+      _logger.d('   └─ XP total: ${profile.totalXP} -> $newTotalXP');
+      _logger.d(
+        '   └─ XP en nuevo nivel: $newCurrentLevelXP / $newNextLevelXP',
+      );
+    }
+
+    // Validar que los valores sean correctos
+    // Si currentLevelXP es mayor que nextLevelXP, significa que el nivel debería ser mayor
+    if (newCurrentLevelXP >= newNextLevelXP && newNextLevelXP > 0) {
+      _logger.w(
+        'LevelService: Advertencia - currentLevelXP ($newCurrentLevelXP) >= nextLevelXP ($newNextLevelXP) para nivel $newLevel',
+      );
+      // Recalcular el nivel para asegurar que sea correcto
+      final correctedLevel = calculateLevelFromTotalXP(newTotalXP);
+      if (correctedLevel != newLevel) {
+        _logger.w(
+          'LevelService: Corrigiendo nivel de $newLevel a $correctedLevel',
+        );
+        final correctedCurrentLevelXP = calculateCurrentLevelXP(
+          newTotalXP,
+          correctedLevel,
+        );
+        final correctedNextLevelXP = calculateNextLevelXP(
+          correctedLevel,
+          newTotalXP,
+        );
+        return profile.copyWith(
+          totalXP: newTotalXP,
+          currentLevel: correctedLevel,
+          currentLevelXP: correctedCurrentLevelXP,
+          nextLevelXP: correctedNextLevelXP,
+          updatedAt: DateTime.now(),
+        );
+      }
     }
 
     return profile.copyWith(
@@ -101,8 +158,28 @@ class LevelService {
   }
 
   /// Calcula el porcentaje de progreso hacia el siguiente nivel
+  /// nextLevelXP ahora representa el XP necesario desde el inicio del nivel actual
   double calculateLevelProgress(UserGamificationProfile profile) {
     if (profile.nextLevelXP == 0) return 1.0;
-    return (profile.currentLevelXP / profile.nextLevelXP).clamp(0.0, 1.0);
+
+    // Validar que los valores sean válidos
+    if (profile.currentLevelXP < 0 || profile.nextLevelXP <= 0) {
+      return 0.0;
+    }
+
+    // Usar currentLevelXP y nextLevelXP directamente
+    // currentLevelXP: XP en el nivel actual (desde el inicio del nivel)
+    // nextLevelXP: XP necesario desde el inicio del nivel actual hasta el siguiente
+    final progress = profile.currentLevelXP / profile.nextLevelXP;
+
+    // Asegurar que el progreso esté entre 0 y 1
+    // Si currentLevelXP es mayor que nextLevelXP, significa que ya alcanzó el siguiente nivel
+    // pero el nivel no se actualizó correctamente, así que mostramos 100%
+    if (progress > 1.0) {
+      // Esto no debería pasar si el nivel está correcto, pero por seguridad retornamos 1.0
+      return 1.0;
+    }
+
+    return progress.clamp(0.0, 1.0);
   }
 }

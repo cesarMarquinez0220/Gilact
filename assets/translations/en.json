@@ -523,6 +523,7 @@
     },
     "firstOfDay": "+5 XP if first of the day",
     "firstOfDaySleep": "+5 XP first of day, +10 XP if includes sleep",
+    "fullRecordXPInfo": "20 XP base (without sleep). +10 XP if you include sleep data. +5 XP if it's the first of the day.",
     "firstLessonOfDay": "+15 XP if first of the day",
     "perQuestion": "5 XP per question",
     "allCorrect": "+20 XP if all correct"
@@ -770,6 +771,10 @@
     "lesson": "Lesson",
     "category": "Category",
     "progress": "Progress",
+    "babyUnlock": {
+      "3months": "Complete this lesson to unlock the 3-month baby!",
+      "6months": "Complete this lesson to unlock the 6-month baby!"
+    },
     "videos": "Videos",
     "viewVideos": "View Videos",
     "completed": "Completed",

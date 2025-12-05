@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../lessons/presentation/providers/video_images_provider.dart';
 import '../../../lessons/data/services/video_service.dart';
@@ -436,7 +437,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
         children: [
           // Agregar padding para el AppBar (reducido)
           SizedBox(
-            height: MediaQuery.of(context).padding.top + kToolbarHeight - 20,
+            height:
+                ResponsiveHelper.safeAreaPadding(context).top +
+                kToolbarHeight -
+                (ResponsiveHelper.isSmall(context) ? 16 : 20),
           ),
           _buildHeader(),
           Expanded(
@@ -457,28 +461,44 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   Widget _buildHeader() {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      padding: EdgeInsets.fromLTRB(
+        padding,
+        padding,
+        padding,
+        isSmallScreen ? 6 : 8,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'history.title'.tr(),
             style: GoogleFonts.quicksand(
-              fontSize: 24,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(
+                context,
+                isSmallScreen ? 22.0 : 24.0,
+              ),
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Text(
             '${'history.lastLessonCompleted'.tr()}: $lastCompletedLesson',
             style: GoogleFonts.quicksand(
-              fontSize: 16,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(
+                context,
+                isSmallScreen ? 14.0 : 16.0,
+              ),
               color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmallScreen ? 12 : 16),
           _buildProgressIndicator(),
         ],
       ),
@@ -486,6 +506,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   Widget _buildProgressIndicator() {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
     final totalVideos = _videos.length;
     // Contar videos completados usando la función _isVideoCompleted
     final completedCount = _videos
@@ -494,7 +518,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
     final progress = totalVideos > 0 ? completedCount / totalVideos : 0.0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 0),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
@@ -512,7 +536,10 @@ class _UserVideosPageState extends State<UserVideosPage> {
               Text(
                 'history.generalProgress'.tr(),
                 style: GoogleFonts.quicksand(
-                  fontSize: 16,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 14.0 : 16.0,
+                  ),
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -520,16 +547,19 @@ class _UserVideosPageState extends State<UserVideosPage> {
               Text(
                 '$completedCount/$totalVideos',
                 style: GoogleFonts.quicksand(
-                  fontSize: 16,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 14.0 : 16.0,
+                  ),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isSmallScreen ? 10 : 12),
           Container(
-            height: 8,
+            height: isSmallScreen ? 6 : 8,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
@@ -545,11 +575,14 @@ class _UserVideosPageState extends State<UserVideosPage> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Text(
             '${(progress * 100).toInt()}${'history.percentCompleted'.tr()}',
             style: GoogleFonts.quicksand(
-              fontSize: 12,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(
+                context,
+                isSmallScreen ? 10.0 : 12.0,
+              ),
               color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
@@ -563,8 +596,9 @@ class _UserVideosPageState extends State<UserVideosPage> {
       return _buildEmptyState();
     }
 
+    final padding = ResponsiveHelper.getResponsivePadding(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      padding: EdgeInsets.all(padding),
       child: ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: _videos.length,
@@ -581,41 +615,64 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.video_library_outlined,
-            size: 80,
-            color: AppColors.textSecondary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'history.noVideosAvailable'.tr(),
-            style: GoogleFonts.quicksand(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
+    return Padding(
+      padding: EdgeInsets.all(padding),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.video_library_outlined,
+              size: ResponsiveHelper.getResponsiveIconSize(context, 80.0),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'history.videosWillAppear'.tr(),
-            style: GoogleFonts.quicksand(
-              fontSize: 14,
-              color: AppColors.textSecondary.withValues(alpha: 0.7),
+            SizedBox(height: isSmallScreen ? 12 : 16),
+            Text(
+              'history.noVideosAvailable'.tr(),
+              style: GoogleFonts.quicksand(
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 16.0 : 18.0,
+                ),
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            SizedBox(height: isSmallScreen ? 6 : 8),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              child: Text(
+                'history.videosWillAppear'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 12.0 : 14.0,
+                  ),
+                  color: AppColors.textSecondary.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildVideoCard(Video video, bool isCompleted, bool isUnlocked) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -633,11 +690,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
           borderRadius: BorderRadius.circular(16),
           onTap: isUnlocked ? () => _navigateToVideoPlayer(video) : null,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isSmallScreen ? padding * 0.75 : padding),
             child: Row(
               children: [
                 _buildVideoThumbnail(video, isCompleted, isUnlocked),
-                const SizedBox(width: 16),
+                SizedBox(width: isSmallScreen ? 12 : 16),
                 Expanded(
                   child: _buildVideoInfo(video, isCompleted, isUnlocked),
                 ),
@@ -651,11 +708,21 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   Widget _buildVideoThumbnail(Video video, bool isCompleted, bool isUnlocked) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final thumbnailWidth = isSmallScreen ? 80.0 : 100.0;
+    final thumbnailHeight = isSmallScreen ? 56.0 : 70.0;
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(
+      context,
+      isSmallScreen ? 20.0 : 24.0,
+    );
+
     return Stack(
       children: [
         Container(
-          width: 100,
-          height: 70,
+          width: thumbnailWidth,
+          height: thumbnailHeight,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
@@ -666,27 +733,31 @@ class _UserVideosPageState extends State<UserVideosPage> {
         ),
         if (!isUnlocked)
           Container(
-            width: 100,
-            height: 70,
+            width: thumbnailWidth,
+            height: thumbnailHeight,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Colors.black.withValues(alpha: 0.6),
             ),
-            child: const Center(
-              child: Icon(Icons.lock, color: Colors.white, size: 24),
+            child: Center(
+              child: Icon(Icons.lock, color: Colors.white, size: iconSize),
             ),
           ),
         if (isCompleted)
           Positioned(
-            top: 8,
-            right: 8,
+            top: isSmallScreen ? 6 : 8,
+            right: isSmallScreen ? 6 : 8,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: EdgeInsets.all(isSmallScreen ? 3 : 4),
               decoration: const BoxDecoration(
                 color: AppColors.success,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check, color: Colors.white, size: 16),
+              child: Icon(
+                Icons.check,
+                color: Colors.white,
+                size: isSmallScreen ? 12 : 16,
+              ),
             ),
           ),
       ],
@@ -694,40 +765,56 @@ class _UserVideosPageState extends State<UserVideosPage> {
   }
 
   Widget _buildVideoInfo(Video video, bool isCompleted, bool isUnlocked) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           video.getLocalizedTitle(context.locale.languageCode),
           style: GoogleFonts.quicksand(
-            fontSize: 16,
+            fontSize: ResponsiveHelper.getResponsiveFontSize(
+              context,
+              isSmallScreen ? 14.0 : 16.0,
+            ),
             fontWeight: FontWeight.bold,
             color: isUnlocked ? AppColors.textPrimary : AppColors.textSecondary,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: isSmallScreen ? 3 : 4),
         Text(
           '${'history.video'.tr()} ${video.videoId}',
           style: GoogleFonts.quicksand(
-            fontSize: 14,
+            fontSize: ResponsiveHelper.getResponsiveFontSize(
+              context,
+              isSmallScreen ? 12.0 : 14.0,
+            ),
             color: AppColors.textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: isSmallScreen ? 6 : 8),
         Row(
           children: [
             Icon(
               isCompleted ? Icons.check_circle : Icons.play_circle_outline,
-              size: 16,
+              size: ResponsiveHelper.getResponsiveIconSize(
+                context,
+                isSmallScreen ? 14.0 : 16.0,
+              ),
               color: isCompleted ? AppColors.success : AppColors.textSecondary,
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: isSmallScreen ? 3 : 4),
             Text(
               isCompleted ? 'history.completed'.tr() : 'history.pending'.tr(),
               style: GoogleFonts.quicksand(
-                fontSize: 12,
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 10.0 : 12.0,
+                ),
                 color: isCompleted
                     ? AppColors.success
                     : AppColors.textSecondary,

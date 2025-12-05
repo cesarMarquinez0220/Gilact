@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class OnboardingSlideWidget extends StatefulWidget {
   final int slideIndex;
@@ -42,17 +43,17 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    // Usar ResponsiveHelper para consistencia
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    final isVeryShortScreen = ResponsiveHelper.isVeryShortScreen(context);
+    final isTallScreen = ResponsiveHelper.isTallScreen(context);
 
-    // Breakpoints mejorados para responsividad
-    final isExtraSmall = screenHeight < 600;
-    final isSmall = screenHeight < 700 && screenHeight >= 600;
-    final isMedium = screenHeight < 800 && screenHeight >= 700;
-    final isLarge = screenHeight >= 800;
-
-    // Ajustar proporciones según el tamaño de pantalla
-    final contentPadding = isExtraSmall ? 0.03 : 0.04;
+    final screenHeight = ResponsiveHelper.screenHeight(context);
+    final screenWidth = ResponsiveHelper.screenWidth(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
 
     return Stack(
       children: [
@@ -62,33 +63,43 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
         // Contenido principal
         Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * contentPadding,
-            vertical: screenHeight * 0.02,
+            horizontal: padding,
+            vertical: isShortScreen
+                ? screenHeight * 0.015
+                : screenHeight * 0.02,
           ),
           child: Column(
             children: [
               // Imagen: más grande para mejor aprovechamiento del espacio
               SizedBox(
-                width: screenWidth * 0.75, // Más ancha para mayor impacto
-                height:
-                    screenHeight *
-                    0.35, // Más alta para llenar mejor el espacio
+                width: isSmallScreen
+                    ? screenWidth * 0.70
+                    : (isShortScreen ? screenWidth * 0.72 : screenWidth * 0.75),
+                height: isVeryShortScreen
+                    ? screenHeight * 0.28
+                    : (isShortScreen
+                          ? screenHeight * 0.32
+                          : screenHeight * 0.35),
                 child: _buildCompactIllustration(),
               ),
 
               SizedBox(
-                height: screenHeight * 0.025,
-              ), // Espacio reducido entre imagen y contenido
+                height: isShortScreen
+                    ? screenHeight * 0.015
+                    : screenHeight * 0.025,
+              ),
               // Contenido: centrado y con mejor espaciado
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? padding * 0.5 : padding * 0.75,
+                  ),
                   child: _buildCompactContent(
                     context,
-                    isExtraSmall,
-                    isSmall,
-                    isMedium,
-                    isLarge,
+                    isVeryShortScreen,
+                    isShortScreen,
+                    !isShortScreen && !isTallScreen,
+                    isTallScreen,
                   ),
                 ),
               ),

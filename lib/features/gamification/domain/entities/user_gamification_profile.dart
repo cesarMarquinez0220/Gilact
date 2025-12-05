@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../services/level_service.dart';
 
 /// Perfil de gamificación del usuario
 /// Diseñado con enfoque empático y offline-first
@@ -9,15 +10,19 @@ class UserGamificationProfile extends Equatable {
   final int currentLevelXP; // XP en el nivel actual
   final int nextLevelXP; // XP necesario para siguiente nivel
   final int currentStreak; // Racha actual en días
-  final DateTime? lastActivityDate; // Última fecha de actividad (CRÍTICO para offline)
+  final DateTime?
+  lastActivityDate; // Última fecha de actividad (CRÍTICO para offline)
   final DateTime? streakStartDate; // Fecha de inicio de racha
   final List<String> unlockedAchievements; // IDs de logros desbloqueados
-  final List<String> newAchievements; // IDs de logros nuevos no vistos (para notificación roja)
+  final List<String>
+  newAchievements; // IDs de logros nuevos no vistos (para notificación roja)
   final String mascotState; // Estado actual del muñequito
   final int mascotLevel; // Nivel del muñequito (crece con el usuario)
-  final String babyStage; // Etapa del bebé: 'baby_born', 'baby_3months', 'baby_6months'
+  final String
+  babyStage; // Etapa del bebé: 'baby_born', 'baby_3months', 'baby_6months'
   final Map<String, int> dailyXP; // XP ganado por día (últimos 30 días)
-  final Map<String, DateTime> completedDailyChallenges; // Desafíos diarios completados (challengeId -> fecha de completado)
+  final Map<String, DateTime>
+  completedDailyChallenges; // Desafíos diarios completados (challengeId -> fecha de completado)
 
   // CAMPOS EMPÁTICOS - Protección contra ansiedad
   final int restDaysUsed; // Días de descanso usados esta semana
@@ -62,31 +67,31 @@ class UserGamificationProfile extends Equatable {
 
   @override
   List<Object?> get props => [
-        userId,
-        totalXP,
-        currentLevel,
-        currentLevelXP,
-        nextLevelXP,
-        currentStreak,
-        lastActivityDate,
-        streakStartDate,
-        unlockedAchievements,
-        newAchievements,
-        mascotState,
-        mascotLevel,
-        babyStage,
-        dailyXP,
-        completedDailyChallenges,
-        restDaysUsed,
-        restDaysAvailable,
-        isPauseModeActive,
-        pauseModeStartDate,
-        lastRestDayUsed,
-        isSynced,
-        lastSyncAt,
-        createdAt,
-        updatedAt,
-      ];
+    userId,
+    totalXP,
+    currentLevel,
+    currentLevelXP,
+    nextLevelXP,
+    currentStreak,
+    lastActivityDate,
+    streakStartDate,
+    unlockedAchievements,
+    newAchievements,
+    mascotState,
+    mascotLevel,
+    babyStage,
+    dailyXP,
+    completedDailyChallenges,
+    restDaysUsed,
+    restDaysAvailable,
+    isPauseModeActive,
+    pauseModeStartDate,
+    lastRestDayUsed,
+    isSynced,
+    lastSyncAt,
+    createdAt,
+    updatedAt,
+  ];
 
   UserGamificationProfile copyWith({
     String? userId,
@@ -129,7 +134,8 @@ class UserGamificationProfile extends Equatable {
       mascotLevel: mascotLevel ?? this.mascotLevel,
       babyStage: babyStage ?? this.babyStage,
       dailyXP: dailyXP ?? this.dailyXP,
-      completedDailyChallenges: completedDailyChallenges ?? this.completedDailyChallenges,
+      completedDailyChallenges:
+          completedDailyChallenges ?? this.completedDailyChallenges,
       restDaysUsed: restDaysUsed ?? this.restDaysUsed,
       restDaysAvailable: restDaysAvailable ?? this.restDaysAvailable,
       isPauseModeActive: isPauseModeActive ?? this.isPauseModeActive,
@@ -149,8 +155,9 @@ class UserGamificationProfile extends Equatable {
 
     // Resetear días disponibles si pasó una semana desde el último uso
     if (lastRestDayUsed != null) {
-      final daysSinceLastRest =
-          DateTime.now().difference(lastRestDayUsed!).inDays;
+      final daysSinceLastRest = DateTime.now()
+          .difference(lastRestDayUsed!)
+          .inDays;
       if (daysSinceLastRest >= 7) {
         return true; // Se resetean automáticamente
       }
@@ -164,8 +171,9 @@ class UserGamificationProfile extends Equatable {
     if (isPauseModeActive) return false;
     if (lastActivityDate == null) return true;
 
-    final hoursSinceLastActivity =
-        DateTime.now().difference(lastActivityDate!).inHours;
+    final hoursSinceLastActivity = DateTime.now()
+        .difference(lastActivityDate!)
+        .inHours;
     return hoursSinceLastActivity >= 24 && hoursSinceLastActivity < 48;
   }
 
@@ -174,16 +182,20 @@ class UserGamificationProfile extends Equatable {
     if (isPauseModeActive) return false;
     if (lastActivityDate == null) return true;
 
-    final hoursSinceLastActivity =
-        DateTime.now().difference(lastActivityDate!).inHours;
+    final hoursSinceLastActivity = DateTime.now()
+        .difference(lastActivityDate!)
+        .inHours;
     return hoursSinceLastActivity >= 48;
   }
 
   /// Porcentaje de progreso hacia el siguiente nivel
   double get levelProgress {
     if (nextLevelXP == 0) return 1.0;
-    final progress = currentLevelXP / nextLevelXP;
-    return progress.clamp(0.0, 1.0);
+
+    // Importar LevelService para calcular correctamente
+    // Por ahora, usar un cálculo simple basado en el XP adicional necesario
+    // El cálculo completo se hace en LevelService.calculateLevelProgress
+    final levelService = LevelService();
+    return levelService.calculateLevelProgress(this);
   }
 }
-

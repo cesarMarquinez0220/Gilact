@@ -426,31 +426,41 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                   curve: Curves.easeOutCubic,
                                 ),
                               ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              24.0,
-                              0,
-                              24.0,
-                              24.0,
-                            ),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                _buildHeader(),
-                                const SizedBox(height: 30),
-                                // Campo de horas de sueño
-                                _buildHoursInput(),
-                                const SizedBox(height: 24),
-                                // Opcional: Despertares
-                                _buildWakeUpsSection(),
-                                const SizedBox(height: 24),
-                                // Opcional: Calidad
-                                _buildQualitySection(),
-                                const SizedBox(height: 40),
-                                // Botones
-                                _buildActionButtons(),
-                              ],
-                            ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final screenWidth = constraints.maxWidth;
+                              final screenHeight = MediaQuery.of(context).size.height;
+                              final isSmallScreen = screenWidth < 360;
+                              final isVerySmallScreen = screenWidth < 320;
+                              final isShortScreen = screenHeight < 700;
+                              
+                              return Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: isShortScreen ? 8 : 16),
+                                    _buildHeader(isSmallScreen, isVerySmallScreen),
+                                    SizedBox(height: isShortScreen ? 20 : 30),
+                                    // Campo de horas de sueño
+                                    _buildHoursInput(isSmallScreen, isVerySmallScreen),
+                                    SizedBox(height: isShortScreen ? 16 : 24),
+                                    // Opcional: Despertares
+                                    _buildWakeUpsSection(isSmallScreen),
+                                    SizedBox(height: isShortScreen ? 16 : 24),
+                                    // Opcional: Calidad
+                                    _buildQualitySection(isSmallScreen),
+                                    SizedBox(height: isShortScreen ? 24 : 40),
+                                    // Botones
+                                    _buildActionButtons(isSmallScreen),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -465,12 +475,19 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isSmallScreen, bool isVerySmallScreen) {
+    final iconSize = isVerySmallScreen ? 80.0 : (isSmallScreen ? 90.0 : 100.0);
+    final iconInnerSize = isVerySmallScreen ? 40.0 : (isSmallScreen ? 45.0 : 50.0);
+    final titleFontSize = isVerySmallScreen ? 24.0 : (isSmallScreen ? 28.0 : 32.0);
+    final subtitleFontSize = isVerySmallScreen ? 14.0 : (isSmallScreen ? 15.0 : 16.0);
+    final spacing1 = isSmallScreen ? 20.0 : 32.0;
+    final spacing2 = isSmallScreen ? 8.0 : 12.0;
+    
     return Column(
       children: [
         Container(
-          width: 100,
-          height: 100,
+          width: iconSize,
+          height: iconSize,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             shape: BoxShape.circle,
@@ -486,17 +503,17 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
               ),
             ],
           ),
-          child: const Icon(Icons.nights_stay, color: Colors.white, size: 50),
+          child: Icon(Icons.nights_stay, color: Colors.white, size: iconInnerSize),
         ),
-        const SizedBox(height: 32),
+        SizedBox(height: spacing1),
         Text(
           'forms.sleep.title'.tr(),
-          style: const TextStyle(
-            fontSize: 32,
+          style: TextStyle(
+            fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 0.5,
-            shadows: [
+            shadows: const [
               Shadow(
                 color: Colors.black26,
                 offset: Offset(0, 2),
@@ -505,24 +522,36 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
             ],
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing2),
         Text(
           'forms.sleep.question'.tr(),
           style: GoogleFonts.quicksand(
-            fontSize: 16,
+            fontSize: subtitleFontSize,
             fontWeight: FontWeight.w500,
             color: Colors.white.withValues(alpha: 0.9),
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
-  Widget _buildHoursInput() {
+  Widget _buildHoursInput(bool isSmallScreen, bool isVerySmallScreen) {
+    final containerPadding = isVerySmallScreen ? 16.0 : (isSmallScreen ? 20.0 : 24.0);
+    final numberFontSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 42.0 : 48.0);
+    final unitFontSize = isVerySmallScreen ? 18.0 : (isSmallScreen ? 20.0 : 24.0);
+    final minutesFontSize = isVerySmallScreen ? 22.0 : (isSmallScreen ? 26.0 : 30.0);
+    final minutesLabelFontSize = isVerySmallScreen ? 14.0 : (isSmallScreen ? 16.0 : 18.0);
+    final buttonSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 38.0 : 44.0);
+    final buttonIconSize = isVerySmallScreen ? 20.0 : 24.0;
+    
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(containerPadding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
@@ -562,14 +591,14 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                           },
                           child: _isEditingHours
                               ? SizedBox(
-                                  width: 110,
+                                  width: isVerySmallScreen ? 90 : (isSmallScreen ? 100 : 110),
                                   child: TextField(
                                     controller: _hoursController,
                                     focusNode: _hoursFocusNode,
                                     autofocus: true,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.quicksand(
-                                      fontSize: 48,
+                                      fontSize: numberFontSize,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -620,7 +649,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                           TextSpan(
                                             text: '$h',
                                             style: GoogleFonts.quicksand(
-                                              fontSize: 48,
+                                              fontSize: numberFontSize,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
                                             ),
@@ -628,7 +657,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                           TextSpan(
                                             text: ' h  ',
                                             style: GoogleFonts.quicksand(
-                                              fontSize: 24,
+                                              fontSize: unitFontSize,
                                               fontWeight: FontWeight.w600,
                                               color: Colors.white.withValues(
                                                 alpha: 0.9,
@@ -638,8 +667,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                           TextSpan(
                                             text: m.toString().padLeft(2, '0'),
                                             style: GoogleFonts.quicksand(
-                                              fontSize:
-                                                  30, // minutos más pequeño
+                                              fontSize: minutesFontSize,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
                                             ),
@@ -647,7 +675,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                           TextSpan(
                                             text: ' min',
                                             style: GoogleFonts.quicksand(
-                                              fontSize: 18,
+                                              fontSize: minutesLabelFontSize,
                                               fontWeight: FontWeight.w600,
                                               color: Colors.white.withValues(
                                                 alpha: 0.9,
@@ -664,13 +692,15 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: isSmallScreen ? 6 : 8),
                   // Columna de botones + y -
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _HoursAdjustButton(
                         icon: Icons.add,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
                         onPressed: () {
                           setState(() {
                             _hoursSlept = _snapToQuarter(_hoursSlept + 0.25);
@@ -680,9 +710,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                           });
                         },
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
                       _HoursAdjustButton(
                         icon: Icons.remove,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
                         onPressed: () {
                           setState(() {
                             _hoursSlept = _snapToQuarter(_hoursSlept - 0.25);
@@ -719,35 +751,45 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     );
   }
 
-  Widget _buildWakeUpsSection() {
+  Widget _buildWakeUpsSection(bool isSmallScreen) {
+    final titleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 12.0;
+    final chipSpacing = isSmallScreen ? 6.0 : 8.0;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'forms.sleep.wakeUpsQuestion'.tr(),
           style: GoogleFonts.quicksand(
-            fontSize: 16,
+            fontSize: titleFontSize,
             fontWeight: FontWeight.w600,
             color: Colors.white.withValues(alpha: 0.9),
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: chipSpacing,
+          runSpacing: chipSpacing,
           children: [
-            _buildChip('0', 0),
-            _buildChip('1', 1),
-            _buildChip('2', 2),
-            _buildChip('3+', 3),
+            _buildChip('0', 0, isSmallScreen),
+            _buildChip('1', 1, isSmallScreen),
+            _buildChip('2', 2, isSmallScreen),
+            _buildChip('3+', 3, isSmallScreen),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildChip(String label, int value) {
+  Widget _buildChip(String label, int value, bool isSmallScreen) {
     final isSelected = _wakeUps == value;
+    final paddingH = isSmallScreen ? 16.0 : 20.0;
+    final paddingV = isSmallScreen ? 8.0 : 10.0;
+    final fontSize = isSmallScreen ? 12.0 : 14.0;
+    
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -755,7 +797,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.white.withValues(alpha: 0.3)
@@ -771,7 +813,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         child: Text(
           label,
           style: GoogleFonts.quicksand(
-            fontSize: 14,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.7),
           ),
@@ -780,34 +822,41 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     );
   }
 
-  Widget _buildQualitySection() {
+  Widget _buildQualitySection(bool isSmallScreen) {
+    final titleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 12.0;
+    final chipSpacing = isSmallScreen ? 8.0 : 12.0;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'forms.sleep.qualityQuestion'.tr(),
           style: GoogleFonts.quicksand(
-            fontSize: 16,
+            fontSize: titleFontSize,
             fontWeight: FontWeight.w600,
             color: Colors.white.withValues(alpha: 0.9),
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing),
         Row(
           children: [
             Expanded(
-              child: _buildQualityChip('forms.sleep.qualityGood'.tr(), 'bueno'),
+              child: _buildQualityChip('forms.sleep.qualityGood'.tr(), 'bueno', isSmallScreen),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: chipSpacing),
             Expanded(
               child: _buildQualityChip(
                 'forms.sleep.qualityFair'.tr(),
                 'regular',
+                isSmallScreen,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: chipSpacing),
             Expanded(
-              child: _buildQualityChip('forms.sleep.qualityPoor'.tr(), 'malo'),
+              child: _buildQualityChip('forms.sleep.qualityPoor'.tr(), 'malo', isSmallScreen),
             ),
           ],
         ),
@@ -815,8 +864,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     );
   }
 
-  Widget _buildQualityChip(String label, String value) {
+  Widget _buildQualityChip(String label, String value, bool isSmallScreen) {
     final isSelected = _quality == value;
+    final paddingV = isSmallScreen ? 10.0 : 12.0;
+    final fontSize = isSmallScreen ? 11.0 : 13.0;
+    
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -824,7 +876,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: paddingV),
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.white.withValues(alpha: 0.3)
@@ -841,23 +893,29 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.quicksand(
-            fontSize: 13,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.7),
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isSmallScreen) {
+    final buttonHeight = isSmallScreen ? 50.0 : 56.0;
+    final buttonFontSize = isSmallScreen ? 16.0 : 18.0;
+    final cancelFontSize = isSmallScreen ? 13.0 : 15.0;
+    
     return Column(
       children: [
         // --- INICIO: Botón Guardar con el nuevo estilo ---
         Container(
           // 1. Contenedor para el gradiente y sombra
           width: double.infinity,
-          height: 56,
+          height: buttonHeight,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               // 2. Gradiente
@@ -915,7 +973,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                     'forms.sleep.save'.tr(),
                     style: GoogleFonts.quicksand(
                       // Usa GoogleFonts si prefieres
-                      fontSize: 18,
+                      fontSize: buttonFontSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white, // Texto blanco
                       letterSpacing: 0.5,
@@ -941,7 +999,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
           child: Text(
             'Cancelar',
             style: GoogleFonts.quicksand(
-              fontSize: 15,
+              fontSize: cancelFontSize,
               fontWeight: FontWeight.w500,
               color: Colors.white,
               decoration: TextDecoration.underline,
@@ -957,14 +1015,21 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
 class _HoursAdjustButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
+  final double size;
+  final double iconSize;
 
-  const _HoursAdjustButton({required this.icon, required this.onPressed});
+  const _HoursAdjustButton({
+    required this.icon,
+    required this.onPressed,
+    this.size = 44.0,
+    this.iconSize = 24.0,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 44,
-      height: 44,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
@@ -983,9 +1048,9 @@ class _HoursAdjustButton extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(size / 2),
           onTap: onPressed,
-          child: Icon(icon, color: Colors.white, size: 24),
+          child: Icon(icon, color: Colors.white, size: iconSize),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../entities/xp_transaction.dart';
 
 /// Servicio para calcular XP según diferentes acciones
@@ -87,6 +88,23 @@ class XPCalculationService {
       bonusReason = bonusReason != null
           ? '$bonusReason + includes_sleep'
           : 'includes_sleep';
+    }
+
+    // Log detallado para debugging
+    if (kDebugMode) {
+      print('🎯 [XPCalculationService] Registro completo:');
+      print('   └─ Base XP: $_baseXPCompleteLactation');
+      print(
+        '   └─ isFirstOfDay: $isFirstOfDay (+${isFirstOfDay ? _bonusFirstOfDay : 0} XP)',
+      );
+      print(
+        '   └─ includesSleep: $includesSleep (+${includesSleep ? _bonusIncludesSleep : 0} XP)',
+      );
+      print('   └─ Total XP: $xp');
+      print('   └─ Bonus reason: ${bonusReason ?? "ninguno"}');
+      print(
+        '   └─ Desglose: $_baseXPCompleteLactation base + ${isFirstOfDay ? _bonusFirstOfDay : 0} primero + ${includesSleep ? _bonusIncludesSleep : 0} sueño = $xp XP',
+      );
     }
 
     return XPTransaction(

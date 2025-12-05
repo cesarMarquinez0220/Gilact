@@ -5,6 +5,7 @@ import '../../../gamification/domain/entities/achievement.dart';
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
 import 'companion_achievement_badge.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 /// Sección de logros/badges de la página de compañera
 class CompanionAchievementsSection extends StatelessWidget {
@@ -105,111 +106,136 @@ class CompanionAchievementsSection extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header de logros
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+          final isSmallScreen = screenWidth < 360;
+          final iconSize = isSmallScreen ? 20.0 : 24.0;
+          final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+          final subtitleFontSize = isSmallScreen ? 11.0 : 12.0;
+          final iconSpacing = isSmallScreen ? 8.0 : 12.0;
+          final badgePaddingH = isSmallScreen ? 8.0 : 12.0;
+          final badgePaddingV = isSmallScreen ? 4.0 : 6.0;
+          final badgeFontSize = isSmallScreen ? 11.0 : 12.0;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header de logros
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.emoji_events, color: Colors.amber[700], size: 24),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'companion.unlockedAchievements'.tr(),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2C3E50),
+                  Flexible(
+                    child: Row(
+                      children: [
+                        Icon(Icons.emoji_events, color: Colors.amber[700], size: iconSize),
+                        SizedBox(width: iconSpacing),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'companion.unlockedAchievements'.tr(),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF2C3E50),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '$unlockedCount ${'companion.of'.tr()} $totalAchievements',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: subtitleFontSize,
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: badgePaddingH,
+                      vertical: badgePaddingV,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.amber[50],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${(progress * 100).toInt()}%',
+                      style: GoogleFonts.quicksand(
+                        fontSize: badgeFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber[800],
                       ),
-                      Text(
-                        '$unlockedCount ${'companion.of'.tr()} $totalAchievements',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+              const SizedBox(height: 16),
+              // Barra de progreso
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.amber[700]!),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.amber[50],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${(progress * 100).toInt()}%',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber[800],
-                  ),
+              ),
+              const SizedBox(height: 16),
+              // Botón informativo "¿Cómo ganar XP?"
+              _XPInfoButton(isPostPartum: isPostPartum),
+              const SizedBox(height: 20),
+              // Tabs para Desbloqueados y Todos
+              DefaultTabController(
+                length: 2,
+                child: Column(
+                  children: [
+                    TabBar(
+                      labelColor: const Color(0xFF03A696),
+                      unselectedLabelColor: Colors.grey[600],
+                      indicatorColor: const Color(0xFF03A696),
+                      tabs: [
+                        Tab(text: 'companion.unlocked'.tr()),
+                        Tab(text: 'companion.all'.tr()),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 300,
+                      child: TabBarView(
+                        children: [
+                          // Tab de logros desbloqueados
+                          _AchievementsGrid(
+                            achievements: unlockedAchievements,
+                            isUnlocked: true,
+                            profile: profile,
+                          ),
+                          // Tab de todos los logros (desbloqueados + bloqueados)
+                          _AllAchievementsGrid(
+                            allAchievements: allAchievements,
+                            profile: profile,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          // Barra de progreso
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.amber[700]!),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Botón informativo "¿Cómo ganar XP?"
-          _XPInfoButton(isPostPartum: isPostPartum),
-          const SizedBox(height: 20),
-          // Tabs para Desbloqueados y Todos
-          DefaultTabController(
-            length: 2,
-            child: Column(
-              children: [
-                TabBar(
-                  labelColor: const Color(0xFF03A696),
-                  unselectedLabelColor: Colors.grey[600],
-                  indicatorColor: const Color(0xFF03A696),
-                  tabs: [
-                    Tab(text: 'companion.unlocked'.tr()),
-                    Tab(text: 'companion.all'.tr()),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 300,
-                  child: TabBarView(
-                    children: [
-                      // Tab de logros desbloqueados
-                      _AchievementsGrid(
-                        achievements: unlockedAchievements,
-                        isUnlocked: true,
-                        profile: profile,
-                      ),
-                      // Tab de todos los logros (desbloqueados + bloqueados)
-                      _AllAchievementsGrid(
-                        allAchievements: allAchievements,
-                        profile: profile,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -310,54 +336,64 @@ class _XPInfoButton extends StatelessWidget {
 
               // 3. Grid de Acciones Diarias
               _buildSectionTitle('companion.dailyActions'.tr()),
-              const SizedBox(height: 10),
+              SizedBox(height: ResponsiveHelper.getResponsiveSpacing(context)),
 
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                childAspectRatio: 2.7,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                physics: const NeverScrollableScrollPhysics(),
-                children: isPostPartum
-                    ? [
-                        // Para postparto: mostrar todas las opciones
-                        _buildCompactXPItem(
-                          Icons.flash_on,
-                          'companion.quickRecord',
-                          '10',
-                        ),
-                        _buildCompactXPItem(
-                          Icons.edit_note,
-                          'companion.fullRecord',
-                          '20',
-                        ),
-                        _buildCompactXPItem(
-                          Icons.school,
-                          'companion.completeLesson',
-                          '30',
-                        ),
-                        _buildTriviaXPItem(),
-                        _buildCompactXPItem(
-                          Icons.monitor_weight,
-                          'companion.weightRecord',
-                          '15',
-                        ),
-                        _buildCompactXPItem(
-                          Icons.bedtime,
-                          'companion.sleepRecord',
-                          '10',
-                        ),
-                      ]
-                    : [
-                        // Para preparto: solo lecciones y trivias
-                        _buildCompactXPItem(
-                          Icons.school,
-                          'companion.completeLesson',
-                          '30',
-                        ),
-                        _buildTriviaXPItem(),
-                      ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                                       ResponsiveHelper.isSmall(context);
+                  final columns = ResponsiveHelper.getResponsiveColumns(
+                    context,
+                    small: 2,
+                    medium: 2,
+                    large: 2,
+                  );
+                  final spacing = ResponsiveHelper.getResponsiveSpacing(context);
+                  
+                  return GridView.count(
+                    shrinkWrap: true,
+                    crossAxisCount: columns,
+                    childAspectRatio: isSmallScreen ? 2.5 : 2.7,
+                    crossAxisSpacing: spacing,
+                    mainAxisSpacing: spacing,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: isPostPartum
+                        ? [
+                            // Para postparto: mostrar todas las opciones
+                            _buildCompactXPItem(
+                              Icons.flash_on,
+                              'companion.quickRecord',
+                              '10',
+                            ),
+                            _buildCompleteRecordXPItem(),
+                            _buildCompactXPItem(
+                              Icons.school,
+                              'companion.completeLesson',
+                              '30',
+                            ),
+                            _buildTriviaXPItem(),
+                            _buildCompactXPItem(
+                              Icons.monitor_weight,
+                              'companion.weightRecord',
+                              '15',
+                            ),
+                            _buildCompactXPItem(
+                              Icons.bedtime,
+                              'companion.sleepRecord',
+                              '10',
+                            ),
+                          ]
+                        : [
+                            // Para preparto: solo lecciones y trivias
+                            _buildCompactXPItem(
+                              Icons.school,
+                              'companion.completeLesson',
+                              '30',
+                            ),
+                            _buildTriviaXPItem(),
+                          ],
+                  );
+                },
               ),
 
               // --- AJUSTE DE ESPACIO ---
@@ -403,10 +439,10 @@ class _XPInfoButton extends StatelessWidget {
                     ),
                     if (isPostPartum) ...[
                       // Solo mostrar milestones de registros para postparto
-                      _buildBonusRow(
-                        'companion.recordMilestones'.tr(),
-                        'companion.milestones'.tr().split(':')[1].trim(),
-                      ),
+                    _buildBonusRow(
+                      'companion.recordMilestones'.tr(),
+                      'companion.milestones'.tr().split(':')[1].trim(),
+                    ),
                     ],
                     _buildBonusRow(
                       'companion.unlockedAchievements'.tr(),
@@ -471,8 +507,22 @@ class _XPInfoButton extends StatelessWidget {
   }
 
   Widget _buildCompactXPItem(IconData icon, String labelKey, String xpValue) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 360;
+        final iconSize = isSmallScreen ? 18.0 : 20.0;
+        final fontSizeTitle = isSmallScreen ? 11.0 : 12.0;
+        final fontSizeSubtitle = isSmallScreen ? 10.0 : 11.0;
+        final paddingVertical = isSmallScreen ? 6.0 : 8.0;
+        final paddingHorizontal = isSmallScreen ? 10.0 : 12.0;
+        final spacing = isSmallScreen ? 6.0 : 8.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
+          ),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
@@ -480,28 +530,31 @@ class _XPInfoButton extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF3498DB)),
-          const SizedBox(width: 8),
+              Icon(icon, size: iconSize, color: const Color(0xFF3498DB)),
+              SizedBox(width: spacing),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   labelKey.tr(),
                   style: GoogleFonts.quicksand(
-                    fontSize: 12,
+                        fontSize: fontSizeTitle,
                     fontWeight: FontWeight.bold,
                   ),
+                      maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   'companion.baseXP'.tr(namedArgs: {'xp': xpValue}),
                   style: GoogleFonts.quicksand(
-                    fontSize: 11,
+                        fontSize: fontSizeSubtitle,
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
+                      maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -509,51 +562,142 @@ class _XPInfoButton extends StatelessWidget {
           ),
         ],
       ),
+        );
+      },
+    );
+  }
+
+  /// Widget especial para mostrar el sistema de XP de registro completo
+  /// Muestra 20 XP base + bonos posibles (+5 si primero del día, +10 si incluye sueño)
+  Widget _buildCompleteRecordXPItem() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 360;
+        final iconSize = isSmallScreen ? 18.0 : 20.0;
+        final fontSizeTitle = isSmallScreen ? 11.0 : 12.0;
+        final fontSizeSubtitle = isSmallScreen ? 9.0 : 10.0;
+        final paddingVertical = isSmallScreen ? 6.0 : 8.0;
+        final paddingHorizontal = isSmallScreen ? 10.0 : 12.0;
+        final spacing = isSmallScreen ? 6.0 : 8.0;
+
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.edit_note,
+                size: iconSize,
+                color: const Color(0xFF3498DB),
+              ),
+              SizedBox(width: spacing),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'companion.fullRecord'.tr(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: fontSizeTitle,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        'companion.fullRecordXPInfo'.tr(),
+                        style: GoogleFonts.quicksand(
+                          fontSize: fontSizeSubtitle,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   /// Widget especial para mostrar el sistema de XP de trivia
   /// Muestra que se otorgan 5 XP por pregunta correcta + 20 XP bonus si todas son correctas
   Widget _buildTriviaXPItem() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.quiz, size: 20, color: const Color(0xFF3498DB)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'companion.completeTrivia'.tr(),
-                  style: GoogleFonts.quicksand(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'companion.triviaXPInfo'.tr(),
-                  style: GoogleFonts.quicksand(
-                    fontSize: 10,
-                    color: Colors.green,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 360;
+        final iconSize = isSmallScreen ? 18.0 : 20.0;
+        final fontSizeTitle = isSmallScreen ? 11.0 : 12.0;
+        final fontSizeSubtitle = isSmallScreen ? 9.0 : 10.0;
+        final paddingVertical = isSmallScreen ? 6.0 : 8.0;
+        final paddingHorizontal = isSmallScreen ? 10.0 : 12.0;
+        final spacing = isSmallScreen ? 6.0 : 8.0;
+
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
           ),
-        ],
-      ),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.quiz, size: iconSize, color: const Color(0xFF3498DB)),
+              SizedBox(width: spacing),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'companion.completeTrivia'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: fontSizeTitle,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'companion.triviaXPInfo'.tr(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: fontSizeSubtitle,
+                        color: Colors.green,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -612,12 +756,18 @@ class _AchievementsGrid extends StatelessWidget {
         return a.requiredValue.compareTo(b.requiredValue);
       });
 
-    // Calcular columnas responsive
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = screenWidth < 360 ? 3 : 4;
-    final spacing = screenWidth < 360 ? 8.0 : 12.0;
+    // Calcular columnas responsive usando ResponsiveHelper
+    final crossAxisCount = ResponsiveHelper.getResponsiveColumns(
+      context,
+      small: 3,
+      medium: 3,
+      large: 4,
+    );
+    final spacing = ResponsiveHelper.getResponsiveSpacing(context);
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
     // Ajustado para badges más grandes (60x60 + texto) - reducido para evitar overflow
-    final aspectRatio = screenWidth < 360 ? 0.65 : 0.6;
+    final aspectRatio = isSmallScreen ? 0.65 : 0.6;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -670,11 +820,18 @@ class _AllAchievementsGrid extends StatelessWidget {
         return a.requiredValue.compareTo(b.requiredValue);
       });
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = screenWidth < 360 ? 3 : 4;
-    final spacing = screenWidth < 360 ? 8.0 : 12.0;
+    // Calcular columnas responsive usando ResponsiveHelper
+    final crossAxisCount = ResponsiveHelper.getResponsiveColumns(
+      context,
+      small: 3,
+      medium: 3,
+      large: 4,
+    );
+    final spacing = ResponsiveHelper.getResponsiveSpacing(context);
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
     // Ajustado para badges más grandes (60x60 + texto) - reducido para evitar overflow
-    final aspectRatio = screenWidth < 360 ? 0.65 : 0.6;
+    final aspectRatio = isSmallScreen ? 0.65 : 0.6;
 
     return GridView.builder(
       shrinkWrap: true,

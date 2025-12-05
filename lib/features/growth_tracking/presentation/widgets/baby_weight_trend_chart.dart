@@ -437,7 +437,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p3Spots,
             isCurved: p3Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withValues(alpha:0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -447,7 +447,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p15Spots,
             isCurved: p15Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withValues(alpha:0.4),
+            color: Colors.grey.withValues(alpha: 0.4),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -463,7 +463,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.grey[200]!.withValues(alpha:0.3),
+              color: Colors.grey[200]!.withValues(alpha: 0.3),
             ),
           ),
         // Percentil 50 (mediana) - línea más visible
@@ -491,7 +491,7 @@ class BabyWeightTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: p97Spots,
             isCurved: p97Spots.length > 2, // Solo curvar si hay más de 2 puntos
-            color: Colors.grey.withValues(alpha:0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             barWidth: 1,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -524,8 +524,8 @@ class BabyWeightTrendChart extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  const Color(0xFF03A696).withValues(alpha:0.1),
-                  const Color(0xFF03A696).withValues(alpha:0.0),
+                  const Color(0xFF03A696).withValues(alpha: 0.1),
+                  const Color(0xFF03A696).withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -535,45 +535,87 @@ class BabyWeightTrendChart extends StatelessWidget {
   }
 
   Widget _buildLegend() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLegendItem(const Color(0xFF03A696), 'health.babyWeight'.tr()),
-          const SizedBox(width: 16),
-          _buildLegendItem(Colors.grey[400]!, 'growth.median'.tr()),
-          const SizedBox(width: 16),
-          _buildLegendItem(Colors.grey[200]!, 'growth.normalRange'.tr()),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 360;
+        final spacing = isSmallScreen ? 8.0 : 16.0;
+        final horizontalPadding = isSmallScreen ? 8.0 : 12.0;
+
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: _buildLegendItem(
+                  const Color(0xFF03A696),
+                  'health.babyWeight'.tr(),
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+              SizedBox(width: spacing),
+              Flexible(
+                child: _buildLegendItem(
+                  Colors.grey[400]!,
+                  'growth.median'.tr(),
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+              SizedBox(width: spacing),
+              Flexible(
+                child: _buildLegendItem(
+                  Colors.grey[200]!,
+                  'growth.normalRange'.tr(),
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildLegendItem(Color color, String label) {
+  Widget _buildLegendItem(
+    Color color,
+    String label, {
+    bool isSmallScreen = false,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: isSmallScreen ? 8 : 10,
+          height: isSmallScreen ? 8 : 10,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1.5),
+            border: Border.all(
+              color: Colors.white,
+              width: isSmallScreen ? 1.0 : 1.5,
+            ),
           ),
         ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: GoogleFonts.quicksand(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF7F8C8D),
+        SizedBox(width: isSmallScreen ? 4 : 6),
+        Flexible(
+          child: Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: isSmallScreen ? 10 : 11,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF7F8C8D),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

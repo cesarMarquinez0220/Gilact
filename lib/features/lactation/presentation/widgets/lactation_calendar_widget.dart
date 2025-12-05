@@ -2149,34 +2149,57 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
 
   /// Construye los botones de filtro
   Widget _buildFilterButtons() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildFilterButton(
-            'lactation.calendar.filters.all'.tr(),
-            RecordFilter.all,
-            Icons.view_module,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenWidth < 360;
+        final spacing = isSmallScreen ? 4.0 : 8.0;
+        final horizontalPadding = isSmallScreen ? 12.0 : 20.0;
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: _buildFilterButton(
+                  'lactation.calendar.filters.all'.tr(),
+                  RecordFilter.all,
+                  Icons.view_module,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+              SizedBox(width: spacing),
+              Flexible(
+                child: _buildFilterButton(
+                  'lactation.calendar.filters.lactation'.tr(),
+                  RecordFilter.lactation,
+                  Icons.child_care,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+              SizedBox(width: spacing),
+              Flexible(
+                child: _buildFilterButton(
+                  'lactation.calendar.filters.weight'.tr(),
+                  RecordFilter.weight,
+                  Icons.monitor_weight,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          _buildFilterButton(
-            'lactation.calendar.filters.lactation'.tr(),
-            RecordFilter.lactation,
-            Icons.child_care,
-          ),
-          const SizedBox(width: 8),
-          _buildFilterButton(
-            'lactation.calendar.filters.weight'.tr(),
-            RecordFilter.weight,
-            Icons.monitor_weight,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildFilterButton(String label, RecordFilter filter, IconData icon) {
+  Widget _buildFilterButton(
+    String label,
+    RecordFilter filter,
+    IconData icon, {
+    bool isSmallScreen = false,
+  }) {
     final isSelected = _currentFilter == filter;
     return GestureDetector(
       onTap: () {
@@ -2185,7 +2208,10 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 8 : 16,
+          vertical: isSmallScreen ? 6 : 8,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: isSelected
@@ -2205,15 +2231,21 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: Colors.white),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.quicksand(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: Colors.white,
+            Icon(icon, size: isSmallScreen ? 14 : 16, color: Colors.white),
+            SizedBox(width: isSmallScreen ? 4 : 6),
+            Flexible(
+              child: Text(
+                label,
+                style: GoogleFonts.quicksand(
+                  fontSize: isSmallScreen ? 11 : 12,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

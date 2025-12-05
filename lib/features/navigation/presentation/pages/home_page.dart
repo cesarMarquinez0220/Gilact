@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -22,6 +21,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/offline_sync_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
@@ -106,10 +106,11 @@ class _HomePageState extends State<HomePage> {
         // 1. El estado es inicial (después de reset o primera carga)
         // 2. El estado no está cargado
         // 3. El userId no coincide con el perfil actual
-        if (currentState is GamificationInitial ||
-            currentState is! GamificationLoaded ||
-            (currentState is GamificationLoaded &&
-                currentState.profile.userId != userId)) {
+        if (currentState is GamificationInitial) {
+          gamificationBloc.add(LoadGamificationProfile(userId));
+        } else if (currentState is! GamificationLoaded) {
+          gamificationBloc.add(LoadGamificationProfile(userId));
+        } else if (currentState.profile.userId != userId) {
           gamificationBloc.add(LoadGamificationProfile(userId));
         }
       }
@@ -344,9 +345,14 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (gamificationState is GamificationLoaded) {
+          final isSmallScreen =
+              ResponsiveHelper.isExtraSmall(context) ||
+              ResponsiveHelper.isSmall(context);
+          final padding = ResponsiveHelper.getResponsivePadding(context);
+
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 0),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.symmetric(horizontal: 0),
+            padding: EdgeInsets.all(isSmallScreen ? padding * 0.75 : padding),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -362,10 +368,10 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Barra de XP compacta (horizontal)
                 _buildCompactXPBar(gamificationState.profile),
-                const SizedBox(height: 12),
+                SizedBox(height: isSmallScreen ? 10 : 12),
                 // Divider sutil
                 Container(height: 1, color: Colors.grey[200]),
-                const SizedBox(height: 12),
+                SizedBox(height: isSmallScreen ? 10 : 12),
                 // Racha compacta (horizontal)
                 FutureBuilder<DailyStreak?>(
                   future: _getStreak(validUserId),
@@ -380,9 +386,10 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         } else if (gamificationState is GamificationLoading) {
+          final padding = ResponsiveHelper.getResponsivePadding(context);
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.symmetric(horizontal: padding),
+            padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -405,6 +412,9 @@ class _HomePageState extends State<HomePage> {
 
   /// Construye la barra de XP compacta (versión horizontal)
   Widget _buildCompactXPBar(UserGamificationProfile profile) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     final levelService = LevelService();
     final progress = profile.levelProgress;
     final tierNameKey = levelService.getLevelTier(profile.currentLevel);
@@ -426,32 +436,43 @@ class _HomePageState extends State<HomePage> {
       levelBadgePath = 'assets/images/badges/badge_level_1.png';
     }
 
+    final badgeSize = isSmallScreen ? 36.0 : 40.0;
+    final spacing = isSmallScreen ? 6.0 : 8.0;
+
     return Row(
       children: [
         // Badge del nivel
         Container(
-          width: 40,
-          height: 40,
+          width: badgeSize,
+          height: badgeSize,
           decoration: BoxDecoration(
             color: Colors.grey[50],
             borderRadius: BorderRadius.circular(10),
           ),
           child: Image.asset(
             levelBadgePath,
-            width: 40,
-            height: 40,
+            width: badgeSize,
+            height: badgeSize,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
               final tierEmoji = levelService.getLevelTierEmoji(
                 profile.currentLevel,
               );
               return Center(
-                child: Text(tierEmoji, style: const TextStyle(fontSize: 20)),
+                child: Text(
+                  tierEmoji,
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      isSmallScreen ? 18.0 : 20.0,
+                    ),
+                  ),
+                ),
               );
             },
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: spacing),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -459,7 +480,10 @@ class _HomePageState extends State<HomePage> {
             Text(
               '${'gamification.level'.tr()} ${profile.currentLevel}',
               style: GoogleFonts.quicksand(
-                fontSize: 16,
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 14.0 : 16.0,
+                ),
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF2C3E50),
               ),
@@ -467,7 +491,10 @@ class _HomePageState extends State<HomePage> {
             Text(
               tierName,
               style: GoogleFonts.quicksand(
-                fontSize: 10,
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 9.0 : 10.0,
+                ),
                 color: Colors.grey[600],
               ),
             ),
@@ -482,16 +509,19 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${profile.totalXP} XP',
+                '${profile.currentLevelXP} XP',
                 style: GoogleFonts.quicksand(
-                  fontSize: 14,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 12.0 : 14.0,
+                  ),
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF3498DB),
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: isSmallScreen ? 3 : 4),
               LinearPercentIndicator(
-                lineHeight: 6.0,
+                lineHeight: isSmallScreen ? 5.0 : 6.0,
                 percent: progress,
                 backgroundColor: Colors.grey[200]!,
                 progressColor: const Color(0xFF3498DB),
@@ -499,11 +529,14 @@ class _HomePageState extends State<HomePage> {
                 animation: true,
                 animationDuration: 500,
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: isSmallScreen ? 1 : 2),
               Text(
                 '${profile.currentLevelXP}/${profile.nextLevelXP}',
                 style: GoogleFonts.quicksand(
-                  fontSize: 10,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 9.0 : 10.0,
+                  ),
                   color: Colors.grey[600],
                 ),
               ),
@@ -519,6 +552,9 @@ class _HomePageState extends State<HomePage> {
     UserGamificationProfile profile,
     DailyStreak? streak,
   ) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     final streakService = StreakService();
     final streakStatus = streak != null
         ? streakService.checkStreakStatus(streak)
@@ -562,21 +598,32 @@ class _HomePageState extends State<HomePage> {
         break;
     }
 
+    final iconSize = isSmallScreen ? 36.0 : 40.0;
+    final spacing = isSmallScreen ? 6.0 : 8.0;
+
     return Row(
       children: [
         // Icono de racha
         Container(
-          width: 40,
-          height: 40,
+          width: iconSize,
+          height: iconSize,
           decoration: BoxDecoration(
             color: streakColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
-            child: Text(streakEmoji, style: const TextStyle(fontSize: 24)),
+            child: Text(
+              streakEmoji,
+              style: TextStyle(
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 20.0 : 24.0,
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: spacing),
         // Información de racha
         Expanded(
           child: Column(
@@ -585,32 +632,48 @@ class _HomePageState extends State<HomePage> {
             children: [
               Row(
                 children: [
-                  Icon(streakIcon, color: streakColor, size: 16),
-                  const SizedBox(width: 4),
+                  Icon(
+                    streakIcon,
+                    color: streakColor,
+                    size: ResponsiveHelper.getResponsiveIconSize(
+                      context,
+                      isSmallScreen ? 14.0 : 16.0,
+                    ),
+                  ),
+                  SizedBox(width: isSmallScreen ? 3 : 4),
                   Text(
                     'gamification.streak'.tr(),
                     style: GoogleFonts.quicksand(
-                      fontSize: 12,
+                      fontSize: ResponsiveHelper.getResponsiveFontSize(
+                        context,
+                        isSmallScreen ? 10.0 : 12.0,
+                      ),
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: isSmallScreen ? 1 : 2),
               Text(
                 '${profile.currentStreak} ${'home.days'.tr()}',
                 style: GoogleFonts.quicksand(
-                  fontSize: 18,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 16.0 : 18.0,
+                  ),
                   fontWeight: FontWeight.bold,
                   color: streakColor,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: isSmallScreen ? 1 : 2),
               Text(
                 message,
                 style: GoogleFonts.quicksand(
-                  fontSize: 10,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    isSmallScreen ? 9.0 : 10.0,
+                  ),
                   color: Colors.grey[600],
                 ),
                 maxLines: 1,
@@ -622,7 +685,10 @@ class _HomePageState extends State<HomePage> {
         // Días de descanso si aplica
         if (profile.canUseRestDay && !profile.isPauseModeActive)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 6 : 8,
+              vertical: isSmallScreen ? 3 : 4,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFF3498DB).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
@@ -631,7 +697,10 @@ class _HomePageState extends State<HomePage> {
               '${profile.restDaysAvailable}\n${'home.days'.tr()}',
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
-                fontSize: 9,
+                fontSize: ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 8.0 : 9.0,
+                ),
                 color: const Color(0xFF3498DB),
                 fontWeight: FontWeight.w600,
               ),
@@ -755,8 +824,13 @@ class _HomePageState extends State<HomePage> {
 
   /// Maneja el estado cuando no hay registros
   Widget _buildEmptyState(LactationProvider lactationProvider) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isSmallScreen ? padding * 1.2 : padding * 1.5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -770,27 +844,37 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Column(
         children: [
-          Icon(Icons.child_care, size: 48, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Icon(
+            Icons.child_care,
+            size: ResponsiveHelper.getResponsiveIconSize(context, 48.0),
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: isSmallScreen ? 12 : 16),
           Text(
             'home.welcome'.tr(),
             style: GoogleFonts.quicksand(
-              fontSize: 20,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(
+                context,
+                isSmallScreen ? 18.0 : 20.0,
+              ),
               fontWeight: FontWeight.bold,
               color: const Color(0xFF2C3E50),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Text(
             'home.welcomeMessage'.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
-              fontSize: 14,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(
+                context,
+                isSmallScreen ? 12.0 : 14.0,
+              ),
               color: Colors.grey[600],
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmallScreen ? 12 : 16),
           SmartLactationButton(
             onSuccess: () {
               // Refrescar datos después de registrar lactancia
@@ -846,12 +930,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBackgroundElements(BuildContext context) {
+    final screenHeight = ResponsiveHelper.screenHeight(context);
+    final screenWidth = ResponsiveHelper.screenWidth(context);
+
     return Stack(
       children: [
         // Círculos decorativos
         Positioned(
-          top: -MediaQuery.of(context).size.height * 0.1,
-          right: -MediaQuery.of(context).size.width * 0.1,
+          top: -screenHeight * 0.1,
+          right: -screenWidth * 0.1,
           child: Container(
             width: 200,
             height: 200,
@@ -874,8 +961,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildAnimatedParticle(BuildContext context, int index) {
-    final left = (index * 50.0) % MediaQuery.of(context).size.width;
-    final top = (index * 80.0) % MediaQuery.of(context).size.height;
+    final screenWidth = ResponsiveHelper.screenWidth(context);
+    final screenHeight = ResponsiveHelper.screenHeight(context);
+    final left = (index * 50.0) % screenWidth;
+    final top = (index * 80.0) % screenHeight;
 
     return Positioned(
       left: left,
@@ -899,25 +988,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent(BuildContext context, UserProfileState state) {
+    // Detección de tamaños responsive
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     // Mostrar skeleton mientras el perfil está inicializando/cargando para evitar parpadeos de UI
     if (state is UserProfileInitial || state is UserProfileLoading) {
       return _buildHomeSkeleton(context);
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: padding),
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16 : (isShortScreen ? 18 : 20)),
           // Header modernizado movido al contenido scrolleable
           ModernHeader(
             userName: NavigationService.getUserName(state),
             onNavigateToLessons: () =>
                 NavigationService.navigateToLessons(context),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16 : (isShortScreen ? 18 : 20)),
           _buildHomeContentSections(context, state),
-          const SizedBox(height: 100), // Espacio para el bottom bar
+          SizedBox(
+            height: isSmallScreen ? 80 : 100,
+          ), // Espacio para el bottom bar
         ],
       ),
     );
@@ -960,28 +1058,34 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     return Shimmer(
       linearGradient: shimmerGradient,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: padding),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 16 : (isShortScreen ? 18 : 20)),
             // Header placeholder
-            skeletonCard(height: 90),
-            const SizedBox(height: 20),
+            skeletonCard(height: isSmallScreen ? 80 : 90),
+            SizedBox(height: isSmallScreen ? 16 : (isShortScreen ? 18 : 20)),
             // Tarjeta principal (countdown o dashboard)
-            skeletonCard(height: 220),
-            const SizedBox(height: 15),
+            skeletonCard(height: isSmallScreen ? 200 : 220),
+            SizedBox(height: isSmallScreen ? 12 : 15),
             // Card Lecciones
-            skeletonCard(height: 88),
-            const SizedBox(height: 15),
+            skeletonCard(height: isSmallScreen ? 80 : 88),
+            SizedBox(height: isSmallScreen ? 12 : 15),
             // Grid/segunda fila
-            skeletonCard(height: 88),
-            const SizedBox(height: 20),
+            skeletonCard(height: isSmallScreen ? 80 : 88),
+            SizedBox(height: isSmallScreen ? 16 : 20),
             // Sección de perfil
-            skeletonCard(height: 120),
-            const SizedBox(height: 100),
+            skeletonCard(height: isSmallScreen ? 110 : 120),
+            SizedBox(height: isSmallScreen ? 80 : 100),
           ],
         ),
       ),
@@ -992,26 +1096,32 @@ class _HomePageState extends State<HomePage> {
     BuildContext context,
     UserProfileState state,
   ) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     final isPostPartum = NavigationService.getUserPostPartumStatus(state);
     _logger.d(
       'HomePage: _buildHomeContentSections - isPostPartum: $isPostPartum, state: ${state.runtimeType}',
     );
 
+    final spacing = isSmallScreen ? 12.0 : 15.0;
+    final largeSpacing = isSmallScreen ? 16.0 : 20.0;
+
     return Column(
       children: [
         // Tarjeta compacta de gamificación
         _buildGamificationCard(context, state),
-        const SizedBox(height: 15),
+        SizedBox(height: spacing),
 
         // Contenido específico según el tipo de usuario
         if (isPostPartum) ...[
           // Dashboard de lactancia para usuarios postparto
           _buildLactationDashboard(context, state),
-          const SizedBox(height: 15),
+          SizedBox(height: spacing),
         ] else ...[
           // Contador de cuenta regresiva para usuarios preparto
           _buildCountdownSection(context, state),
-          const SizedBox(height: 15),
+          SizedBox(height: spacing),
         ],
 
         // Tarjeta de Lecciones (arriba de Tips e Historial)
@@ -1023,12 +1133,12 @@ class _HomePageState extends State<HomePage> {
           color: AppColorService.getFeatureColor('Lecciones'),
         ),
 
-        const SizedBox(height: 15),
+        SizedBox(height: spacing),
 
         // Grid de funcionalidades basado en el estado del usuario
         _buildFeatureGrid(context, isPostPartum),
 
-        const SizedBox(height: 20),
+        SizedBox(height: largeSpacing),
 
         // Secciones de perfil específicas
         _buildProfileSections(context, state),
@@ -1037,6 +1147,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeatureGrid(BuildContext context, bool isPostPartum) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final spacing = isSmallScreen ? 12.0 : 15.0;
+
     // Para ambos perfiles: Tips e Historial en fila
     return Row(
       children: [
@@ -1049,7 +1164,7 @@ class _HomePageState extends State<HomePage> {
             color: AppColorService.getFeatureColor('Tips'),
           ),
         ),
-        const SizedBox(width: 15),
+        SizedBox(width: spacing),
         Expanded(
           child: HomeFeatureCard(
             title: 'home.history'.tr(),

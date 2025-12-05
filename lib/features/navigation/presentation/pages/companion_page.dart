@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -25,11 +24,9 @@ import '../widgets/companion_stats_summary.dart';
 import '../widgets/companion_mascot_wrapper.dart';
 import '../widgets/companion_new_achievements_animation.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
-import '../../../gamification/presentation/services/achievement_queue_service.dart';
+import '../../../gamification/presentation/widgets/baby_stage_upgrade_dialog.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
-import '../../../gamification/domain/services/gamification_service.dart';
-import '../../../gamification/domain/services/user_statistics_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../gamification/domain/services/baby_stage_service.dart';
 
 /// Página dedicada a la compañera de gamificación
 class CompanionPage extends StatefulWidget {
@@ -43,6 +40,9 @@ class _CompanionPageState extends State<CompanionPage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true; // Mantener el estado para evitar recargas al cambiar de pestaña
+
+  // Variable para rastrear qué logros ya se mostraron en esta sesión
+  final Set<String> _shownAchievementIds = {};
 
   @override
   Widget build(BuildContext context) {
@@ -128,70 +128,9 @@ class _CompanionPageState extends State<CompanionPage>
     double totalBottomPadding,
     bool isPostPartum,
   ) {
-    // Detectar logros cuando se carga la página (solo si ya está cargado)
-    if (currentGamificationState is GamificationLoaded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          final gamificationRepository = getIt<GamificationRepository>();
-          final gamificationService = GamificationService(
-            repository: gamificationRepository,
-          );
-          final userStatisticsService = getIt<UserStatisticsService>();
-          final userStats = await userStatisticsService.getUserStatistics(
-            validUserId,
-          );
-
-          final achievements = await gamificationService
-              .detectAndUnlockAchievements(
-                userId: validUserId,
-                totalLactationRecords: userStats.totalLactationRecords,
-                completeLactationRecords: userStats.completeLactationRecords,
-                totalLessonsCompleted: userStats.totalLessonsCompleted,
-                babyWeightRecords: userStats.babyWeightRecords,
-                hasNocturnalRecord: userStats.hasNocturnalRecord,
-                dailyRecordsToday: userStats.dailyRecordsToday,
-                babySleepRecords: userStats.babySleepRecords,
-                perfectTrivias: userStats.perfectTrivias,
-                nocturnalRecordsCount: userStats.nocturnalRecordsCount,
-                daysUsingApp: userStats.daysUsingApp,
-              );
-
-          // Mostrar diálogo si hay logros nuevos
-          if (achievements.isRight()) {
-            final newAchievements = achievements.getOrElse(() => []);
-            if (newAchievements.isNotEmpty && context.mounted) {
-              // Recargar el perfil de gamificación en el bloc para actualizar la UI
-              try {
-                final gamificationBloc = context.read<GamificationBloc>();
-                gamificationBloc.add(LoadGamificationProfile(validUserId));
-
-                if (kDebugMode) {
-                  print(
-                    '🔄 [CompanionPage] GamificationBloc recargado después de desbloquear ${newAchievements.length} logro(s)',
-                  );
-                }
-              } catch (e) {
-                if (kDebugMode) {
-                  print('Error recargando GamificationBloc: $e');
-                }
-              }
-
-              // Mostrar logros uno a la vez usando el servicio de cola
-              final achievementQueueService = getIt<AchievementQueueService>();
-              achievementQueueService.queueAchievements(
-                context,
-                newAchievements,
-              );
-            }
-          }
-        } catch (e) {
-          // Ignorar errores en la detección de logros
-          if (kDebugMode) {
-            print('Error detectando logros en companion page: $e');
-          }
-        }
-      });
-    }
+    // NOTA: La detección de logros se hace en otros lugares (LactationService, etc.)
+    // No duplicar la detección aquí para evitar mostrar logros múltiples veces
+    // El BlocBuilder más abajo se encargará de mostrar los logros cuando el perfil se actualice
 
     return SingleChildScrollView(
       // Usar physics para optimizar el scroll y reducir reconstrucciones
@@ -290,17 +229,32 @@ class _CompanionPageState extends State<CompanionPage>
           BlocBuilder<GamificationBloc, GamificationState>(
             builder: (context, gamificationState) {
               if (gamificationState is GamificationLoaded) {
-                // Mostrar animación de logros nuevos si hay
+                // Mostrar animación de logros nuevos si hay (solo una vez por conjunto de logros)
                 final newAchievements =
                     gamificationState.profile.newAchievements;
                 if (newAchievements.isNotEmpty) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    CompanionNewAchievementsAnimation.show(
-                      context,
-                      gamificationState.profile,
-                      validUserId,
-                    );
-                  });
+                  // Filtrar logros que ya se mostraron en esta sesión
+                  final unseenAchievements = newAchievements
+                      .where((id) => !_shownAchievementIds.contains(id))
+                      .toList();
+
+                  if (unseenAchievements.isNotEmpty) {
+                    // Marcar estos logros como mostrados ANTES de mostrarlos
+                    _shownAchievementIds.addAll(unseenAchievements);
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        CompanionNewAchievementsAnimation.show(
+                          context,
+                          gamificationState.profile,
+                          validUserId,
+                        );
+                      }
+                    });
+                  }
+                } else {
+                  // Si no hay logros nuevos, limpiar el set de mostrados
+                  _shownAchievementIds.clear();
                 }
 
                 // Manejar level up con vibración y sonido mejorados
@@ -499,6 +453,119 @@ class _CompanionPageState extends State<CompanionPage>
                 ],
               ),
             ),
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _testAchievementDialog(context),
+                  borderRadius: BorderRadius.circular(25),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.emoji_events,
+                      color: Colors.amber[700],
+                      size: isSmallScreen ? 22 : 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Botón de prueba para celebración del bebé (solo para postparto)
+            Builder(
+              builder: (context) {
+                // Verificar si es postparto desde el UserProfileBloc
+                final userProfileBloc = context.read<UserProfileBloc>();
+                final userState = userProfileBloc.state;
+                final isPostPartumUser = userState is UserProfileLoaded
+                    ? !userState.profile.isPrePartum
+                    : (userState is UserProfileUpdated
+                          ? !userState.profile.isPrePartum
+                          : false);
+
+                if (!isPostPartumUser) return const SizedBox.shrink();
+
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Botón para animación de 3 meses
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _testBaby3Months(context),
+                          borderRadius: BorderRadius.circular(25),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.child_care,
+                              color: const Color(0xFFf093fb),
+                              size: isSmallScreen ? 20 : 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Botón para animación de 6 meses
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _testBaby6Months(context),
+                          borderRadius: BorderRadius.circular(25),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.child_friendly,
+                              color: const Color(0xFFf093fb),
+                              size: isSmallScreen ? 20 : 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
         SizedBox(height: isShortScreen ? 12 : 16),
@@ -572,6 +639,28 @@ class _CompanionPageState extends State<CompanionPage>
           ),
         ],
       ),
+    );
+  }
+
+  /// Método de prueba para mostrar la animación de desbloqueo del bebé de 3 meses
+  void _testBaby3Months(BuildContext context) {
+    BabyStageUpgradeDialog.show(
+      context,
+      newStage: 'baby_3months',
+      previousStage: 'baby_born',
+      completedLessons: 7,
+      withVibration: true,
+    );
+  }
+
+  /// Método de prueba para mostrar la animación de desbloqueo del bebé de 6 meses
+  void _testBaby6Months(BuildContext context) {
+    BabyStageUpgradeDialog.show(
+      context,
+      newStage: 'baby_6months',
+      previousStage: 'baby_3months',
+      completedLessons: 14,
+      withVibration: true,
     );
   }
 

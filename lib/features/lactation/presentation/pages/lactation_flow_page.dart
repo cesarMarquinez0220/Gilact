@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../alerta_dialoge.dart';
 import '../../domain/entities/lactation_record.dart';
 import '../../domain/services/lactation_decision_tree.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 /// Página principal del nuevo flujo de registro de lactancia
 class LactationFlowPage extends StatefulWidget {
@@ -356,12 +357,22 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildOptionsGrid(List<LactationOption> options) {
+    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                         ResponsiveHelper.isSmall(context);
+    final columns = ResponsiveHelper.getResponsiveColumns(
+      context,
+      small: 2,
+      medium: 2,
+      large: 2,
+    );
+    final spacing = ResponsiveHelper.getResponsiveSpacing(context);
+    
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        childAspectRatio: isSmallScreen ? 1.1 : 1.2,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
       ),
       itemCount: options.length,
       itemBuilder: (context, index) {

@@ -6,6 +6,7 @@ import '../widgets/onboarding_slide_widget.dart';
 import 'situation_selection_page.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -79,6 +80,14 @@ class _OnboardingPageState extends State<OnboardingPage>
 
   @override
   Widget build(BuildContext context) {
+    // Detección de tamaños responsive
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final isShortScreen = ResponsiveHelper.isShortScreen(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 16.0);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -98,12 +107,17 @@ class _OnboardingPageState extends State<OnboardingPage>
             children: [
               // Indicador de progreso simplificado
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                padding: EdgeInsets.fromLTRB(
+                  padding,
+                  isSmallScreen ? 16.0 : (isShortScreen ? 18.0 : 20.0),
+                  padding,
+                  0,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Container(
-                        height: 4,
+                        height: isSmallScreen ? 3 : 4,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(2),
                           color: Colors.white.withValues(alpha: 0.2),
@@ -120,13 +134,13 @@ class _OnboardingPageState extends State<OnboardingPage>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: isSmallScreen ? 12 : 16),
                     Text(
                       '${_currentPage + 1}/$_totalPages',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: fontSize,
                       ),
                     ),
                   ],
@@ -154,11 +168,11 @@ class _OnboardingPageState extends State<OnboardingPage>
               // Indicador de swipe sutil (solo en las primeras dos páginas)
               if (_currentPage < _totalPages - 1)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.only(bottom: isSmallScreen ? 16.0 : 20.0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 10 : 12,
+                      vertical: isSmallScreen ? 5 : 6,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
@@ -174,14 +188,14 @@ class _OnboardingPageState extends State<OnboardingPage>
                         Icon(
                           Icons.swipe_left,
                           color: Colors.white.withValues(alpha: 0.7),
-                          size: 14,
+                          size: isSmallScreen ? 12 : 14,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: isSmallScreen ? 3 : 4),
                         Text(
                           'onboarding.swipe'.tr(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 11,
+                            fontSize: isSmallScreen ? 10 : 11,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -192,11 +206,11 @@ class _OnboardingPageState extends State<OnboardingPage>
               else
                 // Indicador de progreso automático en la última página
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.only(bottom: isSmallScreen ? 16.0 : 20.0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 14 : 16,
+                      vertical: isSmallScreen ? 6 : 8,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
@@ -210,8 +224,8 @@ class _OnboardingPageState extends State<OnboardingPage>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(
-                          width: 12,
-                          height: 12,
+                          width: isSmallScreen ? 10 : 12,
+                          height: isSmallScreen ? 10 : 12,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -219,12 +233,12 @@ class _OnboardingPageState extends State<OnboardingPage>
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: isSmallScreen ? 6 : 8),
                         Text(
                           'onboarding.continuingAutomatically'.tr(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 12,
+                            fontSize: isSmallScreen ? 11 : 12,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

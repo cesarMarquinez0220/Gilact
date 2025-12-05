@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/lactation_record.dart'; // Assuming this defines LactationRecord
 import '../../data/services/lactation_service.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class LactationRecordPage extends StatefulWidget {
   final DateTime? selectedDate;
@@ -219,26 +221,52 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                 behavior: ScrollConfiguration.of(
                   context,
                 ).copyWith(overscroll: false),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Form(
-                    // Keep Form if validation is needed on manual inputs
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        // Header Section (moved _buildHeader here for clarity)
-                        _buildHeader(),
-                        const SizedBox(height: 30),
-                        // Accordion Form Content
-                        _buildAccordionForm(), // This now contains the main UI logic
-                        const SizedBox(height: 40),
-                        // Action Buttons (Simplified)
-                        _buildSaveAndCancelButtons(), // Use simplified buttons
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmallScreen =
+                        ResponsiveHelper.isExtraSmall(context) ||
+                        ResponsiveHelper.isSmall(context);
+                    final isShortScreen = ResponsiveHelper.isShortScreen(
+                      context,
+                    );
+                    final padding = ResponsiveHelper.getResponsivePadding(
+                      context,
+                    );
+
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.all(padding),
+                      child: Form(
+                        // Keep Form if validation is needed on manual inputs
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: isSmallScreen
+                                  ? 16
+                                  : (isShortScreen ? 18 : 20),
+                            ),
+                            // Header Section (moved _buildHeader here for clarity)
+                            _buildHeader(),
+                            SizedBox(
+                              height: isSmallScreen
+                                  ? 24
+                                  : (isShortScreen ? 28 : 30),
+                            ),
+                            // Accordion Form Content
+                            _buildAccordionForm(), // This now contains the main UI logic
+                            SizedBox(
+                              height: isSmallScreen
+                                  ? 32
+                                  : (isShortScreen ? 36 : 40),
+                            ),
+                            // Action Buttons (Simplified)
+                            _buildSaveAndCancelButtons(), // Use simplified buttons
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -250,6 +278,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
   // NEW: Linear Progressive Disclosure Form
   Widget _buildAccordionForm() {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     final hasSelection = _flowData.containsKey('alimentacion');
     final selectedType = _flowData['alimentacion'] as String?;
 
@@ -257,7 +288,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('lactation.recordForm.feedingTypeQuestion'.tr()),
-        const SizedBox(height: 16),
+        SizedBox(height: isSmallScreen ? 12 : 16),
 
         // --- Show all options OR only the selected one ---
         if (!hasSelection)
@@ -269,14 +300,14 @@ class _LactationRecordPageState extends State<LactationRecordPage>
             icon: Icons.accessibility_new,
             value: 'pecho',
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isSmallScreen ? 10 : 12),
           _buildFeedingTypeOption(
             title: 'lactation.recordForm.bottle'.tr(),
             description: 'lactation.recordForm.bottleDescription'.tr(),
             icon: Icons.baby_changing_station,
             value: 'biberon',
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isSmallScreen ? 10 : 12),
           _buildFeedingTypeOption(
             title: 'lactation.recordForm.mixed'.tr(),
             description: 'lactation.recordForm.mixedDescription'.tr(),
@@ -288,14 +319,14 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         ...[
           // Show selected option as header
           _buildSelectedFeedingHeader(selectedType!),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmallScreen ? 12 : 16),
 
           // Progressive disclosure: Show relevant details based on selection
           if (selectedType == 'pecho' || selectedType == 'mixto') ...[
             _buildBreastSideOptions(),
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 16 : 20),
             _buildBreastDurationOptions(),
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 16 : 20),
           ],
 
           if (selectedType == 'biberon' || selectedType == 'mixto') ...[
@@ -558,10 +589,16 @@ class _LactationRecordPageState extends State<LactationRecordPage>
 
   // Helper to build section titles consistently
   Widget _buildSectionTitle(String title) {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     return Text(
       title,
       style: GoogleFonts.quicksand(
-        fontSize: 20, // Slightly smaller for section titles
+        fontSize: ResponsiveHelper.getResponsiveFontSize(
+          context,
+          isSmallScreen ? 18.0 : 20.0,
+        ),
         fontWeight: FontWeight.bold,
         color: Colors.white,
         shadows: [
@@ -576,6 +613,9 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   }
 
   Widget _buildBreastSideOptions() {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     // Simplified: directly set _flowData['breastSide']
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,7 +623,7 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         _buildSectionTitle(
           'lactation.recordForm.breastSideQuestion'.tr(),
         ), // Use consistent title style
-        const SizedBox(height: 12),
+        SizedBox(height: isSmallScreen ? 10 : 12),
         Row(
           // Use Row for better layout
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1246,6 +1286,14 @@ class _LactationRecordPageState extends State<LactationRecordPage>
       ); // Keep double for potential oz decimals
       final sleepValue = _parseValueToDouble(_flowData['sleep'] as String?);
 
+      // Log para debugging
+      if (kDebugMode) {
+        print('🔍 [LactationRecordPage] Creando registro completo:');
+        print('   └─ sleepValue parseado: $sleepValue');
+        print('   └─ _flowData["sleep"]: ${_flowData['sleep']}');
+        print('   └─ incluyeSueno será: ${sleepValue > 0}');
+      }
+
       final record = LactationRecord(
         id:
             widget.existingRecord?.id ??
@@ -1473,8 +1521,13 @@ class _LactationRecordPageState extends State<LactationRecordPage>
   }
 
   Widget _buildHeader() {
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isSmallScreen ? padding * 0.75 : padding),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
@@ -1494,18 +1547,21 @@ class _LactationRecordPageState extends State<LactationRecordPage>
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.child_care,
                   color: Colors.white,
-                  size: 28,
+                  size: ResponsiveHelper.getResponsiveIconSize(
+                    context,
+                    isSmallScreen ? 24.0 : 28.0,
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isSmallScreen ? 12 : 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1513,18 +1569,24 @@ class _LactationRecordPageState extends State<LactationRecordPage>
                     Text(
                       'lactation.recordForm.title'.tr(),
                       style: GoogleFonts.quicksand(
-                        fontSize: 18,
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(
+                          context,
+                          isSmallScreen ? 16.0 : 18.0,
+                        ),
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 3 : 4),
                     Text(
                       widget.selectedDate != null
                           ? 'Fecha: ${widget.selectedDate!.day}/${widget.selectedDate!.month}/${widget.selectedDate!.year}'
                           : 'Fecha: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
                       style: GoogleFonts.quicksand(
-                        fontSize: 14,
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(
+                          context,
+                          isSmallScreen ? 12.0 : 14.0,
+                        ),
                         fontWeight: FontWeight.w500,
                         color: Colors.white.withValues(alpha: 0.9),
                       ),

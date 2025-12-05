@@ -473,14 +473,24 @@ class LactationService {
 
           if (kDebugMode) {
             final expectedXP = record.tipoRegistro == 'completo' ? 20 : 10;
-            final bonusXP = isFirstOfDay ? 5 : 0;
-            final totalExpectedXP = expectedXP + bonusXP;
+            final bonusFirstOfDay = isFirstOfDay ? 5 : 0;
+            final bonusSleep =
+                (record.tipoRegistro == 'completo' && record.incluyeSueno)
+                ? 10
+                : 0;
+            final totalExpectedXP = expectedXP + bonusFirstOfDay + bonusSleep;
             _logger.success(
               '✅ [LactationService] GamificationBloc notificado inmediatamente con ${transaction.amount} XP',
             );
             _logger.d(
-              '   └─ XP esperado: $totalExpectedXP (base: $expectedXP + bonus: $bonusXP)',
+              '   └─ XP esperado: $totalExpectedXP (base: $expectedXP + primero del día: $bonusFirstOfDay + sueño: $bonusSleep)',
             );
+            _logger.d('   └─ XP real calculado: ${transaction.amount} XP');
+            if (transaction.amount != totalExpectedXP) {
+              _logger.w(
+                '   ⚠️ DISCREPANCIA: XP esperado ($totalExpectedXP) != XP real (${transaction.amount})',
+              );
+            }
           }
         } else {
           if (kDebugMode) {

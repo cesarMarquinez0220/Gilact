@@ -25,6 +25,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _scrollController = ScrollController();
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -48,6 +51,37 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     _initializeAnimations();
     _loadCachedCredentials();
     _checkBiometricAvailability();
+    _setupFocusListeners();
+  }
+
+  /// Configura los listeners para hacer scroll automático cuando un campo recibe el foco
+  void _setupFocusListeners() {
+    _emailFocusNode.addListener(() {
+      if (_emailFocusNode.hasFocus) {
+        _scrollToField(_emailFocusNode);
+      }
+    });
+
+    _passwordFocusNode.addListener(() {
+      if (_passwordFocusNode.hasFocus) {
+        _scrollToField(_passwordFocusNode);
+      }
+    });
+  }
+
+  /// Hace scroll automático al campo que tiene el foco
+  void _scrollToField(FocusNode focusNode) {
+    // Esperar un frame para que el teclado aparezca
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (focusNode.context != null) {
+        Scrollable.ensureVisible(
+          focusNode.context!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: 0.2, // Alinear el campo a 20% desde arriba
+        );
+      }
+    });
   }
 
   /// Habilita la autenticación biométrica si está disponible
@@ -171,6 +205,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _scrollController.dispose();
     _slideController.dispose();
     _fadeController.dispose();
     _pulseController.dispose();
@@ -266,6 +303,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       child: LoginFormWidget(
                         emailController: _emailController,
                         passwordController: _passwordController,
+                        emailFocusNode: _emailFocusNode,
+                        passwordFocusNode: _passwordFocusNode,
                         saveCredentials: _saveCredentials,
                         slideAnimation: _slideAnimation,
                         fadeAnimation: _fadeAnimation,
@@ -290,10 +329,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     final isShortScreen = constraints.maxHeight < 700;
 
                     if (isShortScreen) {
-                      return SingleChildScrollView(child: formWidget);
+                      return SingleChildScrollView(
+                        controller: _scrollController,
+                        child: formWidget,
+                      );
                     } else {
                       return Center(
-                        child: SingleChildScrollView(child: formWidget),
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          child: formWidget,
+                        ),
                       );
                     }
                   },

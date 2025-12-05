@@ -36,5 +36,7 @@ abstract class GamificationRepository {
 
   /// Sincroniza datos locales con Firestore
   Future<Either<String, void>> syncWithFirestore(String userId);
-}
 
+  /// Limpia todos los datos de gamificación de un usuario (útil al cerrar sesión)
+  Future<Either<String, void>> clearUserData(String userId);
+}

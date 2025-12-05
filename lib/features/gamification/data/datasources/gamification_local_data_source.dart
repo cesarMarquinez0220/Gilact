@@ -140,16 +140,12 @@ class GamificationLocalDataSource {
               'ALTER TABLE user_gamification_profile ADD COLUMN baby_stage TEXT NOT NULL DEFAULT \'baby_born\'',
             );
             if (kDebugMode) {
-              print(
-                '✅ Migración v4: Columna baby_stage agregada',
-              );
+              print('✅ Migración v4: Columna baby_stage agregada');
             }
           } catch (e) {
             // Si la columna ya existe, ignorar el error
             if (kDebugMode) {
-              print(
-                '⚠️ Columna baby_stage ya existe o error: $e',
-              );
+              print('⚠️ Columna baby_stage ya existe o error: $e');
             }
           }
         }
@@ -427,5 +423,92 @@ class GamificationLocalDataSource {
             )
           : null,
     );
+  }
+
+  /// Limpia todos los datos de gamificación de un usuario específico
+  /// Útil cuando un usuario cierra sesión para evitar que sus datos aparezcan en otra cuenta
+  Future<void> clearUserData(String userId) async {
+    if (kDebugMode) {
+      print(
+        '🧹 [GamificationLocalDataSource] Iniciando limpieza de datos para userId: $userId',
+      );
+      print('   └─ Timestamp: ${DateTime.now().toIso8601String()}');
+    }
+
+    try {
+      final db = await database;
+
+      // Verificar datos antes de eliminar
+      final profileBefore = await db.query(
+        'user_gamification_profile',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+      final transactionsBefore = await db.query(
+        'xp_transactions',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+      final streakBefore = await db.query(
+        'daily_streak',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+
+      if (kDebugMode) {
+        print('   └─ Datos encontrados antes de limpiar:');
+        print('      • Perfiles: ${profileBefore.length}');
+        if (profileBefore.isNotEmpty) {
+          final profile = profileBefore.first;
+          print('         - Nivel: ${profile['current_level']}');
+          print('         - XP Total: ${profile['total_xp']}');
+          print(
+            '         - XP Nivel: ${profile['current_level_xp']}/${profile['next_level_xp']}',
+          );
+        }
+        print('      • Transacciones XP: ${transactionsBefore.length}');
+        print('      • Rachas: ${streakBefore.length}');
+      }
+
+      // Eliminar perfil del usuario
+      final profileDeleted = await db.delete(
+        'user_gamification_profile',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+
+      // Eliminar transacciones de XP del usuario
+      final transactionsDeleted = await db.delete(
+        'xp_transactions',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+
+      // Eliminar racha del usuario
+      final streakDeleted = await db.delete(
+        'daily_streak',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+
+      if (kDebugMode) {
+        print('   └─ Datos eliminados:');
+        print('      • Perfiles eliminados: $profileDeleted');
+        print('      • Transacciones eliminadas: $transactionsDeleted');
+        print('      • Rachas eliminadas: $streakDeleted');
+        print(
+          '✅ [GamificationLocalDataSource] Limpieza completada para userId: $userId',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          '❌ [GamificationLocalDataSource] Error limpiando datos para userId: $userId',
+        );
+        print('   └─ Error: $e');
+        print('   └─ StackTrace: ${StackTrace.current}');
+      }
+      rethrow;
+    }
   }
 }

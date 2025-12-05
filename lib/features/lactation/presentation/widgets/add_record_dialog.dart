@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class _AddRecordDialog extends StatefulWidget {
   final Function(LactationRecord) onRecordAdded;
@@ -648,16 +649,30 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
         ),
         content: SizedBox(
           width: double.maxFinite,
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 2,
-            ),
-            itemCount: durations.length,
-            itemBuilder: (context, index) {
-              final minutes = durations[index];
-              final isSelected = currentMinutes == minutes;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
+                                   ResponsiveHelper.isSmall(context);
+              final columns = ResponsiveHelper.getResponsiveColumns(
+                context,
+                small: 3,
+                medium: 4,
+                large: 4,
+              );
+              final spacing = ResponsiveHelper.getResponsiveSpacing(context);
+              
+              return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  childAspectRatio: isSmallScreen ? 1.8 : 2.0,
+                  crossAxisSpacing: spacing,
+                  mainAxisSpacing: spacing,
+                ),
+                itemCount: durations.length,
+                itemBuilder: (context, index) {
+                  final minutes = durations[index];
+                  final isSelected = currentMinutes == minutes;
 
               return GestureDetector(
                 onTap: () {
@@ -682,6 +697,8 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
                     ),
                   ),
                 ),
+              );
+                },
               );
             },
           ),

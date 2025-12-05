@@ -69,12 +69,12 @@ class BabyStageUpgradeDialog extends StatefulWidget {
   String getStageName(String stage) {
     switch (stage) {
       case 'baby_3months':
-        return 'gamification.babyStage.3months'.tr();
+        return 'gamification.messages.babyStage.3months'.tr();
       case 'baby_6months':
-        return 'gamification.babyStage.6months'.tr();
+        return 'gamification.messages.babyStage.6months'.tr();
       case 'baby_born':
       default:
-        return 'gamification.babyStage.born'.tr();
+        return 'gamification.messages.babyStage.born'.tr();
     }
   }
 
@@ -217,7 +217,7 @@ class _BabyStageUpgradeDialogState extends State<BabyStageUpgradeDialog>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '🎉 ${'gamification.babyStage.upgradeTitle'.tr()}',
+                          '🎉 ${'gamification.messages.babyStage.upgradeTitle'.tr()}',
                           style: GoogleFonts.quicksand(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class _BabyStageUpgradeDialogState extends State<BabyStageUpgradeDialog>
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          'gamification.babyStage.upgradeMessage'.tr(),
+                          'gamification.messages.babyStage.upgradeMessage'.tr(),
                           style: GoogleFonts.quicksand(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -281,7 +281,7 @@ class _BabyStageUpgradeDialogState extends State<BabyStageUpgradeDialog>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'gamification.babyStage.upgradeDescription'
+                          'gamification.messages.babyStage.upgradeDescription'
                               .tr(namedArgs: {
                             'newStage': widget.getStageName(widget.newStage),
                             'lessons': widget.completedLessons.toString(),
@@ -484,6 +484,19 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
     }
   }
 
+  /// Obtiene el nombre del Artboard según la etapa del bebé
+  String? _getArtboardName(String babyStage) {
+    switch (babyStage) {
+      case 'baby_3months':
+        return 'baby_3months';
+      case 'baby_6months':
+        return 'baby_6months';
+      case 'baby_born':
+      default:
+        return null; // El archivo 0meses puede no tener artboard específico
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -524,84 +537,120 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // Cada archivo Rive tiene un solo artboard, así que no necesitamos especificar el artboard
-    return rive.RiveWidgetBuilder(
-      fileLoader: _fileLoader,
-      // No especificamos artboardSelector porque cada archivo solo tiene un artboard
-      stateMachineSelector: rive.StateMachineSelector.byName('Bebe_StateMachine'),
-      builder: (context, state) {
-        if (state is rive.RiveLoading) {
-          return SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-          );
-        }
+    final artboardName = _getArtboardName(widget.babyStage);
+    
+    // Si hay un artboard específico, usarlo; si no, usar el artboard por defecto
+    if (artboardName != null) {
+      return rive.RiveWidgetBuilder(
+        fileLoader: _fileLoader,
+        artboardSelector: rive.ArtboardSelector.byName(artboardName),
+        // Usar 'State Machine 1' que es el nombre correcto
+        stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+        builder: (context, state) {
+          return _buildRiveState(state);
+        },
+      );
+    } else {
+      // Para baby_born, usar el artboard por defecto
+      return rive.RiveWidgetBuilder(
+        fileLoader: _fileLoader,
+        // Usar 'State Machine 1' que es el nombre correcto
+        stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+        builder: (context, state) {
+          return _buildRiveState(state);
+        },
+      );
+    }
+  }
 
-        if (state is rive.RiveFailed) {
-          if (kDebugMode) {
-            print(
-              '❌ Diálogo: Rive falló al cargar archivo para etapa "${widget.babyStage}": ${state.error}',
-            );
-          }
-          // Mostrar error
-          return SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: const Center(
-              child: Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-            ),
-          );
-        }
+  Widget _buildRiveState(dynamic state) {
+    if (state is rive.RiveLoading) {
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      );
+    }
 
-        if (state is rive.RiveLoaded) {
-          // Establecer estado idle para la celebración
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              try {
-                final stateMachine = state.controller.stateMachine;
-                if (stateMachine.inputs.isNotEmpty) {
-                  final input = stateMachine.inputs.first;
-                  if (input.name == 'state' || input.name == 'Number 1') {
-                    (input as dynamic).value = 0.0; // idle
+    if (state is rive.RiveFailed) {
+      if (kDebugMode) {
+        print(
+          '❌ Diálogo: Rive falló al cargar archivo para etapa "${widget.babyStage}": ${state.error}',
+        );
+        print('   └─ Artboard esperado: ${_getArtboardName(widget.babyStage) ?? "default"}');
+        print('   └─ State Machine: State Machine 1');
+      }
+      // Mostrar error
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: const Center(
+          child: Icon(
+            Icons.error_outline,
+            color: Colors.red,
+            size: 60,
+          ),
+        ),
+      );
+    }
+
+    if (state is rive.RiveLoaded) {
+      if (kDebugMode) {
+        print('✅ Diálogo: Rive cargado exitosamente para etapa "${widget.babyStage}"');
+        print('   └─ Artboard: ${_getArtboardName(widget.babyStage) ?? "default"}');
+        print('   └─ State Machine: State Machine 1');
+      }
+      
+      // Establecer estado idle para la celebración
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          try {
+            final stateMachine = state.controller.stateMachine;
+            if (kDebugMode) {
+              print('   └─ Inputs disponibles: ${stateMachine.inputs.map((i) => i.name).join(", ")}');
+            }
+            if (stateMachine.inputs.isNotEmpty) {
+              // Buscar el input correcto para establecer el estado idle
+              for (final input in stateMachine.inputs) {
+                if (input.name == 'state' || input.name == 'Number 1' || input.name == '1') {
+                  (input as dynamic).value = 0.0; // idle
+                  if (kDebugMode) {
+                    print('   └─ Estado establecido a idle (0.0) en input: ${input.name}');
                   }
-                }
-              } catch (e) {
-                if (kDebugMode) {
-                  print('⚠️ Error estableciendo estado idle: $e');
+                  break;
                 }
               }
             }
-          });
-
-          return SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: rive.RiveWidget(
-              controller: state.controller,
-              fit: rive.Fit.contain,
-            ),
-          );
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ Error estableciendo estado idle: $e');
+            }
+          }
         }
+      });
 
-        return SizedBox(
-          width: widget.size,
-          height: widget.size,
-          child: const Icon(
-            Icons.child_care,
-            size: 100,
-            color: Colors.white,
-          ),
-        );
-      },
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: rive.RiveWidget(
+          controller: state.controller,
+          fit: rive.Fit.contain,
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: const Icon(
+        Icons.child_care,
+        size: 100,
+        color: Colors.white,
+      ),
     );
   }
 }

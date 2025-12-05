@@ -10,10 +10,7 @@ class XPBarWidget extends StatelessWidget {
   final UserGamificationProfile profile;
   final LevelService _levelService = LevelService();
 
-   XPBarWidget({
-    super.key,
-    required this.profile,
-  });
+  XPBarWidget({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +105,7 @@ class XPBarWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${profile.totalXP} XP',
+                    '${profile.currentLevelXP} XP',
                     style: GoogleFonts.quicksand(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -141,4 +138,3 @@ class XPBarWidget extends StatelessWidget {
     );
   }
 }
-

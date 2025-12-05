@@ -110,6 +110,11 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen =
+        screenWidth < 375 || screenHeight < 700; // iPhone SE y similares
+    final isLargeScreen = screenWidth > 430; // iPhone 16 Pro Max y similares
+    final isVerySmallScreen = screenWidth < 360; // Pantallas muy pequeñas
 
     return Stack(
       children: [
@@ -161,9 +166,19 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 32,
+                    constraints: BoxConstraints(
+                      maxWidth: isSmallScreen
+                          ? screenWidth * 0.9
+                          : (isLargeScreen ? 400 : screenWidth * 0.85),
+                      maxHeight: screenHeight * 0.85,
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isVerySmallScreen
+                          ? 16
+                          : (isSmallScreen ? 20 : 24),
+                      vertical: isVerySmallScreen
+                          ? 20
+                          : (isSmallScreen ? 24 : 32),
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
@@ -181,157 +196,241 @@ class _AchievementUnlockedDialogState extends State<AchievementUnlockedDialog>
                         ),
                       ],
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '🎉 ¡Logro Desbloqueado!',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '🎉 ¡Logro Desbloqueado!',
+                            style: GoogleFonts.quicksand(
+                              fontSize: isVerySmallScreen
+                                  ? 18
+                                  : (isSmallScreen
+                                        ? 20
+                                        : (isLargeScreen ? 26 : 24)),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          width: 220,
-                          height: 220,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(110),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                blurRadius: 30,
-                                offset: const Offset(0, 15),
-                                spreadRadius: 2,
-                              ),
-                            ],
+                          SizedBox(
+                            height: isVerySmallScreen
+                                ? 12
+                                : (isSmallScreen ? 16 : 20),
                           ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Efecto de brillo "Sunburst" girando (estilo Clash Royale elegante)
-                              AnimatedBuilder(
-                                animation: _rotationController,
-                                builder: (context, child) {
-                                  return Transform.rotate(
-                                    angle:
-                                        _rotationController.value * 2 * math.pi,
-                                    child: Opacity(
-                                      opacity:
-                                          0.5, // Opacidad suave y agradable
-                                      child: CustomPaint(
-                                        size: const Size(220, 220),
-                                        painter: _SunburstPainter(),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final badgeSize = isVerySmallScreen
+                                  ? 160.0
+                                  : (isSmallScreen
+                                        ? 180.0
+                                        : (isLargeScreen ? 240.0 : 220.0));
+                              final iconSize = isVerySmallScreen
+                                  ? 120.0
+                                  : (isSmallScreen
+                                        ? 140.0
+                                        : (isLargeScreen ? 200.0 : 180.0));
+                              final sunburstSize = badgeSize;
+
+                              return Container(
+                                width: badgeSize,
+                                height: badgeSize,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(
+                                    badgeSize / 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 15),
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Efecto de brillo "Sunburst" girando
+                                    AnimatedBuilder(
+                                      animation: _rotationController,
+                                      builder: (context, child) {
+                                        return Transform.rotate(
+                                          angle:
+                                              _rotationController.value *
+                                              2 *
+                                              math.pi,
+                                          child: Opacity(
+                                            opacity: 0.5,
+                                            child: CustomPaint(
+                                              size: Size(
+                                                sunburstSize,
+                                                sunburstSize,
+                                              ),
+                                              painter: _SunburstPainter(),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Badge/Icono
+                                    Padding(
+                                      padding: EdgeInsets.all(
+                                        isVerySmallScreen ? 3 : 4,
+                                      ),
+                                      child: Center(
+                                        child:
+                                            widget.achievement.icon.startsWith(
+                                              'assets/',
+                                            )
+                                            ? Image.asset(
+                                                widget.achievement.icon,
+                                                width: iconSize,
+                                                height: iconSize,
+                                                fit: BoxFit.contain,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Icon(
+                                                        Icons.emoji_events,
+                                                        size: iconSize * 0.67,
+                                                        color:
+                                                            Colors.amber[700],
+                                                      );
+                                                    },
+                                              )
+                                            : Text(
+                                                widget.achievement.icon,
+                                                style: TextStyle(
+                                                  fontSize: iconSize * 0.56,
+                                                ),
+                                              ),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                              // Badge/Icono (imagen más grande, menos padding)
-                              Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: Center(
-                                  child:
-                                      widget.achievement.icon.startsWith(
-                                        'assets/',
-                                      )
-                                      ? Image.asset(
-                                          widget.achievement.icon,
-                                          width: 180,
-                                          height: 180,
-                                          fit: BoxFit.contain,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Icon(
-                                                  Icons.emoji_events,
-                                                  size: 120,
-                                                  color: Colors.amber[700],
-                                                );
-                                              },
-                                        )
-                                      : Text(
-                                          widget.achievement.icon,
-                                          style: const TextStyle(fontSize: 100),
-                                        ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          widget.achievement.title.tr(),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          SizedBox(
+                            height: isVerySmallScreen
+                                ? 16
+                                : (isSmallScreen ? 20 : 24),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.achievement.description.tr(),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '+${widget.xpReward} XP',
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF3498DB),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Text(
-                            'gamification.messages.great'.tr(),
+                          Text(
+                            widget.achievement.title.tr(),
                             style: GoogleFonts.quicksand(
-                              fontSize: 16,
+                              fontSize: isVerySmallScreen
+                                  ? 16
+                                  : (isSmallScreen
+                                        ? 18
+                                        : (isLargeScreen ? 22 : 20)),
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: isVerySmallScreen ? 6 : 8),
+                          Text(
+                            widget.achievement.description.tr(),
+                            style: GoogleFonts.quicksand(
+                              fontSize: isVerySmallScreen
+                                  ? 12
+                                  : (isSmallScreen
+                                        ? 13
+                                        : (isLargeScreen ? 15 : 14)),
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: isVerySmallScreen ? 12 : 16),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isVerySmallScreen
+                                  ? 12
+                                  : (isSmallScreen ? 14 : 16),
+                              vertical: isVerySmallScreen ? 6 : 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.white,
+                                  size: isVerySmallScreen
+                                      ? 16
+                                      : (isSmallScreen ? 18 : 20),
+                                ),
+                                SizedBox(width: isVerySmallScreen ? 3 : 4),
+                                Text(
+                                  '+${widget.xpReward} XP',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: isVerySmallScreen
+                                        ? 14
+                                        : (isSmallScreen
+                                              ? 15
+                                              : (isLargeScreen ? 18 : 16)),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: isVerySmallScreen
+                                ? 16
+                                : (isSmallScreen ? 20 : 24),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF3498DB),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isVerySmallScreen
+                                    ? 24
+                                    : (isSmallScreen
+                                          ? 28
+                                          : (isLargeScreen ? 40 : 32)),
+                                vertical: isVerySmallScreen
+                                    ? 10
+                                    : (isSmallScreen
+                                          ? 11
+                                          : (isLargeScreen ? 14 : 12)),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            child: Text(
+                              'gamification.messages.great'.tr(),
+                              style: GoogleFonts.quicksand(
+                                fontSize: isVerySmallScreen
+                                    ? 14
+                                    : (isSmallScreen
+                                          ? 15
+                                          : (isLargeScreen ? 18 : 16)),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

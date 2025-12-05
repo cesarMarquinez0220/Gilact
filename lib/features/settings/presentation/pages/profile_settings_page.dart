@@ -9,6 +9,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_event.dart';
+import '../../../gamification/domain/repositories/gamification_repository.dart';
 import '../bloc/settings_bloc.dart';
 import '../widgets/user_info_card_widget.dart';
 import '../widgets/app_settings_card_widget.dart';
@@ -32,6 +33,9 @@ class ProfileSettingsPage extends StatefulWidget {
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   Map<String, dynamic> _localSettings = {};
   String _appVersion = '1.0.0';
+  final AppLogger _logger = getIt<AppLogger>();
+  final GamificationRepository _gamificationRepository =
+      getIt<GamificationRepository>();
 
   @override
   void initState() {
@@ -81,10 +85,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               if (state is AuthUnauthenticated) {
                 // La cuenta fue eliminada exitosamente
                 Navigator.of(dialogContext).pop();
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/login',
-                  (route) => false,
-                );
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -168,7 +171,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     const SizedBox(height: 16),
                     const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF03A696)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF03A696),
+                        ),
                       ),
                     ),
                   ],
@@ -195,7 +200,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                           if (password.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Por favor ingresa tu contraseña'),
+                                content: Text(
+                                  'Por favor ingresa tu contraseña',
+                                ),
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -219,12 +226,16 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Text(
                           'Eliminar',
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                 ),
               ],
@@ -241,7 +252,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
             'account.deleteAccountConfirmTitle'.tr(),
             style: GoogleFonts.quicksand(
@@ -334,12 +347,56 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         ),
       );
 
+      // Obtener userId antes de cerrar sesión para limpiar datos locales
+      final user = FirebaseAuth.instance.currentUser;
+      String? userId;
+      if (user != null) {
+        // Intentar obtener userId del UserProfileBloc
+        final userProfileBloc = context.read<UserProfileBloc>();
+        final userState = userProfileBloc.state;
+        if (userState is UserProfileLoaded) {
+          userId = userState.profile.id;
+        } else if (userState is UserProfileUpdated) {
+          userId = userState.profile.id;
+        }
+
+        // Si no se pudo obtener del bloc, intentar obtenerlo de Firestore
+        if (userId == null || userId.isEmpty) {
+          try {
+            final userQuery = await FirebaseFirestore.instance
+                .collection('Users')
+                .where('email', isEqualTo: user.email)
+                .limit(1)
+                .get();
+            if (userQuery.docs.isNotEmpty) {
+              userId = userQuery.docs.first.id;
+            } else {
+              userId = user.uid; // Fallback a UID
+            }
+          } catch (e) {
+            _logger.w('Error obteniendo userId para limpieza: $e');
+            userId = user.uid; // Fallback a UID
+          }
+        }
+      }
+
       // Resetear UserProfileBloc antes de cerrar sesión
       context.read<UserProfileBloc>().add(const ResetUserProfileRequested());
-      
-      // Resetear GamificationBloc antes de cerrar sesión
+
+      // Limpiar datos locales de gamificación del usuario que está cerrando sesión
+      if (userId != null && userId.isNotEmpty) {
+        _logger.d('🧹 Limpiando datos de gamificación para userId: $userId');
+        final clearResult = await _gamificationRepository.clearUserData(userId);
+        clearResult.fold(
+          (error) =>
+              _logger.w('⚠️ Error limpiando datos de gamificación: $error'),
+          (_) => _logger.d('✅ Datos de gamificación limpiados exitosamente'),
+        );
+      }
+
+      // Resetear GamificationBloc después de limpiar datos
       context.read<GamificationBloc>().add(const ResetGamificationProfile());
-      
+
       // Esperar un momento para que los resets se completen
       await Future.delayed(const Duration(milliseconds: 100));
 
@@ -433,13 +490,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
                 }
-                
+
                 // La cuenta fue eliminada exitosamente, navegar al login
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/login',
-                  (route) => false,
-                );
-                
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
+
                 // Mostrar mensaje de éxito después de un pequeño delay
                 Future.delayed(const Duration(milliseconds: 300), () {
                   if (context.mounted) {
@@ -469,9 +525,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
                 }
-                
+
                 // Si el error es que requiere reautenticación, mostrar diálogo para pedir contraseña
-                if (state.message.contains('REQUIRES_RECENT_LOGIN') || 
+                if (state.message.contains('REQUIRES_RECENT_LOGIN') ||
                     state.message.contains('reautenticación')) {
                   _showPasswordDialogForReauthentication(context);
                 } else {

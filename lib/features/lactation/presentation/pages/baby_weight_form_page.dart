@@ -340,28 +340,38 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                                   curve: Curves.easeOutCubic,
                                 ),
                               ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              24.0,
-                              0,
-                              24.0,
-                              24.0,
-                            ),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                _buildHeader(),
-                                const SizedBox(height: 30),
-                                // Campo de peso
-                                _buildWeightInput(),
-                                const SizedBox(height: 24),
-                                // Campo de notas opcional
-                                _buildNotesSection(),
-                                const SizedBox(height: 40),
-                                // Botones
-                                _buildActionButtons(),
-                              ],
-                            ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final screenWidth = constraints.maxWidth;
+                              final screenHeight = MediaQuery.of(context).size.height;
+                              final isSmallScreen = screenWidth < 360;
+                              final isVerySmallScreen = screenWidth < 320;
+                              final isShortScreen = screenHeight < 700;
+                              
+                              return Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: isShortScreen ? 8 : 16),
+                                    _buildHeader(isSmallScreen, isVerySmallScreen),
+                                    SizedBox(height: isShortScreen ? 20 : 30),
+                                    // Campo de peso
+                                    _buildWeightInput(isSmallScreen, isVerySmallScreen),
+                                    SizedBox(height: isShortScreen ? 16 : 24),
+                                    // Campo de notas opcional
+                                    _buildNotesSection(isSmallScreen),
+                                    SizedBox(height: isShortScreen ? 24 : 40),
+                                    // Botones
+                                    _buildActionButtons(isSmallScreen),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -376,12 +386,19 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isSmallScreen, bool isVerySmallScreen) {
+    final iconSize = isVerySmallScreen ? 80.0 : (isSmallScreen ? 90.0 : 100.0);
+    final iconInnerSize = isVerySmallScreen ? 40.0 : (isSmallScreen ? 45.0 : 50.0);
+    final titleFontSize = isVerySmallScreen ? 24.0 : (isSmallScreen ? 28.0 : 32.0);
+    final subtitleFontSize = isVerySmallScreen ? 14.0 : (isSmallScreen ? 15.0 : 16.0);
+    final spacing1 = isSmallScreen ? 20.0 : 32.0;
+    final spacing2 = isSmallScreen ? 8.0 : 12.0;
+    
     return Column(
       children: [
         Container(
-          width: 100,
-          height: 100,
+          width: iconSize,
+          height: iconSize,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             shape: BoxShape.circle,
@@ -397,21 +414,21 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.monitor_weight,
             color: Colors.white,
-            size: 50,
+            size: iconInnerSize,
           ),
         ),
-        const SizedBox(height: 32),
+        SizedBox(height: spacing1),
         Text(
           'forms.babyWeight.title'.tr(),
-          style: const TextStyle(
-            fontSize: 32,
+          style: TextStyle(
+            fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 0.5,
-            shadows: [
+            shadows: const [
               Shadow(
                 color: Colors.black26,
                 offset: Offset(0, 2),
@@ -420,24 +437,34 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
             ],
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing2),
         Text(
           'forms.babyWeight.question'.tr(),
           style: GoogleFonts.quicksand(
-            fontSize: 16,
+            fontSize: subtitleFontSize,
             fontWeight: FontWeight.w500,
             color: Colors.white.withValues(alpha: 0.9),
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
-  Widget _buildWeightInput() {
+  Widget _buildWeightInput(bool isSmallScreen, bool isVerySmallScreen) {
+    final containerPadding = isVerySmallScreen ? 16.0 : (isSmallScreen ? 20.0 : 24.0);
+    final numberFontSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 42.0 : 48.0);
+    final unitFontSize = isVerySmallScreen ? 18.0 : (isSmallScreen ? 20.0 : 24.0);
+    final buttonSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 38.0 : 40.0);
+    final buttonIconSize = isVerySmallScreen ? 18.0 : 20.0;
+    
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(containerPadding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
@@ -478,14 +505,14 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                           },
                           child: _isEditingWeight
                               ? SizedBox(
-                                  width: 110,
+                                  width: isVerySmallScreen ? 90 : (isSmallScreen ? 100 : 110),
                                   child: TextField(
                                     controller: _weightController,
                                     focusNode: _weightFocusNode,
                                     autofocus: true,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.quicksand(
-                                      fontSize: 48,
+                                      fontSize: numberFontSize,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -527,7 +554,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                                       TextSpan(
                                         text: _weight.toStringAsFixed(1),
                                         style: GoogleFonts.quicksand(
-                                          fontSize: 48,
+                                          fontSize: numberFontSize,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -535,7 +562,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                                       TextSpan(
                                         text: ' kg',
                                         style: GoogleFonts.quicksand(
-                                          fontSize: 24,
+                                          fontSize: unitFontSize,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white.withValues(
                                             alpha: 0.9,
@@ -549,13 +576,15 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: isSmallScreen ? 6 : 8),
                   // Columna de botones + y -
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _WeightAdjustButton(
                         icon: Icons.add,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
                         onPressed: () {
                           setState(() {
                             _weight = _snapToTenth(_weight + 0.1);
@@ -563,9 +592,11 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                           });
                         },
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
                       _WeightAdjustButton(
                         icon: Icons.remove,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
                         onPressed: () {
                           setState(() {
                             _weight = _snapToTenth(_weight - 0.1);
@@ -600,9 +631,12 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
     );
   }
 
-  Widget _buildNotesSection() {
+  Widget _buildNotesSection(bool isSmallScreen) {
+    final padding = isSmallScreen ? 16.0 : 20.0;
+    final fontSize = isSmallScreen ? 14.0 : 16.0;
+    
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
@@ -625,17 +659,17 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
           child: TextField(
             controller: _notesController,
             maxLines: 3,
-            style: GoogleFonts.quicksand(fontSize: 16, color: Colors.white),
+            style: GoogleFonts.quicksand(fontSize: fontSize, color: Colors.white),
             decoration: InputDecoration(
               hintText: 'forms.babyWeight.notesPlaceholder'.tr(),
               hintStyle: GoogleFonts.quicksand(
-                fontSize: 16,
+                fontSize: fontSize,
                 color: Colors.white.withValues(alpha: 0.6),
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 12 : 16,
+                vertical: isSmallScreen ? 10 : 12,
               ),
             ),
           ),
@@ -644,13 +678,16 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isSmallScreen) {
+    final buttonHeight = isSmallScreen ? 50.0 : 56.0;
+    final buttonFontSize = isSmallScreen ? 16.0 : 18.0;
+    
     return Column(
       children: [
         // Botón Guardar con gradiente y sombras
         Container(
           width: double.infinity,
-          height: 56,
+          height: buttonHeight,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [
@@ -695,7 +732,7 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
                 : Text(
                     'forms.babyWeight.save'.tr(),
                     style: GoogleFonts.quicksand(
-                      fontSize: 18,
+                      fontSize: buttonFontSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 0.5,
@@ -712,14 +749,21 @@ class _BabyWeightFormPageState extends State<BabyWeightFormPage>
 class _WeightAdjustButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
+  final double size;
+  final double iconSize;
 
-  const _WeightAdjustButton({required this.icon, required this.onPressed});
+  const _WeightAdjustButton({
+    required this.icon,
+    required this.onPressed,
+    this.size = 40.0,
+    this.iconSize = 20.0,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 40,
-      height: 40,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
@@ -732,8 +776,8 @@ class _WeightAdjustButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(20),
-          child: Icon(icon, color: Colors.white, size: 20),
+          borderRadius: BorderRadius.circular(size / 2),
+          child: Icon(icon, color: Colors.white, size: iconSize),
         ),
       ),
     );

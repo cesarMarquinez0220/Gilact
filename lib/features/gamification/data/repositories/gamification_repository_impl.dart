@@ -19,9 +19,9 @@ class GamificationRepositoryImpl implements GamificationRepository {
     required GamificationLocalDataSource localDataSource,
     required GamificationRemoteDataSource remoteDataSource,
     required ConnectivityService connectivityService,
-  })  : _localDataSource = localDataSource,
-        _remoteDataSource = remoteDataSource,
-        _connectivityService = connectivityService;
+  }) : _localDataSource = localDataSource,
+       _remoteDataSource = remoteDataSource,
+       _connectivityService = connectivityService;
 
   @override
   Future<Either<String, UserGamificationProfile?>> getProfile(
@@ -130,13 +130,16 @@ class GamificationRepositoryImpl implements GamificationRepository {
   ) async {
     try {
       // OFFLINE-FIRST: Obtener de local primero
-      final localTransactions = await _localDataSource.getXPTransactions(userId);
+      final localTransactions = await _localDataSource.getXPTransactions(
+        userId,
+      );
 
       // Si hay conexión, intentar obtener de Firestore
       if (await _connectivityService.isConnected()) {
         try {
-          final remoteTransactions =
-              await _remoteDataSource.getXPTransactions(userId);
+          final remoteTransactions = await _remoteDataSource.getXPTransactions(
+            userId,
+          );
 
           // Combinar y deduplicar (priorizar remoto)
           final remoteIds = remoteTransactions.map((t) => t.id).toSet();
@@ -241,8 +244,8 @@ class GamificationRepositoryImpl implements GamificationRepository {
       }
 
       // 1. Sincronizar transacciones no sincronizadas
-      final unsyncedTransactions =
-          await _localDataSource.getUnsyncedTransactions(userId);
+      final unsyncedTransactions = await _localDataSource
+          .getUnsyncedTransactions(userId);
 
       if (unsyncedTransactions.isNotEmpty) {
         await _remoteDataSource.syncXPTransactions(unsyncedTransactions);
@@ -256,10 +259,7 @@ class GamificationRepositoryImpl implements GamificationRepository {
       if (localProfile != null && !localProfile.isSynced) {
         await _remoteDataSource.saveProfile(localProfile);
         await _localDataSource.saveProfile(
-          localProfile.copyWith(
-            isSynced: true,
-            lastSyncAt: DateTime.now(),
-          ),
+          localProfile.copyWith(isSynced: true, lastSyncAt: DateTime.now()),
         );
       }
 
@@ -274,5 +274,14 @@ class GamificationRepositoryImpl implements GamificationRepository {
       return Left('Error sincronizando con Firestore: $e');
     }
   }
-}
 
+  @override
+  Future<Either<String, void>> clearUserData(String userId) async {
+    try {
+      await _localDataSource.clearUserData(userId);
+      return const Right(null);
+    } catch (e) {
+      return Left('Error limpiando datos de gamificación: $e');
+    }
+  }
+}

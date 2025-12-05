@@ -16,71 +16,111 @@ class TrulyAdaptiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ya no necesitamos calcular la altura manualmente.
-    // Usamos un Column para que Flutter distribuya el espacio.
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-        ), // Padding lateral general
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(height: 8), // Reducido de 24 a 8
-            // 1. La imagen ocupa una porción flexible del espacio.
-            // El `flex` determina la proporción. Un valor más bajo le da menos espacio
-            // en comparación con el contenido.
-            Flexible(
-              flex: 2, // Reducido de 3 a 2 para dar menos espacio a la imagen
-              child: image,
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenHeight = constraints.maxHeight;
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenHeight < 700 || screenWidth < 360;
+        final isVerySmallScreen = screenHeight < 600;
 
-            const SizedBox(height: 8), // Reducido de 16 a 8
-            // 2. La tarjeta de contenido se expande para llenar todo el espacio restante.
-            _buildContentCard(),
-            const SizedBox(height: 8), // Reducido de 24 a 8
+        // Ajustar flex de imagen según tamaño de pantalla
+        final imageFlex = isVerySmallScreen ? 1 : (isSmallScreen ? 2 : 3);
+
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12.0 : 16.0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(height: isSmallScreen ? 4 : 8),
+                // 1. La imagen ocupa una porción flexible del espacio.
+                Flexible(flex: imageFlex, child: image),
+                SizedBox(height: isSmallScreen ? 4 : 8),
+                // 2. La tarjeta de contenido se expande para llenar todo el espacio restante.
+                Expanded(
+                  child: _buildContentCard(
+                    context,
+                    isSmallScreen,
+                    isVerySmallScreen,
+                  ),
+                ),
+                SizedBox(height: isSmallScreen ? 4 : 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContentCard(
+    BuildContext context,
+    bool isSmallScreen,
+    bool isVerySmallScreen,
+  ) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(isSmallScreen ? 10.0 : 12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Título responsive con FittedBox para ajuste automático
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Reducir tamaño máximo del título en pantallas pequeñas
+                final maxTitleWidth = isSmallScreen
+                    ? constraints.maxWidth * 0.95
+                    : constraints.maxWidth;
+                final maxTitleScale = isVerySmallScreen
+                    ? 0.75
+                    : (isSmallScreen ? 0.85 : 1.0);
+
+                return FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: maxTitleWidth,
+                      maxHeight: isSmallScreen ? 80 : 100,
+                    ),
+                    child: Transform.scale(
+                      scale: maxTitleScale,
+                      alignment: Alignment.center,
+                      child: DefaultTextStyle(
+                        style: DefaultTextStyle.of(context).style,
+                        textAlign: TextAlign.center,
+                        child: title,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: isSmallScreen ? 4 : 6),
+            // Contenido con scroll - Expanded para ocupar espacio restante
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: body,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
-Widget _buildContentCard() {
-  return Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        // --- CAMBIOS CLAVE AQUÍ ---
-
-        // 1. ELIMINA ESTA LÍNEA. Es la causa del problema.
-        // mainAxisSize: MainAxisSize.min,
-
-        // 2. AÑADE ESTA LÍNEA para centrar el contenido verticalmente.
-        mainAxisSize: MainAxisSize.min,
-
-        // -------------------------
-
-        children: [
-          title,
-          const SizedBox(height: 6),
-          // Envolver el contenido del cuerpo en Flexible es una buena
-          // práctica para evitar errores si el texto es muy largo.
-          Flexible(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(children: body),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
 }
 
 /// Un widget de texto que se encoge para caber en el espacio disponible.

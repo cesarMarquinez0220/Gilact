@@ -541,6 +541,7 @@
     },
     "firstOfDay": "+5 XP si es primero del día",
     "firstOfDaySleep": "+5 XP primero del día, +10 XP si incluye sueño",
+    "fullRecordXPInfo": "20 XP base (sin sueño). +10 XP si incluyes datos de sueño. +5 XP si es el primero del día.",
     "firstLessonOfDay": "+15 XP si es primera del día",
     "perQuestion": "5 XP por pregunta",
     "allCorrect": "+20 XP si todas correctas"
@@ -789,6 +790,10 @@
     "lesson": "Lección",
     "category": "Categoría",
     "progress": "Progreso",
+    "babyUnlock": {
+      "3months": "¡Completa esta lección para desbloquear el bebé de 3 meses!",
+      "6months": "¡Completa esta lección para desbloquear el bebé de 6 meses!"
+    },
     "videos": "Videos",
     "viewVideos": "Ver Videos",
     "completed": "Completado",
