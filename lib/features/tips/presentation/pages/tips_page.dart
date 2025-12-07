@@ -15,56 +15,18 @@ class TipsPage extends StatefulWidget {
   State<TipsPage> createState() => _TipsPageState();
 }
 
-class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
+class _TipsPageState extends State<TipsPage> {
   final PageController _pageController = PageController();
-  late AnimationController _backgroundController;
-  late AnimationController _pulseController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _pulseAnimation;
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
     context.read<TipBloc>().add(const GetAllTipsRequested());
-  }
-
-  void _initializeAnimations() {
-    _backgroundController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    );
-
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _backgroundController, curve: Curves.easeInOut),
-    );
-
-    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _backgroundController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    _backgroundController.forward();
-    _pulseController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _backgroundController.dispose();
-    _pulseController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -230,50 +192,32 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
   Widget _buildTipCard(dynamic tip, int index, {Widget? tipContent}) {
     // Si tenemos un widget estático (diseño original), lo mostramos tal cual
     if (tipContent != null) {
-      return AnimatedBuilder(
-        animation: _fadeAnimation,
-        builder: (context, child) {
-          return Transform.translate(
-            offset: Offset(0, _slideAnimation.value),
-            child: Opacity(
-              opacity: _fadeAnimation.value,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: tipContent,
-              ),
-            ),
-          );
-        },
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        child: tipContent,
       );
     }
 
-    return AnimatedBuilder(
-      animation: _fadeAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _slideAnimation.value),
-          child: Opacity(
-            opacity: _fadeAnimation.value,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Imagen del tip
-                  Expanded(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Imagen del tip
+          Expanded(
                     flex: 3,
                     child: Container(
                       width: double.infinity,
@@ -309,29 +253,21 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                           Positioned(
                             top: 16,
                             right: 16,
-                            child: AnimatedBuilder(
-                              animation: _pulseAnimation,
-                              builder: (context, child) {
-                                return Transform.scale(
-                                  scale: _pulseAnimation.value,
-                                  child: IconButton(
-                                    onPressed: tip == null
-                                        ? null
-                                        : () => _toggleFavorite(tip.id),
-                                    icon: Icon(
-                                      (tip != null && (tip.isFavorite == true))
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color:
-                                          (tip != null &&
-                                              (tip.isFavorite == true))
-                                          ? Colors.red
-                                          : Colors.white,
-                                      size: 28,
-                                    ),
-                                  ),
-                                );
-                              },
+                            child: IconButton(
+                              onPressed: tip == null
+                                  ? null
+                                  : () => _toggleFavorite(tip.id),
+                              icon: Icon(
+                                (tip != null && (tip.isFavorite == true))
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color:
+                                    (tip != null &&
+                                        (tip.isFavorite == true))
+                                    ? Colors.red
+                                    : Colors.white,
+                                size: 28,
+                              ),
                             ),
                           ),
 
@@ -361,10 +297,10 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                  ),
+          ),
 
-                  // Contenido del tip
-                  Expanded(
+          // Contenido del tip
+          Expanded(
                     flex: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
@@ -405,13 +341,9 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -493,26 +425,18 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
         Positioned(
           top: -height * 0.1,
           right: -width * 0.1,
-          child: AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _pulseAnimation.value,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.white.withValues(alpha: 0.1),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
         ),
         ...List.generate(6, (index) => _buildFloatingParticle(context, index)),
@@ -521,105 +445,85 @@ class _TipsPageState extends State<TipsPage> with TickerProviderStateMixin {
   }
 
   Widget _buildFloatingParticle(BuildContext context, int index) {
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        final animationValue = _pulseController.value;
-        final left = (index * 60.0) % MediaQuery.of(context).size.width;
-        final top = (index * 100.0) % MediaQuery.of(context).size.height;
-        return Positioned(
-          left: left + (animationValue * 25 * (index % 2 == 0 ? 1 : -1)),
-          top: top + (animationValue * 20 * (index % 3 == 0 ? 1 : -1)),
-          child: Opacity(
-            opacity: 0.4 + (animationValue * 0.3),
-            child: Container(
-              width: 6 + (index % 3) * 2.0,
-              height: 6 + (index % 3) * 2.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.7),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
+    final left = (index * 60.0) % MediaQuery.of(context).size.width;
+    final top = (index * 100.0) % MediaQuery.of(context).size.height;
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: 6 + (index % 3) * 2.0,
+        height: 6 + (index % 3) * 2.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.7),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.4),
+              blurRadius: 6,
+              spreadRadius: 1,
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildProgressHeader({int current = 1, int total = 14}) {
-    return AnimatedBuilder(
-      animation: _backgroundController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _slideAnimation.value),
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.25),
-                    Colors.white.withValues(alpha: 0.15),
-                  ],
-                ),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: 1,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'tips.progress'.tr(),
+                style: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'tips.progress'.tr(),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        '$current / $total',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Barra de progreso inferior al título
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: current / total,
-                      minHeight: 6,
-                      backgroundColor: Colors.white.withValues(alpha: 0.3),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                '$current / $total',
+                style: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Barra de progreso inferior al título
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: current / total,
+              minHeight: 6,
+              backgroundColor: Colors.white.withValues(alpha: 0.3),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Colors.white,
               ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

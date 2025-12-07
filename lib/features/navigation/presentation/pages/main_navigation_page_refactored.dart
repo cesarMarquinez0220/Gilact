@@ -501,7 +501,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
           await videoPreloadService.preloadVideoMetadata(videoId);
 
           // Precargar video en cache (solo los primeros segundos)
-          await VideoCacheService.preloadVideoSegment(videoId, duration: 30);
+          await VideoCacheService.preloadVideoSegment(videoId, '', duration: 30);
 
           _logger.d('Video $videoId precargado en cache');
         } catch (e, stackTrace) {
@@ -553,7 +553,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       await videoPreloadService.preloadVideoMetadata(nextVideoId);
 
       // Precargar video en cache
-      await VideoCacheService.preloadVideoSegment(nextVideoId, duration: 30);
+      await VideoCacheService.preloadVideoSegment(nextVideoId, '', duration: 30);
 
       _logger.success('Video $nextVideoId precargado progresivamente');
     } catch (e, stackTrace) {

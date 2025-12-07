@@ -14,6 +14,7 @@ class SettingsLocalDataSource {
   static const String _keyAutoSaveProgress = 'autoSaveProgress';
   static const String _keyLanguage = 'language';
   static const String _keyAppVersion = 'app_version';
+  static const String _keyBiometricEnabled = 'biometric_login_enabled';
 
   /// Obtiene el estado del sonido
   Future<bool> getSoundEnabled() async {
@@ -65,6 +66,16 @@ class SettingsLocalDataSource {
     return await _prefs.setString(_keyAppVersion, version);
   }
 
+  /// Obtiene el estado de la autenticación biométrica
+  Future<bool> getBiometricEnabled() async {
+    return _prefs.getBool(_keyBiometricEnabled) ?? false;
+  }
+
+  /// Guarda el estado de la autenticación biométrica
+  Future<bool> setBiometricEnabled(bool value) async {
+    return await _prefs.setBool(_keyBiometricEnabled, value);
+  }
+
   /// Obtiene todas las configuraciones locales
   Future<Map<String, dynamic>> getAllLocalSettings() async {
     return {
@@ -73,6 +84,7 @@ class SettingsLocalDataSource {
       'autoSaveProgress': await getAutoSaveProgress(),
       'language': await getLanguage(),
       'appVersion': await getAppVersion(),
+      'biometricEnabled': await getBiometricEnabled(),
     };
   }
 }

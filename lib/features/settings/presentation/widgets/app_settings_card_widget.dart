@@ -73,6 +73,7 @@ class AppSettingsCardWidget extends StatelessWidget {
                 (value) => onSettingChanged('autoSaveProgress', value),
                 isSmallScreen,
               ),
+
               const Divider(height: 1),
               _buildSettingTile(
                 context,

@@ -160,13 +160,13 @@ void main() async {
     );
   }
 
-  runApp(
-    DevicePreview(
-      // ¡IMPORTANTE! Solo activar en modo debug, nunca en release
-      enabled: !kReleaseMode,
-      builder: (context) => const MyApp(),
-    ),
-  );
+  // Solo usar DevicePreview en modo debug
+  if (kDebugMode) {
+    runApp(DevicePreview(enabled: true, builder: (context) => const MyApp()));
+  } else {
+    // En release, ejecutar directamente sin DevicePreview
+    runApp(const MyApp());
+  }
 }
 
 /// Muestra una notificación de sincronización
@@ -334,10 +334,12 @@ class MyApp extends StatelessWidget {
               saveLocale: true,
               child: Builder(
                 builder: (context) => MaterialApp(
-                  // Estas 3 líneas son obligatorias para que funcione el preview
-                  useInheritedMediaQuery: true,
-                  locale: DevicePreview.locale(context) ?? context.locale,
-                  builder: DevicePreview.appBuilder,
+                  // Solo usar DevicePreview en modo debug
+                  useInheritedMediaQuery: kDebugMode,
+                  locale: kDebugMode
+                      ? (DevicePreview.locale(context) ?? context.locale)
+                      : context.locale,
+                  builder: kDebugMode ? DevicePreview.appBuilder : null,
                   debugShowCheckedModeBanner: false,
                   theme: ThemeData.light().copyWith(
                     // Color de fondo que coincide con el gradiente del login

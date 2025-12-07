@@ -190,17 +190,40 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
   Widget _buildHeader() {
     final progress = _getProgress();
+    final padding = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 16.0,
+      medium: 20.0,
+      large: 24.0,
+    );
+    final iconSize = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 50.0,
+      medium: 60.0,
+      large: 70.0,
+    );
+    final iconInnerSize = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 24.0,
+      medium: 30.0,
+      large: 36.0,
+    );
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 24);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(
+      context,
+      14,
+    );
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(padding),
       child: Column(
         children: [
           // Icono y título
           Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: iconSize,
+                height: iconSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white.withValues(alpha: 0.15),
@@ -209,13 +232,20 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     width: 1,
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.child_care,
                   color: Colors.white,
-                  size: 30,
+                  size: iconInnerSize,
                 ),
               ),
-              const SizedBox(width: 20),
+              SizedBox(
+                width: ResponsiveHelper.getResponsiveValue(
+                  context,
+                  small: 16.0,
+                  medium: 20.0,
+                  large: 24.0,
+                ),
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,7 +255,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                           ? 'lactation.calendar.editRecord'.tr()
                           : 'lactation.flow.recordTitle'.tr(),
                       style: GoogleFonts.quicksand(
-                        fontSize: 24,
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         shadows: [
@@ -241,7 +271,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     Text(
                       'lactation.flow.stepByStepRecord'.tr(),
                       style: GoogleFonts.quicksand(
-                        fontSize: 14,
+                        fontSize: subtitleFontSize,
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
@@ -280,7 +310,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           Text(
             'Paso ${_getCurrentStepNumber()} de ${_getTotalSteps()}',
             style: GoogleFonts.quicksand(
-              fontSize: 12,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(context, 12),
               color: Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w600,
             ),
@@ -297,15 +327,28 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     final options = LactationDecisionTree.getOptionsForStep(
       _context.currentStep,
     );
+    final padding = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 16.0,
+      medium: 20.0,
+      large: 24.0,
+    );
+    final innerPadding = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 20.0,
+      medium: 24.0,
+      large: 28.0,
+    );
+    final messageFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
 
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(padding),
       child: Column(
         children: [
           // Mensaje del paso
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(innerPadding),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               gradient: LinearGradient(
@@ -327,7 +370,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   message,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.quicksand(
-                    fontSize: 20,
+                    fontSize: messageFontSize,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
@@ -343,7 +386,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
 
-          const SizedBox(height: 30),
+          SizedBox(
+            height: ResponsiveHelper.getResponsiveValue(
+              context,
+              small: 24.0,
+              medium: 30.0,
+              large: 36.0,
+            ),
+          ),
 
           // Opciones del paso
           Expanded(
@@ -357,16 +407,17 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildOptionsGrid(List<LactationOption> options) {
-    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
-                         ResponsiveHelper.isSmall(context);
+    final isSmallScreen =
+        ResponsiveHelper.isExtraSmall(context) ||
+        ResponsiveHelper.isSmall(context);
     final columns = ResponsiveHelper.getResponsiveColumns(
       context,
       small: 2,
       medium: 2,
-      large: 2,
+      large: 3,
     );
     final spacing = ResponsiveHelper.getResponsiveSpacing(context);
-    
+
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
@@ -383,6 +434,16 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildOptionCard(LactationOption option) {
+    final iconFontSize = ResponsiveHelper.getResponsiveFontSize(context, 32);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final descFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
+    final padding = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 12.0,
+      medium: 16.0,
+      large: 20.0,
+    );
+
     return GestureDetector(
       onTap: () => _selectOption(option),
       child: Container(
@@ -411,12 +472,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Icono
-                  Text(option.icon, style: const TextStyle(fontSize: 32)),
+                  Text(option.icon, style: TextStyle(fontSize: iconFontSize)),
                   const SizedBox(height: 8),
 
                   // Título
@@ -424,7 +485,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     option.title,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.quicksand(
-                      fontSize: 16,
+                      fontSize: titleFontSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -436,7 +497,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     option.description,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.quicksand(
-                      fontSize: 12,
+                      fontSize: descFontSize,
                       color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
@@ -450,8 +511,16 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildConfirmationStep() {
+    final padding = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 16.0,
+      medium: 20.0,
+      large: 24.0,
+    );
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
@@ -475,17 +544,31 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               Text(
                 'lactation.flow.summaryTitle'.tr(),
                 style: GoogleFonts.quicksand(
-                  fontSize: 20,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(
+                height: ResponsiveHelper.getResponsiveValue(
+                  context,
+                  small: 16.0,
+                  medium: 20.0,
+                  large: 24.0,
+                ),
+              ),
 
               // Mostrar datos resumidos
               ..._buildSummaryItems(),
 
-              const SizedBox(height: 30),
+              SizedBox(
+                height: ResponsiveHelper.getResponsiveValue(
+                  context,
+                  small: 24.0,
+                  medium: 30.0,
+                  large: 36.0,
+                ),
+              ),
 
               // Botones de acción
               Row(
@@ -498,7 +581,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       () => _goToPreviousStep(),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: ResponsiveHelper.getResponsiveValue(
+                      context,
+                      small: 12.0,
+                      medium: 16.0,
+                      large: 20.0,
+                    ),
+                  ),
                   Expanded(
                     child: _buildActionButton(
                       'lactation.flow.save'.tr(),
@@ -554,17 +644,27 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildSummaryItem(String icon, String title, String value) {
+    final iconFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final valueFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+    final spacing = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 10.0,
+      medium: 12.0,
+      large: 14.0,
+    );
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: spacing),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 12),
+          Text(icon, style: TextStyle(fontSize: iconFontSize)),
+          SizedBox(width: spacing),
           Expanded(
             child: Text(
               title,
               style: GoogleFonts.quicksand(
-                fontSize: 16,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
@@ -573,7 +673,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           Text(
             value,
             style: GoogleFonts.quicksand(
-              fontSize: 14,
+              fontSize: valueFontSize,
               color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
@@ -588,8 +688,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     Color color,
     VoidCallback onPressed,
   ) {
+    final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final iconSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
+
     return Container(
-      height: 50,
+      height: buttonHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.8)]),
@@ -611,10 +715,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           ),
         ),
         child: _isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
+            ? SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: const CircularProgressIndicator(
                   color: Colors.white,
                   strokeWidth: 2,
                 ),
@@ -622,12 +726,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: Colors.white, size: 20),
+                  Icon(icon, color: Colors.white, size: iconSize),
                   const SizedBox(width: 8),
                   Text(
                     text,
                     style: GoogleFonts.quicksand(
-                      fontSize: 16,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -789,14 +893,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
 
       if (!mounted) return;
 
-      DialogExample.showSuccessDialog(
-        context,
-        'lactation.flow.recordSuccess'.tr(),
-        'lactation.flow.recordSavedSuccess'.tr(),
-        () {
-          Navigator.of(context).pop(true);
-        },
-      );
+      Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
 

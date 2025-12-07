@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/services/app_logger.dart';
@@ -435,166 +436,182 @@ class _RegistrationPageState extends State<RegistrationPage>
   }
 
   Future<bool> _showDataConfirmationDialog() async {
+    final isTablet = ResponsiveHelper.isTablet(context);
+    final dialogWidth = isTablet ? 500.0 : double.infinity;
+
     return await showDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: Colors.transparent,
-            contentPadding: EdgeInsets.zero,
-            content: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Icono de confirmación
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.check_circle_outline,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
+          builder: (context) => Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: dialogWidth),
+              child: AlertDialog(
+                backgroundColor: Colors.transparent,
+                contentPadding: EdgeInsets.zero,
+                content: Container(
+                  padding: EdgeInsets.all(ResponsiveHelper.getResponsiveValue(
+                    context,
+                    small: 24,
+                    medium: 32,
+                    large: 40,
 
-                  const SizedBox(height: 20),
-
-                  // Título
-                  Text(
-                    'auth.register.confirmRegistration'.tr(),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A365D),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Resumen de datos
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildConfirmationRow(
-                          '${'profile.name'.tr()}:',
-                          _nameController.text.trim(),
-                        ),
-                        _buildConfirmationRow(
-                          '${'profile.email'.tr()}:',
-                          _emailController.text.trim(),
-                        ),
-                        _buildConfirmationRow(
-                          '${'profile.birthDate'.tr()}:',
-                          _birthDateController.text.trim(),
-                        ),
-                        if (_phoneController.text.trim().isNotEmpty)
-                          _buildConfirmationRow(
-                            '${'profile.phone'.tr()}:',
-                            _phoneController.text.trim(),
-                          ),
-                        if (_locationController.text.trim().isNotEmpty)
-                          _buildConfirmationRow(
-                            '${'profile.location'.tr()}:',
-                            _locationController.text.trim(),
-                          ),
-                        if (_motherNameController.text.trim().isNotEmpty)
-                          _buildConfirmationRow(
-                            '${'profile.motherName'.tr()}:',
-                            _motherNameController.text.trim(),
-                          ),
-                        if (_idNumberController.text.trim().isNotEmpty)
-                          _buildConfirmationRow(
-                            '${'profile.idNumber'.tr()}:',
-                            _idNumberController.text.trim(),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Texto de confirmación
-                  Text(
-                    'auth.register.confirmRegistrationMessage'.tr(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      height: 1.4,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Botones
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'common.cancel'.tr(),
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4FD1C7),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'auth.register.confirm'.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                  )),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icono de confirmación
+                      Container(
+                        width: ResponsiveHelper.getResponsiveValue(context, small: 60, medium: 70, large: 80),
+                        height: ResponsiveHelper.getResponsiveValue(context, small: 60, medium: 70, large: 80),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF4FD1C7), Color(0xFF1A365D)],
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.check_circle_outline,
+                          color: Colors.white,
+                          size: ResponsiveHelper.getResponsiveValue(context, small: 30, medium: 35, large: 40),
+                        ),
+                      ),
+                      
+                      SizedBox(height: ResponsiveHelper.getResponsiveValue(context, small: 20, medium: 24, large: 28)),
+      
+                      // Título
+                      Text(
+                        'auth.register.confirmRegistration'.tr(),
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 24),
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1A365D),
+                        ),
+                      ),
+      
+                      SizedBox(height: ResponsiveHelper.getResponsiveValue(context, small: 16, medium: 20, large: 24)),
+      
+                      // Resumen de datos
+                      Container(
+                        padding: EdgeInsets.all(ResponsiveHelper.getResponsiveValue(context, small: 16, medium: 20, large: 24)),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildConfirmationRow(
+                              '${'profile.name'.tr()}:',
+                              _nameController.text.trim(),
+                            ),
+                            _buildConfirmationRow(
+                              '${'profile.email'.tr()}:',
+                              _emailController.text.trim(),
+                            ),
+                            _buildConfirmationRow(
+                              '${'profile.birthDate'.tr()}:',
+                              _birthDateController.text.trim(),
+                            ),
+                            if (_phoneController.text.trim().isNotEmpty)
+                              _buildConfirmationRow(
+                                '${'profile.phone'.tr()}:',
+                                _phoneController.text.trim(),
+                              ),
+                            if (_locationController.text.trim().isNotEmpty)
+                              _buildConfirmationRow(
+                                '${'profile.location'.tr()}:',
+                                _locationController.text.trim(),
+                              ),
+                            if (_motherNameController.text.trim().isNotEmpty)
+                              _buildConfirmationRow(
+                                '${'profile.motherName'.tr()}:',
+                                _motherNameController.text.trim(),
+                              ),
+                            if (_idNumberController.text.trim().isNotEmpty)
+                              _buildConfirmationRow(
+                                '${'profile.idNumber'.tr()}:',
+                                _idNumberController.text.trim(),
+                              ),
+                          ],
+                        ),
+                      ),
+      
+                      SizedBox(height: ResponsiveHelper.getResponsiveValue(context, small: 20, medium: 24, large: 28)),
+      
+                      // Texto de confirmación
+                      Text(
+                        'auth.register.confirmRegistrationMessage'.tr(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
+                          color: Colors.grey,
+                          height: 1.4,
+                        ),
+                      ),
+      
+                      SizedBox(height: ResponsiveHelper.getResponsiveValue(context, small: 24, medium: 32, large: 40)),
+      
+                      // Botones
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'common.cancel'.tr(),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4FD1C7),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'auth.register.confirm'.tr(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -609,20 +626,23 @@ class _RegistrationPageState extends State<RegistrationPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: ResponsiveHelper.getResponsiveValue(context, small: 120, medium: 140, large: 160),
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A365D),
-                fontSize: 14,
+                color: const Color(0xFF1A365D),
+                fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(
+                color: Colors.grey, 
+                fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
+              ),
             ),
           ),
         ],

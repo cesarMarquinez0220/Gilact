@@ -194,7 +194,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
       print('   └─ Preguntas totales: ${_questions.length}');
       print('   └─ Respuestas correctas: $_correctAnswers');
       print(
-        '   └─ XP Trivia: ${triviaTransaction.amount} (${_correctAnswers} × 5 + ${_correctAnswers == _questions.length ? 20 : 0} bonus)',
+        '   └─ XP Trivia: ${triviaTransaction.amount} ($_correctAnswers × 5 + ${_correctAnswers == _questions.length ? 20 : 0} bonus)',
       );
       print('   └─ XP Lección: ${lessonTransaction.amount}');
       print('   └─ XP Total mostrado: $_totalXP');

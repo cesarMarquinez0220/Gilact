@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/educational_content.dart';
 import '../bloc/educational_content_bloc.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class EducationalContentPage extends StatefulWidget {
   const EducationalContentPage({super.key});
@@ -118,202 +119,6 @@ class _EducationalContentPageState extends State<EducationalContentPage> {
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchAndFilter() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
-      ),
-      child: Column(
-        children: [
-          // Barra de búsqueda
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Buscar contenido...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        _searchController.clear();
-                        _performSearch();
-                      },
-                      icon: const Icon(Icons.clear),
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            onChanged: (value) {
-              setState(() {});
-              if (value.isNotEmpty) {
-                _performSearch();
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-
-          // Filtro por categoría
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _categories.map((category) {
-                final isSelected = _selectedCategory == category;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
-                      _filterByCategory();
-                    },
-                    selectedColor: const Color(
-                      0xFF03A696,
-                    ).withValues(alpha: 0.2),
-                    checkmarkColor: const Color(0xFF03A696),
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? const Color(0xFF03A696)
-                          : Colors.grey[600],
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContentList(List<EducationalContent> content) {
-    if (content.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.library_books_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No hay contenido disponible',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: content.length,
-      itemBuilder: (context, index) {
-        final item = content[index];
-        return _buildContentCard(item);
-      },
-    );
-  }
-
-  Widget _buildContentCard(EducationalContent content) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => _showContentDetail(content),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Imagen del contenido
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  content.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF03A696).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.library_books,
-                        color: Color(0xFF03A696),
-                        size: 32,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Información del contenido
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      content.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      content.description,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF03A696,
-                            ).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            content.category,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF03A696),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
                         if (content.isCompleted)
                           const Icon(
                             Icons.check_circle,
@@ -412,6 +217,13 @@ class EducationalContentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.getResponsivePadding(context); // ~16 to 24
+    final imageHeight = ResponsiveHelper.getResponsiveValue(context, small: 200, medium: 250, large: 300);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 24);
+    final descFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final contentFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final categoryFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(content.title),
@@ -429,7 +241,7 @@ class EducationalContentDetailPage extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -440,20 +252,20 @@ class EducationalContentDetailPage extends StatelessWidget {
                 child: Image.asset(
                   content.imageUrl,
                   width: double.infinity,
-                  height: 200,
+                  height: imageHeight,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: double.infinity,
-                      height: 200,
+                      height: imageHeight,
                       decoration: BoxDecoration(
                         color: const Color(0xFF03A696).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.library_books,
-                        color: Color(0xFF03A696),
-                        size: 64,
+                        color: const Color(0xFF03A696),
+                        size: imageHeight * 0.32, // Relative size
                       ),
                     );
                   },
@@ -465,10 +277,10 @@ class EducationalContentDetailPage extends StatelessWidget {
             // Título
             Text(
               content.title,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2C3E50),
+                color: const Color(0xFF2C3E50),
               ),
             ),
             const SizedBox(height: 8),
@@ -482,9 +294,9 @@ class EducationalContentDetailPage extends StatelessWidget {
               ),
               child: Text(
                 content.category,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF03A696),
+                style: TextStyle(
+                  fontSize: categoryFontSize,
+                  color: const Color(0xFF03A696),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -495,7 +307,7 @@ class EducationalContentDetailPage extends StatelessWidget {
             Text(
               content.description,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: descFontSize,
                 color: Colors.grey[700],
                 height: 1.5,
               ),
@@ -505,9 +317,9 @@ class EducationalContentDetailPage extends StatelessWidget {
             // Contenido principal
             Text(
               content.content,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF2C3E50),
+              style: TextStyle(
+                fontSize: contentFontSize,
+                color: const Color(0xFF2C3E50),
                 height: 1.6,
               ),
             ),

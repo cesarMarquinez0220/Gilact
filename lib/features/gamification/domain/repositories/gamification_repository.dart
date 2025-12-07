@@ -39,4 +39,11 @@ abstract class GamificationRepository {
 
   /// Limpia todos los datos de gamificación de un usuario (útil al cerrar sesión)
   Future<Either<String, void>> clearUserData(String userId);
+
+  /// Ejecuta múltiples actualizaciones en una sola transacción batch (Optimización de Escritura)
+  Future<Either<String, void>> performBatchUpdate({
+    required UserGamificationProfile profile,
+    required DailyStreak streak,
+    List<XPTransaction>? transactions,
+  });
 }

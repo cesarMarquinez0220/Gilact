@@ -915,15 +915,6 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
 
       Navigator.of(context).pop();
       widget.onRecordSaved();
-
-      DialogExample.showSuccessDialog(
-        context,
-        'lactation.flow.recordSuccess'.tr(),
-        widget.existingRecord != null
-            ? 'El registro de lactancia ha sido actualizado correctamente.'
-            : 'El registro de lactancia ha sido guardado correctamente.',
-        () {},
-      );
     } catch (e) {
       if (!mounted) return;
 

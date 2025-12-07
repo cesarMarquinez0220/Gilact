@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
@@ -23,10 +24,26 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
   @override
   Future<List<EducationalContentModel>> getAllContent() async {
     try {
+    try {
+      // 1. Intentar obtener de caché primero
+      try {
+        final cacheSnapshot = await _firestore
+            .collection('educational_content')
+            .orderBy('order')
+            .get(const GetOptions(source: Source.cache));
+
+        if (cacheSnapshot.docs.isNotEmpty) {
+          return cacheSnapshot.docs
+              .map((doc) => EducationalContentModel.fromQueryDocument(doc))
+              .toList();
+        }
+      } catch (_) {}
+
+      // 2. Si hay fallo o está vacío, ir al servidor
       final querySnapshot = await _firestore
           .collection('educational_content')
           .orderBy('order')
-          .get();
+          .get(const GetOptions(source: Source.server));
 
       return querySnapshot.docs
           .map((doc) => EducationalContentModel.fromQueryDocument(doc))
@@ -88,8 +105,13 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
   @override
   Future<void> markContentAsCompleted(String contentId) async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance.collection('Users').doc('current_user_id');
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(userId);
       
       await user.collection('completed_content').doc(contentId).set({
         'contentId': contentId,
@@ -103,8 +125,12 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
   @override
   Future<List<String>> getCompletedContentIds() async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance.collection('Users').doc('current_user_id');
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(userId);
       
       final querySnapshot = await user
           .collection('completed_content')
@@ -120,9 +146,11 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
   Future<Map<String, dynamic>> getContentStatistics() async {
     try {
       // Obtener estadísticas del contenido educativo
+      // Usar agregación `count()` si es posible para ahorrar lecturas, pero SDK base a veces no lo tiene expuesto simple.
+      // Por ahora, usamos caché para obtener la lista sin costo si ya la tenemos.
       final totalContent = await _firestore
           .collection('educational_content')
-          .get();
+          .get(const GetOptions(source: Source.cache));
 
       final completedContent = await getCompletedContentIds();
 

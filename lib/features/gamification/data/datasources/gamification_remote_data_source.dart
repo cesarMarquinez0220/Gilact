@@ -17,13 +17,30 @@ class GamificationRemoteDataSource {
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
+  String? _cachedUserDocId;
+
   /// Obtiene el ID del documento del usuario en Firestore
   Future<String?> _getUserDocumentId() async {
+    if (_cachedUserDocId != null) return _cachedUserDocId;
+
     try {
       final user = _auth.currentUser;
       if (user == null) return null;
 
-      // Buscar por email
+      // Optimización: Si el UID existe como documento, es lo ideal.
+      // Primero verificamos UID directo para evitar queries costosas
+      final docSnapshot =
+          await _firestore
+              .collection('Users')
+              .doc(user.uid)
+              .get();
+
+      if (docSnapshot.exists) {
+        _cachedUserDocId = user.uid;
+        return user.uid;
+      }
+
+      // Si no existe por UID, buscar por email (Legacy fallback)
       if (user.email != null) {
         final query = await _firestore
             .collection('Users')
@@ -32,13 +49,10 @@ class GamificationRemoteDataSource {
             .get();
 
         if (query.docs.isNotEmpty) {
-          return query.docs.first.id;
+          _cachedUserDocId = query.docs.first.id;
+          return _cachedUserDocId;
         }
       }
-
-      // Buscar por UID
-      final doc = await _firestore.collection('Users').doc(user.uid).get();
-      if (doc.exists) return doc.id;
 
       return null;
     } catch (e) {
@@ -397,6 +411,52 @@ class GamificationRemoteDataSource {
       isPauseModeActive: data['isPauseModeActive'] as bool? ?? false,
       pauseModeStartDate: (data['pauseModeStartDate'] as Timestamp?)?.toDate(),
     );
+  }
+
+  /// Ejecuta múltiples actualizaciones en una sola transacción batch (Optimización de Escritura)
+  Future<void> performBatchUpdate({
+    required UserGamificationProfile profile,
+    required DailyStreak streak,
+    List<XPTransaction>? transactions,
+  }) async {
+    try {
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        throw Exception('Usuario no encontrado en Firestore');
+      }
+
+      final batch = _firestore.batch();
+      final userRef =
+          _firestore.collection('Users').doc(userDocId).collection('gamification');
+
+      // 1. Actualizar Perfil
+      final profileRef = userRef.doc('profile');
+      batch.set(profileRef, _profileToFirestore(profile), SetOptions(merge: true));
+
+      // 2. Actualizar Racha
+      final streakRef = userRef.doc('streak');
+      batch.set(streakRef, _streakToFirestore(streak), SetOptions(merge: true));
+
+      // 3. Guardar Transacciones (si hay)
+      if (transactions != null && transactions.isNotEmpty) {
+        final transactionsRef = userRef.doc('xp_transactions').collection('transactions');
+        for (final transaction in transactions) {
+          final docRef = transactionsRef.doc(transaction.id);
+          batch.set(docRef, _transactionToFirestore(transaction));
+        }
+      }
+
+      await batch.commit();
+
+      if (kDebugMode) {
+        print('✅ Batch update completado exitosamente (${transactions?.length ?? 0} Txs)');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error en batch update: $e');
+      }
+      rethrow;
+    }
   }
 }
 

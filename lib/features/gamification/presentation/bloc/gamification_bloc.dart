@@ -171,42 +171,32 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
       );
 
       // OPERACIONES EN BACKGROUND (no bloquean la UI)
-      // Guardar transacción y actualizar perfil en segundo plano
-      // NO emitir aquí porque el handler ya terminó - solo guardar en BD
+      // Guardar transacción y actualizar perfil en un solo batch
       unawaited(
         (() async {
           try {
-            // 1. Guardar transacción de XP
-            await _repository.saveXPTransaction(event.transaction);
-
-            // 2. Guardar racha actualizada
-            await _repository.saveStreak(updatedStreak);
+            final transactions = <XPTransaction>[event.transaction];
+            UserGamificationProfile finalProfile = profileWithStreak;
+            DailyStreak finalStreak = updatedStreak;
 
             // 3. Verificar bonus de racha
-            XPTransaction? streakBonus;
             if (updatedStreak.currentStreak == 3 ||
                 updatedStreak.currentStreak == 7 ||
                 updatedStreak.currentStreak == 30 ||
                 updatedStreak.currentStreak == 60 ||
                 updatedStreak.currentStreak == 100) {
-              streakBonus = _xpService.calculateStreakBonus(
+              final streakBonus = _xpService.calculateStreakBonus(
                 userId: currentProfile.userId,
                 streakDays: updatedStreak.currentStreak,
                 timestamp: DateTime.now(),
               );
 
               if (streakBonus != null) {
-                await _repository.saveXPTransaction(streakBonus);
-                final profileWithBonus = _levelService.updateLevelAfterXP(
-                  profileWithStreak,
+                transactions.add(streakBonus);
+                finalProfile = _levelService.updateLevelAfterXP(
+                  finalProfile,
                   streakBonus.amount,
                 );
-                await _repository.saveProfile(profileWithBonus);
-
-                // Si hay bonus, recargar el perfil usando un nuevo evento
-                // en lugar de emitir directamente
-                add(LoadGamificationProfile(currentProfile.userId));
-                return;
               }
             }
 
@@ -217,24 +207,28 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
 
             // 5. Actualizar estado de mascota
             final mascotState = _determineMascotState(
-              profileWithStreak,
-              updatedStreak,
+              finalProfile,
+              finalStreak,
               lactationRecordsToday: todayRecordsCount,
             );
-            final profileWithMascot = profileWithStreak.copyWith(
-              mascotState: mascotState,
-            );
-            await _repository.saveProfile(profileWithMascot);
+            finalProfile = finalProfile.copyWith(mascotState: mascotState);
 
-            // No emitir aquí - el estado ya fue actualizado optimistamente
-            // Si necesitamos actualizar el estado de la mascota, podemos
-            // recargar el perfil, pero solo si es necesario
+            // 6. EJECUTAR BATCH UPDATE (1 sola escritura en lugar de 3-5)
+            await _repository.performBatchUpdate(
+              profile: finalProfile,
+              streak: finalStreak,
+              transactions: transactions,
+            );
+
+            // Si hubo bonus, recargar para asegurar consistencia
+            if (transactions.length > 1) {
+               add(LoadGamificationProfile(currentProfile.userId));
+            }
+
           } catch (e) {
             if (kDebugMode) {
               print('⚠️ Error en operaciones de background al agregar XP: $e');
             }
-            // No emitir error aquí para no interrumpir la UI
-            // La actualización optimista ya se mostró
           }
         })(),
       );

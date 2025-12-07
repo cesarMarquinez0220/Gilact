@@ -214,167 +214,96 @@ class LeccionesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Carga el progreso desde Firestore para usuarios existentes
-  Future<void> loadProgressFromFirestore(String userId) async {
+  /// Carga el progreso desde Firestore con optimización de lecturas
+  Future<void> loadProgressFromFirestore(String? userIdParam) async {
     try {
-      _logger.d('Cargando progreso desde Firestore para usuario: $userId');
+      final authUser = FirebaseAuth.instance.currentUser;
+      final targetUserId = (userIdParam != null && userIdParam.isNotEmpty) 
+          ? userIdParam 
+          : authUser?.uid;
 
-      // Limpiar datos locales primero
+      if (targetUserId == null) {
+        _logger.w('LeccionesProvider: No hay usuario autenticado para cargar progreso');
+        return;
+      }
+
+      _logger.d('Cargando progreso optimizado para: $targetUserId');
+
+      // Limpiar datos locales
       _leccionesCompletadas.clear();
       _progresoVideos.clear();
 
-      // Cargar desde Firestore
-      // El VideoProgressService guarda usando user.uid (UID de Firebase Auth)
-      // Necesitamos buscar en ambos lugares: el userId proporcionado y el UID de Firebase Auth
-      // y combinar los resultados porque los videos pueden estar guardados en diferentes lugares
-      final authUser = FirebaseAuth.instance.currentUser;
-      final List<QueryDocumentSnapshot> allDocs = [];
-      final Set<String> usedUserIds = {};
+      final videosCollection = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(targetUserId)
+          .collection('videos');
       
-      // 1. Buscar con el userId proporcionado
-      if (userId.isNotEmpty) {
+      List<QueryDocumentSnapshot> docs = [];
+      
+      // ESTRATEGIA OPTIMIZADA:
+      // 1. Intentar leer de caché local primero (Costo: 0 lecturas)
+      // 2. Si hay error o está vacío, leer de servidor (Costo: N lecturas)
+      
+      try {
+        final cacheSnapshot = await videosCollection.get(const GetOptions(source: Source.cache));
+        if (cacheSnapshot.docs.isNotEmpty) {
+           docs = cacheSnapshot.docs;
+           _logger.d('Progreso cargado desde CACHÉ (${docs.length} videos)');
+        }
+      } catch (e) {
+        _logger.d('Cache miss o error, intentando servidor...');
+      }
+
+      // Si no tenemos docs, ir al servidor
+      if (docs.isEmpty) {
         try {
-          final videosCollection = FirebaseFirestore.instance
-              .collection('Users')
-              .doc(userId)
-              .collection('videos');
-          final querySnapshot = await videosCollection.get();
-          allDocs.addAll(querySnapshot.docs);
-          usedUserIds.add(userId);
-          _logger.d('LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con userId: $userId');
-        } catch (e, stackTrace) {
-          _logger.w('LeccionesProvider: Error buscando con userId $userId', e, stackTrace);
+          final serverSnapshot = await videosCollection.get(const GetOptions(source: Source.server));
+          docs = serverSnapshot.docs;
+           _logger.d('Progreso cargado desde SERVIDOR (${docs.length} videos)');
+        } catch (e) {
+           _logger.e('Error leyendo del servidor', e);
         }
       }
-      
-      // 2. Buscar con el UID de Firebase Auth (si es diferente del userId)
-      if (authUser != null && authUser.uid != userId && !usedUserIds.contains(authUser.uid)) {
-        try {
-          final videosCollection = FirebaseFirestore.instance
-              .collection('Users')
-              .doc(authUser.uid)
-              .collection('videos');
-          final querySnapshot = await videosCollection.get();
-          allDocs.addAll(querySnapshot.docs);
-          usedUserIds.add(authUser.uid);
-          _logger.d('LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con UID de Firebase Auth: ${authUser.uid}');
-        } catch (e, stackTrace) {
-          _logger.w('LeccionesProvider: Error buscando con UID de Firebase Auth', e, stackTrace);
-        }
-      }
-      
-      // 3. Si aún no hay documentos, buscar por email
-      if (allDocs.isEmpty && authUser != null && authUser.email != null) {
-        try {
-          final userQuery = await FirebaseFirestore.instance
-              .collection('Users')
-              .where('email', isEqualTo: authUser.email)
-              .limit(1)
-              .get();
+
+      // Procesar documentos (solo si encontramos algo)
+      if (docs.isNotEmpty) {
+        for (final doc in docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
+          final estaCompletado = data['estaCompletado'] as bool? ?? false;
           
-          if (userQuery.docs.isNotEmpty) {
-            final actualUserId = userQuery.docs.first.id;
-            _logger.d('LeccionesProvider: Usuario encontrado por email, ID real: $actualUserId');
-            if (!usedUserIds.contains(actualUserId)) {
-              final videosCollection = FirebaseFirestore.instance
-                  .collection('Users')
-                  .doc(actualUserId)
-                  .collection('videos');
-              final querySnapshot = await videosCollection.get();
-              allDocs.addAll(querySnapshot.docs);
-              usedUserIds.add(actualUserId);
-              _logger.d('LeccionesProvider: Encontrados ${querySnapshot.docs.length} documentos con userId por email: $actualUserId');
-            }
+          if (videoId == null) continue;
+
+          // Manejar avance
+          dynamic avanceRaw = data['avance'];
+          double avance = 0.0;
+          
+          if (avanceRaw is int) avance = avanceRaw.toDouble();
+          else if (avanceRaw is double) avance = avanceRaw;
+          else {
+             final ultimaPosicion = data['ultimaPosicion'] as int? ?? 0;
+             final duracion = data['duracion'] as int? ?? 0;
+             if (duracion > 0) avance = ultimaPosicion / duracion;
           }
-        } catch (e, stackTrace) {
-          _logger.w('LeccionesProvider: Error buscando usuario por email', e, stackTrace);
-        }
-      }
-      
-      // Eliminar duplicados basándose en el ID del documento (videoId)
-      final Map<String, QueryDocumentSnapshot> uniqueDocs = {};
-      for (final doc in allDocs) {
-        final videoId = doc.id;
-        // Si ya existe, mantener el más reciente (basado en fechaActualizacion si está disponible)
-        if (!uniqueDocs.containsKey(videoId)) {
-          uniqueDocs[videoId] = doc;
-        } else {
-          final existingData = uniqueDocs[videoId]!.data() as Map<String, dynamic>;
-          final newData = doc.data() as Map<String, dynamic>;
-          final existingDate = existingData['fechaActualizacion'];
-          final newDate = newData['fechaActualizacion'];
-          if (newDate != null && (existingDate == null || 
-              (newDate is Timestamp && existingDate is Timestamp && 
-               newDate.compareTo(existingDate) > 0))) {
-            uniqueDocs[videoId] = doc;
-          }
-        }
-      }
-      
-      final querySnapshot = uniqueDocs.values.toList();
-      _logger.d('LeccionesProvider: Total documentos únicos encontrados: ${querySnapshot.length} (buscados en: ${usedUserIds.join(", ")})');
 
-      for (final doc in querySnapshot) {
-        final data = doc.data() as Map<String, dynamic>;
-        _logger.d('LeccionesProvider: Procesando documento ${doc.id} con datos: $data');
-
-        // Usar el ID del documento como videoId, o el campo videoId si existe
-        final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
-        final estaCompletado = data['estaCompletado'] as bool? ?? false;
-
-        _logger.d('LeccionesProvider: videoId = $videoId, estaCompletado = $estaCompletado');
-
-        // Manejar avance que puede ser int o double
-        dynamic avanceRaw = data['avance'];
-        double avance = 0.0;
-        if (avanceRaw != null) {
-          _logger.d('LeccionesProvider: avanceRaw = $avanceRaw (tipo: ${avanceRaw.runtimeType})');
-          if (avanceRaw is int) {
-            avance = avanceRaw.toDouble();
-            _logger.d('LeccionesProvider: avance convertido de int a double: $avance');
-          } else if (avanceRaw is double) {
-            avance = avanceRaw;
-            _logger.d('LeccionesProvider: avance ya es double: $avance');
-          }
-        } else {
-          // Si no hay avance, calcularlo desde ultimaPosicion y duracion
-          final ultimaPosicion = data['ultimaPosicion'] as int? ?? 0;
-          final duracion = data['duracion'] as int? ?? 0;
-          if (duracion > 0 && ultimaPosicion > 0) {
-            avance = ultimaPosicion / duracion;
-            _logger.d('LeccionesProvider: avance calculado desde ultimaPosicion ($ultimaPosicion) / duracion ($duracion) = ${avance.toStringAsFixed(3)}');
-          } else {
-            _logger.d('LeccionesProvider: avanceRaw es null y no se puede calcular, usando 0.0');
-          }
-        }
-
-        if (videoId != null) {
-          // Si el video está completado, el progreso debe ser 100%
-          // Si no está completado, usar el avance de Firestore (o calculado)
           if (estaCompletado) {
             _progresoVideos[videoId] = 100.0;
             _leccionesCompletadas.add(videoId);
-            _logger.success('Video $videoId marcado como completado desde Firestore (progreso: 100%)');
           } else {
-            // Usar el progreso de Firestore (avance viene como 0.0-1.0, convertir a porcentaje)
-            final progressPercentage = avance * 100;
-            _progresoVideos[videoId] = progressPercentage;
-            _logger.d('Video $videoId NO completado (estaCompletado: $estaCompletado, avance: ${progressPercentage.toStringAsFixed(1)}%)');
+            _progresoVideos[videoId] = avance * 100;
           }
-        } else {
-          _logger.e('Error: No se pudo obtener videoId del documento ${doc.id}');
         }
+        
+        _logger.success('Progreso procesado: ${_leccionesCompletadas.length} completados');
+        _notifyLessonsCompletedChanged();
+        notifyListeners();
+        return;
+      } else {
+        _logger.d('No se encontró progreso para $targetUserId');
       }
 
-      _logger.d('Progreso cargado desde Firestore: ${_leccionesCompletadas.length} videos completados');
-      
-      // Notificar cambio en lecciones completadas después de cargar desde Firestore
-      _notifyLessonsCompletedChanged();
-      
-      notifyListeners();
     } catch (e, stackTrace) {
-      _logger.e('Error cargando progreso desde Firestore', e, stackTrace);
-      // Fallback a SharedPreferences
+      _logger.e('Error fatal cargando progreso', e, stackTrace);
       await _cargarProgresoGuardado();
     }
   }

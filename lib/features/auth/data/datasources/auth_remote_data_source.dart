@@ -39,6 +39,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseFirestore _firestore;
   final AppLogger _logger;
 
+  // In-memory cache for the current user
+  UserModel? _cachedUser;
+
   AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore, this._logger);
 
   @override
@@ -56,7 +59,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthException(message: 'Error al iniciar sesión');
       }
 
-      return await _getUserFromFirestore(credential.user!.uid);
+      final user = await _getUserFromFirestore(credential.user!.uid);
+      _cachedUser = user;
+      return user;
     } on FirebaseAuthException catch (e) {
       throw AuthException(message: _getAuthErrorMessage(e.code));
     } catch (e) {
@@ -133,6 +138,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'Usuario registrado exitosamente: ${credential.user!.uid}',
       );
 
+      _cachedUser = userModel;
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw AuthException(message: _getAuthErrorMessage(e.code));
@@ -145,6 +151,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
+      _cachedUser = null; // Clear cache on sign out
     } catch (e) {
       throw AuthException(message: 'Error al cerrar sesión: ${e.toString()}');
     }
@@ -156,7 +163,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final user = _firebaseAuth.currentUser;
       if (user == null) return null;
 
-      return await _getUserFromFirestore(user.uid);
+      // Return cached user if available and matches current auth user
+      if (_cachedUser != null && _cachedUser!.id == user.uid) {
+        return _cachedUser;
+      }
+
+      final userModel = await _getUserFromFirestore(user.uid);
+      _cachedUser = userModel;
+      return userModel;
     } catch (e) {
       throw AuthException(
         message: 'Error al obtener usuario actual: ${e.toString()}',
@@ -228,6 +242,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .doc(user.uid)
           .update(userModel.toDocument());
 
+      _cachedUser = userModel; // Update cache
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw AuthException(message: _getAuthErrorMessage(e.code));
@@ -279,18 +294,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               _logger.e('AuthRemoteDataSource: Error en reautenticación', reauthError);
               // Si la reautenticación falla, lanzar error específico
               if (reauthError is FirebaseAuthException) {
-                throw AuthException(
+                throw const AuthException(
                   message: 'Contraseña incorrecta. Por favor, verifica tu contraseña e intenta nuevamente.',
                 );
               }
-              throw AuthException(
+              throw const AuthException(
                 message: 'Error al reautenticarse. Por favor, cierra sesión e inicia sesión de nuevo.',
               );
             }
           } else {
             // No tenemos contraseña, lanzar error para que la UI la solicite
             _logger.w('AuthRemoteDataSource: Se requiere login reciente pero no se proporcionó contraseña');
-            throw AuthException(
+            throw const AuthException(
               message: 'REQUIRES_RECENT_LOGIN: Se requiere reautenticación para eliminar la cuenta. Por favor, ingresa tu contraseña.',
             );
           }

@@ -22,6 +22,7 @@ class OfflineVideoPlayer extends StatefulWidget {
   final VoidCallback? onVideoCompleted;
   final VoidCallback? onVideoReady;
   final bool isFromHistory;
+  final File? file; // Archivo directo (para caché sin encriptación)
 
   const OfflineVideoPlayer({
     super.key,
@@ -29,6 +30,7 @@ class OfflineVideoPlayer extends StatefulWidget {
     this.onVideoCompleted,
     this.onVideoReady,
     this.isFromHistory = false,
+    this.file,
   });
 
   @override
@@ -98,7 +100,23 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
     try {
       _logger.d('Iniciando reproductor offline para video: ${widget.video.id}');
 
-      // Verificar si el video está descargado
+      // CASO 1: Archivo directo (Caché normal)
+      if (widget.file != null) {
+        if (!await widget.file!.exists()) {
+           throw Exception('El archivo de video proporcionado no existe');
+        }
+        
+        await _initializeControllerWithErrorHandling(widget.file!);
+        if (mounted) {
+          setState(() {
+             _isInitializing = false;
+          });
+          widget.onVideoReady?.call();
+        }
+        return;
+      }
+
+      // CASO 2: Video descargado y encriptado (Legacy/Secure)
       final isDownloaded = await _downloadService.isVideoDownloaded(
         widget.video.id,
       );
@@ -145,14 +163,8 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       final fileSize = await _decryptedVideoFile!.length();
       _logger.d('Tamaño del archivo desencriptado: $fileSize bytes');
 
-      // Inicializar video_player con el archivo desencriptado
-      _logger.d('Inicializando VideoPlayerController...');
-      _videoController = VideoPlayerController.file(_decryptedVideoFile!);
-      await _videoController!.initialize();
-
-      _logger.d('VideoPlayerController inicializado');
-      _logger.d('Aspect ratio: ${_videoController!.value.aspectRatio}');
-      _logger.d('Duración: ${_videoController!.value.duration}');
+      // Inicializar controladores con el archivo desencriptado
+      await _initializeControllerWithErrorHandling(_decryptedVideoFile!);
 
       // Cargar última posición
       await _getLastPosition();
@@ -212,19 +224,36 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
         setState(() {
           _isInitializing = false;
         });
-
-        // Mensaje más amigable si el error es de desencriptación
-        String errorMessage = 'Error inicializando video offline: $e';
-        if (e.toString().contains('Invalid or corrupted pad block') ||
-            e.toString().contains('Error desencriptando')) {
-          errorMessage =
-              'El video fue encriptado con un método anterior incompatible. '
-              'Por favor, elimina este video descargado y vuelve a descargarlo.';
-        }
-
-        _showError(errorMessage);
+        _showError('Error inicializando video: $e');
       }
     }
+  }
+
+  Future<void> _initializeControllerWithErrorHandling(File file) async {
+      _logger.d('Inicializando VideoPlayerController con archivo: ${file.path}');
+      _videoController = VideoPlayerController.file(file);
+      await _videoController!.initialize();
+
+      _logger.d('VideoPlayerController inicializado. Aspect ratio: ${_videoController!.value.aspectRatio}');
+
+      // Crear ChewieController para controles personalizados
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController!,
+        autoPlay: true,
+        looping: false,
+        allowFullScreen: true,
+        allowMuting: true,
+        showControls: true,
+        aspectRatio: _videoController!.value.aspectRatio,
+        errorBuilder: (context, errorMessage) {
+          return Center(
+            child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
+          );
+        },
+      );
+      
+      _videoController!.addListener(_onVideoPositionChanged);
+      _videoController!.addListener(_onVideoEnded);
   }
 
   Future<void> _decryptVideoToFile(

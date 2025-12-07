@@ -479,6 +479,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
         case 'appVersion':
           await localDataSource.setAppVersion(value as String);
           break;
+        case 'biometricEnabled':
+          await localDataSource.setBiometricEnabled(value as bool);
+          break;
         default:
           return Left(UnknownFailure(message: 'Clave de configuración desconocida: $key'));
       }

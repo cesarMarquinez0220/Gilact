@@ -1,6 +1,5 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
@@ -75,14 +74,10 @@ class RolPadreLactanciaInfo extends StatelessWidget {
 
         for (int i = 0; i < items.length; i++) {
           widgets.add(
-            FadeInDown(
-              duration: const Duration(milliseconds: 1000),
-              delay: const Duration(milliseconds: 500),
-              child: Text(
-                items[i],
-                style: TipTypography.paragraph,
-                textAlign: TextAlign.justify,
-              ),
+            Text(
+              items[i],
+              style: TipTypography.paragraph,
+              textAlign: TextAlign.justify,
             ),
           );
           if (i < items.length - 1) {
@@ -98,19 +93,11 @@ class RolPadreLactanciaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.padre),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.fatherRole.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingXL,
-        ),
+      image: Image.asset(TipAssets.padre),
+      title: Text(
+        'tips.content.fatherRole.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingXL,
       ),
       body: [_buildItemsList(context)],
     );

@@ -7,6 +7,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
 import '../../../../alerta_dialoge.dart';
 import '../../../../core/services/app_initialization_service.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class PrepartumFormPage extends StatefulWidget {
   const PrepartumFormPage({super.key});
@@ -197,7 +198,7 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                         end: Offset.zero,
                       ).animate(_slideAnimation),
                       child: Padding(
-                        padding: const EdgeInsets.all(24.0),
+                        padding: ResponsiveHelper.getResponsivePaddingAll(context),
                         child: Column(
                           children: [
                             const SizedBox(height: 60),
@@ -232,8 +233,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                 const SizedBox(height: 32),
                                 Text(
                                   'onboarding.prepartoInfo'.tr(),
-                                  style: const TextStyle(
-                                    fontSize: 32,
+                                  style: TextStyle(
+                                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 32),
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     letterSpacing: 0.5,
@@ -250,8 +251,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                 const SizedBox(height: 12),
                                 Text(
                                   'onboarding.prepartoInfoDescription'.tr(),
-                                  style: const TextStyle(
-                                    fontSize: 17,
+                                  style: TextStyle(
+                                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 17),
                                     color: Colors.white70,
                                     fontWeight: FontWeight.w400,
                                     letterSpacing: 0.3,
@@ -295,9 +296,9 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                   }
                                   return null;
                                 },
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
                                   fontWeight: FontWeight.w500,
                                 ),
                                 decoration: InputDecoration(
@@ -326,7 +327,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                             // Botón de guardar
                             Container(
                               width: double.infinity,
-                              height: 56,
+                              height: 56, // Keep slightly larger for primary action or use responsive if needed
+                              constraints: BoxConstraints(minHeight: ResponsiveHelper.getResponsiveButtonHeight(context)),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
@@ -378,8 +380,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
                                       )
                                     : Text(
                                         'common.save'.tr(),
-                                        style: const TextStyle(
-                                          fontSize: 18,
+                                        style: TextStyle(
+                                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 18),
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                           letterSpacing: 0.5,
@@ -452,8 +454,8 @@ class _PrepartumFormPageState extends State<PrepartumFormPage>
               return Transform.scale(
                 scale: _pulseAnimation.value,
                 child: Container(
-                  width: 250,
-                  height: 250,
+                  width: ResponsiveHelper.screenWidth(context) * 0.65,
+                  height: ResponsiveHelper.screenWidth(context) * 0.65,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(

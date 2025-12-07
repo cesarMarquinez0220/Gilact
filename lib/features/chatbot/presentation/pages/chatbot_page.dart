@@ -6,6 +6,7 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/predefined_question.dart';
 import '../../domain/services/predefined_questions_service.dart';
 import '../bloc/chatbot_bloc.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class ChatbotPage extends StatefulWidget {
   final String? userId;
@@ -177,8 +178,18 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   Widget _buildHeader() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final iconContainerSize =
+        ResponsiveHelper.isExtraSmall(context) ? 40.0 : 50.0;
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 28);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: padding,
+        vertical: padding * 0.8,
+      ),
       child: Row(
         children: [
           Container(
@@ -196,10 +207,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
               tooltip: 'Volver',
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: padding * 0.8),
           Container(
-            width: 50,
-            height: 50,
+            width: iconContainerSize,
+            height: iconContainerSize,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
@@ -215,13 +226,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.smart_toy_rounded,
               color: Colors.white,
-              size: 28,
+              size: iconSize,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: padding * 0.8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +241,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   'chatbot.title'.tr(),
                   style: GoogleFonts.quicksand(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: titleFontSize,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
@@ -239,7 +250,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   'chatbot.subtitle'.tr(),
                   style: GoogleFonts.quicksand(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: subtitleFontSize,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -339,20 +350,24 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final avatarSize = ResponsiveHelper.isExtraSmall(context) ? 32.0 : 40.0;
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 15);
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 22);
+
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: padding * 0.6),
         child: Row(
-          mainAxisAlignment: message.isUser
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start,
+          mainAxisAlignment:
+              message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!message.isUser) ...[
               Container(
-                width: 40,
-                height: 40,
+                width: avatarSize,
+                height: avatarSize,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
@@ -362,30 +377,31 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.smart_toy_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: iconSize,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: padding * 0.5),
             ],
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+                padding: EdgeInsets.symmetric(
+                  horizontal: padding * 0.9,
+                  vertical: padding * 0.7,
                 ),
                 decoration: BoxDecoration(
-                  color: message.isUser
-                      ? const Color(0xFF4FD1C7).withValues(alpha: 0.95)
-                      : Colors.white.withValues(alpha: 0.2),
+                  color:
+                      message.isUser
+                          ? const Color(0xFF4FD1C7).withValues(alpha: 0.95)
+                          : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.3),
@@ -403,7 +419,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   message.text,
                   style: GoogleFonts.quicksand(
                     color: Colors.white,
-                    fontSize: 15,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w500,
                     height: 1.5,
                   ),
@@ -411,10 +427,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
               ),
             ),
             if (message.isUser) ...[
-              const SizedBox(width: 10),
+              SizedBox(width: padding * 0.5),
               Container(
-                width: 40,
-                height: 40,
+                width: avatarSize,
+                height: avatarSize,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
@@ -423,10 +439,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     width: 2,
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: iconSize,
                 ),
               ),
             ],
@@ -440,16 +456,25 @@ class _ChatbotPageState extends State<ChatbotPage> {
     PredefinedQuestion question,
     Function(PredefinedQuestion) onTap,
   ) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+
     return InkWell(
       onTap: () => onTap(question),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: EdgeInsets.symmetric(
+          horizontal: padding,
+          vertical: padding * 0.8,
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -470,7 +495,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
               child: Text(
                 question.question,
                 style: GoogleFonts.quicksand(
-                  fontSize: 14,
+                  fontSize: fontSize,
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -501,15 +526,24 @@ class _EmptyChatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final iconContainerSize =
+        ResponsiveHelper.isSmall(context) ? 100.0 : 120.0;
+    final mainIconSize = ResponsiveHelper.getResponsiveIconSize(context, 60);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 32);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
+    final textFontSize = ResponsiveHelper.getResponsiveFontSize(context, 15);
+    final smallFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
+
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(padding * 1.5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 120,
-              height: 120,
+              width: iconContainerSize,
+              height: iconContainerSize,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
@@ -525,17 +559,17 @@ class _EmptyChatWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline_rounded,
-                size: 60,
+                size: mainIconSize,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: padding),
             Text(
               '¡Hola! 👋',
               style: GoogleFonts.quicksand(
-                fontSize: 32,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 letterSpacing: 0.5,
@@ -545,7 +579,7 @@ class _EmptyChatWidget extends StatelessWidget {
             Text(
               'Soy tu asistente virtual',
               style: GoogleFonts.quicksand(
-                fontSize: 18,
+                fontSize: subtitleFontSize,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.3,
@@ -556,31 +590,35 @@ class _EmptyChatWidget extends StatelessWidget {
               'Pregúntame sobre lactancia materna',
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
-                fontSize: 15,
+                fontSize: textFontSize,
                 color: Colors.white70,
                 fontWeight: FontWeight.w400,
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: padding * 1.5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Preguntas frecuentes',
                   style: GoogleFonts.quicksand(
-                    fontSize: 12,
+                    fontSize: smallFontSize,
                     color: Colors.white70,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.refresh_rounded, size: 16, color: Colors.white70),
+                const Icon(
+                  Icons.refresh_rounded,
+                  size: 16,
+                  color: Colors.white70,
+                ),
                 GestureDetector(
                   onTap: onRefresh,
                   child: Text(
                     ' Actualizar',
                     style: GoogleFonts.quicksand(
-                      fontSize: 12,
+                      fontSize: smallFontSize,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
@@ -602,16 +640,25 @@ class _EmptyChatWidget extends StatelessWidget {
   }
 
   Widget _buildQuestionChip(BuildContext context, PredefinedQuestion question) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+
     return InkWell(
       onTap: () => onQuestionSelected(question),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: EdgeInsets.symmetric(
+          horizontal: padding,
+          vertical: padding * 0.8,
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -632,7 +679,7 @@ class _EmptyChatWidget extends StatelessWidget {
               child: Text(
                 question.question,
                 style: GoogleFonts.quicksand(
-                  fontSize: 14,
+                  fontSize: fontSize,
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 import '../models/video_model.dart';
 import '../../../../core/error/exceptions.dart';
@@ -19,11 +20,16 @@ abstract class VideoRemoteDataSource {
 @LazySingleton(as: VideoRemoteDataSource)
 class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
   final FirebaseFirestore _firestore;
+  List<VideoModel>? _cachedVideos;
 
   VideoRemoteDataSourceImpl(this._firestore);
 
   @override
   Future<List<VideoModel>> getAllVideos() async {
+    if (_cachedVideos != null && _cachedVideos!.isNotEmpty) {
+      return _cachedVideos!;
+    }
+
     try {
       final querySnapshot = await _firestore
           .collection('videos')
@@ -41,6 +47,7 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
         return imageNumberA.compareTo(imageNumberB);
       });
 
+      _cachedVideos = videos;
       return videos;
     } catch (e) {
       throw ServerException(
@@ -103,16 +110,18 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
   @override
   Future<void> markVideoAsCompleted(String videoId) async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      // Por ahora, asumimos que tienes acceso al usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(uid);
 
       await user.collection('videos').doc(videoId).set({
         'estaCompletado': true,
         'completedAt': Timestamp.now(),
-      });
+        'videoId': int.tryParse(videoId) ?? 0, // Asegurar que videoId se guarde
+      }, SetOptions(merge: true)); // Merge para no sobrescribir otros campos
     } catch (e) {
       throw ServerException(
         message: 'Error al marcar video como completado: ${e.toString()}',
@@ -123,10 +132,12 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
   @override
   Future<List<String>> getCompletedVideoIds() async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        return []; // Retornar lista vacía si no hay usuario, o lanzar excepción
+      }
+
+      final user = _firestore.collection('Users').doc(uid);
 
       final querySnapshot = await user
           .collection('videos')
@@ -147,15 +158,17 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
     required Duration currentPosition,
   }) async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
 
-      await user.collection('videos').doc(videoId).update({
+      final user = _firestore.collection('Users').doc(uid);
+
+      await user.collection('videos').doc(videoId).set({
         'currentPosition': currentPosition.inSeconds,
         'lastWatched': Timestamp.now(),
-      });
+        'videoId': int.tryParse(videoId) ?? 0,
+         // Aseguramos que existan datos básicos si el doc no existía
+      }, SetOptions(merge: true));
     } catch (e) {
       throw ServerException(
         message: 'Error al actualizar progreso: ${e.toString()}',

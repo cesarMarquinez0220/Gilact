@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/app_initialization_service.dart' as app_init;
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import 'dart:ui';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
@@ -108,7 +109,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         context,
                       ).copyWith(overscroll: false),
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding:
+                            ResponsiveHelper.getResponsiveHorizontalPadding(
+                              context,
+                            ),
                         child: _buildStepContent(),
                       ),
                     ),
@@ -124,9 +128,13 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildHeader() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSizeTitle = ResponsiveHelper.getResponsiveFontSize(context, 26);
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 18);
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(padding, padding, padding, padding / 2),
+      padding: EdgeInsets.all(padding),
       child: Column(
         children: [
           // Header con botón de volver
@@ -135,7 +143,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(padding / 2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white.withValues(alpha: 0.2),
@@ -144,14 +152,14 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       width: 1,
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back_ios,
                     color: Colors.white,
-                    size: 18,
+                    size: iconSize,
                   ),
                 ),
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: padding),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +167,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     Text(
                       'Registro de Lactancia',
                       style: GoogleFonts.quicksand(
-                        fontSize: 26,
+                        fontSize: fontSizeTitle,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         shadows: [
@@ -202,12 +210,17 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     final options = LactationDecisionTree.getOptionsForStep(
       LactationStep.initial,
     );
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 22);
 
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -235,7 +248,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 'lactation.flow.feedingTypeQuestion'.tr(),
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -251,9 +264,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         ...options.map((option) => _buildOptionCard(option)),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
@@ -262,12 +275,17 @@ class _LactationFlowPageState extends State<LactationFlowPage>
     final options = LactationDecisionTree.getOptionsForStep(
       LactationStep.breastSide,
     );
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 22);
 
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -295,7 +313,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 'lactation.flow.breastSideQuestion'.tr(),
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -311,9 +329,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         ...options.map((option) => _buildOptionCard(option)),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
@@ -338,12 +356,17 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         color: 0xFF9E9E9E,
       ),
     ];
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 22);
 
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -371,7 +394,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 '¿Cuánto tiempo duró la lactancia?',
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -387,9 +410,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         ...allOptions.map((option) => _buildOptionCard(option)),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
@@ -414,12 +437,17 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         color: 0xFF9E9E9E,
       ),
     ];
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 22);
 
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -447,7 +475,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 '¿Cuánto volumen tomó?',
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -463,19 +491,28 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         ...allOptions.map((option) => _buildOptionCard(option)),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
 
   Widget _buildManualDurationInput() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSizeTitle = ResponsiveHelper.getResponsiveFontSize(context, 22);
+    final fontSizeInput = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
+    final fontSizeButton = ResponsiveHelper.getResponsiveFontSize(context, 18);
+
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -503,7 +540,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 'Ingresa la duración manualmente',
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSizeTitle,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -519,9 +556,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -545,9 +582,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           child: Column(
             children: [
               TextField(
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: fontSizeInput,
                   fontWeight: FontWeight.w500,
                 ),
                 keyboardType: TextInputType.number,
@@ -560,29 +597,29 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     );
                   }
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Duración en minutos',
                   hintStyle: TextStyle(
                     color: Colors.white70,
-                    fontSize: 16,
+                    fontSize: fontSizeInput,
                     fontWeight: FontWeight.w400,
                   ),
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.timer_outlined,
                     color: Colors.white70,
                     size: 22,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
+                    horizontal: padding,
+                    vertical: padding * 0.9,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: padding),
               Container(
                 width: double.infinity,
-                height: 56,
+                height: buttonHeight * 1.25,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
@@ -656,7 +693,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                             ? 'Continuar'
                             : 'Guardar',
                         style: GoogleFonts.quicksand(
-                          fontSize: 18,
+                          fontSize: fontSizeButton,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           letterSpacing: 0.5,
@@ -669,17 +706,26 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
 
   Widget _buildManualVolumeInput() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSizeTitle = ResponsiveHelper.getResponsiveFontSize(context, 22);
+    final fontSizeInput = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
+    final fontSizeButton = ResponsiveHelper.getResponsiveFontSize(context, 18);
+
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -707,7 +753,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               child: Text(
                 'Ingresa el volumen manualmente',
                 style: GoogleFonts.quicksand(
-                  fontSize: 22,
+                  fontSize: fontSizeTitle,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   shadows: [
@@ -723,9 +769,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -749,9 +795,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           child: Column(
             children: [
               TextField(
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: fontSizeInput,
                   fontWeight: FontWeight.w500,
                 ),
                 keyboardType: TextInputType.number,
@@ -765,29 +811,29 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     );
                   }
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Volumen en ml',
                   hintStyle: TextStyle(
                     color: Colors.white70,
-                    fontSize: 16,
+                    fontSize: fontSizeInput,
                     fontWeight: FontWeight.w400,
                   ),
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.water_drop_outlined,
                     color: Colors.white70,
                     size: 22,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
+                    horizontal: padding,
+                    vertical: padding * 0.9,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: padding),
               Container(
                 width: double.infinity,
-                height: 56,
+                height: buttonHeight * 1.25,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
@@ -839,7 +885,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       Text(
                         'Guardar',
                         style: GoogleFonts.quicksand(
-                          fontSize: 18,
+                          fontSize: fontSizeButton,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           letterSpacing: 0.5,
@@ -852,17 +898,24 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
 
   Widget _buildConfirmation() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 22);
+    final buttonFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding * 0.8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -877,16 +930,16 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           child: Text(
             'lactation.flow.confirmRecord'.tr(),
             style: GoogleFonts.quicksand(
-              fontSize: 22,
+              fontSize: fontSize,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF2C3E50),
             ),
             textAlign: TextAlign.center,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -910,12 +963,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   'Volumen',
                   '${_data['volume']} ${_data['unit']}',
                 ),
-              const SizedBox(height: 24),
+              SizedBox(height: padding),
               GestureDetector(
                 onTap: _saveRecord,
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: padding * 0.8),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -944,7 +997,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       Text(
                         'Guardar Registro',
                         style: GoogleFonts.quicksand(
-                          fontSize: 16,
+                          fontSize: buttonFontSize,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -956,21 +1009,25 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: padding),
       ],
     );
   }
 
   Widget _buildConfirmationItem(String label, String value) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final fontSizeLabel = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final fontSizeValue = ResponsiveHelper.getResponsiveFontSize(context, 16);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: padding * 0.4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             '$label:',
             style: GoogleFonts.quicksand(
-              fontSize: 16,
+              fontSize: fontSizeLabel,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF2C3E50),
             ),
@@ -978,7 +1035,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
           Text(
             value,
             style: GoogleFonts.quicksand(
-              fontSize: 16,
+              fontSize: fontSizeValue,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF7F8C8D),
             ),
@@ -989,8 +1046,12 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildActionButtons() {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 15);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 15);
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      padding: EdgeInsets.fromLTRB(padding, padding * 0.5, padding, padding),
       child: Row(
         children: [
           if (_currentStep != LactationStep.initial) ...[
@@ -1009,9 +1070,9 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   onPressed: _goBack,
                   // 2. Copiamos el estilo del "TextButton" de "Cancelar"
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: padding,
+                      vertical: padding * 0.6,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1022,18 +1083,18 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.arrow_back_ios,
                         color: Colors.white70, // 4. Ajustamos color y tamaño
-                        size: 15,
+                        size: iconSize,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'lactation.flow.back'.tr(),
                         // 5. Copiamos el estilo de texto de "Cancelar"
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 15,
+                          fontSize: fontSize,
                           fontWeight: FontWeight.w500,
                           decoration: TextDecoration.underline,
                           decorationColor: Colors.white70,
@@ -1058,20 +1119,20 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 child: TextButton(
                   onPressed: _goBack,
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: padding,
+                      vertical: padding * 0.6,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Cancelar',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 15,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                       decorationColor: Colors.white70,
@@ -1087,12 +1148,20 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildOptionCard(LactationOption option) {
+    final padding = ResponsiveHelper.getResponsivePadding(context);
+    final iconContainerSize = ResponsiveHelper.isExtraSmall(context)
+        ? 50.0
+        : 60.0;
+    final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 30);
+    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
+    final descFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: padding * 0.8),
       child: GestureDetector(
         onTap: () => _selectOption(option),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.all(padding * 0.9),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -1121,8 +1190,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                 children: [
                   // Icono simplificado estilo preparto/postparto
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: iconContainerSize,
+                    height: iconContainerSize,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
@@ -1135,11 +1204,11 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                       child: Icon(
                         _getIconForOption(option),
                         color: Colors.white,
-                        size: 30,
+                        size: iconSize,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: padding * 0.8),
                   // Información
                   Expanded(
                     child: Column(
@@ -1149,7 +1218,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         Text(
                           option.title,
                           style: GoogleFonts.quicksand(
-                            fontSize: 20,
+                            fontSize: titleFontSize,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             shadows: [
@@ -1165,7 +1234,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                         Text(
                           option.description,
                           style: GoogleFonts.quicksand(
-                            fontSize: 14,
+                            fontSize: descFontSize,
                             fontWeight: FontWeight.w500,
                             color: Colors.white.withValues(alpha: 0.85),
                             height: 1.3,
@@ -1464,19 +1533,6 @@ class _LactationFlowPageState extends State<LactationFlowPage>
         // Refrescar datos de lactancia usando el context global después de la navegación
         await Future.delayed(const Duration(milliseconds: 150));
         await app_init.AppInitializationService.refreshLactationDataOnly();
-
-        // Mostrar mensaje de éxito usando navigatorKey (evita error de widget desmontado)
-        await Future.delayed(const Duration(milliseconds: 100));
-        final homeContext =
-            app_init.AppInitializationService.navigationKey.currentContext;
-        if (homeContext != null && homeContext.mounted) {
-          ScaffoldMessenger.of(homeContext).showSnackBar(
-            SnackBar(
-              content: Text('lactation.flow.recordSavedSuccessEnhanced'.tr()),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
       }
     } catch (e, stackTrace) {
       _logger.e(
@@ -1663,6 +1719,10 @@ class _LactationFlowPageState extends State<LactationFlowPage>
   }
 
   Widget _buildAnimatedBackground() {
+    final screenWidth = ResponsiveHelper.screenWidth(context);
+    final size1 = screenWidth * 0.6; // 60% del ancho
+    final size2 = screenWidth * 0.85; // 85% del ancho
+
     return Stack(
       children: [
         // Círculos decorativos animados más grandes y suaves
@@ -1675,8 +1735,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               return Transform.scale(
                 scale: _pulseAnimation.value,
                 child: Container(
-                  width: 250,
-                  height: 250,
+                  width: size1,
+                  height: size1,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
@@ -1705,8 +1765,8 @@ class _LactationFlowPageState extends State<LactationFlowPage>
               return Transform.scale(
                 scale: _pulseAnimation.value * 0.7,
                 child: Container(
-                  width: 350,
-                  height: 350,
+                  width: size2,
+                  height: size2,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(

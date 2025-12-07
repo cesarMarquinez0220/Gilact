@@ -6,7 +6,6 @@ import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
 import 'common/truly_adaptive_card.dart';
-import 'package:animate_do/animate_do.dart';
 
 class BeneficiosBebeInfo extends StatelessWidget {
   const BeneficiosBebeInfo({super.key});
@@ -59,25 +58,14 @@ class BeneficiosBebeInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.like),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 800),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.benefitsBaby.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingLarge,
-        ),
+      image: Image.asset(TipAssets.like),
+      title: Text(
+        'tips.content.benefitsBaby.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingLarge,
       ),
       body: [
-        FadeInDown(
-          duration: const Duration(milliseconds: 1200),
-          delay: const Duration(milliseconds: 500),
-          child: Column(
+        Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AdaptiveTextContent(
@@ -116,7 +104,6 @@ class BeneficiosBebeInfo extends StatelessWidget {
               ),
             ],
           ),
-        ),
       ],
     );
   }

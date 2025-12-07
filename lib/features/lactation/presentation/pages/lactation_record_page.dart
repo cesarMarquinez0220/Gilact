@@ -1351,19 +1351,6 @@ class _LactationRecordPageState extends State<LactationRecordPage>
         // Refrescar datos de lactancia usando el context global después de la navegación
         await Future.delayed(const Duration(milliseconds: 150));
         await app_init.AppInitializationService.refreshLactationDataOnly();
-
-        // Mostrar mensaje de éxito usando navigatorKey (evita error de widget desmontado)
-        await Future.delayed(const Duration(milliseconds: 100));
-        final homeContext =
-            app_init.AppInitializationService.navigationKey.currentContext;
-        if (homeContext != null && homeContext.mounted) {
-          ScaffoldMessenger.of(homeContext).showSnackBar(
-            SnackBar(
-              content: Text('lactation.recordForm.saved'.tr()),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
       }
     } catch (e) {
       /* ... Error handling ... */

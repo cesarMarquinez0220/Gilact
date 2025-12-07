@@ -284,4 +284,53 @@ class GamificationRepositoryImpl implements GamificationRepository {
       return Left('Error limpiando datos de gamificación: $e');
     }
   }
+  @override
+  Future<Either<String, void>> performBatchUpdate({
+    required UserGamificationProfile profile,
+    required DailyStreak streak,
+    List<XPTransaction>? transactions,
+  }) async {
+    try {
+      // OFFLINE-FIRST: Guardar todo localmente
+      await _localDataSource.saveProfile(profile);
+      await _localDataSource.saveStreak(streak);
+      if (transactions != null) {
+        for (final transaction in transactions) {
+          await _localDataSource.saveXPTransaction(transaction);
+        }
+      }
+
+      // Si hay conexión, usar batch update remoto
+      if (await _connectivityService.isConnected()) {
+        try {
+          await _remoteDataSource.performBatchUpdate(
+            profile: profile,
+            streak: streak,
+            transactions: transactions,
+          );
+
+          // Marcar como sincronizado
+          final syncedProfile = profile.copyWith(
+            isSynced: true,
+            lastSyncAt: DateTime.now(),
+          );
+          await _localDataSource.saveProfile(syncedProfile);
+
+          if (transactions != null) {
+            final txIds = transactions.map((t) => t.id).toList();
+            await _localDataSource.markTransactionsAsSynced(txIds);
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Error en batch update remoto, se guardó localmente: $e');
+          }
+          // No es crítico, ya está guardado localmente
+        }
+      }
+
+      return const Right(null);
+    } catch (e) {
+      return Left('Error en batch update: $e');
+    }
+  }
 }

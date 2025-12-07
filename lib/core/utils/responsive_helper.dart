@@ -234,6 +234,17 @@ class ResponsiveHelper {
       ),
     );
   }
+  /// Obtiene un valor responsive genérico
+  static T getResponsiveValue<T>(
+    BuildContext context, {
+    required T small,
+    required T medium,
+    required T large,
+  }) {
+    if (isExtraSmall(context) || isSmall(context)) return small;
+    if (isMedium(context)) return medium;
+    return large;
+  }
 }
 
 

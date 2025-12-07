@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_typography.dart';
-import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 
 class CalostroInfo extends StatelessWidget {
@@ -99,19 +98,11 @@ class CalostroInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TrulyAdaptiveCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.calostro),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.colostrum.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingXL,
-        ),
+      image: Image.asset(TipAssets.calostro),
+      title: Text(
+        'tips.content.colostrum.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingXL,
       ),
       body: [
         const SizedBox(height: 8),

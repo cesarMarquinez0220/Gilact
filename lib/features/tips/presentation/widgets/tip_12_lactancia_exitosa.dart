@@ -1,6 +1,5 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
-import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,14 +78,10 @@ class LactanciaExitosa extends StatelessWidget {
 
         for (int i = 0; i < items.length; i++) {
           widgets.add(
-            FadeInDown(
-              duration: const Duration(milliseconds: 1000),
-              delay: const Duration(milliseconds: 500),
-              child: CompactTextContent(
-                text: '- ${items[i]}',
-                style: TipTypography.paragraph,
-                textAlign: TextAlign.center,
-              ),
+            CompactTextContent(
+              text: '- ${items[i]}',
+              style: TipTypography.paragraph,
+              textAlign: TextAlign.center,
             ),
           );
           if (i < items.length - 1) {
@@ -102,19 +97,11 @@ class LactanciaExitosa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.consejolactancia),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.successfulBreastfeeding.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingXL,
-        ),
+      image: Image.asset(TipAssets.consejolactancia),
+      title: Text(
+        'tips.content.successfulBreastfeeding.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingXL,
       ),
       body: [_buildItemsList(context)],
     );

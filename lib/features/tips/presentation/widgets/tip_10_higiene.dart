@@ -1,6 +1,5 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
@@ -75,14 +74,10 @@ class HigieneLactanciaInfo extends StatelessWidget {
 
         for (final item in items) {
           widgets.add(
-            FadeInDown(
-              duration: const Duration(milliseconds: 1000),
-              delay: const Duration(milliseconds: 500),
-              child: Text(
-                '- $item',
-                textAlign: TextAlign.center,
-                style: TipTypography.paragraph,
-              ),
+            Text(
+              '- $item',
+              textAlign: TextAlign.center,
+              style: TipTypography.paragraph,
             ),
           );
         }
@@ -95,19 +90,11 @@ class HigieneLactanciaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.higiene),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.hygiene.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingXL,
-        ),
+      image: Image.asset(TipAssets.higiene),
+      title: Text(
+        'tips.content.hygiene.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingXL,
       ),
       body: [_buildItemsList(context)],
     );

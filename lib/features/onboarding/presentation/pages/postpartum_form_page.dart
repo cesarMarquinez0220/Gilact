@@ -9,6 +9,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
 import '../../../../alerta_dialoge.dart';
 import '../../../../core/services/app_initialization_service.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class PostpartumFormPage extends StatefulWidget {
   const PostpartumFormPage({super.key});
@@ -266,10 +267,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                       // Contenido scrolleable
                       Expanded(
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                            vertical: 8.0,
-                          ),
+                          padding: ResponsiveHelper.getResponsivePaddingAll(context),
                           child: Column(
                             children: [
                               const SizedBox(height: 8),
@@ -304,8 +302,8 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                   const SizedBox(height: 12),
                                   Text(
                                     'onboarding.babyRegistration'.tr(),
-                                    style: const TextStyle(
-                                      fontSize: 24,
+                                    style: TextStyle(
+                                      fontSize: ResponsiveHelper.getResponsiveFontSize(context, 24),
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                       letterSpacing: 0.5,
@@ -453,6 +451,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                               Container(
                                 width: double.infinity,
                                 height: 50,
+                                constraints: BoxConstraints(minHeight: ResponsiveHelper.getResponsiveButtonHeight(context)),
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
@@ -580,8 +579,8 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
@@ -616,9 +615,9 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
             validator: validator,
             enabled: !_isLoading,
             textAlignVertical: TextAlignVertical.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
@@ -842,7 +841,7 @@ class PostpartumBackgroundPainter extends CustomPainter {
     for (int i = 0; i < 15; i++) {
       final x = (size.width * (i / 15.0) + animationValue * 50) % size.width;
       final y =
-          size.height * 0.1 + (i * 60.0) + (animationValue * 30 * math.sin(i));
+          size.height * 0.1 + (i * (size.height * 0.06)) + (animationValue * 30 * math.sin(i));
 
       final radius = 2.0 + (i % 3);
       paint.color = Colors.white.withValues(alpha: 0.05 + (animationValue * 0.1));

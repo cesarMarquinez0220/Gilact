@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 import '../bloc/auth_bloc.dart';
 
@@ -128,95 +129,110 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo animado
-                AnimatedBuilder(
-                  animation: _scaleAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+            child: SingleChildScrollView(
+               physics: const BouncingScrollPhysics(),
+               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo animado
+                  AnimatedBuilder(
+                    animation: _scaleAnimation,
+                    builder: (context, child) {
+                      // Usar un porcentaje del ancho de la pantalla para el logo
+                      // En pantallas grandes (tablets), limitamos el tamaño máximo
+                      final logoSize = ResponsiveHelper.isTablet(context)
+                          ? 250.0 
+                          : ResponsiveHelper.screenWidth(context) * 0.5;
+                      
+                      return Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: Container(
+                          width: logoSize,
+                          height: logoSize,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(logoSize / 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(logoSize / 2),
+                            child: Image.asset(
+                              'assets/images/logo-completo2.png',
+                              fit: BoxFit.contain,
                             ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Image.asset(
-                            'assets/images/logo-completo2.png',
-                            fit: BoxFit.contain,
                           ),
                         ),
+                      );
+                    },
+                  ),
+            
+                  SizedBox(height: ResponsiveHelper.getResponsiveSpacing(context) * 3),
+            
+                  // Título animado
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
+                      'Gilact',
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(context, 48),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 2,
                       ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 40),
-
-                // Título animado
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const Text(
-                    'Gilact',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 2,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Subtítulo animado
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const Text(
-                    'Tu compañero en la lactancia materna',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w300,
+            
+                  SizedBox(height: ResponsiveHelper.getResponsiveSpacing(context)),
+            
+                  // Subtítulo animado
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: ResponsiveHelper.getResponsivePadding(context)),
+                      child: Text(
+                        'Tu compañero en la lactancia materna',
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 18),
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w300,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-
-                const SizedBox(height: 60),
-
-                // Indicador de carga
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 3,
+            
+                  SizedBox(height: ResponsiveHelper.getResponsiveSpacing(context) * 4),
+            
+                  // Indicador de carga
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 3,
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Texto de carga
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const Text(
-                    'Cargando...',
-                    style: TextStyle(fontSize: 16, color: Colors.white60),
+            
+                  SizedBox(height: ResponsiveHelper.getResponsiveSpacing(context)),
+            
+                  // Texto de carga
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
+                      'Cargando...',
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
+                        color: Colors.white60
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

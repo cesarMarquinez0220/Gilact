@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 import '../models/tip_model.dart';
 import '../../../../core/error/exceptions.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class TipRemoteDataSource {
   Future<List<TipModel>> getAllTips();
@@ -22,10 +24,27 @@ class TipRemoteDataSourceImpl implements TipRemoteDataSource {
   @override
   Future<List<TipModel>> getAllTips() async {
     try {
+      // 1. Intentar obtener de caché primero
+      try {
+        final cacheSnapshot = await _firestore
+            .collection('tips')
+            .orderBy('order')
+            .get(const GetOptions(source: Source.cache));
+
+        if (cacheSnapshot.docs.isNotEmpty) {
+          return cacheSnapshot.docs
+              .map((doc) => TipModel.fromQueryDocument(doc))
+              .toList();
+        }
+      } catch (_) {
+        // Ignorar error de caché y continuar con servidor
+      }
+
+      // 2. Si no hay caché o falla, obtener del servidor
       final querySnapshot = await _firestore
           .collection('tips')
           .orderBy('order')
-          .get();
+          .get(const GetOptions(source: Source.server));
 
       return querySnapshot.docs
           .map((doc) => TipModel.fromQueryDocument(doc))
@@ -89,10 +108,12 @@ class TipRemoteDataSourceImpl implements TipRemoteDataSource {
   @override
   Future<void> markTipAsFavorite(String tipId) async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(userId);
 
       await user.collection('favorite_tips').doc(tipId).set({
         'tipId': tipId,
@@ -108,10 +129,12 @@ class TipRemoteDataSourceImpl implements TipRemoteDataSource {
   @override
   Future<void> unmarkTipAsFavorite(String tipId) async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(userId);
 
       await user.collection('favorite_tips').doc(tipId).delete();
     } catch (e) {
@@ -124,10 +147,12 @@ class TipRemoteDataSourceImpl implements TipRemoteDataSource {
   @override
   Future<List<TipModel>> getFavoriteTips() async {
     try {
-      // Aquí necesitarías obtener el usuario actual
-      final user = FirebaseFirestore.instance
-          .collection('Users')
-          .doc('current_user_id');
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw const ServerException(message: 'Usuario no autenticado');
+      }
+
+      final user = _firestore.collection('Users').doc(userId);
 
       final querySnapshot = await user.collection('favorite_tips').get();
 

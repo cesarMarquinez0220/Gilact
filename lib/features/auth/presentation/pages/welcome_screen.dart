@@ -13,6 +13,7 @@ import '../../../lactation/data/services/sleep_notification_service.dart';
 import '../../../lessons/presentation/providers/lecciones_provider.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -722,13 +723,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return AnimatedBuilder(
       animation: _mainController,
       builder: (context, child) {
+        final logoSize = ResponsiveHelper.isTablet(context) 
+            ? 250.0 
+            : ResponsiveHelper.screenWidth(context) * 0.45;
+        final innerSize = logoSize * 0.78; // Proporcional al contenedor
+
         return Transform.scale(
           scale: _logoScale.value,
           child: Opacity(
             opacity: _logoOpacity.value,
             child: Container(
-              width: 180,
-              height: 180,
+              width: logoSize,
+              height: logoSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -754,8 +760,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Center(
                 child: Image.asset(
                   'assets/images/logo-completo2.png',
-                  width: 140,
-                  height: 140,
+                  width: innerSize,
+                  height: innerSize,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -779,7 +785,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 Text(
                   'welcome.title'.tr(),
                   style: TextStyle(
-                    fontSize: 42,
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 42),
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                     letterSpacing: 2.0,
@@ -799,7 +805,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   'welcome.verifying'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 18),
                     color: Colors.white.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.5,
@@ -822,7 +828,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           children: [
             // Barra de progreso personalizada
             Container(
-              width: 200,
+              width: ResponsiveHelper.screenWidth(context) * 0.6,
               height: 4,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
@@ -831,7 +837,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Stack(
                 children: [
                   Container(
-                    width: 200 * _progressAnimation.value,
+                    width: (ResponsiveHelper.screenWidth(context) * 0.6) * _progressAnimation.value,
                     height: 4,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
@@ -857,7 +863,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             Text(
               'welcome.loading'.tr(),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
                 color: Colors.white.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w300,
                 letterSpacing: 1.0,
@@ -884,9 +890,10 @@ class ParticlePainter extends CustomPainter {
     // Crear partículas flotantes
     for (int i = 0; i < 20; i++) {
       final x = (size.width * (i / 20.0) + animationValue * 100) % size.width;
+      // Usar porcentaje de altura para que se adapte
       final y =
           size.height * 0.3 +
-          (i * 30.0) +
+          (i * (size.height * 0.04)) + // Escalar espaciado vertical
           (animationValue * 50 * (i % 2 == 0 ? 1 : -1));
 
       final radius = 2.0 + (i % 3);
@@ -899,7 +906,8 @@ class ParticlePainter extends CustomPainter {
     // Partículas más grandes en el fondo
     for (int i = 0; i < 8; i++) {
       final x = size.width * (i / 8.0) + animationValue * 30;
-      final y = size.height * 0.7 + (i * 40.0);
+      // Usar porcentaje de altura
+      final y = size.height * 0.7 + (i * (size.height * 0.05));
 
       final radius = 4.0 + (i % 2);
       final opacity = 0.1 + (animationValue * 0.2);

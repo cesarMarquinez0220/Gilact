@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt;
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 
@@ -221,33 +223,60 @@ class VideoCacheService {
     }
   }
 
-  /// Precarga un segmento del video en cache
+  /// Precarga un video de YouTube resolviendo su URL directa
   static Future<void> preloadVideoSegment(
-    int videoId, {
+    int videoId,
+    String videoUrl, {
     int duration = 30,
   }) async {
     final logger = getIt<AppLogger>();
     try {
-      logger.d('Precargando segmento de video $videoId (${duration}s)');
+      if (videoUrl.isEmpty) return;
+      
+      logger.d('Iniciando precarga para video $videoId ($videoUrl)');
 
-      // Simular precarga del segmento
-      // En una implementación real, aquí se descargaría el segmento del video
-      await Future.delayed(const Duration(milliseconds: 500));
+      // 1. Extraer ID y obtener URL del stream directo
+      final ytId = yt.VideoId(videoUrl);
+      final ytExplode = yt.YoutubeExplode();
+      
+      try {
+        final manifest = await ytExplode.videos.streamsClient.getManifest(ytId);
+        final streamInfo = manifest.muxed.withHighestBitrate();
+        final streamUrl = streamInfo.url.toString();
 
-      // Guardar información de precarga
-      final prefs = await SharedPreferences.getInstance();
-      final preloadKey = 'preload_$videoId';
-      final preloadData = {
-        'videoId': videoId,
-        'duration': duration,
-        'preloadedAt': DateTime.now().millisecondsSinceEpoch,
-      };
+        logger.d('URL directa obtenida, iniciando descarga..');
 
-      await prefs.setString(preloadKey, jsonEncode(preloadData));
+        // 2. Descargar y cachear usando videoId como key
+        await DefaultCacheManager().getSingleFile(streamUrl, key: videoId.toString());
 
-      logger.success('Segmento de video $videoId precargado exitosamente');
+        // 3. Guardar metadatos
+        final prefs = await SharedPreferences.getInstance();
+        final preloadKey = 'preload_$videoId';
+        final preloadData = {
+          'videoId': videoId,
+          'originalUrl': videoUrl,
+          'streamUrl': streamUrl,
+          'preloadedAt': DateTime.now().millisecondsSinceEpoch,
+          'isFullDownload': true,
+        };
+
+        await prefs.setString(preloadKey, jsonEncode(preloadData));
+
+        logger.success('Video $videoId precargado exitosamente en cache');
+      } finally {
+        ytExplode.close();
+      }
     } catch (e, stackTrace) {
-      logger.e('Error precargando segmento de video $videoId', e, stackTrace);
+      logger.e('Error precargando video $videoId', e, stackTrace);
+    }
+  }
+
+  /// Obtiene el archivo de video desde el cache usando el videoId como key
+  static Future<FileInfo?> getCachedVideoFile(int videoId) async {
+    try {
+      return await DefaultCacheManager().getFileFromCache(videoId.toString());
+    } catch (e) {
+      return null;
     }
   }
 

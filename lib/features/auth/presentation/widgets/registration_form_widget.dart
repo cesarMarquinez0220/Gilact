@@ -147,7 +147,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
-                  shadows: [
+                  shadows: const [
                     Shadow(
                       color: Colors.black26,
                       offset: Offset(0, 2),
@@ -283,7 +283,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
-                  shadows: [
+                  shadows: const [
                     Shadow(
                       color: Colors.black26,
                       offset: Offset(0, 2),
@@ -422,7 +422,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
-                  shadows: [
+                  shadows: const [
                     Shadow(
                       color: Colors.black26,
                       offset: Offset(0, 2),
@@ -553,6 +553,10 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     VoidCallback? onTap,
     ValueChanged<String>? onChanged,
   }) {
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
+    final verticalPadding = ResponsiveHelper.getResponsiveValue(context, small: 14.0, medium: 16.0, large: 18.0);
+    final horizontalPadding = ResponsiveHelper.getResponsiveValue(context, small: 16.0, medium: 20.0, large: 24.0);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
@@ -584,27 +588,27 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         enabled: !widget.isLoading,
         onTap: onTap,
         onChanged: onChanged,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 16,
+          fontSize: fontSize,
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             color: Colors.white70,
-            fontSize: 16,
+            fontSize: fontSize,
             fontWeight: FontWeight.w400,
           ),
-          prefixIcon: Icon(icon, color: Colors.white70, size: 22),
+          prefixIcon: Icon(icon, color: Colors.white70, size: fontSize * 1.375), // ~22px relative to 16
           suffixIcon: suffixIcon,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 18,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
           errorText: errorText,
-          errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
+          errorStyle: TextStyle(color: Colors.redAccent, fontSize: fontSize * 0.75), // ~12px relative to 16
         ),
       ),
     );
@@ -616,6 +620,8 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     bool isLoading = false,
   }) {
     final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
+
     return Container(
       width: double.infinity,
       height: buttonHeight,
@@ -652,18 +658,18 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
+            ? SizedBox(
+                height: fontSize * 1.33,
+                width: fontSize * 1.33,
+                child: const CircularProgressIndicator(
                   color: Colors.white,
                   strokeWidth: 2.5,
                 ),
               )
             : Text(
                 text,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.5,
@@ -678,6 +684,8 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
     required VoidCallback onPressed,
   }) {
     final buttonHeight = ResponsiveHelper.getResponsiveButtonHeight(context);
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
+
     return Container(
       width: double.infinity,
       height: buttonHeight,
@@ -704,8 +712,8 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 0.5,
@@ -716,22 +724,29 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
   }
 
   Widget _buildPasswordStrengthIndicator() {
+    final fontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
+    final iconSize = fontSize * 1.33; // ~16px relatives to 12
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.getResponsiveValue(context, small: 10, medium: 12, large: 14),
+        vertical: ResponsiveHelper.getResponsiveValue(context, small: 6, medium: 8, large: 10),
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.security, color: _passwordStrengthColor, size: 16),
-          const SizedBox(width: 8),
+          Icon(Icons.security, color: _passwordStrengthColor, size: iconSize),
+          SizedBox(width: ResponsiveHelper.getResponsiveValue(context, small: 6, medium: 8, large: 10)),
           Text(
             'Fortaleza: $_passwordStrength',
             style: TextStyle(
               color: _passwordStrengthColor,
-              fontSize: 12,
+              fontSize: fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

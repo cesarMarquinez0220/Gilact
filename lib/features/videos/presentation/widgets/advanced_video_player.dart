@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,6 +76,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   bool _isOfflineMode = false;
   bool _isCheckingDownload = true;
+  File? _cachedFile; // Archivo cacheado (no encriptado)
 
   final int _pauseCount = 0;
   final int _forwardCount = 0;
@@ -146,7 +148,34 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       // Verificar conectividad primero
       final isConnected = await _connectivityService.isConnected();
 
-      // Verificar si el video está descargado
+      // 1. Verificar si hay archivo en cache (Video Cache Optimization)
+      // Usar int.parse para compatibilidad, aunque videoId en Video es String, el servicio usa int
+      int? videoIdInt;
+      try {
+        videoIdInt = int.parse(widget.video.id);
+      } catch (e) {
+        videoIdInt = int.tryParse(widget.video.videoId.toString());
+      }
+      
+      if (videoIdInt != null) {
+        final fileInfo = await VideoCacheService.getCachedVideoFile(videoIdInt);
+        if (fileInfo != null) {
+           if (kDebugMode) {
+             print('🚀 VIDEO EN CACHE EXITOSO: Usando archivo local para ahorrar datos');
+           }
+           if (mounted) {
+             setState(() {
+               _cachedFile = fileInfo.file;
+               _isOfflineMode = true; // Usar reproductor offline (File player)
+               _isCheckingDownload = false;
+             });
+             widget.onVideoReady?.call();
+             return; // Salir temprano, ya tenemos video
+           }
+        }
+      }
+
+      // 2. Verificar si el video está descargado (Secure Download)
       final isDownloaded = await _downloadService.isVideoDownloaded(
         widget.video.id,
       );
@@ -456,6 +485,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         onVideoCompleted: widget.onVideoCompleted,
         onVideoReady: widget.onVideoReady,
         isFromHistory: widget.isFromHistory,
+        file: _cachedFile, // Pasar archivo cacheado si existe
       );
     }
 

@@ -7,7 +7,9 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/services/user_subcollections_service.dart';
 import '../widgets/situation_option_widget.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class SituationSelectionPage extends StatefulWidget {
   const SituationSelectionPage({super.key});
@@ -135,7 +137,7 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                 child: SlideTransition(
                   position: _slideAnimation,
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: ResponsiveHelper.getResponsivePaddingAll(context),
                     child: Column(
                       children: [
                         const SizedBox(height: 20),
@@ -162,8 +164,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                         // Título principal
                         Text(
                           'onboarding.chooseSituation'.tr(),
-                          style: const TextStyle(
-                            fontSize: 28,
+                          style: TextStyle(
+                            fontSize: ResponsiveHelper.getResponsiveFontSize(context, 28),
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -175,8 +177,8 @@ class _SituationSelectionPageState extends State<SituationSelectionPage>
                         // Subtítulo
                         Text(
                           'onboarding.selectSituationDescription'.tr(),
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16),
                             color: Colors.white70,
                             height: 1.4,
                           ),
@@ -273,7 +275,7 @@ class ParticlePainter extends CustomPainter {
       final x = (size.width * (i / 30.0) + animationValue * 80) % size.width;
       final y =
           size.height * 0.2 +
-          (i * 25.0) +
+          (i * (size.height * 0.03)) +
           (animationValue * 40 * (i % 3 == 0 ? 1 : -1));
 
       final radius = 1.5 + (i % 2);
@@ -286,7 +288,7 @@ class ParticlePainter extends CustomPainter {
     // Partículas más grandes en el fondo
     for (int i = 0; i < 12; i++) {
       final x = size.width * (i / 12.0) + animationValue * 25;
-      final y = size.height * 0.6 + (i * 35.0);
+      final y = size.height * 0.6 + (i * (size.height * 0.04));
 
       final radius = 2.5 + (i % 2);
       final opacity = 0.05 + (animationValue * 0.15);
@@ -299,7 +301,7 @@ class ParticlePainter extends CustomPainter {
     for (int i = 0; i < 20; i++) {
       final x =
           (size.width * 0.3 + i * 20.0 + animationValue * 15) % size.width;
-      final y = size.height * 0.4 + (i * 30.0);
+      final y = size.height * 0.4 + (i * (size.height * 0.035));
 
       final radius = 1.0 + (i % 3) * 0.5;
       final opacity = 0.08 + (animationValue * 0.12);

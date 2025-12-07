@@ -701,16 +701,7 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
 
       if (!mounted) return;
 
-      // Mostrar mensaje de éxito y cerrar diálogo
-      DialogExample.showSuccessDialog(
-        context,
-        'Registro Exitoso',
-        'Los datos de lactancia han sido registrados correctamente.',
-        () {
-          Navigator.of(context).pop();
-          // Opcional: refrescar la pantalla principal
-        },
-      );
+      Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
 

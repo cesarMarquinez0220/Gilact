@@ -1,6 +1,5 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
-import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -105,22 +104,14 @@ class ProblemasLactanciaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Transform.scale(
-          scale: 1.2,
-          child: Image.asset(TipAssets.problemas),
-        ),
+      image: Transform.scale(
+        scale: 1.2,
+        child: Image.asset(TipAssets.problemas),
       ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.commonProblems.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingLarge,
-        ),
+      title: Text(
+        'tips.content.commonProblems.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingLarge,
       ),
       body: [
         const SizedBox(height: 6),

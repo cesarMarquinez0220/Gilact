@@ -112,10 +112,8 @@ class CredentialsCacheService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? lastLoginString = prefs.getString(_lastLoginKey);
-      if (lastLoginString != null) {
-        return DateTime.tryParse(lastLoginString);
-      }
-      return null;
+      if (lastLoginString == null) return null;
+      return DateTime.tryParse(lastLoginString);
     } catch (e, stackTrace) {
       _logger.e('Error obteniendo última vez de login', e, stackTrace);
       return null;

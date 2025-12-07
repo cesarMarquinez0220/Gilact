@@ -1,6 +1,5 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use, avoid_unnecessary_containers
 
-import 'package:animate_do/animate_do.dart';
 import 'common/truly_adaptive_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -95,19 +94,11 @@ class ExtraccionAlmacenamientoInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: FadeInRight(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Image.asset(TipAssets.extraccion),
-      ),
-      title: FadeInDown(
-        duration: const Duration(milliseconds: 1000),
-        delay: const Duration(milliseconds: 500),
-        child: Text(
-          'tips.content.extractionStorage.title'.tr(),
-          textAlign: TextAlign.center,
-          style: TipTypography.headingLarge,
-        ),
+      image: Image.asset(TipAssets.extraccion),
+      title: Text(
+        'tips.content.extractionStorage.title'.tr(),
+        textAlign: TextAlign.center,
+        style: TipTypography.headingLarge,
       ),
       body: [
         const SizedBox(height: 10),
