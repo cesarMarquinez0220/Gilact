@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/responsive_tip_image.dart';
 import 'common/truly_adaptive_card.dart';
 
 class BeneficiosBebeInfo extends StatelessWidget {
@@ -58,7 +59,10 @@ class BeneficiosBebeInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: Image.asset(TipAssets.like),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.like,
+        fit: BoxFit.contain,
+      ),
       title: Text(
         'tips.content.benefitsBaby.title'.tr(),
         textAlign: TextAlign.center,
@@ -66,44 +70,44 @@ class BeneficiosBebeInfo extends StatelessWidget {
       ),
       body: [
         Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AdaptiveTextContent(
-                text: 'tips.content.benefitsBaby.subtitle'.tr(),
-                style: TipTypography.paragraph,
-                textAlign: TextAlign.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AdaptiveTextContent(
+              text: 'tips.content.benefitsBaby.subtitle'.tr(),
+              style: TipTypography.paragraph,
+              textAlign: TextAlign.start,
+            ),
+            const SizedBox(height: 12),
+            FutureBuilder<List<String>>(
+              future: _getItemsListAsync(
+                context,
+                'tips.content.benefitsBaby.items',
               ),
-              const SizedBox(height: 12),
-              FutureBuilder<List<String>>(
-                future: _getItemsListAsync(
-                  context,
-                  'tips.content.benefitsBaby.items',
-                ),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    debugPrint('Error en FutureBuilder: ${snapshot.error}');
-                    return const SizedBox.shrink();
-                  }
-
-                  final items = snapshot.data ?? [];
-
-                  return AdaptiveListContent(
-                    items: items,
-                    itemStyle: TipTypography.paragraph,
-                    bullet: '-',
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   );
-                },
-              ),
-            ],
-          ),
+                }
+
+                if (snapshot.hasError) {
+                  debugPrint('Error en FutureBuilder: ${snapshot.error}');
+                  return const SizedBox.shrink();
+                }
+
+                final items = snapshot.data ?? [];
+
+                return AdaptiveListContent(
+                  items: items,
+                  itemStyle: TipTypography.paragraph,
+                  bullet: '-',
+                );
+              },
+            ),
+          ],
+        ),
       ],
     );
   }

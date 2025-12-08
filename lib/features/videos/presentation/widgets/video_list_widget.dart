@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../bloc/video_bloc.dart';
+import '../../../../core/widgets/optimized_image.dart';
 
 class VideoListWidget extends StatefulWidget {
   const VideoListWidget({super.key});
@@ -28,6 +29,8 @@ class _VideoListWidgetState extends State<VideoListWidget> {
         } else if (state is VideosLoaded) {
           return ListView.builder(
             itemCount: state.videos.length,
+            // Optimización: cacheExtent reduce reconstrucciones durante scroll
+            cacheExtent: 500, // Cache 500px fuera del viewport
             itemBuilder: (context, index) {
               final video = state.videos[index];
               return VideoCard(
@@ -42,7 +45,7 @@ class _VideoListWidgetState extends State<VideoListWidget> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 Text(
                   'Error al cargar videos',
@@ -152,28 +155,17 @@ class VideoCard extends StatelessWidget {
               // Imagen del video
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Builder(
-                  builder: (context) {
-                    final devicePixelRatio = MediaQuery.of(
-                      context,
-                    ).devicePixelRatio;
-                    final cacheWidth = (80 * devicePixelRatio).round();
-                    final cacheHeight = (60 * devicePixelRatio).round();
-                    return Image.asset(
-                      'assets/mini_videos/${video.imageName}',
+                child: OptimizedImage(
+                  imagePath: 'assets/mini_videos/${video.imageName}',
+                  width: 80,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
                       width: 80,
                       height: 60,
-                      cacheWidth: cacheWidth,
-                      cacheHeight: cacheHeight,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 80,
-                          height: 60,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.video_library),
-                        );
-                      },
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.video_library),
                     );
                   },
                 ),

@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/responsive_tip_image.dart';
 
 class LactanciaExitosa extends StatelessWidget {
   const LactanciaExitosa({Key? key}) : super(key: key);
@@ -97,7 +98,10 @@ class LactanciaExitosa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: Image.asset(TipAssets.consejolactancia),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.consejolactancia,
+        fit: BoxFit.contain,
+      ),
       title: Text(
         'tips.content.successfulBreastfeeding.title'.tr(),
         textAlign: TextAlign.center,

@@ -217,30 +217,38 @@ Este documento detalla las correcciones adicionales aplicadas para mejorar la pu
 
 ---
 
-### 11. Network Security - Trust System Certificates ✅
+### 11. Network Security - Trust System Certificates ⚠️
 
 **Problema Detectado:**
 - MobSF advierte sobre confiar en certificados del sistema
 
 **Análisis:**
 - La configuración actual confía en certificados del sistema (común y necesario)
-- Para mayor seguridad, se implementó **certificate pinning**
+- Se intentó implementar **certificate pinning** pero causó problemas con reCAPTCHA
 
 **Solución Implementada:**
 - ✅ **Configuración segura**: `cleartextTrafficPermitted="false"`
-- ✅ **Dominios específicos**: Configurados para Firebase/Google
-- ✅ **Certificate Pinning**: Implementado con hashes SHA-256 de certificados de Google
-- ✅ **Backup pins**: Incluidos múltiples certificados para evitar bloqueos
-- ✅ **Fecha de expiración**: Configurada para 2026-12-31 (actualizar antes)
+- ✅ **Dominios específicos**: Configurados para Firebase/Google y reCAPTCHA
+- ⚠️ **Certificate Pinning**: **DESHABILITADO TEMPORALMENTE** - Los pins estaban bloqueando reCAPTCHA
+- ✅ **Dominios adicionales**: Agregados gstatic.com, recaptcha.net, googleusercontent.com
 
-**Detalles de Implementación:**
-- **Pins configurados**: Google Internet Authority G2, G3, GlobalSign Root CA (backups)
-- **Dominios protegidos**: firebase.google.com, firebaseapp.com, googleapis.com, google.com
-- **Prevención MITM**: Previene ataques Man-in-the-Middle
+**Problema Encontrado:**
+- El certificate pinning con los hashes implementados causaba "Pin verification failed" en reCAPTCHA
+- Esto bloqueaba el login de Firebase Authentication
+
+**Solución Temporal:**
+- Removido el `pin-set` pero mantenida la configuración segura de dominios
+- Agregados todos los dominios necesarios para Firebase y reCAPTCHA
+- La app funciona correctamente sin certificate pinning (aún es segura con certificados del sistema)
+
+**Próximos Pasos (Opcional):**
+- Obtener hashes SHA-256 exactos y actualizados de los certificados
+- Incluir todos los dominios de reCAPTCHA en el pin-set
+- Probar exhaustivamente antes de reactivar
 
 **Ubicación:**
-- `android/app/src/main/res/xml/network_security_config.xml`: **ACTUALIZADO** con pin-set
-- `CERTIFICATE_PINNING_GUIDE.md`: **NUEVO** - Guía completa de certificate pinning
+- `android/app/src/main/res/xml/network_security_config.xml`: **ACTUALIZADO** - Pins removidos, dominios agregados
+- `CERTIFICATE_PINNING_GUIDE.md`: **ACTUALIZADO** - Estado actual documentado
 
 ---
 

@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/responsive_tip_image.dart';
 
 class ProblemasLactanciaInfo extends StatelessWidget {
   const ProblemasLactanciaInfo({Key? key}) : super(key: key);
@@ -104,9 +105,9 @@ class ProblemasLactanciaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: Transform.scale(
-        scale: 1.2,
-        child: Image.asset(TipAssets.problemas),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.problemas,
+        fit: BoxFit.contain,
       ),
       title: Text(
         'tips.content.commonProblems.title'.tr(),

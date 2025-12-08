@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/responsive_tip_image.dart';
 
 class ExtraccionAlmacenamientoInfo extends StatelessWidget {
   const ExtraccionAlmacenamientoInfo({Key? key}) : super(key: key);
@@ -94,7 +95,10 @@ class ExtraccionAlmacenamientoInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: Image.asset(TipAssets.extraccion),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.extraccion,
+        fit: BoxFit.contain,
+      ),
       title: Text(
         'tips.content.extractionStorage.title'.tr(),
         textAlign: TextAlign.center,

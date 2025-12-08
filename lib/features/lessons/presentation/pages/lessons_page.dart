@@ -59,6 +59,8 @@ class _LessonsPageState extends State<LessonsPage> {
     return ListView.builder(
       padding: EdgeInsets.all(padding),
       itemCount: lessons.length,
+      // Optimización: cacheExtent reduce reconstrucciones durante scroll
+      cacheExtent: 500, // Cache 500px fuera del viewport
       itemBuilder: (context, index) {
         final lesson = lessons[index];
         return LessonCard(
@@ -126,7 +128,7 @@ class _LessonsPageState extends State<LessonsPage> {
 
   void _showLessonDetails(BuildContext context, lesson) {
     final spacing = ResponsiveHelper.getResponsiveSpacing(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -151,28 +153,40 @@ class _LessonsPageState extends State<LessonsPage> {
                 Text(
                   '${'lessons.category'.tr()}: ${lesson.category}',
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      14.0,
+                    ),
                   ),
                 ),
                 SizedBox(height: spacing * 0.5),
                 Text(
                   '${'lessons.progress'.tr()}: ${(lesson.progress * 100).toInt()}%',
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      14.0,
+                    ),
                   ),
                 ),
                 SizedBox(height: spacing * 0.5),
                 Text(
                   '${'lessons.videos'.tr()}: ${lesson.videoIds.length}',
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      14.0,
+                    ),
                   ),
                 ),
                 SizedBox(height: spacing),
                 Text(
                   lesson.description,
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      14.0,
+                    ),
                   ),
                 ),
               ],
@@ -232,7 +246,10 @@ class _LessonsPageState extends State<LessonsPage> {
               title: Text(
                 'lessons.statisticsTitle'.tr(),
                 style: TextStyle(
-                  fontSize: ResponsiveHelper.getResponsiveFontSize(context, 18.0),
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(
+                    context,
+                    18.0,
+                  ),
                 ),
               ),
               content: ConstrainedBox(
@@ -250,28 +267,40 @@ class _LessonsPageState extends State<LessonsPage> {
                       Text(
                         '${'lessons.completedLessons'.tr()}: ${state.statistics['completedLessons'] ?? 0}',
                         style: TextStyle(
-                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(
+                            context,
+                            14.0,
+                          ),
                         ),
                       ),
                       SizedBox(height: spacing * 0.5),
                       Text(
                         '${'lessons.completedVideos'.tr()}: ${state.statistics['completedVideos'] ?? 0}',
                         style: TextStyle(
-                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(
+                            context,
+                            14.0,
+                          ),
                         ),
                       ),
                       SizedBox(height: spacing * 0.5),
                       Text(
                         '${'lessons.totalTime'.tr()}: ${state.statistics['totalTime'] ?? '0 min'}',
                         style: TextStyle(
-                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(
+                            context,
+                            14.0,
+                          ),
                         ),
                       ),
                       SizedBox(height: spacing * 0.5),
                       Text(
                         '${'lessons.overallProgress'.tr()}: ${state.statistics['overallProgress'] ?? 0}%',
                         style: TextStyle(
-                          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14.0),
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(
+                            context,
+                            14.0,
+                          ),
                         ),
                       ),
                     ],
@@ -340,9 +369,15 @@ class LessonCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(borderRadius),
                         child: LayoutBuilder(
                           builder: (context, constraints) {
-                            final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-                            final cacheWidth = (constraints.maxWidth * devicePixelRatio).round();
-                            final cacheHeight = (constraints.maxHeight * devicePixelRatio).round();
+                            final devicePixelRatio = MediaQuery.of(
+                              context,
+                            ).devicePixelRatio;
+                            final cacheWidth =
+                                (constraints.maxWidth * devicePixelRatio)
+                                    .round();
+                            final cacheHeight =
+                                (constraints.maxHeight * devicePixelRatio)
+                                    .round();
                             return Image.asset(
                               'assets/images/${lesson.imageUrl}',
                               fit: BoxFit.cover,
@@ -353,10 +388,11 @@ class LessonCard extends StatelessWidget {
                                   color: Colors.grey[300],
                                   child: Icon(
                                     Icons.school,
-                                    size: ResponsiveHelper.getResponsiveIconSize(
-                                      context,
-                                      24.0,
-                                    ),
+                                    size:
+                                        ResponsiveHelper.getResponsiveIconSize(
+                                          context,
+                                          24.0,
+                                        ),
                                   ),
                                 );
                               },
@@ -430,7 +466,10 @@ class LessonCard extends StatelessWidget {
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
                       color: lesson.isCompleted ? Colors.green : Colors.grey,
-                      size: ResponsiveHelper.getResponsiveIconSize(context, 24.0),
+                      size: ResponsiveHelper.getResponsiveIconSize(
+                        context,
+                        24.0,
+                      ),
                     ),
                     tooltip: lesson.isCompleted
                         ? 'lessons.completed'.tr()

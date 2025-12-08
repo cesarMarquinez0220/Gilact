@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_typography.dart';
 import 'common/truly_adaptive_card.dart';
+import 'common/responsive_tip_image.dart';
 
 class CalostroInfo extends StatelessWidget {
   const CalostroInfo({Key? key}) : super(key: key);
@@ -98,7 +99,10 @@ class CalostroInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TrulyAdaptiveCard(
-      image: Image.asset(TipAssets.calostro),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.calostro,
+        fit: BoxFit.contain,
+      ),
       title: Text(
         'tips.content.colostrum.title'.tr(),
         textAlign: TextAlign.center,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/utils/responsive_helper.dart';
+import '../../../../core/widgets/optimized_image.dart';
 
 class OnboardingSlideWidget extends StatefulWidget {
   final int slideIndex;
@@ -136,77 +137,99 @@ class _OnboardingSlideWidgetState extends State<OnboardingSlideWidget>
   }
 
   Widget _buildFirstSlideIllustration() {
-    return Image.asset(
-      'assets/images/mother.png',
-      fit: BoxFit.contain, // Cambiado para evitar recortes
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.2),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Icon(
-            Icons.family_restroom,
-            size: 60,
-            color: Colors.white,
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OptimizedImage(
+          imagePath: 'assets/images/mother.png',
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.2),
+                    Colors.white.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.family_restroom,
+                size: 60,
+                color: Colors.white,
+              ),
+            );
+          },
         );
       },
     );
   }
 
   Widget _buildSecondSlideIllustration() {
-    return Image.asset(
-      'assets/images/mother2.png',
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.2),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Icon(Icons.child_care, size: 60, color: Colors.white),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OptimizedImage(
+          imagePath: 'assets/images/mother2.png',
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.2),
+                    Colors.white.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.child_care,
+                size: 60,
+                color: Colors.white,
+              ),
+            );
+          },
         );
       },
     );
   }
 
   Widget _buildThirdSlideIllustration() {
-    return Image.asset(
-      'assets/images/mother3.png',
-      fit: BoxFit.contain, // Cambiado para evitar recortes
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.2),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Icon(
-            Icons.health_and_safety,
-            size: 60,
-            color: Colors.white,
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OptimizedImage(
+          imagePath: 'assets/images/mother3.png',
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.2),
+                    Colors.white.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.health_and_safety,
+                size: 60,
+                color: Colors.white,
+              ),
+            );
+          },
         );
       },
     );

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/utils/responsive_helper.dart';
 
 /// Widget de tarjeta que se adapta verticalmente para llenar el espacio disponible
 /// SIN necesidad de scroll, utilizando Flexible y Expanded para distribuir el espacio.
+/// Optimizado para performance usando ResponsiveHelper y const constructors.
 class TrulyAdaptiveCard extends StatelessWidget {
   final Widget image;
   final Widget title;
@@ -18,32 +20,52 @@ class TrulyAdaptiveCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenHeight = constraints.maxHeight;
-        final screenWidth = constraints.maxWidth;
-        final isSmallScreen = screenHeight < 700 || screenWidth < 360;
-        final isVerySmallScreen = screenHeight < 600;
+        final screenHeight = ResponsiveHelper.screenHeight(context);
+        final screenWidth = ResponsiveHelper.screenWidth(context);
+        final isSmallScreen =
+            ResponsiveHelper.isSmall(context) ||
+            ResponsiveHelper.isShortScreen(context);
+        final isVerySmallScreen = ResponsiveHelper.isVeryShortScreen(context);
 
-        // Ajustar flex de imagen según tamaño de pantalla
-        final imageFlex = isVerySmallScreen ? 1 : (isSmallScreen ? 2 : 3);
+        // Padding responsive usando ResponsiveHelper
+        final horizontalPadding = ResponsiveHelper.getResponsivePadding(
+          context,
+        );
+
+        // Ajustar tamaño relativo máximo para la imagen
+        final maxImageHeight = isVerySmallScreen
+            ? screenHeight * 0.25
+            : (isSmallScreen ? screenHeight * 0.30 : screenHeight * 0.35);
 
         return SafeArea(
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 12.0 : 16.0,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+              // MainAxisSize.min es importante aquí para no forzar altura si no es necesario
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 SizedBox(height: isSmallScreen ? 4 : 8),
-                // 1. La imagen ocupa una porción flexible del espacio.
-                Flexible(flex: imageFlex, child: image),
+                // 1. IMAGEN: Usamos ConstrainedBox para que no crezca infinitamente,
+                // pero no usamos Flexible/Expanded forzado para permitir que la UI fluya.
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: screenWidth * 0.9,
+                    maxHeight: maxImageHeight,
+                  ),
+                  child: image,
+                ),
                 SizedBox(height: isSmallScreen ? 4 : 8),
-                // 2. La tarjeta de contenido se expande para llenar todo el espacio restante.
-                Expanded(
+                // 2. CONTENIDO: Aquí está la magia.
+                // Usamos Flexible con FlexFit.loose.
+                // Esto dice: "Ocupa lo que necesites, pero NO MÁS del espacio restante".
+                Flexible(
+                  fit: FlexFit.loose,
                   child: _buildContentCard(
                     context,
                     isSmallScreen,
                     isVerySmallScreen,
+                    screenWidth,
                   ),
                 ),
                 SizedBox(height: isSmallScreen ? 4 : 8),
@@ -59,20 +81,27 @@ class TrulyAdaptiveCard extends StatelessWidget {
     BuildContext context,
     bool isSmallScreen,
     bool isVerySmallScreen,
+    double screenWidth,
   ) {
+    // Ancho responsive de la card: 90-95% del ancho de pantalla
+    final cardWidth = isSmallScreen ? screenWidth * 0.95 : screenWidth * 0.92;
+    final cardPadding = ResponsiveHelper.getResponsivePadding(context) * 0.6;
+
     return Container(
-      width: double.infinity,
+      width: cardWidth,
+      // Quitamos altura fija, dejamos que el contenido dicte
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isSmallScreen ? 10.0 : 12.0),
+        padding: EdgeInsets.all(cardPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          // LA TARJETA SE ENCOGE AL CONTENIDO
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Título responsive con FittedBox para ajuste automático
+            // Título responsive con FittedBox y ResponsiveHelper
             LayoutBuilder(
               builder: (context, constraints) {
                 // Reducir tamaño máximo del título en pantallas pequeñas
@@ -82,6 +111,11 @@ class TrulyAdaptiveCard extends StatelessWidget {
                 final maxTitleScale = isVerySmallScreen
                     ? 0.75
                     : (isSmallScreen ? 0.85 : 1.0);
+                // Tamaño de fuente responsive
+                final titleFontSize = ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  isSmallScreen ? 18.0 : 20.0,
+                );
 
                 return FittedBox(
                   fit: BoxFit.scaleDown,
@@ -95,7 +129,10 @@ class TrulyAdaptiveCard extends StatelessWidget {
                       scale: maxTitleScale,
                       alignment: Alignment.center,
                       child: DefaultTextStyle(
-                        style: DefaultTextStyle.of(context).style,
+                        style: DefaultTextStyle.of(context).style.copyWith(
+                          fontSize: titleFontSize,
+                          color: Colors.black87, // Asegura contraste
+                        ),
                         textAlign: TextAlign.center,
                         child: title,
                       ),
@@ -105,14 +142,27 @@ class TrulyAdaptiveCard extends StatelessWidget {
               },
             ),
             SizedBox(height: isSmallScreen ? 4 : 6),
-            // Contenido con scroll - Expanded para ocupar espacio restante
-            Expanded(
+            // CUERPO DEL TEXTO
+            // Cambiamos Expanded por Flexible.
+            // Si hay poco texto -> Se encoge.
+            // Si hay mucho texto -> Topa con el límite del padre y hace scroll.
+            Flexible(
+              fit: FlexFit.loose,
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: body,
+                child: DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(
+                      context,
+                      isSmallScreen ? 14.0 : 16.0,
+                    ),
+                    height: 1.5,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: body,
+                  ),
                 ),
               ),
             ),
@@ -148,6 +198,7 @@ class AutoFitText extends StatelessWidget {
 }
 
 /// Widget especializado para contenido de texto que se ajusta automáticamente
+/// Optimizado con ResponsiveHelper para fuentes responsive
 class AdaptiveTextContent extends StatelessWidget {
   final String text;
   final TextStyle? style;
@@ -164,9 +215,23 @@ class AdaptiveTextContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Aplicar tamaño de fuente responsive si no está especificado en el style
+    final responsiveStyle =
+        style?.copyWith(
+          fontSize: style?.fontSize != null
+              ? ResponsiveHelper.getResponsiveFontSize(
+                  context,
+                  style!.fontSize!,
+                )
+              : ResponsiveHelper.getResponsiveFontSize(context, 16.0),
+        ) ??
+        TextStyle(
+          fontSize: ResponsiveHelper.getResponsiveFontSize(context, 16.0),
+        );
+
     return Text(
       text,
-      style: style,
+      style: responsiveStyle,
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: maxLines != null ? TextOverflow.ellipsis : null,

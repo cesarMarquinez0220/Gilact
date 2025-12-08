@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../constants/tip_assets.dart';
 import 'common/tip_card.dart';
 import 'common/tip_typography.dart';
+import 'common/responsive_tip_image.dart';
 import 'common/truly_adaptive_card.dart';
 
 class BeneficiosMamaInfo extends StatelessWidget {
@@ -55,7 +56,10 @@ class BeneficiosMamaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TipCard(
-      image: Image.asset(TipAssets.beneficios),
+      image: const ResponsiveTipImage(
+        imagePath: TipAssets.beneficios,
+        fit: BoxFit.contain,
+      ),
       title: Text(
         'tips.titles.benefitsMom'.tr(),
         textAlign: TextAlign.center,
@@ -63,33 +67,30 @@ class BeneficiosMamaInfo extends StatelessWidget {
       ),
       body: [
         FutureBuilder<List<String>>(
-            future: _getItemsListAsync(
-              context,
-              'tips.content.benefitsMom.items',
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                );
-              }
-
-              if (snapshot.hasError) {
-                debugPrint('Error en FutureBuilder: ${snapshot.error}');
-                return const SizedBox.shrink();
-              }
-
-              final items = snapshot.data ?? [];
-
-              return AdaptiveListContent(
-                items: items,
-                itemStyle: TipTypography.paragraph,
-                bullet: '-',
+          future: _getItemsListAsync(context, 'tips.content.benefitsMom.items'),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               );
-            },
-          ),
+            }
+
+            if (snapshot.hasError) {
+              debugPrint('Error en FutureBuilder: ${snapshot.error}');
+              return const SizedBox.shrink();
+            }
+
+            final items = snapshot.data ?? [];
+
+            return AdaptiveListContent(
+              items: items,
+              itemStyle: TipTypography.paragraph,
+              bullet: '-',
+            );
+          },
+        ),
       ],
     );
   }

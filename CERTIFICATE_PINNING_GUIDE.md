@@ -4,11 +4,16 @@
 
 Certificate Pinning (fijación de certificados) es una técnica de seguridad que asocia un host con su certificado público esperado. Esto previene ataques Man-in-the-Middle (MITM) al garantizar que la aplicación solo se conecte a servidores con certificados específicos.
 
-## Implementación Actual
+## ⚠️ Estado Actual: Deshabilitado Temporalmente
 
-### Archivo: `android/app/src/main/res/xml/network_security_config.xml`
+**Razón**: El certificate pinning estaba bloqueando las conexiones de reCAPTCHA de Firebase, causando errores de login ("Pin verification failed").
 
-Se ha implementado certificate pinning para los dominios de Firebase/Google usando hashes SHA-256 de los certificados.
+**Solución Temporal**: Se removió el `pin-set` pero se mantiene la configuración segura de dominios específicos.
+
+**Próximos Pasos**: Para implementar certificate pinning correctamente:
+1. Obtener los hashes SHA-256 exactos de los certificados actuales de Google/Firebase
+2. Incluir todos los dominios necesarios (incluyendo reCAPTCHA)
+3. Probar exhaustivamente antes de activar en producción
 
 ## Cómo Obtener los Hashes de Certificados
 

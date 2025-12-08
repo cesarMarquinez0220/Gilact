@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -315,7 +316,8 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   late final rive.FileLoader _fileLoader;
   rive.RiveWidgetController? _controller;
-  final GlobalKey _widgetKey = GlobalKey();
+  final GlobalKey _repaintBoundaryKey = GlobalKey();
+  final GlobalKey _riveWidgetKey = GlobalKey();
   bool _isVisible = true;
   Timer? _visibilityCheckTimer;
   final AppLogger _logger = getIt<AppLogger>();
@@ -342,9 +344,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final filePath = _getRiveFilePath(widget.babyStage);
-    _logger.d(
-      '📁 Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}',
-    );
+    if (kDebugMode) {
+      _logger.d(
+        '📁 Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}',
+      );
+    }
     _fileLoader = rive.FileLoader.fromAsset(
       filePath,
       riveFactory: rive.Factory.rive,
@@ -367,11 +371,10 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   }
 
   /// Inicia la verificación periódica de visibilidad
+  /// Optimizado: Reducido de 500ms a 2s para reducir carga de CPU
   void _startVisibilityCheck() {
     _visibilityCheckTimer?.cancel();
-    _visibilityCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (
-      _,
-    ) {
+    _visibilityCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       _checkVisibility();
     });
   }
@@ -380,7 +383,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   void _checkVisibility() {
     if (!mounted || _controller == null) return;
 
-    final context = _widgetKey.currentContext;
+    final context = _repaintBoundaryKey.currentContext;
     if (context == null) {
       if (_isVisible) {
         setState(() {
@@ -440,7 +443,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     try {
       // En Rive, la animación se pausa automáticamente cuando el widget no se renderiza
       // Usamos Visibility con maintainAnimation: false para que no se actualice
-      _logger.d('⏸️ Animación Rive pausada (fuera del viewport)');
+      if (kDebugMode) {
+        _logger.d('⏸️ Animación Rive pausada (fuera del viewport)');
+      }
     } catch (e) {
       _logger.w('⚠️ Error pausando animación Rive: $e');
     }
@@ -452,7 +457,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
     try {
       // La animación se reanudará automáticamente cuando el widget vuelva a ser visible
-      _logger.d('▶️ Animación Rive reanudada (dentro del viewport)');
+      if (kDebugMode) {
+        _logger.d('▶️ Animación Rive reanudada (dentro del viewport)');
+      }
       // Actualizar el estado para que la animación continúe
       if (mounted) {
         _updateState(widget.state);
@@ -467,9 +474,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     super.didUpdateWidget(oldWidget);
     // Si cambió la etapa del bebé, necesitamos recargar el archivo
     if (oldWidget.babyStage != widget.babyStage) {
-      _logger.d(
-        '🔄 Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
-      );
+      if (kDebugMode) {
+        _logger.d(
+          '🔄 Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
+        );
+      }
       _fileLoader.dispose();
       final filePath = _getRiveFilePath(widget.babyStage);
       _fileLoader = rive.FileLoader.fromAsset(
@@ -496,9 +505,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   }
 
   void _updateState(String newState) {
-    _logger.d(
-      '🔍 _updateState llamado: newState=$newState, babyStage=${widget.babyStage}',
-    );
+    if (kDebugMode) {
+      _logger.d(
+        '🔍 _updateState llamado: newState=$newState, babyStage=${widget.babyStage}',
+      );
+    }
 
     if (_controller == null) {
       _logger.w('❌ _controller es null, no se puede actualizar el estado');
@@ -631,7 +642,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
           width: widget.size,
           height: widget.size,
           child: rive.RiveWidget(
-            key: _widgetKey,
+            key: _riveWidgetKey,
             controller: state.controller,
             fit: rive.Fit.contain,
           ),
@@ -646,9 +657,12 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   Widget build(BuildContext context) {
     super.build(context); // Requerido para AutomaticKeepAliveClientMixin
 
-    _logger.d(
-      '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}, visible=$_isVisible',
-    );
+    // Log solo en debug mode para reducir overhead en producción
+    if (kDebugMode) {
+      _logger.d(
+        '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}, visible=$_isVisible',
+      );
+    }
 
     // Cada archivo Rive tiene un solo artboard, así que no necesitamos especificar el artboard
     // El archivo correcto ya se carga según la etapa del bebé
@@ -657,7 +671,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     // Nota: No podemos usar maintainSize: true con maintainAnimation: false
     // En su lugar, usamos maintainState: true para mantener el estado pero pausar la animación
     return RepaintBoundary(
-      key: _widgetKey,
+      key: _repaintBoundaryKey,
       child: Visibility(
         visible: _isVisible,
         maintainState: true,
@@ -673,7 +687,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
           ),
           builder: (context, state) {
             if (state is rive.RiveLoading) {
-              _logger.d('⏳ Rive cargando artboard: ${widget.babyStage}...');
+              if (kDebugMode) {
+                _logger.d('⏳ Rive cargando artboard: ${widget.babyStage}...');
+              }
               return SizedBox(
                 width: widget.size,
                 height: widget.size,
@@ -688,14 +704,18 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
               // Si el error es que no se encuentra el artboard, intentar con baby_born
               if (state.error.toString().contains('not found') &&
                   widget.babyStage != 'baby_born') {
-                _logger.d('🔄 Intentando fallback a artboard "baby_born"...');
+                if (kDebugMode) {
+                  _logger.d('🔄 Intentando fallback a artboard "baby_born"...');
+                }
               }
 
               // Si el artboard solicitado no existe, intentar con artboards alternativos en orden
               if (state.error.toString().contains('not found')) {
-                _logger.d(
-                  '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
-                );
+                if (kDebugMode) {
+                  _logger.d(
+                    '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
+                  );
+                }
 
                 // Lista de artboards a intentar en orden de prioridad
                 final fallbackArtboards = <String>[];
@@ -713,9 +733,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                 // Intentar cargar el primer artboard de fallback
                 if (fallbackArtboards.isNotEmpty) {
                   final fallbackArtboard = fallbackArtboards.first;
-                  _logger.d(
-                    '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
-                  );
+                  if (kDebugMode) {
+                    _logger.d(
+                      '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
+                    );
+                  }
                   return rive.RiveWidgetBuilder(
                     fileLoader: _fileLoader,
                     artboardSelector: rive.ArtboardSelector.byName(
@@ -727,9 +749,11 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                     builder: (context, fallbackState) {
                       if (fallbackState is rive.RiveFailed) {
                         // Si el fallback también falla, intentar sin especificar artboard
-                        _logger.d(
-                          '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
-                        );
+                        if (kDebugMode) {
+                          _logger.d(
+                            '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
+                          );
+                        }
                         return rive.RiveWidgetBuilder(
                           fileLoader: _fileLoader,
                           stateMachineSelector: rive
@@ -745,7 +769,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                 }
 
                 // Si no hay fallbacks, usar el artboard por defecto
-                _logger.d('🔄 Usando el artboard por defecto del archivo...');
+                if (kDebugMode) {
+                  _logger.d('🔄 Usando el artboard por defecto del archivo...');
+                }
                 return rive.RiveWidgetBuilder(
                   fileLoader: _fileLoader,
                   stateMachineSelector: rive.StateMachineSelector.byName(
