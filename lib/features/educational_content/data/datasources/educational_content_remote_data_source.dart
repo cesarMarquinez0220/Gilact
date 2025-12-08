@@ -16,14 +16,14 @@ abstract class EducationalContentRemoteDataSource {
 }
 
 @LazySingleton(as: EducationalContentRemoteDataSource)
-class EducationalContentRemoteDataSourceImpl implements EducationalContentRemoteDataSource {
+class EducationalContentRemoteDataSourceImpl
+    implements EducationalContentRemoteDataSource {
   final FirebaseFirestore _firestore;
 
   EducationalContentRemoteDataSourceImpl(this._firestore);
 
   @override
   Future<List<EducationalContentModel>> getAllContent() async {
-    try {
     try {
       // 1. Intentar obtener de caché primero
       try {
@@ -49,27 +49,38 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
           .map((doc) => EducationalContentModel.fromQueryDocument(doc))
           .toList();
     } catch (e) {
-      throw ServerException(message: 'Error al obtener contenido educativo: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al obtener contenido educativo: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<EducationalContentModel> getContentById(String id) async {
     try {
-      final doc = await _firestore.collection('educational_content').doc(id).get();
-      
+      final doc = await _firestore
+          .collection('educational_content')
+          .doc(id)
+          .get();
+
       if (!doc.exists) {
-        throw const ServerException(message: 'Contenido educativo no encontrado');
+        throw const ServerException(
+          message: 'Contenido educativo no encontrado',
+        );
       }
 
       return EducationalContentModel.fromDocument(doc);
     } catch (e) {
-      throw ServerException(message: 'Error al obtener contenido educativo: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al obtener contenido educativo: ${e.toString()}',
+      );
     }
   }
 
   @override
-  Future<List<EducationalContentModel>> getContentByCategory(String category) async {
+  Future<List<EducationalContentModel>> getContentByCategory(
+    String category,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('educational_content')
@@ -81,7 +92,9 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
           .map((doc) => EducationalContentModel.fromQueryDocument(doc))
           .toList();
     } catch (e) {
-      throw ServerException(message: 'Error al obtener contenido por categoría: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al obtener contenido por categoría: ${e.toString()}',
+      );
     }
   }
 
@@ -98,13 +111,14 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
           .map((doc) => EducationalContentModel.fromQueryDocument(doc))
           .toList();
     } catch (e) {
-      throw ServerException(message: 'Error al buscar contenido: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al buscar contenido: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<void> markContentAsCompleted(String contentId) async {
-    try {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) {
@@ -112,13 +126,15 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
       }
 
       final user = _firestore.collection('Users').doc(userId);
-      
+
       await user.collection('completed_content').doc(contentId).set({
         'contentId': contentId,
         'completedAt': Timestamp.now(),
       });
     } catch (e) {
-      throw ServerException(message: 'Error al marcar contenido como completado: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al marcar contenido como completado: ${e.toString()}',
+      );
     }
   }
 
@@ -131,15 +147,29 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
       }
 
       final user = _firestore.collection('Users').doc(userId);
-      
-      final querySnapshot = await user
-          .collection('completed_content')
-          .get();
 
-      return querySnapshot.docs.map((doc) => doc.get('contentId') as String).toList();
+      final querySnapshot = await user.collection('completed_content').get();
+
+      return querySnapshot.docs
+          .map((doc) => doc.get('contentId') as String)
+          .toList();
     } catch (e) {
-      throw ServerException(message: 'Error al obtener contenido completado: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al obtener contenido completado: ${e.toString()}',
+      );
     }
+  }
+
+  List<String> _getCategoriesFromContent(List<QueryDocumentSnapshot> docs) {
+    final categories = <String>{};
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final category = data['category'] as String?;
+      if (category != null) {
+        categories.add(category);
+      }
+    }
+    return categories.toList();
   }
 
   @override
@@ -157,25 +187,15 @@ class EducationalContentRemoteDataSourceImpl implements EducationalContentRemote
       return {
         'totalContent': totalContent.docs.length,
         'completedContent': completedContent.length,
-        'completionRate': totalContent.docs.isNotEmpty 
+        'completionRate': totalContent.docs.isNotEmpty
             ? (completedContent.length / totalContent.docs.length * 100).round()
             : 0,
         'categories': _getCategoriesFromContent(totalContent.docs),
       };
     } catch (e) {
-      throw ServerException(message: 'Error al obtener estadísticas: ${e.toString()}');
+      throw ServerException(
+        message: 'Error al obtener estadísticas: ${e.toString()}',
+      );
     }
-  }
-
-  List<String> _getCategoriesFromContent(List<QueryDocumentSnapshot> docs) {
-    final categories = <String>{};
-    for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final category = data['category'] as String?;
-      if (category != null) {
-        categories.add(category);
-      }
-    }
-    return categories.toList();
   }
 }

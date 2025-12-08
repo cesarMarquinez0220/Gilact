@@ -72,7 +72,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
       if (!isConnected) {
         // Modo offline: cargar videos descargados desde la base de datos local
         if (kDebugMode) {
-          print('📴 Modo offline: Cargando videos descargados...');
+          // Log removido: usar AppLogger si es necesario en debug
         }
 
         final offlineVideos = await _offlineDataSource.getAllOfflineVideos();
@@ -133,12 +133,8 @@ class _UserVideosPageState extends State<UserVideosPage> {
           _isLoading = false;
         });
 
-        if (kDebugMode) {
-          print('📊 Historial offline cargado:');
-          print('📹 Total videos descargados: ${_videos.length}');
-          print('✅ Videos disponibles: $_completedVideos');
-          print('🎯 Última lección: $lastCompletedLesson');
-        }
+        // Logs removidos: información sensible no debe imprimirse en producción
+        // Si se necesita debug, usar AppLogger con kDebugMode
         return;
       }
 
@@ -181,14 +177,11 @@ class _UserVideosPageState extends State<UserVideosPage> {
 
       // Log para debugging
       if (kDebugMode) {
-        print('📊 Historial cargado:');
-        print('📹 Total videos: ${_videos.length}');
-        print('✅ Videos completados: $_completedVideos');
-        print('🎯 Última lección completada: $lastCompletedLesson');
+        // Logs removidos: información sensible no debe imprimirse en producción
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error cargando videos: $e');
+        // Error logging: usar AppLogger si es necesario
       }
       if (!mounted) return;
       setState(() {
@@ -726,7 +719,12 @@ class _UserVideosPageState extends State<UserVideosPage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
-              image: AssetImage('assets/mini_videos/${video.imageName}'),
+              image: ResizeImage(
+                AssetImage('assets/mini_videos/${video.imageName}'),
+                width:
+                    (thumbnailWidth * MediaQuery.of(context).devicePixelRatio)
+                        .toInt(),
+              ),
               fit: BoxFit.cover,
             ),
           ),
@@ -1187,7 +1185,7 @@ class _UserVideosPageState extends State<UserVideosPage> {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ Error verificando estado de descargas: $e');
+          // Error logging: usar AppLogger si es necesario
         }
       }
     });

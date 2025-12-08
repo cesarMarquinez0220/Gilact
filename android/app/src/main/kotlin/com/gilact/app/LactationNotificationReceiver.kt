@@ -1,4 +1,4 @@
-package com.example.gilact3
+package com.gilact.app
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -14,7 +14,7 @@ import androidx.core.app.NotificationManagerCompat
 
 class LactationNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == "com.example.gilact3.LACTATION_NOTIFICATION") {
+        if (intent.action == "com.gilact.app.LACTATION_NOTIFICATION") {
             val notificationId = intent.getIntExtra("notification_id", 1000)
             val title = intent.getStringExtra("title") ?: "🍼 Recordatorio de Lactancia"
             val body = intent.getStringExtra("body") ?: "Han pasado 2h desde la última toma"
@@ -142,7 +142,7 @@ class LactationNotificationReceiver : BroadcastReceiver() {
         val reminderTime = System.currentTimeMillis() + (30 * 60 * 1000) // 30 minutos
         
         val intent = Intent(context, LactationNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.LACTATION_NOTIFICATION"
+            action = "com.gilact.app.LACTATION_NOTIFICATION"
             putExtra("notification_id", notificationId)
             putExtra("title", title)
             putExtra("body", body)
@@ -206,4 +206,3 @@ class LactationNotificationReceiver : BroadcastReceiver() {
         }
     }
 }
-

@@ -278,24 +278,32 @@ class EducationalContentListWidget extends StatelessWidget {
               // Imagen del contenido
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  content.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
+                child: Builder(
+                  builder: (context) {
+                    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+                    final cacheSize = (80 * devicePixelRatio).round();
+                    return Image.asset(
+                      content.imageUrl,
                       width: 80,
                       height: 80,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.library_books,
-                        color: AppColors.primary,
-                        size: 32,
-                      ),
+                      cacheWidth: cacheSize,
+                      cacheHeight: cacheSize,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.library_books,
+                            color: AppColors.primary,
+                            size: 32,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

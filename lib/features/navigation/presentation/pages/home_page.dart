@@ -351,7 +351,7 @@ class _HomePageState extends State<HomePage> {
           final padding = ResponsiveHelper.getResponsivePadding(context);
 
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: 0),
+            margin: const EdgeInsets.symmetric(horizontal: 0),
             padding: EdgeInsets.all(isSmallScreen ? padding * 0.75 : padding),
             decoration: BoxDecoration(
               color: Colors.white,

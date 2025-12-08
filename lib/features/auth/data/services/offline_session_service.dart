@@ -3,23 +3,30 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../../domain/entities/user.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/encrypted_preferences_service.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para gestionar sesiones offline de usuarios
 class OfflineSessionService {
   final AppLogger _logger;
+  final EncryptedPreferencesService _encryptedPrefs =
+      getIt<EncryptedPreferencesService>();
 
   OfflineSessionService(this._logger);
   static const String _sessionKey = 'offline_session';
   static const String _sessionTokenKey = 'session_token';
   static const String _sessionExpiryKey = 'session_expiry';
   static const String _userDataKey = 'cached_user_data';
-  static const Duration _sessionDuration = Duration(days: 30); // Sesión válida por 30 días
+  static const Duration _sessionDuration = Duration(
+    days: 30,
+  ); // Sesión válida por 30 días
 
   /// Guardar sesión después de login exitoso
   Future<void> saveOfflineSession({
     required User user,
     required String email,
-    required String passwordHash, // Hash de la contraseña, NO la contraseña real
+    required String
+    passwordHash, // Hash de la contraseña, NO la contraseña real
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -36,20 +43,34 @@ class OfflineSessionService {
       await prefs.setString(_sessionExpiryKey, expiryDate.toIso8601String());
 
       // 4. Guardar datos del usuario (sin información sensible)
-      await prefs.setString(_userDataKey, jsonEncode({
-        'id': user.id,
-        'email': email,
-        'name': user.name,
-        'createdAt': user.createdAt.toIso8601String(),
-        'isEmailVerified': user.isEmailVerified,
-      }));
+      await prefs.setString(
+        _userDataKey,
+        jsonEncode({
+          'id': user.id,
+          'email': email,
+          'name': user.name,
+          'createdAt': user.createdAt.toIso8601String(),
+          'isEmailVerified': user.isEmailVerified,
+        }),
+      );
 
-      // 5. Guardar hash de contraseña para validación local
-      await prefs.setString('password_hash_$email', passwordHash);
+      // 5. Guardar hash de contraseña para validación local (cifrado)
+      await _encryptedPrefs.setEncryptedString(
+        'password_hash_$email',
+        passwordHash,
+      );
 
-      _logger.serviceSuccess('OfflineSessionService', 'Sesión offline guardada para usuario: $email');
+      _logger.serviceSuccess(
+        'OfflineSessionService',
+        'Sesión offline guardada para usuario: $email',
+      );
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'guardar sesión offline', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'guardar sesión offline',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -79,7 +100,12 @@ class OfflineSessionService {
 
       return true;
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'verificar sesión', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'verificar sesión',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -105,7 +131,12 @@ class OfflineSessionService {
         isEmailVerified: userData['isEmailVerified'] as bool? ?? false,
       );
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'obtener usuario offline', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'obtener usuario offline',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -116,10 +147,10 @@ class OfflineSessionService {
     required String password,
   }) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // 1. Obtener hash guardado
-      final storedHash = prefs.getString('password_hash_$email');
+      // 1. Obtener hash guardado (cifrado)
+      final storedHash = await _encryptedPrefs.getEncryptedString(
+        'password_hash_$email',
+      );
       if (storedHash == null) return false;
 
       // 2. Calcular hash de la contraseña ingresada
@@ -128,7 +159,12 @@ class OfflineSessionService {
       // 3. Comparar hashes
       return storedHash == inputHash;
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'validar credenciales offline', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'validar credenciales offline',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -143,9 +179,17 @@ class OfflineSessionService {
       await prefs.remove(_userDataKey);
 
       // No eliminar password_hash para permitir login offline
-      _logger.serviceSuccess('OfflineSessionService', 'Sesión offline limpiada');
+      _logger.serviceSuccess(
+        'OfflineSessionService',
+        'Sesión offline limpiada',
+      );
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'limpiar sesión', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'limpiar sesión',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -173,7 +217,12 @@ class OfflineSessionService {
       await prefs.setString(_sessionExpiryKey, newExpiry.toIso8601String());
       _logger.d('Sesión extendida hasta ${newExpiry.toIso8601String()}');
     } catch (e, stackTrace) {
-      _logger.serviceError('OfflineSessionService', 'extender sesión', e, stackTrace);
+      _logger.serviceError(
+        'OfflineSessionService',
+        'extender sesión',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -182,4 +231,3 @@ class OfflineSessionService {
     return _hashPassword(password);
   }
 }
-

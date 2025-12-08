@@ -26,7 +26,9 @@ class LeccionesProvider extends ChangeNotifier {
     try {
       _gamificationService = getIt<GamificationService>();
     } catch (e) {
-      _logger.w('GamificationService no disponible aún, se intentará más tarde');
+      _logger.w(
+        'GamificationService no disponible aún, se intentará más tarde',
+      );
     }
   }
 
@@ -35,29 +37,29 @@ class LeccionesProvider extends ChangeNotifier {
   int get completedLessonsCount {
     // Si no hay videos completados, retornar 0
     if (_leccionesCompletadas.isEmpty) return 0;
-    
+
     // Obtener todos los videos para mapear videoId -> leccionId
     // Usar un método asíncrono no es posible en un getter, así que usamos un cache
     // Por ahora, retornamos el conteo de videos como aproximación
     // TODO: Implementar cache de mapeo videoId -> leccionId
     return _leccionesCompletadas.length;
   }
-  
+
   /// Calcula el número de lecciones únicas completadas
   /// Este método consulta VideoService para obtener el leccionId de cada video
   Future<int> getCompletedLessonsCountUnique() async {
     if (_leccionesCompletadas.isEmpty) return 0;
-    
+
     try {
       // Obtener todos los videos
       final allVideos = await VideoService.getVideos();
-      
+
       // Crear un mapa de videoId -> leccionId
       final videoToLessonMap = <int, int>{};
       for (final video in allVideos) {
         videoToLessonMap[video.videoId] = video.leccionId;
       }
-      
+
       // Obtener lecciones únicas de los videos completados
       final uniqueLessons = <int>{};
       for (final videoId in _leccionesCompletadas) {
@@ -66,11 +68,11 @@ class LeccionesProvider extends ChangeNotifier {
           uniqueLessons.add(leccionId);
         }
       }
-      
+
       _logger.d(
         'Lecciones únicas completadas: ${uniqueLessons.length} (de ${_leccionesCompletadas.length} videos)',
       );
-      
+
       return uniqueLessons.length;
     } catch (e, stackTrace) {
       _logger.e('Error calculando lecciones únicas', e, stackTrace);
@@ -86,7 +88,9 @@ class LeccionesProvider extends ChangeNotifier {
       try {
         _gamificationService = getIt<GamificationService>();
       } catch (e) {
-        _logger.w('GamificationService no disponible para actualizar etapa del bebé');
+        _logger.w(
+          'GamificationService no disponible para actualizar etapa del bebé',
+        );
         return null;
       }
     }
@@ -117,7 +121,11 @@ class LeccionesProvider extends ChangeNotifier {
         },
       );
     } catch (e, stackTrace) {
-      _logger.e('Error notificando cambio de lecciones completadas', e, stackTrace);
+      _logger.e(
+        'Error notificando cambio de lecciones completadas',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
@@ -175,7 +183,9 @@ class LeccionesProvider extends ChangeNotifier {
   void _preloadNextVideo(int currentVideoId) {
     // Notificar al MainNavigationPage para precargar el siguiente video
     // Esto se puede hacer a través de un callback o evento
-    _logger.d('Lección $currentVideoId completada, precargando siguiente video...');
+    _logger.d(
+      'Lección $currentVideoId completada, precargando siguiente video...',
+    );
   }
 
   void actualizarProgresoVideo(int videoId, double progreso) {
@@ -185,7 +195,7 @@ class LeccionesProvider extends ChangeNotifier {
     final wasAlreadyCompleted = _leccionesCompletadas.contains(videoId);
     if (progreso >= 100.0) {
       _leccionesCompletadas.add(videoId);
-      
+
       // Notificar cambio en lecciones completadas si es nueva
       if (!wasAlreadyCompleted) {
         _notifyLessonsCompletedChanged();
@@ -218,12 +228,14 @@ class LeccionesProvider extends ChangeNotifier {
   Future<void> loadProgressFromFirestore(String? userIdParam) async {
     try {
       final authUser = FirebaseAuth.instance.currentUser;
-      final targetUserId = (userIdParam != null && userIdParam.isNotEmpty) 
-          ? userIdParam 
+      final targetUserId = (userIdParam != null && userIdParam.isNotEmpty)
+          ? userIdParam
           : authUser?.uid;
 
       if (targetUserId == null) {
-        _logger.w('LeccionesProvider: No hay usuario autenticado para cargar progreso');
+        _logger.w(
+          'LeccionesProvider: No hay usuario autenticado para cargar progreso',
+        );
         return;
       }
 
@@ -237,18 +249,20 @@ class LeccionesProvider extends ChangeNotifier {
           .collection('Users')
           .doc(targetUserId)
           .collection('videos');
-      
+
       List<QueryDocumentSnapshot> docs = [];
-      
+
       // ESTRATEGIA OPTIMIZADA:
       // 1. Intentar leer de caché local primero (Costo: 0 lecturas)
       // 2. Si hay error o está vacío, leer de servidor (Costo: N lecturas)
-      
+
       try {
-        final cacheSnapshot = await videosCollection.get(const GetOptions(source: Source.cache));
+        final cacheSnapshot = await videosCollection.get(
+          const GetOptions(source: Source.cache),
+        );
         if (cacheSnapshot.docs.isNotEmpty) {
-           docs = cacheSnapshot.docs;
-           _logger.d('Progreso cargado desde CACHÉ (${docs.length} videos)');
+          docs = cacheSnapshot.docs;
+          _logger.d('Progreso cargado desde CACHÉ (${docs.length} videos)');
         }
       } catch (e) {
         _logger.d('Cache miss o error, intentando servidor...');
@@ -257,11 +271,13 @@ class LeccionesProvider extends ChangeNotifier {
       // Si no tenemos docs, ir al servidor
       if (docs.isEmpty) {
         try {
-          final serverSnapshot = await videosCollection.get(const GetOptions(source: Source.server));
+          final serverSnapshot = await videosCollection.get(
+            const GetOptions(source: Source.server),
+          );
           docs = serverSnapshot.docs;
-           _logger.d('Progreso cargado desde SERVIDOR (${docs.length} videos)');
+          _logger.d('Progreso cargado desde SERVIDOR (${docs.length} videos)');
         } catch (e) {
-           _logger.e('Error leyendo del servidor', e);
+          _logger.e('Error leyendo del servidor', e);
         }
       }
 
@@ -271,19 +287,23 @@ class LeccionesProvider extends ChangeNotifier {
           final data = doc.data() as Map<String, dynamic>;
           final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
           final estaCompletado = data['estaCompletado'] as bool? ?? false;
-          
+
           if (videoId == null) continue;
 
           // Manejar avance
           dynamic avanceRaw = data['avance'];
           double avance = 0.0;
-          
-          if (avanceRaw is int) avance = avanceRaw.toDouble();
-          else if (avanceRaw is double) avance = avanceRaw;
-          else {
-             final ultimaPosicion = data['ultimaPosicion'] as int? ?? 0;
-             final duracion = data['duracion'] as int? ?? 0;
-             if (duracion > 0) avance = ultimaPosicion / duracion;
+
+          if (avanceRaw is int) {
+            avance = avanceRaw.toDouble();
+          } else if (avanceRaw is double) {
+            avance = avanceRaw;
+          } else {
+            final ultimaPosicion = data['ultimaPosicion'] as int? ?? 0;
+            final duracion = data['duracion'] as int? ?? 0;
+            if (duracion > 0) {
+              avance = ultimaPosicion / duracion;
+            }
           }
 
           if (estaCompletado) {
@@ -293,15 +313,16 @@ class LeccionesProvider extends ChangeNotifier {
             _progresoVideos[videoId] = avance * 100;
           }
         }
-        
-        _logger.success('Progreso procesado: ${_leccionesCompletadas.length} completados');
+
+        _logger.success(
+          'Progreso procesado: ${_leccionesCompletadas.length} completados',
+        );
         _notifyLessonsCompletedChanged();
         notifyListeners();
         return;
       } else {
         _logger.d('No se encontró progreso para $targetUserId');
       }
-
     } catch (e, stackTrace) {
       _logger.e('Error fatal cargando progreso', e, stackTrace);
       await _cargarProgresoGuardado();
@@ -331,7 +352,9 @@ class LeccionesProvider extends ChangeNotifier {
         );
       }
 
-      _logger.d('Progreso cargado: ${_leccionesCompletadas.length} lecciones completadas, ${_progresoVideos.length} videos con progreso');
+      _logger.d(
+        'Progreso cargado: ${_leccionesCompletadas.length} lecciones completadas, ${_progresoVideos.length} videos con progreso',
+      );
 
       notifyListeners();
     } catch (e, stackTrace) {
@@ -386,6 +409,8 @@ class LeccionesProvider extends ChangeNotifier {
 
   /// Método legacy para compatibilidad
   void imprimirAvancesMap() {
-    _logger.d('Lecciones completadas: $_leccionesCompletadas, Progreso videos: $_progresoVideos');
+    _logger.d(
+      'Lecciones completadas: $_leccionesCompletadas, Progreso videos: $_progresoVideos',
+    );
   }
 }

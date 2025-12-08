@@ -71,11 +71,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     }
   }
 
-  void _showPasswordDialogForReauthentication(BuildContext context) {
+  void _showPasswordDialogForReauthentication(BuildContext context) async {
     final passwordController = TextEditingController();
     bool isProcessing = false;
 
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
@@ -244,6 +244,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         },
       ),
     );
+    passwordController.dispose();
   }
 
   void _handleDeleteAccount() async {
@@ -347,12 +348,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         ),
       );
 
+      // Obtener referencias a los blocs antes de los gaps asíncronos
+      final userProfileBloc = context.read<UserProfileBloc>();
+      final gamificationBloc = context.read<GamificationBloc>();
+
       // Obtener userId antes de cerrar sesión para limpiar datos locales
       final user = FirebaseAuth.instance.currentUser;
       String? userId;
       if (user != null) {
         // Intentar obtener userId del UserProfileBloc
-        final userProfileBloc = context.read<UserProfileBloc>();
         final userState = userProfileBloc.state;
         if (userState is UserProfileLoaded) {
           userId = userState.profile.id;
@@ -381,7 +385,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       }
 
       // Resetear UserProfileBloc antes de cerrar sesión
-      context.read<UserProfileBloc>().add(const ResetUserProfileRequested());
+      if (mounted) {
+        userProfileBloc.add(const ResetUserProfileRequested());
+      }
 
       // Limpiar datos locales de gamificación del usuario que está cerrando sesión
       if (userId != null && userId.isNotEmpty) {
@@ -395,7 +401,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       }
 
       // Resetear GamificationBloc después de limpiar datos
-      context.read<GamificationBloc>().add(const ResetGamificationProfile());
+      if (mounted) {
+        gamificationBloc.add(const ResetGamificationProfile());
+      }
 
       // Esperar un momento para que los resets se completen
       await Future.delayed(const Duration(milliseconds: 100));

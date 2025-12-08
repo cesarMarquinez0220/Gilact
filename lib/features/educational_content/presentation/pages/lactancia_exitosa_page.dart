@@ -94,6 +94,7 @@ class LactanciaExitosaPage extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.47,
               child: Image.asset(
                 "assets/tips/9_CONSEJO_LACTANCIA.png",
+                cacheHeight: (MediaQuery.of(context).size.height * 0.4 * MediaQuery.of(context).devicePixelRatio).toInt(),
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

@@ -1,4 +1,4 @@
-package com.example.gilact3
+package com.gilact.app
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -14,7 +14,7 @@ import androidx.core.app.NotificationManagerCompat
 
 class SleepNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == "com.example.gilact3.SLEEP_NOTIFICATION") {
+        if (intent.action == "com.gilact.app.SLEEP_NOTIFICATION") {
             val isReminder = intent.getBooleanExtra("is_reminder", false)
             
             if (isReminder) {
@@ -122,7 +122,7 @@ class SleepNotificationReceiver : BroadcastReceiver() {
         val reminderTime = System.currentTimeMillis() + (30 * 60 * 1000) // 30 minutos
         
         val intent = Intent(context, SleepNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.SLEEP_NOTIFICATION"
+            action = "com.gilact.app.SLEEP_NOTIFICATION"
             putExtra("is_reminder", true)
         }
         
@@ -182,4 +182,3 @@ class SleepNotificationReceiver : BroadcastReceiver() {
         }
     }
 }
-

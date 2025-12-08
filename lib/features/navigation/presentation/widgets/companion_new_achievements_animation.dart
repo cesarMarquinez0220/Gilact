@@ -12,7 +12,7 @@ import '../../../../core/di/injection.dart';
 class CompanionNewAchievementsAnimation {
   // Variable estática para evitar mostrar logros múltiples veces
   static bool _isShowing = false;
-  static Set<String> _shownAchievementIds = {};
+  static final Set<String> _shownAchievementIds = {};
 
   static Future<void> show(
     BuildContext context,

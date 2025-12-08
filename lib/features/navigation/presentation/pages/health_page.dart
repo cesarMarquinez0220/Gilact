@@ -7,14 +7,9 @@ import 'package:get_it/get_it.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../chatbot/presentation/pages/chatbot_page.dart';
 import '../../../chatbot/presentation/bloc/chatbot_bloc.dart';
-import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
-import '../../../lactation/domain/entities/baby_weight_record.dart';
-import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
-import '../../../lactation/domain/entities/sleep_record.dart';
 import '../../../user/presentation/bloc/user_profile_bloc.dart';
 import '../widgets/home_feature_card.dart';
 import '../providers/health_provider.dart';
-import '../../../../core/theme/app_colors.dart';
 
 /// Página de salud del bebé con diseño mejorado y funcionalidades adicionales
 class HealthPage extends StatefulWidget {
@@ -180,7 +175,7 @@ class _HealthPageState extends State<HealthPage> {
                                   }
                                 },
                                 lastRecord: lastWeightRecord != null
-                                    ? '${'health.last'.tr()} ${lastWeightRecord!.weight.toStringAsFixed(2)} kg'
+                                    ? '${'health.last'.tr()} ${lastWeightRecord.weight.toStringAsFixed(2)} kg'
                                     : 'lactation.calendar.noRecordsText'.tr(),
                                 recordDate: lastWeightRecord?.recordedAt,
                               ),
@@ -211,7 +206,7 @@ class _HealthPageState extends State<HealthPage> {
                                   }
                                 },
                                 lastRecord: lastSleepRecord != null
-                                    ? '${'health.last'.tr()} ${lastSleepRecord!.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
+                                    ? '${'health.last'.tr()} ${lastSleepRecord.totalSleepDuration.inHours.toStringAsFixed(1)} horas'
                                     : 'lactation.calendar.noRecordsText'.tr(),
                                 recordDate: lastSleepRecord?.sleepStartTime,
                               ),

@@ -94,6 +94,7 @@ class AlimentacionComplementariaPage extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.4,
               child: Image.asset(
                 "assets/tips/1_ALIMENTACION.png",
+                cacheHeight: (MediaQuery.of(context).size.height * 0.25 * MediaQuery.of(context).devicePixelRatio).toInt(),
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

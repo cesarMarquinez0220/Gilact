@@ -35,6 +35,7 @@ import 'core/services/offline_sync_service.dart';
 import 'core/services/app_initialization_service.dart';
 import 'core/services/localization_service.dart';
 import 'core/services/app_logger.dart';
+import 'core/services/temporary_file_cleanup_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -130,6 +131,18 @@ void main() async {
   } catch (e, stackTrace) {
     appLogger.w(
       'Error al iniciar verificación periódica de notificaciones (no crítico)',
+      e,
+      stackTrace,
+    );
+  }
+
+  // Limpiar archivos temporales sensibles al iniciar (no bloquea si falla)
+  try {
+    final cleanupService = getIt<TemporaryFileCleanupService>();
+    await cleanupService.cleanupTemporaryDecryptedFiles();
+  } catch (e, stackTrace) {
+    appLogger.w(
+      'Error al limpiar archivos temporales (no crítico)',
       e,
       stackTrace,
     );

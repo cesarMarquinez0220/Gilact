@@ -94,6 +94,7 @@ class BeneficiosBebePage extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.45,
               child: Image.asset(
                 "assets/tips/3_BENEFICIOS.png",
+                cacheHeight: (MediaQuery.of(context).size.height * 0.35 * MediaQuery.of(context).devicePixelRatio).toInt(),
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

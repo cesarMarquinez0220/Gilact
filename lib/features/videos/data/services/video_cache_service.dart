@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart'; // Import for compute
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt;
@@ -9,6 +10,10 @@ class VideoCacheService {
   static const String _cacheKey = 'video_cache';
   static const String _progressKey = 'video_progress_cache';
   static const Duration _cacheExpiration = Duration(hours: 24);
+
+  // Helper functions for compute
+  static Map<String, dynamic> _decodeMap(String json) => jsonDecode(json) as Map<String, dynamic>;
+  static String _encodeMap(Map<String, dynamic> map) => jsonEncode(map);
 
   // Cachear información del video
   static Future<void> cacheVideoInfo({
@@ -31,11 +36,11 @@ class VideoCacheService {
       Map<String, dynamic> cache = {};
 
       if (existingCache != null) {
-        cache = jsonDecode(existingCache);
+        cache = await compute(_decodeMap, existingCache);
       }
 
       cache[videoId.toString()] = cacheData;
-      await prefs.setString(_cacheKey, jsonEncode(cache));
+      await prefs.setString(_cacheKey, await compute(_encodeMap, cache));
     } catch (e, stackTrace) {
       final logger = getIt<AppLogger>();
       logger.e('Error caching video info', e, stackTrace);
@@ -49,7 +54,7 @@ class VideoCacheService {
       final cacheData = prefs.getString(_cacheKey);
 
       if (cacheData != null) {
-        final cache = jsonDecode(cacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, cacheData);
         final videoData = cache[videoId.toString()];
 
         if (videoData != null) {
@@ -63,7 +68,7 @@ class VideoCacheService {
           } else {
             // Eliminar caché expirado
             cache.remove(videoId.toString());
-            await prefs.setString(_cacheKey, jsonEncode(cache));
+            await prefs.setString(_cacheKey, await compute(_encodeMap, cache));
           }
         }
       }
@@ -93,11 +98,11 @@ class VideoCacheService {
       Map<String, dynamic> cache = {};
 
       if (existingCache != null) {
-        cache = jsonDecode(existingCache);
+        cache = await compute(_decodeMap, existingCache);
       }
 
       cache[videoId.toString()] = progressData;
-      await prefs.setString(_progressKey, jsonEncode(cache));
+      await prefs.setString(_progressKey, await compute(_encodeMap, cache));
     } catch (e, stackTrace) {
       final logger = getIt<AppLogger>();
       logger.e('Error caching video progress', e, stackTrace);
@@ -113,7 +118,7 @@ class VideoCacheService {
       final cacheData = prefs.getString(_progressKey);
 
       if (cacheData != null) {
-        final cache = jsonDecode(cacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, cacheData);
         final progressData = cache[videoId.toString()];
 
         if (progressData != null) {
@@ -127,7 +132,7 @@ class VideoCacheService {
           } else {
             // Eliminar caché expirado
             cache.remove(videoId.toString());
-            await prefs.setString(_progressKey, jsonEncode(cache));
+            await prefs.setString(_progressKey, await compute(_encodeMap, cache));
           }
         }
       }
@@ -146,7 +151,7 @@ class VideoCacheService {
       // Limpiar caché de videos
       final videoCacheData = prefs.getString(_cacheKey);
       if (videoCacheData != null) {
-        final cache = jsonDecode(videoCacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, videoCacheData);
         final now = DateTime.now();
 
         cache.removeWhere((key, value) {
@@ -156,13 +161,13 @@ class VideoCacheService {
           return now.difference(cachedAt) > _cacheExpiration;
         });
 
-        await prefs.setString(_cacheKey, jsonEncode(cache));
+        await prefs.setString(_cacheKey, await compute(_encodeMap, cache));
       }
 
       // Limpiar caché de progreso
       final progressCacheData = prefs.getString(_progressKey);
       if (progressCacheData != null) {
-        final cache = jsonDecode(progressCacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, progressCacheData);
         final now = DateTime.now();
 
         cache.removeWhere((key, value) {
@@ -172,7 +177,7 @@ class VideoCacheService {
           return now.difference(cachedAt) > const Duration(hours: 1);
         });
 
-        await prefs.setString(_progressKey, jsonEncode(cache));
+        await prefs.setString(_progressKey, await compute(_encodeMap, cache));
       }
     } catch (e, stackTrace) {
       final logger = getIt<AppLogger>();
@@ -202,13 +207,13 @@ class VideoCacheService {
 
       final videoCacheData = prefs.getString(_cacheKey);
       if (videoCacheData != null) {
-        final cache = jsonDecode(videoCacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, videoCacheData);
         videoCacheCount = cache.length;
       }
 
       final progressCacheData = prefs.getString(_progressKey);
       if (progressCacheData != null) {
-        final cache = jsonDecode(progressCacheData) as Map<String, dynamic>;
+        final cache = await compute(_decodeMap, progressCacheData);
         progressCacheCount = cache.length;
       }
 
@@ -289,7 +294,7 @@ class VideoCacheService {
 
       if (preloadData == null) return false;
 
-      final data = jsonDecode(preloadData) as Map<String, dynamic>;
+      final data = await compute(_decodeMap, preloadData);
       final preloadedAt = DateTime.fromMillisecondsSinceEpoch(
         data['preloadedAt'],
       );

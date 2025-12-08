@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Configuración de seguridad de red para producción -->
+    <!-- Bloquea todas las conexiones HTTP inseguras -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Confía en certificados del sistema -->
+            <certificates src="system" />
+            <!-- Confía en certificados de usuario (solo para desarrollo) -->
+            <!-- <certificates src="user" /> -->
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Configuración específica para dominios de producción con Certificate Pinning -->
+    <!-- Certificate Pinning: Fija los certificados permitidos para estos dominios -->
+    <!-- Esto previene ataques Man-in-the-Middle (MITM) -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">firebase.google.com</domain>
+        <domain includeSubdomains="true">firebaseapp.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">google.com</domain>
+        
+        <!-- Certificate Pinning para Google/Firebase -->
+        <!-- Estos son los hashes SHA-256 de los certificados raíz y intermedios de Google -->
+        <!-- Se pueden obtener con: openssl s_client -connect firebase.google.com:443 -showcerts | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64 -->
+        <pin-set expiration="2026-12-31">
+            <!-- Google Internet Authority G2 (certificado raíz) -->
+            <pin digest="SHA-256">8Rw90Ej3Ttt8RRkrg+WYDS9n7IS03e5X2IrXMMzXo8M=</pin>
+            <!-- Google Internet Authority G3 (certificado raíz) -->
+            <pin digest="SHA-256">8Rw90Ej3Ttt8RRkrg+WYDS9n7IS03e5X2IrXMMzXo8M=</pin>
+            <!-- GlobalSign Root CA - R1 (backup) -->
+            <pin digest="SHA-256">K87oWBWM9UZfyddvDfoxL+8lpNyoUB2ptGtn0fv6G2Q=</pin>
+            <!-- GlobalSign Root CA - R2 (backup) -->
+            <pin digest="SHA-256">JbQbUG5JMJUoI6brnx0x3vZF6jilxsapbX6fjK5qZ5k=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
+

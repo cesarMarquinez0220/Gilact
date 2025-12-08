@@ -1,6 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter/foundation.dart';
 import '../../domain/entities/lactation_record.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -183,11 +182,9 @@ class LactationDatabase {
     );
 
     if (existingRecord.isNotEmpty) {
-      if (kDebugMode) {
-        print(
-          '⚠️ [LactationDatabase] Registro duplicado detectado, omitiendo inserción: ${record.id}',
-        );
-      }
+      _logger.w(
+        '⚠️ [LactationDatabase] Registro duplicado detectado, omitiendo inserción: ${record.id}',
+      );
       return; // Ya existe, no insertar de nuevo
     }
 
@@ -219,9 +216,7 @@ class LactationDatabase {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
-    if (kDebugMode) {
-      print('✅ [LactationDatabase] Registro insertado: ${record.id}');
-    }
+    _logger.d('✅ [LactationDatabase] Registro insertado: ${record.id}');
   }
 
   /// Marca un registro como sincronizado
@@ -313,8 +308,8 @@ class LactationDatabase {
       }
     }
 
-    if (kDebugMode && maps.length != records.length) {
-      print(
+    if (maps.length != records.length) {
+      _logger.w(
         '⚠️ [LactationDatabase] Duplicados detectados: ${maps.length} registros, ${records.length} únicos',
       );
     }

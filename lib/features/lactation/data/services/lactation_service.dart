@@ -448,8 +448,9 @@ class LactationService {
       // NOTIFICAR AL BLOC INMEDIATAMENTE (antes de guardar en BD)
       // Esto permite actualización optimista de la UI
       try {
+        // Obtener el contexto ANTES de usarlo después de gaps asíncronos
         final context = app_main.navigatorKey.currentContext;
-        if (context != null) {
+        if (context != null && context.mounted) {
           // Calcular la transacción de XP localmente
           final xpService = XPCalculationService();
           final transaction = record.tipoRegistro == 'completo'
@@ -468,8 +469,12 @@ class LactationService {
                 );
 
           // Notificar al bloc INMEDIATAMENTE para actualización optimista
-          final gamificationBloc = context.read<GamificationBloc>();
-          gamificationBloc.add(AddXP(transaction));
+          // Verificar que el contexto sigue siendo válido antes de usarlo
+          final currentContext = app_main.navigatorKey.currentContext;
+          if (currentContext != null && currentContext.mounted) {
+            final gamificationBloc = currentContext.read<GamificationBloc>();
+            gamificationBloc.add(AddXP(transaction));
+          }
 
           if (kDebugMode) {
             final expectedXP = record.tipoRegistro == 'completo' ? 20 : 10;
@@ -591,26 +596,28 @@ class LactationService {
       // Mostrar diálogo si hay badges nuevos
       if (achievements.isRight()) {
         final newAchievements = achievements.getOrElse(() => []);
-        if (newAchievements.isNotEmpty &&
-            app_main.navigatorKey.currentContext != null) {
+        if (newAchievements.isNotEmpty) {
           // Recargar el perfil de gamificación en el bloc para actualizar la UI
-          final context = app_main.navigatorKey.currentContext!;
-          try {
-            final gamificationBloc = context.read<GamificationBloc>();
-            gamificationBloc.add(LoadGamificationProfile(userId));
+          // Verificar que el contexto sigue siendo válido después del gap asíncrono
+          final context = app_main.navigatorKey.currentContext;
+          if (context != null && context.mounted) {
+            try {
+              final gamificationBloc = context.read<GamificationBloc>();
+              gamificationBloc.add(LoadGamificationProfile(userId));
 
-            if (kDebugMode) {
-              _logger.d(
-                '🔄 [LactationService] GamificationBloc recargado después de desbloquear ${newAchievements.length} logro(s)',
-              );
-            }
-          } catch (e, stackTrace) {
-            if (kDebugMode) {
-              _logger.w(
-                'Error recargando GamificationBloc (no crítico)',
-                e,
-                stackTrace,
-              );
+              if (kDebugMode) {
+                _logger.d(
+                  '🔄 [LactationService] GamificationBloc recargado después de desbloquear ${newAchievements.length} logro(s)',
+                );
+              }
+            } catch (e, stackTrace) {
+              if (kDebugMode) {
+                _logger.w(
+                  'Error recargando GamificationBloc (no crítico)',
+                  e,
+                  stackTrace,
+                );
+              }
             }
           }
 

@@ -326,7 +326,8 @@ class UserSubcollectionsService {
           _logger.d('Preservando información de preparto al actualizar a postparto');
           
           // Preservar datos originales de preparto de forma simple
-          if (existingData != null) {
+          // existingData ya fue verificado que no es null arriba
+          {
             // Guardar solo la información esencial de preparto
             seleccionData['prepartumData'] = {
               'expectedBirthDate': existingData['expectedBirthDate'],

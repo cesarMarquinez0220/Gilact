@@ -1,4 +1,4 @@
-package com.example.gilact3
+package com.gilact.app
 
 import android.os.Build
 import android.view.WindowManager
@@ -314,7 +314,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun scheduleNativeAlarm(timestamp: Long) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, SleepNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.SLEEP_NOTIFICATION"
+            action = "com.gilact.app.SLEEP_NOTIFICATION"
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -354,7 +354,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun cancelNativeAlarm() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, SleepNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.SLEEP_NOTIFICATION"
+            action = "com.gilact.app.SLEEP_NOTIFICATION"
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -373,7 +373,7 @@ class MainActivity : FlutterFragmentActivity() {
     ) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, LactationNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.LACTATION_NOTIFICATION"
+            action = "com.gilact.app.LACTATION_NOTIFICATION"
             putExtra("notification_id", notificationId)
             putExtra("title", title)
             putExtra("body", body)
@@ -416,7 +416,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun cancelNativeLactationAlarm(notificationId: Int) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, LactationNotificationReceiver::class.java).apply {
-            action = "com.example.gilact3.LACTATION_NOTIFICATION"
+            action = "com.gilact.app.LACTATION_NOTIFICATION"
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,

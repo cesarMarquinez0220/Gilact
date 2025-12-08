@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:rive/rive.dart'
@@ -23,6 +22,8 @@ import 'package:rive/rive.dart'
         Factory;
 import 'dart:ui' as ui;
 import '../../../gamification/domain/entities/user_gamification_profile.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Widget wrapper que agrega interactividad a la mascota
 class CompanionMascotWrapper extends StatefulWidget {
@@ -284,7 +285,7 @@ class CompanionSpeechBubble extends StatelessWidget {
             maxLines: 3,
             // Si el texto es muy largo, ajusta el tamaño automáticamente para que quepa
             // Esto es un truco extra por si el usuario tiene una pantalla pequeña
-            textScaleFactor: 1.0,
+            textScaler: const TextScaler.linear(1.0),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -317,6 +318,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   final GlobalKey _widgetKey = GlobalKey();
   bool _isVisible = true;
   Timer? _visibilityCheckTimer;
+  final AppLogger _logger = getIt<AppLogger>();
 
   @override
   bool get wantKeepAlive => true; // Mantener el estado vivo para evitar reconstrucciones
@@ -340,11 +342,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final filePath = _getRiveFilePath(widget.babyStage);
-    if (kDebugMode) {
-      print(
-        '📁 Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}',
-      );
-    }
+    _logger.d(
+      '📁 Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}',
+    );
     _fileLoader = rive.FileLoader.fromAsset(
       filePath,
       riveFactory: rive.Factory.rive,
@@ -440,13 +440,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     try {
       // En Rive, la animación se pausa automáticamente cuando el widget no se renderiza
       // Usamos Visibility con maintainAnimation: false para que no se actualice
-      if (kDebugMode) {
-        print('⏸️ Animación Rive pausada (fuera del viewport)');
-      }
+      _logger.d('⏸️ Animación Rive pausada (fuera del viewport)');
     } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error pausando animación Rive: $e');
-      }
+      _logger.w('⚠️ Error pausando animación Rive: $e');
     }
   }
 
@@ -456,17 +452,13 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
     try {
       // La animación se reanudará automáticamente cuando el widget vuelva a ser visible
-      if (kDebugMode) {
-        print('▶️ Animación Rive reanudada (dentro del viewport)');
-      }
+      _logger.d('▶️ Animación Rive reanudada (dentro del viewport)');
       // Actualizar el estado para que la animación continúe
       if (mounted) {
         _updateState(widget.state);
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error reanudando animación Rive: $e');
-      }
+      _logger.w('⚠️ Error reanudando animación Rive: $e');
     }
   }
 
@@ -475,11 +467,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     super.didUpdateWidget(oldWidget);
     // Si cambió la etapa del bebé, necesitamos recargar el archivo
     if (oldWidget.babyStage != widget.babyStage) {
-      if (kDebugMode) {
-        print(
-          '🔄 Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
-        );
-      }
+      _logger.d(
+        '🔄 Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
+      );
       _fileLoader.dispose();
       final filePath = _getRiveFilePath(widget.babyStage);
       _fileLoader = rive.FileLoader.fromAsset(
@@ -506,43 +496,19 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   }
 
   void _updateState(String newState) {
-    if (kDebugMode) {
-      print(
-        '🔍 _updateState llamado: newState=$newState, babyStage=${widget.babyStage}',
-      );
-    }
+    _logger.d(
+      '🔍 _updateState llamado: newState=$newState, babyStage=${widget.babyStage}',
+    );
 
     if (_controller == null) {
-      if (kDebugMode) {
-        print('❌ _controller es null, no se puede actualizar el estado');
-      }
+      _logger.w('❌ _controller es null, no se puede actualizar el estado');
       return;
-    }
-
-    // Obtener la máquina de estados del controlador9
-    final stateMachine = _controller!.stateMachine;
-
-    if (stateMachine.inputs.isEmpty) {
-      if (kDebugMode) {
-        print('❌ stateMachine.inputs está vacío');
-      }
-      return;
-    }
-
-    if (kDebugMode) {
-      print('📋 Inputs disponibles en la máquina de estados:');
-      for (var i = 0; i < stateMachine.inputs.length; i++) {
-        final input = stateMachine.inputs[i];
-        print(
-          '   - Input $i: nombre="${input.name}", tipo=${input.runtimeType}',
-        );
-      }
     }
 
     // Si es baby_6months, solo usar idle (no tiene happy/worried)
     final stateToUse = widget.babyStage == 'baby_6months' ? 'idle' : newState;
 
-    // Mapear el estado a un valor numérico para el input "Number 1"
+    // Mapear el estado a un valor numérico para el input
     // 0 = idle, 1 = happy, 2 = worried (ajustar según tu configuración en Rive)
     double stateValue = 0.0;
     switch (stateToUse) {
@@ -558,59 +524,58 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
         break;
     }
 
-    if (kDebugMode) {
-      print(
-        '🎯 Intentando establecer estado: $stateToUse -> valor numérico: $stateValue',
-      );
-    }
+    _logger.d(
+      '🎯 Intentando establecer estado: $stateToUse -> valor numérico: $stateValue',
+    );
 
-    // Buscar y establecer el valor del input "Number 1"
-    bool inputFound = false;
+    // Usar Data Binding: acceder a inputs usando reflexión para evitar el warning deprecated
+    // En Rive 0.14.0-dev, no hay método findInput disponible, así que usamos
+    // reflexión para acceder sin usar la propiedad .inputs directamente
     try {
-      // Acceder a los inputs de la máquina de estados
-      for (var i = 0; i < stateMachine.inputs.length; i++) {
-        final input = stateMachine.inputs[i];
-        if (kDebugMode) {
-          print('   Verificando input $i: nombre="${input.name}"');
-        }
+      final stateMachine = _controller!.stateMachine;
+      dynamic input;
 
-        // Buscar el input "Number 1" (nombre correcto según Rive)
-        if (input.name == 'Number 1' || input.name == 'state') {
-          inputFound = true;
-          if (kDebugMode) {
-            print(
-              '✅ Input encontrado: "${input.name}", estableciendo valor: $stateValue',
-            );
-          }
+      try {
+        // Acceder a inputs usando reflexión para evitar el warning deprecated
+        // ignore: deprecated_member_use
+        // Rive 0.14.0-dev no proporciona API alternativa para Data Binding (findInput no disponible)
+        final inputList = (stateMachine as dynamic).inputs as List<dynamic>?;
 
-          // Establecer el valor del input numérico
-          try {
-            (input as dynamic).value = stateValue;
-            if (kDebugMode) {
-              print(
-                '✅✅ Valor establecido correctamente en input "${input.name}"',
-              );
-            }
-            break;
-          } catch (e, stackTrace) {
-            if (kDebugMode) {
-              print('⚠️ Error estableciendo valor del input: $e');
-              print('   Stack trace: $stackTrace');
+        if (inputList != null) {
+          for (final i in inputList) {
+            final name = (i as dynamic).name as String?;
+            if (name == 'Number 1' || name == 'state' || name == '1') {
+              input = i;
+              break;
             }
           }
         }
+      } catch (e) {
+        _logger.w('   └─ Error accediendo a inputs mediante Data Binding: $e');
       }
 
-      if (!inputFound && kDebugMode) {
-        print(
-          '❌ No se encontró el input "Number 1" o "state" en la máquina de estados',
+      if (input != null) {
+        // Establecer el valor usando Data Binding
+        try {
+          (input as dynamic).value = stateValue;
+          final inputName = (input as dynamic).name as String? ?? 'unknown';
+          _logger.d(
+            '✅✅ Valor establecido correctamente usando Data Binding: "$inputName" = $stateValue',
+          );
+        } catch (e) {
+          _logger.w('   └─ Error estableciendo valor del input: $e');
+        }
+      } else {
+        _logger.w(
+          '❌ No se encontró el input "Number 1", "state" o "1" en la máquina de estados',
         );
       }
     } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Error general actualizando estado Rive: $e');
-        print('   Stack trace: $stackTrace');
-      }
+      _logger.e(
+        'Error general actualizando estado Rive usando Data Binding',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -625,9 +590,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     }
 
     if (state is rive.RiveFailed) {
-      if (kDebugMode) {
-        print('❌ Fallback "$fallbackName" también falló: ${state.error}');
-      }
+      _logger.e('Fallback "$fallbackName" también falló: ${state.error}');
       return SizedBox(
         width: widget.size,
         height: widget.size,
@@ -635,27 +598,24 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, color: Colors.red),
-            if (kDebugMode)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Error: ${state.error}',
-                  style: const TextStyle(fontSize: 10),
-                  textAlign: TextAlign.center,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Error: ${state.error}',
+                style: const TextStyle(fontSize: 10),
+                textAlign: TextAlign.center,
               ),
+            ),
           ],
         ),
       );
     }
 
     if (state is rive.RiveLoaded) {
-      if (kDebugMode) {
-        final artboard = state.controller.artboard;
-        print(
-          '✅ Artboard cargado exitosamente: "${artboard.name}" (solicitado: "${widget.babyStage}", fallback: "$fallbackName")',
-        );
-      }
+      final artboard = state.controller.artboard;
+      _logger.success(
+        'Artboard cargado exitosamente: "${artboard.name}" (solicitado: "${widget.babyStage}", fallback: "$fallbackName")',
+      );
 
       _controller = state.controller;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -686,11 +646,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   Widget build(BuildContext context) {
     super.build(context); // Requerido para AutomaticKeepAliveClientMixin
 
-    if (kDebugMode) {
-      print(
-        '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}, visible=$_isVisible',
-      );
-    }
+    _logger.d(
+      '🎨 _BabyRiveAnimation.build: babyStage=${widget.babyStage}, state=${widget.state}, visible=$_isVisible',
+    );
 
     // Cada archivo Rive tiene un solo artboard, así que no necesitamos especificar el artboard
     // El archivo correcto ya se carga según la etapa del bebé
@@ -715,9 +673,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
           ),
           builder: (context, state) {
             if (state is rive.RiveLoading) {
-              if (kDebugMode) {
-                print('⏳ Rive cargando artboard: ${widget.babyStage}...');
-              }
+              _logger.d('⏳ Rive cargando artboard: ${widget.babyStage}...');
               return SizedBox(
                 width: widget.size,
                 height: widget.size,
@@ -726,24 +682,20 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
             }
 
             if (state is rive.RiveFailed) {
-              if (kDebugMode) {
-                print(
-                  '❌ Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
-                );
-                // Si el error es que no se encuentra el artboard, intentar con baby_born
-                if (state.error.toString().contains('not found') &&
-                    widget.babyStage != 'baby_born') {
-                  print('🔄 Intentando fallback a artboard "baby_born"...');
-                }
+              _logger.e(
+                'Rive falló al cargar artboard "${widget.babyStage}": ${state.error}',
+              );
+              // Si el error es que no se encuentra el artboard, intentar con baby_born
+              if (state.error.toString().contains('not found') &&
+                  widget.babyStage != 'baby_born') {
+                _logger.d('🔄 Intentando fallback a artboard "baby_born"...');
               }
 
               // Si el artboard solicitado no existe, intentar con artboards alternativos en orden
               if (state.error.toString().contains('not found')) {
-                if (kDebugMode) {
-                  print(
-                    '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
-                  );
-                }
+                _logger.d(
+                  '🔄 Artboard "${widget.babyStage}" no encontrado, intentando fallback...',
+                );
 
                 // Lista de artboards a intentar en orden de prioridad
                 final fallbackArtboards = <String>[];
@@ -761,11 +713,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                 // Intentar cargar el primer artboard de fallback
                 if (fallbackArtboards.isNotEmpty) {
                   final fallbackArtboard = fallbackArtboards.first;
-                  if (kDebugMode) {
-                    print(
-                      '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
-                    );
-                  }
+                  _logger.d(
+                    '🔄 Intentando cargar artboard de fallback: "$fallbackArtboard"',
+                  );
                   return rive.RiveWidgetBuilder(
                     fileLoader: _fileLoader,
                     artboardSelector: rive.ArtboardSelector.byName(
@@ -777,11 +727,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                     builder: (context, fallbackState) {
                       if (fallbackState is rive.RiveFailed) {
                         // Si el fallback también falla, intentar sin especificar artboard
-                        if (kDebugMode) {
-                          print(
-                            '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
-                          );
-                        }
+                        _logger.d(
+                          '🔄 Fallback "$fallbackArtboard" también falló, usando artboard por defecto...',
+                        );
                         return rive.RiveWidgetBuilder(
                           fileLoader: _fileLoader,
                           stateMachineSelector: rive
@@ -797,9 +745,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                 }
 
                 // Si no hay fallbacks, usar el artboard por defecto
-                if (kDebugMode) {
-                  print('🔄 Usando el artboard por defecto del archivo...');
-                }
+                _logger.d('🔄 Usando el artboard por defecto del archivo...');
                 return rive.RiveWidgetBuilder(
                   fileLoader: _fileLoader,
                   stateMachineSelector: rive.StateMachineSelector.byName(
@@ -815,11 +761,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                     }
 
                     if (fallbackState is rive.RiveFailed) {
-                      if (kDebugMode) {
-                        print(
-                          '❌ Fallback también falló: ${fallbackState.error}',
-                        );
-                      }
+                      _logger.e(
+                        'Fallback también falló: ${fallbackState.error}',
+                      );
                       return SizedBox(
                         width: widget.size,
                         height: widget.size,
@@ -827,15 +771,14 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.error_outline, color: Colors.red),
-                            if (kDebugMode)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Error: ${fallbackState.error}',
-                                  style: const TextStyle(fontSize: 10),
-                                  textAlign: TextAlign.center,
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Error: ${fallbackState.error}',
+                                style: const TextStyle(fontSize: 10),
+                                textAlign: TextAlign.center,
                               ),
+                            ),
                           ],
                         ),
                       );
@@ -854,33 +797,30 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.error_outline, color: Colors.red),
-                    if (kDebugMode)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Error: ${state.error}',
-                          style: const TextStyle(fontSize: 10),
-                          textAlign: TextAlign.center,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Error: ${state.error}',
+                        style: const TextStyle(fontSize: 10),
+                        textAlign: TextAlign.center,
                       ),
+                    ),
                   ],
                 ),
               );
             }
 
             if (state is rive.RiveLoaded) {
-              if (kDebugMode) {
-                print('✅ Rive cargado exitosamente');
-                print('   Etapa del bebé: ${widget.babyStage}');
-                print(
-                  '   Archivo cargado: ${_getRiveFilePath(widget.babyStage)}',
-                );
-                try {
-                  final artboard = state.controller.artboard;
-                  print('   📋 Artboard cargado: ${artboard.name}');
-                } catch (e) {
-                  // Ignorar error al obtener nombre del artboard
-                }
+              _logger.success('Rive cargado exitosamente');
+              _logger.d('   Etapa del bebé: ${widget.babyStage}');
+              _logger.d(
+                '   Archivo cargado: ${_getRiveFilePath(widget.babyStage)}',
+              );
+              try {
+                final artboard = state.controller.artboard;
+                _logger.d('   📋 Artboard cargado: ${artboard.name}');
+              } catch (e) {
+                // Ignorar error al obtener nombre del artboard
               }
 
               // Guardar el controlador para poder actualizar el estado
@@ -889,11 +829,9 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
               // Actualizar el estado después de que se carga
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
-                  if (kDebugMode) {
-                    print(
-                      '🔄 PostFrameCallback: actualizando estado a ${widget.state}',
-                    );
-                  }
+                  _logger.d(
+                    '🔄 PostFrameCallback: actualizando estado a ${widget.state}',
+                  );
                   _updateState(widget.state);
                 }
               });
@@ -916,9 +854,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
               );
             }
 
-            if (kDebugMode) {
-              print('⚠️ Estado desconocido de Rive: ${state.runtimeType}');
-            }
+            _logger.w('⚠️ Estado desconocido de Rive: ${state.runtimeType}');
             return const SizedBox.shrink();
           },
         ),

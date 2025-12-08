@@ -50,7 +50,7 @@ class ResponsiveDebugBanner extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.phone_android,
                         size: 12,
                         color: Colors.white70,
@@ -129,7 +129,7 @@ class _ResponsiveDebugOverlayState extends State<ResponsiveDebugOverlay> {
     final padding = MediaQuery.of(context).padding;
 
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -171,7 +171,7 @@ class _ResponsiveDebugOverlayState extends State<ResponsiveDebugOverlay> {
               ),
               _buildInfoRow(
                 'Text Scale',
-                MediaQuery.of(context).textScaleFactor.toStringAsFixed(2),
+                ResponsiveHelper.textScaleFactor(context).toStringAsFixed(2),
               ),
               _buildInfoRow(
                 'Has Notch',

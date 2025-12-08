@@ -26,6 +26,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   // IDs de preguntas que ya se han mostrado (para rotación)
   final Set<String> _shownQuestionIds = {};
   // ID de la última pregunta seleccionada (para mostrar preguntas relacionadas)
+  // ignore: unused_field
   String? _lastSelectedQuestionId;
 
   @override

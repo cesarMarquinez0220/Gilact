@@ -26,7 +26,6 @@ import '../widgets/companion_new_achievements_animation.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
 import '../../../gamification/presentation/widgets/baby_stage_upgrade_dialog.dart';
 import '../../../gamification/domain/services/achievement_service.dart';
-import '../../../gamification/domain/services/baby_stage_service.dart';
 
 /// Página dedicada a la compañera de gamificación
 class CompanionPage extends StatefulWidget {
@@ -195,9 +194,9 @@ class _CompanionPageState extends State<CompanionPage>
                 ),
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.favorite,
-                      color: const Color(0xFFf093fb),
+                      color: Color(0xFFf093fb),
                       size: 64,
                     ),
                     const SizedBox(height: 16),
@@ -350,7 +349,7 @@ class _CompanionPageState extends State<CompanionPage>
                       height: 60,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -360,7 +359,7 @@ class _CompanionPageState extends State<CompanionPage>
                       height: 80,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -374,7 +373,7 @@ class _CompanionPageState extends State<CompanionPage>
                     height: 60,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -383,7 +382,7 @@ class _CompanionPageState extends State<CompanionPage>
                     height: 80,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -697,6 +696,7 @@ class _CompanionPageState extends State<CompanionPage>
 
   /// Método de prueba para simular desbloqueo real de un logro
   /// Esto agregará el logro al perfil y mostrará la animación automáticamente
+  // ignore: unused_element
   void _testRealAchievementUnlock(BuildContext context) {
     final gamificationBloc = context.read<GamificationBloc>();
     final currentState = gamificationBloc.state;

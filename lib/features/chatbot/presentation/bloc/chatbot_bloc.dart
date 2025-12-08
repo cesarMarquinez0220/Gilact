@@ -69,7 +69,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       );
 
       final botMessage = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString() + '_bot',
+        id: '${DateTime.now().millisecondsSinceEpoch}_bot',
         text: event.predefinedAnswer!,
         isUser: false,
         timestamp: DateTime.now(),

@@ -57,6 +57,9 @@ import '../../core/services/sound_service.dart';
 import '../../core/services/vibration_service.dart';
 import '../../core/services/app_logger.dart';
 import '../../core/services/auto_save_service.dart';
+import '../../core/services/temporary_file_cleanup_service.dart';
+import '../../core/services/secure_storage_service.dart';
+import '../../core/services/encrypted_preferences_service.dart';
 import '../../features/videos/data/services/video_encryption_service.dart';
 import '../../features/videos/data/services/video_download_service.dart';
 import '../../features/videos/data/datasources/video_offline_local_data_source.dart';
@@ -205,6 +208,17 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<VideoOfflineLocalDataSource>(
     () => VideoOfflineLocalDataSource(),
+  );
+
+  // Security services
+  getIt.registerLazySingleton<TemporaryFileCleanupService>(
+    () => TemporaryFileCleanupService(),
+  );
+  getIt.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService(),
+  );
+  getIt.registerLazySingleton<EncryptedPreferencesService>(
+    () => EncryptedPreferencesService(),
   );
 
   // Offline sync services

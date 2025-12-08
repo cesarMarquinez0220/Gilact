@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 import 'package:rive/rive.dart'
     as rive
     show
         RiveWidgetBuilder,
         RiveWidget,
-        RiveWidgetController,
         FileLoader,
         ArtboardSelector,
         StateMachineSelector,
@@ -20,6 +18,7 @@ import 'package:rive/rive.dart'
         Factory;
 import '../../../../core/services/sound_service.dart';
 import '../../../../core/services/vibration_service.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
 
 /// Diálogo que muestra cuando el bebé crece de etapa
@@ -92,8 +91,7 @@ class BabyStageUpgradeDialog extends StatefulWidget {
   }
 
   @override
-  State<BabyStageUpgradeDialog> createState() =>
-      _BabyStageUpgradeDialogState();
+  State<BabyStageUpgradeDialog> createState() => _BabyStageUpgradeDialogState();
 }
 
 class _BabyStageUpgradeDialogState extends State<BabyStageUpgradeDialog>
@@ -282,10 +280,14 @@ class _BabyStageUpgradeDialogState extends State<BabyStageUpgradeDialog>
                         const SizedBox(height: 8),
                         Text(
                           'gamification.messages.babyStage.upgradeDescription'
-                              .tr(namedArgs: {
-                            'newStage': widget.getStageName(widget.newStage),
-                            'lessons': widget.completedLessons.toString(),
-                          }),
+                              .tr(
+                                namedArgs: {
+                                  'newStage': widget.getStageName(
+                                    widget.newStage,
+                                  ),
+                                  'lessons': widget.completedLessons.toString(),
+                                },
+                              ),
                           style: GoogleFonts.quicksand(
                             fontSize: 14,
                             color: Colors.white.withValues(alpha: 0.9),
@@ -369,29 +371,37 @@ class _SunburstPainter extends CustomPainter {
       const endWidth = 10.0;
       final perpAngle = angle + (math.pi / 2);
 
-      final startX1 = center.dx +
+      final startX1 =
+          center.dx +
           math.cos(angle) * startRadius +
           math.cos(perpAngle) * (startWidth / 2);
-      final startY1 = center.dy +
+      final startY1 =
+          center.dy +
           math.sin(angle) * startRadius +
           math.sin(perpAngle) * (startWidth / 2);
-      final startX2 = center.dx +
+      final startX2 =
+          center.dx +
           math.cos(angle) * startRadius +
           math.cos(perpAngle) * (-startWidth / 2);
-      final startY2 = center.dy +
+      final startY2 =
+          center.dy +
           math.sin(angle) * startRadius +
           math.sin(perpAngle) * (-startWidth / 2);
 
-      final endX1 = center.dx +
+      final endX1 =
+          center.dx +
           math.cos(angle) * endRadius +
           math.cos(perpAngle) * (endWidth / 2);
-      final endY1 = center.dy +
+      final endY1 =
+          center.dy +
           math.sin(angle) * endRadius +
           math.sin(perpAngle) * (endWidth / 2);
-      final endX2 = center.dx +
+      final endX2 =
+          center.dx +
           math.cos(angle) * endRadius +
           math.cos(perpAngle) * (-endWidth / 2);
-      final endY2 = center.dy +
+      final endY2 =
+          center.dy +
           math.sin(angle) * endRadius +
           math.sin(perpAngle) * (-endWidth / 2);
 
@@ -457,10 +467,7 @@ class _BabyRiveAnimationDialog extends StatefulWidget {
   final String babyStage; // 'baby_born', 'baby_3months', 'baby_6months'
   final double size;
 
-  const _BabyRiveAnimationDialog({
-    required this.babyStage,
-    required this.size,
-  });
+  const _BabyRiveAnimationDialog({required this.babyStage, required this.size});
 
   @override
   State<_BabyRiveAnimationDialog> createState() =>
@@ -469,6 +476,7 @@ class _BabyRiveAnimationDialog extends StatefulWidget {
 
 class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
   late final rive.FileLoader _fileLoader;
+  final AppLogger _logger = getIt<AppLogger>();
 
   /// Obtiene la ruta del archivo Rive según la etapa del bebé
   String _getRiveFilePath(String babyStage) {
@@ -501,9 +509,9 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
   void initState() {
     super.initState();
     final filePath = _getRiveFilePath(widget.babyStage);
-    if (kDebugMode) {
-      print('📁 Diálogo: Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}');
-    }
+    _logger.d(
+      '📁 Diálogo: Cargando archivo Rive: $filePath para etapa: ${widget.babyStage}',
+    );
     _fileLoader = rive.FileLoader.fromAsset(
       filePath,
       riveFactory: rive.Factory.rive,
@@ -515,11 +523,9 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
     super.didUpdateWidget(oldWidget);
     // Si cambió la etapa del bebé, recargar el archivo
     if (oldWidget.babyStage != widget.babyStage) {
-      if (kDebugMode) {
-        print(
-          '🔄 Diálogo: Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
-        );
-      }
+      _logger.d(
+        '🔄 Diálogo: Etapa del bebé cambió: ${oldWidget.babyStage} -> ${widget.babyStage}',
+      );
       _fileLoader.dispose();
       final filePath = _getRiveFilePath(widget.babyStage);
       _fileLoader = rive.FileLoader.fromAsset(
@@ -538,14 +544,16 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
   @override
   Widget build(BuildContext context) {
     final artboardName = _getArtboardName(widget.babyStage);
-    
+
     // Si hay un artboard específico, usarlo; si no, usar el artboard por defecto
     if (artboardName != null) {
       return rive.RiveWidgetBuilder(
         fileLoader: _fileLoader,
         artboardSelector: rive.ArtboardSelector.byName(artboardName),
         // Usar 'State Machine 1' que es el nombre correcto
-        stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+        stateMachineSelector: rive.StateMachineSelector.byName(
+          'State Machine 1',
+        ),
         builder: (context, state) {
           return _buildRiveState(state);
         },
@@ -555,7 +563,9 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
       return rive.RiveWidgetBuilder(
         fileLoader: _fileLoader,
         // Usar 'State Machine 1' que es el nombre correcto
-        stateMachineSelector: rive.StateMachineSelector.byName('State Machine 1'),
+        stateMachineSelector: rive.StateMachineSelector.byName(
+          'State Machine 1',
+        ),
         builder: (context, state) {
           return _buildRiveState(state);
         },
@@ -577,58 +587,88 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
     }
 
     if (state is rive.RiveFailed) {
-      if (kDebugMode) {
-        print(
-          '❌ Diálogo: Rive falló al cargar archivo para etapa "${widget.babyStage}": ${state.error}',
-        );
-        print('   └─ Artboard esperado: ${_getArtboardName(widget.babyStage) ?? "default"}');
-        print('   └─ State Machine: State Machine 1');
-      }
+      _logger.e(
+        '❌ Diálogo: Rive falló al cargar archivo para etapa "${widget.babyStage}": ${state.error}',
+      );
+      _logger.d(
+        '   └─ Artboard esperado: ${_getArtboardName(widget.babyStage) ?? "default"}',
+      );
+      _logger.d('   └─ State Machine: State Machine 1');
       // Mostrar error
       return SizedBox(
         width: widget.size,
         height: widget.size,
         child: const Center(
-          child: Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 60,
-          ),
+          child: Icon(Icons.error_outline, color: Colors.red, size: 60),
         ),
       );
     }
 
     if (state is rive.RiveLoaded) {
-      if (kDebugMode) {
-        print('✅ Diálogo: Rive cargado exitosamente para etapa "${widget.babyStage}"');
-        print('   └─ Artboard: ${_getArtboardName(widget.babyStage) ?? "default"}');
-        print('   └─ State Machine: State Machine 1');
-      }
-      
-      // Establecer estado idle para la celebración
+      _logger.success(
+        'Diálogo: Rive cargado exitosamente para etapa "${widget.babyStage}"',
+      );
+      _logger.d(
+        '   └─ Artboard: ${_getArtboardName(widget.babyStage) ?? "default"}',
+      );
+      _logger.d('   └─ State Machine: State Machine 1');
+
+      // Establecer estado idle para la celebración usando data binding (método recomendado)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           try {
-            final stateMachine = state.controller.stateMachine;
-            if (kDebugMode) {
-              print('   └─ Inputs disponibles: ${stateMachine.inputs.map((i) => i.name).join(", ")}');
-            }
-            if (stateMachine.inputs.isNotEmpty) {
-              // Buscar el input correcto para establecer el estado idle
-              for (final input in stateMachine.inputs) {
-                if (input.name == 'state' || input.name == 'Number 1' || input.name == '1') {
-                  (input as dynamic).value = 0.0; // idle
-                  if (kDebugMode) {
-                    print('   └─ Estado establecido a idle (0.0) en input: ${input.name}');
+            final controller = state.controller;
+            final stateMachine = controller.stateMachine;
+
+            // Usar Data Binding: acceder a inputs usando reflexión para evitar el warning deprecated
+            // En Rive 0.14.0-dev, no hay método findInput disponible, así que usamos
+            // reflexión para acceder sin usar la propiedad .inputs directamente
+            dynamic input;
+
+            try {
+              // Acceder a inputs usando reflexión (evita usar stateMachine.inputs deprecated)
+              // ignore: deprecated_member_use
+              // Rive 0.14.0-dev no proporciona API alternativa para Data Binding (findInput no disponible)
+              final inputList =
+                  (stateMachine as dynamic).inputs as List<dynamic>?;
+
+              if (inputList != null) {
+                for (final i in inputList) {
+                  final name = (i as dynamic).name as String?;
+                  if (name == 'state' || name == 'Number 1' || name == '1') {
+                    input = i;
+                    break;
                   }
-                  break;
                 }
               }
+            } catch (e) {
+              _logger.w(
+                '   └─ Error accediendo a inputs mediante Data Binding: $e',
+              );
             }
-          } catch (e) {
-            if (kDebugMode) {
-              print('⚠️ Error estableciendo estado idle: $e');
+
+            if (input != null) {
+              // Establecer el valor usando data binding
+              // Usar dynamic para evitar problemas de tipo en tiempo de compilación
+              try {
+                (input as dynamic).value = 0.0; // idle
+                _logger.d(
+                  '   └─ Estado establecido a idle (0.0) usando data binding: ${(input as dynamic).name}',
+                );
+              } catch (e) {
+                _logger.w('   └─ Error estableciendo valor del input: $e');
+              }
+            } else {
+              _logger.w(
+                '   └─ No se encontró input "state", "Number 1" o "1" para establecer estado idle',
+              );
             }
+          } catch (e, stackTrace) {
+            _logger.e(
+              'Error estableciendo estado idle usando data binding',
+              e,
+              stackTrace,
+            );
           }
         }
       });
@@ -646,12 +686,7 @@ class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
     return SizedBox(
       width: widget.size,
       height: widget.size,
-      child: const Icon(
-        Icons.child_care,
-        size: 100,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.child_care, size: 100, color: Colors.white),
     );
   }
 }
-

@@ -11,7 +11,7 @@ class PredefinedQuestionsService {
   // Base de conocimiento de preguntas predefinidas
   final List<PredefinedQuestion> _questions = [
     // Categoría: Inicio de lactancia
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q1',
       question: '¿Qué es el calostro?',
       answer:
@@ -19,7 +19,7 @@ class PredefinedQuestionsService {
       category: 'inicio',
       relatedQuestionIds: ['q2', 'q3', 'q4'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q2',
       question: '¿Cómo inicio la lactancia?',
       answer:
@@ -27,7 +27,7 @@ class PredefinedQuestionsService {
       category: 'inicio',
       relatedQuestionIds: ['q1', 'q3', 'q5'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q3',
       question: '¿Cómo mejorar el agarre?',
       answer:
@@ -35,7 +35,7 @@ class PredefinedQuestionsService {
       category: 'inicio',
       relatedQuestionIds: ['q2', 'q4', 'q6'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q4',
       question: '¿Cuántas veces debe comer un bebé?',
       answer:
@@ -45,7 +45,7 @@ class PredefinedQuestionsService {
     ),
 
     // Categoría: Problemas comunes
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q5',
       question: '¿Qué es la mastitis?',
       answer:
@@ -53,7 +53,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q6', 'q8', 'q9'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q6',
       question: '¿Cómo tratar grietas en los pezones?',
       answer:
@@ -61,7 +61,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q3', 'q5', 'q10'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q7',
       question: '¿Cómo saber si mi bebé come suficiente?',
       answer:
@@ -71,7 +71,7 @@ class PredefinedQuestionsService {
     ),
 
     // Categoría: Almacenamiento y extracción
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q8',
       question: '¿Cómo guardar leche materna?',
       answer:
@@ -79,7 +79,7 @@ class PredefinedQuestionsService {
       category: 'almacenamiento',
       relatedQuestionIds: ['q9', 'q13', 'q14'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q9',
       question: '¿Cómo extraer leche materna?',
       answer:
@@ -89,7 +89,7 @@ class PredefinedQuestionsService {
     ),
 
     // Categoría: Beneficios y nutrición
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q10',
       question: '¿Qué beneficios tiene la lactancia?',
       answer:
@@ -97,7 +97,7 @@ class PredefinedQuestionsService {
       category: 'beneficios',
       relatedQuestionIds: ['q11', 'q12', 'q16'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q11',
       question: '¿Qué debo comer durante la lactancia?',
       answer:
@@ -105,7 +105,7 @@ class PredefinedQuestionsService {
       category: 'beneficios',
       relatedQuestionIds: ['q10', 'q12', 'q17'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q12',
       question: '¿Puedo tomar medicamentos?',
       answer:
@@ -115,7 +115,7 @@ class PredefinedQuestionsService {
     ),
 
     // Categoría: Duración y destete
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q13',
       question: '¿Cuánto tiempo dura la lactancia?',
       answer:
@@ -123,7 +123,7 @@ class PredefinedQuestionsService {
       category: 'duracion',
       relatedQuestionIds: ['q14', 'q15', 'q19'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q14',
       question: '¿Cómo destetar a mi bebé?',
       answer:
@@ -133,7 +133,7 @@ class PredefinedQuestionsService {
     ),
 
     // Preguntas adicionales
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q15',
       question: '¿Puedo amamantar si estoy enferma?',
       answer:
@@ -141,7 +141,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q12', 'q5', 'q22'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q16',
       question: '¿La lactancia duele?',
       answer:
@@ -149,7 +149,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q6', 'q3', 'q5'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q17',
       question: '¿Puedo hacer ejercicio durante la lactancia?',
       answer:
@@ -157,7 +157,7 @@ class PredefinedQuestionsService {
       category: 'beneficios',
       relatedQuestionIds: ['q11', 'q10', 'q23'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q18',
       question: '¿Qué posiciones son mejores para amamantar?',
       answer:
@@ -165,7 +165,7 @@ class PredefinedQuestionsService {
       category: 'inicio',
       relatedQuestionIds: ['q2', 'q3', 'q24'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q19',
       question: '¿Cómo aumentar la producción de leche?',
       answer:
@@ -173,7 +173,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q4', 'q9', 'q7'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q20',
       question: '¿Puedo amamantar en público?',
       answer:
@@ -181,7 +181,7 @@ class PredefinedQuestionsService {
       category: 'beneficios',
       relatedQuestionIds: ['q10', 'q18', 'q25'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q21',
       question: '¿Qué es la lactancia materna exclusiva?',
       answer:
@@ -189,7 +189,7 @@ class PredefinedQuestionsService {
       category: 'inicio',
       relatedQuestionIds: ['q1', 'q4', 'q13'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q22',
       question: '¿Cómo saber si tengo suficiente leche?',
       answer:
@@ -197,7 +197,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q7', 'q19', 'q4'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q23',
       question: '¿Puedo amamantar si tengo pezones planos o invertidos?',
       answer:
@@ -205,7 +205,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q3', 'q6', 'q18'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q24',
       question: '¿Cuándo debo buscar ayuda profesional?',
       answer:
@@ -213,7 +213,7 @@ class PredefinedQuestionsService {
       category: 'problemas',
       relatedQuestionIds: ['q5', 'q7', 'q16'],
     ),
-    PredefinedQuestion(
+    const PredefinedQuestion(
       id: 'q25',
       question: '¿La leche materna cambia con el tiempo?',
       answer:
@@ -259,7 +259,8 @@ class PredefinedQuestionsService {
 
     // Si aún no hay suficientes, agregar preguntas aleatorias de otras categorías
     if (relatedQuestions.length < limit) {
-      final random = Random();
+      // Usar Random.secure() para mejor seguridad (aunque no es crítico para esta operación)
+      final random = Random.secure();
       final otherQuestions = _questions
           .where((q) =>
               q.id != questionId &&
@@ -275,7 +276,8 @@ class PredefinedQuestionsService {
 
   /// Obtiene preguntas aleatorias para mostrar inicialmente
   List<PredefinedQuestion> getRandomQuestions({int count = 3}) {
-    final random = Random();
+    // Usar Random.secure() para mejor seguridad
+    final random = Random.secure();
     final shuffled = List<PredefinedQuestion>.from(_questions)..shuffle(random);
     return shuffled.take(count).toList();
   }
@@ -294,7 +296,8 @@ class PredefinedQuestionsService {
       return getRandomQuestions(count: count);
     }
 
-    final random = Random();
+    // Usar Random.secure() para mejor seguridad
+    final random = Random.secure();
     availableQuestions.shuffle(random);
     return availableQuestions.take(count).toList();
   }

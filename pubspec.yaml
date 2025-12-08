@@ -83,7 +83,7 @@ dependencies:
   crypto: ^3.0.3
   connectivity_plus: ^5.0.2
   dio: ^5.4.0
-  encrypt: ^5.0.3
+  pointycastle: ^3.9.1
   path_provider: ^2.1.1
   youtube_explode_dart: ^2.0.0
   local_auth: ^2.3.0
@@ -93,6 +93,7 @@ dependencies:
   rive: ^0.14.0-dev.6
   flutter_svg: ^2.0.10+1
   simple_shadow: ^0.3.1
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -129,7 +130,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-   - assets/images/estrella.png
    - assets/images/lecciones_camino/ley1.png
    - assets/images/lecciones_camino/ley2.png
    - assets/images/lecciones_camino/banco1.png
@@ -155,14 +155,6 @@ flutter:
    - assets/images/lecciones_camino/bebemujer1.png 
    - assets/images/lecciones_camino/bebevientre.png 
    - assets/images/lecciones_camino/mujereshablando.png 
-   - assets/images/edicionPerfil.png 
-   - assets/images/prueba.png
-   - assets/images/engranaje.png
-   - assets/images/iluminacion_reparacion.jpeg
-   - assets/images/Imagen1.png
-   - assets/images/Imagen2.png
-   - assets/images/splash.png
-   - assets/images/doctor.png
    - assets/images/lecciones_camino/salud.png
    - assets/images/mamapost.png
    - assets/images/mamapre.png

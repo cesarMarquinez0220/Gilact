@@ -338,19 +338,28 @@ class LessonCard extends StatelessWidget {
                       aspectRatio: 4 / 3,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(borderRadius),
-                        child: Image.asset(
-                          'assets/images/${lesson.imageUrl}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: Icon(
-                                Icons.school,
-                                size: ResponsiveHelper.getResponsiveIconSize(
-                                  context,
-                                  24.0,
-                                ),
-                              ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+                            final cacheWidth = (constraints.maxWidth * devicePixelRatio).round();
+                            final cacheHeight = (constraints.maxHeight * devicePixelRatio).round();
+                            return Image.asset(
+                              'assets/images/${lesson.imageUrl}',
+                              fit: BoxFit.cover,
+                              cacheWidth: cacheWidth,
+                              cacheHeight: cacheHeight,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: Icon(
+                                    Icons.school,
+                                    size: ResponsiveHelper.getResponsiveIconSize(
+                                      context,
+                                      24.0,
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),

@@ -226,7 +226,12 @@ class _TipsPageState extends State<TipsPage> {
                           top: Radius.circular(20),
                         ),
                         image: DecorationImage(
-                          image: AssetImage(_resolveImageAsset(tip, index)),
+                          image: ResizeImage(
+                            AssetImage(_resolveImageAsset(tip, index)),
+                            width: (MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).devicePixelRatio)
+                                .toInt(),
+                          ),
                           fit: BoxFit.cover,
                         ),
                       ),

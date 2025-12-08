@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -103,13 +105,13 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
       // CASO 1: Archivo directo (Caché normal)
       if (widget.file != null) {
         if (!await widget.file!.exists()) {
-           throw Exception('El archivo de video proporcionado no existe');
+          throw Exception('El archivo de video proporcionado no existe');
         }
-        
+
         await _initializeControllerWithErrorHandling(widget.file!);
         if (mounted) {
           setState(() {
-             _isInitializing = false;
+            _isInitializing = false;
           });
           widget.onVideoReady?.call();
         }
@@ -230,30 +232,35 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
   }
 
   Future<void> _initializeControllerWithErrorHandling(File file) async {
-      _logger.d('Inicializando VideoPlayerController con archivo: ${file.path}');
-      _videoController = VideoPlayerController.file(file);
-      await _videoController!.initialize();
+    _logger.d('Inicializando VideoPlayerController con archivo: ${file.path}');
+    _videoController = VideoPlayerController.file(file);
+    await _videoController!.initialize();
 
-      _logger.d('VideoPlayerController inicializado. Aspect ratio: ${_videoController!.value.aspectRatio}');
+    _logger.d(
+      'VideoPlayerController inicializado. Aspect ratio: ${_videoController!.value.aspectRatio}',
+    );
 
-      // Crear ChewieController para controles personalizados
-      _chewieController = ChewieController(
-        videoPlayerController: _videoController!,
-        autoPlay: true,
-        looping: false,
-        allowFullScreen: true,
-        allowMuting: true,
-        showControls: true,
-        aspectRatio: _videoController!.value.aspectRatio,
-        errorBuilder: (context, errorMessage) {
-          return Center(
-            child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
-          );
-        },
-      );
-      
-      _videoController!.addListener(_onVideoPositionChanged);
-      _videoController!.addListener(_onVideoEnded);
+    // Crear ChewieController para controles personalizados
+    _chewieController = ChewieController(
+      videoPlayerController: _videoController!,
+      autoPlay: true,
+      looping: false,
+      allowFullScreen: true,
+      allowMuting: true,
+      showControls: true,
+      aspectRatio: _videoController!.value.aspectRatio,
+      errorBuilder: (context, errorMessage) {
+        return Center(
+          child: Text(
+            errorMessage,
+            style: const TextStyle(color: Colors.white),
+          ),
+        );
+      },
+    );
+
+    _videoController!.addListener(_onVideoPositionChanged);
+    _videoController!.addListener(_onVideoEnded);
   }
 
   Future<void> _decryptVideoToFile(
@@ -468,6 +475,53 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
     );
   }
 
+  /// Sobrescribe de forma segura un archivo antes de eliminarlo
+  /// Esto previene la recuperación de datos sensibles desde el almacenamiento
+  Future<void> _secureDeleteFile(File file) async {
+    try {
+      if (!await file.exists()) return;
+
+      final fileSize = await file.length();
+      if (fileSize == 0) {
+        await file.delete();
+        return;
+      }
+
+      // Sobrescribir el archivo con datos aleatorios (3 pasadas para mayor seguridad)
+      final random = Random.secure();
+      final randomBytes = Uint8List(fileSize);
+
+      for (int pass = 0; pass < 3; pass++) {
+        // Generar datos aleatorios para esta pasada
+        for (int i = 0; i < fileSize; i++) {
+          randomBytes[i] = random.nextInt(256);
+        }
+
+        // Escribir datos aleatorios
+        final raf = await file.open(mode: FileMode.write);
+        await raf.writeFrom(randomBytes);
+        await raf.flush();
+        await raf.close();
+      }
+
+      // Finalmente, eliminar el archivo
+      await file.delete();
+      _logger.d('Archivo temporal eliminado de forma segura');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Error en eliminación segura de archivo temporal',
+        e,
+        stackTrace,
+      );
+      // Intentar eliminación normal como fallback
+      try {
+        await file.delete();
+      } catch (deleteError) {
+        _logger.e('Error eliminando archivo temporal (fallback)', deleteError);
+      }
+    }
+  }
+
   @override
   void dispose() {
     _progressSaveTimer?.cancel();
@@ -478,10 +532,10 @@ class _OfflineVideoPlayerState extends State<OfflineVideoPlayer> {
     // Desactivar prevención de grabación de pantalla
     ScreenRecordingPreventionService.disableScreenProtection();
 
-    // Eliminar archivo temporal desencriptado (sin await ya que dispose no puede ser async)
+    // Eliminar archivo temporal desencriptado de forma segura
+    // (sin await ya que dispose no puede ser async)
     if (_decryptedVideoFile != null) {
-      _decryptedVideoFile!
-          .delete()
+      _secureDeleteFile(_decryptedVideoFile!)
           .then((_) {
             // Archivo eliminado exitosamente
           })

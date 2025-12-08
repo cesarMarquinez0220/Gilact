@@ -16,6 +16,7 @@ import 'package:firebase_messaging_web/firebase_messaging_web.dart';
 import 'package:firebase_performance_web/firebase_performance_web.dart';
 import 'package:flutter_inappwebview_web/web/main.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
+import 'package:flutter_secure_storage_web/flutter_secure_storage_web.dart';
 import 'package:package_info_plus/src/package_info_plus_web.dart';
 import 'package:rive_native/rive_native_plugin_web.dart';
 import 'package:shared_preferences_web/shared_preferences_web.dart';
@@ -35,6 +36,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebasePerformanceWeb.registerWith(registrar);
   InAppWebViewFlutterPlugin.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);
+  FlutterSecureStorageWeb.registerWith(registrar);
   PackageInfoPlusWebPlugin.registerWith(registrar);
   RiveNativePlugin.registerWith(registrar);
   SharedPreferencesPlugin.registerWith(registrar);

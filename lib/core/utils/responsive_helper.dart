@@ -20,7 +20,7 @@ class ResponsiveHelper {
 
   /// Obtiene el factor de escala de texto del sistema
   static double textScaleFactor(BuildContext context) {
-    return MediaQuery.of(context).textScaleFactor;
+    return MediaQuery.of(context).textScaler.scale(1.0);
   }
 
   /// Verifica si es una pantalla muy pequeña (< 360px)
@@ -125,7 +125,7 @@ class ResponsiveHelper {
 
   /// Obtiene altura de botón responsive (mínimo 44px para accesibilidad)
   static double getResponsiveButtonHeight(BuildContext context) {
-    final baseHeight = 44.0;
+    const baseHeight = 44.0;
     if (isExtraSmall(context)) return baseHeight;
     if (isSmall(context)) return baseHeight;
     if (isMedium(context)) return baseHeight * 1.1;

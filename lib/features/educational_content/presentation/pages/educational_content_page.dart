@@ -119,21 +119,172 @@ class _EducationalContentPageState extends State<EducationalContentPage> {
               },
             ),
           ),
-                        if (content.isCompleted)
-                          const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF03A696),
-                            size: 20,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Buscar contenido...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        _filterByCategory();
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onSubmitted: (_) => _performSearch(),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final category = _categories[index];
+                final isSelected = _selectedCategory == category;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(category),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                      _filterByCategory();
+                    },
+                    selectedColor: const Color(
+                      0xFF03A696,
+                    ).withValues(alpha: 0.2),
+                    checkmarkColor: const Color(0xFF03A696),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentList(List<EducationalContent> contentList) {
+    if (contentList.isEmpty) {
+      return const Center(child: Text('No hay contenido disponible'));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: contentList.length,
+      itemBuilder: (context, index) {
+        final content = contentList[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            onTap: () => _showContentDetail(content),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Builder(
+                      builder: (context) {
+                        final devicePixelRatio = MediaQuery.of(
+                          context,
+                        ).devicePixelRatio;
+                        final cacheSize = (80 * devicePixelRatio).round();
+                        return Image.asset(
+                          content.imageUrl,
+                          width: 80,
+                          height: 80,
+                          cacheWidth: cacheSize,
+                          cacheHeight: cacheSize,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF03A696,
+                                ).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.library_books,
+                                color: Color(0xFF03A696),
+                                size: 32,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                content.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (content.isCompleted)
+                              const Icon(
+                                Icons.check_circle,
+                                color: Color(0xFF03A696),
+                                size: 20.0,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          content.category,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
                           ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -218,11 +369,19 @@ class EducationalContentDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final padding = ResponsiveHelper.getResponsivePadding(context); // ~16 to 24
-    final imageHeight = ResponsiveHelper.getResponsiveValue(context, small: 200, medium: 250, large: 300);
+    final imageHeight = ResponsiveHelper.getResponsiveValue(
+      context,
+      small: 200,
+      medium: 250,
+      large: 300,
+    );
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 24);
     final descFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
     final contentFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
-    final categoryFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+    final categoryFontSize = ResponsiveHelper.getResponsiveFontSize(
+      context,
+      14,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -249,24 +408,39 @@ class EducationalContentDetailPage extends StatelessWidget {
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  content.imageUrl,
-                  width: double.infinity,
-                  height: imageHeight,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
+                child: Builder(
+                  builder: (context) {
+                    final devicePixelRatio = MediaQuery.of(
+                      context,
+                    ).devicePixelRatio;
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final cacheWidth = (screenWidth * devicePixelRatio).round();
+                    final cacheHeight = (imageHeight * devicePixelRatio)
+                        .round();
+                    return Image.asset(
+                      content.imageUrl,
                       width: double.infinity,
-                      height: imageHeight,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF03A696).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.library_books,
-                        color: const Color(0xFF03A696),
-                        size: imageHeight * 0.32, // Relative size
-                      ),
+                      height: imageHeight.toDouble(),
+                      cacheWidth: cacheWidth,
+                      cacheHeight: cacheHeight,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: double.infinity,
+                          height: imageHeight.toDouble(),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF03A696,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.library_books,
+                            color: const Color(0xFF03A696),
+                            size: imageHeight * 0.32, // Relative size (double)
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -331,9 +505,9 @@ class EducationalContentDetailPage extends StatelessWidget {
 
   void _markAsCompleted(BuildContext context) {
     if (!content.isCompleted) {
-      context.read<EducationalContentBloc>().add(
-        MarkEducationalContentAsCompletedRequested(contentId: content.id),
-      );
+      BlocProvider.of<EducationalContentBloc>(
+        context,
+      ).add(MarkEducationalContentAsCompletedRequested(contentId: content.id));
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

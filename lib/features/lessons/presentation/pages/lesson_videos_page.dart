@@ -21,7 +21,6 @@ import '../../../gamification/presentation/bloc/gamification_bloc.dart';
 import '../../../gamification/presentation/bloc/gamification_event.dart';
 import '../../../gamification/presentation/bloc/gamification_state.dart';
 import '../../../gamification/presentation/widgets/baby_stage_upgrade_dialog.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -81,15 +80,15 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       }
 
       final userId = authState.user.id;
-      
+
       // Verificar si el usuario es preparto
       final userProfileBloc = context.read<UserProfileBloc>();
       final userProfileState = userProfileBloc.state;
       final isPrePartum = userProfileState is UserProfileLoaded
           ? userProfileState.profile.isPrePartum
           : (userProfileState is UserProfileUpdated
-              ? userProfileState.profile.isPrePartum
-              : false);
+                ? userProfileState.profile.isPrePartum
+                : false);
 
       // Si es preparto, no cargar trivias completadas para permitir repetición
       if (isPrePartum) {
@@ -97,7 +96,9 @@ class _LessonVideosPageState extends State<LessonVideosPage>
         setState(() {
           _completedTriviaLessons = {};
         });
-        _logger.d('Usuario preparto: trivias siempre disponibles para repetición');
+        _logger.d(
+          'Usuario preparto: trivias siempre disponibles para repetición',
+        );
         return;
       }
 
@@ -334,39 +335,40 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       if (currentState is GamificationLoaded) {
         previousStage = currentState.profile.babyStage;
       }
-      
+
       // Actualizar el provider y obtener el perfil actualizado si la etapa cambió
       final updatedProfile = await context
           .read<LeccionesProvider>()
           .marcarLeccionCompletadaWithProfileUpdate(videoId);
-      
+
       // Si la etapa del bebé cambió, actualizar el GamificationBloc y mostrar diálogo
       if (updatedProfile != null && mounted) {
         final newStage = updatedProfile.babyStage;
-        
+
         // Verificar si la etapa realmente cambió
         if (previousStage != null && previousStage != newStage) {
           // Actualizar el bloc
           gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
-          _logger.d(
-            'Etapa del bebé actualizada: $previousStage -> $newStage',
-          );
-          
+          _logger.d('Etapa del bebé actualizada: $previousStage -> $newStage');
+
           // Mostrar diálogo de celebración después de un pequeño delay
           await Future.delayed(const Duration(milliseconds: 500));
-          if (mounted) {
-            // Obtener el conteo de lecciones únicas (no videos)
-            final completedLessons = await context
-                .read<LeccionesProvider>()
-                .getCompletedLessonsCountUnique();
-            
-            BabyStageUpgradeDialog.show(
-              context,
-              newStage: newStage,
-              previousStage: previousStage,
-              completedLessons: completedLessons,
-            );
-          }
+          if (!mounted) return;
+
+          // Obtener el conteo de lecciones únicas (no videos)
+          final completedLessons = await context
+              .read<LeccionesProvider>()
+              .getCompletedLessonsCountUnique();
+
+          // Verificar que el contexto sigue siendo válido después del gap asíncrono
+          if (!mounted) return;
+
+          BabyStageUpgradeDialog.show(
+            context,
+            newStage: newStage,
+            previousStage: previousStage,
+            completedLessons: completedLessons,
+          );
         } else {
           // Solo actualizar el bloc sin mostrar diálogo
           gamificationBloc.add(UpdateGamificationProfile(updatedProfile));
@@ -926,12 +928,13 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final isPrePartum = userProfileState is UserProfileLoaded
         ? userProfileState.profile.isPrePartum
         : (userProfileState is UserProfileUpdated
-            ? userProfileState.profile.isPrePartum
-            : false);
+              ? userProfileState.profile.isPrePartum
+              : false);
 
     // Para preparto, siempre permitir hacer trivias (repetibles)
     // Para postparto, verificar si está completada
-    final isCompleted = !isPrePartum && _completedTriviaLessons.contains(lessonId);
+    final isCompleted =
+        !isPrePartum && _completedTriviaLessons.contains(lessonId);
     final allVideosCompleted = videos.every(
       (video) => _isVideoCompletedFromFirestore(video.videoId),
     );
@@ -953,8 +956,8 @@ class _LessonVideosPageState extends State<LessonVideosPage>
           isPrePartum
               ? 'trivia.repeatTrivia'.tr()
               : (isCompleted
-                  ? 'trivia.completed'.tr()
-                  : 'trivia.completeToAdvance'.tr()),
+                    ? 'trivia.completed'.tr()
+                    : 'trivia.completeToAdvance'.tr()),
           style: GoogleFonts.quicksand(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -987,11 +990,12 @@ class _LessonVideosPageState extends State<LessonVideosPage>
     final isPrePartum = userProfileState is UserProfileLoaded
         ? userProfileState.profile.isPrePartum
         : (userProfileState is UserProfileUpdated
-            ? userProfileState.profile.isPrePartum
-            : false);
+              ? userProfileState.profile.isPrePartum
+              : false);
 
     // Verificar si ya está completada (solo para postparto)
-    final isCompleted = !isPrePartum && _completedTriviaLessons.contains(lessonId);
+    final isCompleted =
+        !isPrePartum && _completedTriviaLessons.contains(lessonId);
 
     if (!mounted) return;
 
@@ -1007,7 +1011,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       return;
     }
 
-      await LessonTriviaWidget.show(
+    await LessonTriviaWidget.show(
       context,
       lessonId: lessonIdStr,
       userId: userId,
@@ -1072,7 +1076,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
       future: _getCompletedLessonsCount(),
       builder: (context, snapshot) {
         final completedLessons = snapshot.data ?? 0;
-        
+
         // Determinar si mostrar el indicador basándose directamente en la lección y lecciones completadas
         bool shouldShow = false;
         if (lessonId == 7 && completedLessons < 7) {
@@ -1082,7 +1086,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
           // Mostrar en lección 14 si el usuario tiene menos de 14 lecciones completadas
           shouldShow = true;
         }
-        
+
         if (!shouldShow) {
           return const SizedBox.shrink();
         }
@@ -1116,11 +1120,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                   color: const Color(0xFFf093fb).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: const Color(0xFFf093fb),
-                ),
+                child: Icon(icon, size: 20, color: const Color(0xFFf093fb)),
               ),
               const SizedBox(width: 10),
               Expanded(

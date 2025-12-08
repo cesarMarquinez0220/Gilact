@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../bloc/video_bloc.dart';
 
@@ -104,9 +105,13 @@ class _VideoListWidgetState extends State<VideoListWidget> {
   }
 
   void _markVideoCompleted(String videoId) {
-    // TODO: Obtener el userId del usuario actual
-    const userId =
-        'current_user_id'; // Temporal hasta implementar autenticación
+    // Obtener el userId del usuario actual desde Firebase Auth
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      // Si no hay usuario autenticado, no se puede marcar como completado
+      return;
+    }
+    final userId = currentUser.uid;
 
     context.read<VideoBloc>().add(
       MarkVideoAsCompletedRequested(videoId: videoId, userId: userId),
@@ -147,17 +152,28 @@ class VideoCard extends StatelessWidget {
               // Imagen del video
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/mini_videos/${video.imageName}',
-                  width: 80,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
+                child: Builder(
+                  builder: (context) {
+                    final devicePixelRatio = MediaQuery.of(
+                      context,
+                    ).devicePixelRatio;
+                    final cacheWidth = (80 * devicePixelRatio).round();
+                    final cacheHeight = (60 * devicePixelRatio).round();
+                    return Image.asset(
+                      'assets/mini_videos/${video.imageName}',
                       width: 80,
                       height: 60,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.video_library),
+                      cacheWidth: cacheWidth,
+                      cacheHeight: cacheHeight,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 60,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.video_library),
+                        );
+                      },
                     );
                   },
                 ),

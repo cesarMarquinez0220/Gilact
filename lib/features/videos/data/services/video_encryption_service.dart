@@ -1,20 +1,26 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/foundation.dart' hide Key;
-import 'package:encrypt/encrypt.dart';
-import 'package:crypto/crypto.dart';
-import 'package:path_provider/path_provider.dart';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:pointycastle/export.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/di/injection.dart';
 
-/// Servicio para encriptar y desencriptar videos usando AES-256
+/// Servicio para encriptar y desencriptar videos usando AES-256-GCM
+/// GCM (Galois/Counter Mode) es el estándar seguro actual, reemplazando CBC/PKCS5
+/// Usa SecureStorage (Android Keystore/iOS Keychain) para almacenar la clave
 class VideoEncryptionService {
-  static const String _keyFileName = 'video_encryption_key.dat';
-  Key? _encryptionKey;
-  IV? _initializationVector;
-  Encrypter? _encrypter;
+  static const String _keyStorageKey = 'video_encryption_key';
+  static const int _keyLength = 32; // 256 bits
+  static const int _ivLength = 12; // 96 bits para GCM (recomendado)
+  static const int _tagLength = 16; // 128 bits para el tag de autenticación
+
+  Uint8List? _encryptionKey;
   bool _isInitialized = false;
   final AppLogger _logger = getIt<AppLogger>();
+  final SecureStorageService _secureStorage = getIt<SecureStorageService>();
 
   VideoEncryptionService() {
     // La inicialización se hará de forma lazy cuando se necesite
@@ -30,48 +36,57 @@ class VideoEncryptionService {
 
   Future<void> _initializeEncryption() async {
     try {
-      final keyFile = await _getKeyFile();
+      // Intentar cargar clave desde SecureStorage (Android Keystore/iOS Keychain)
+      final keyString = await _secureStorage.read(_keyStorageKey);
 
-      if (await keyFile.exists()) {
-        // Cargar clave existente
-        final keyBytes = await keyFile.readAsBytes();
-        _encryptionKey = Key(keyBytes);
+      if (keyString != null) {
+        // Decodificar la clave desde base64
+        final keyBytes = base64Decode(keyString);
+        if (keyBytes.length != _keyLength) {
+          throw Exception(
+            'Clave de encriptación inválida: longitud incorrecta',
+          );
+        }
+        _encryptionKey = keyBytes;
       } else {
-        // Generar nueva clave única
+        // Generar nueva clave única usando Random.secure()
         final random = Random.secure();
-        final keyBytes = Uint8List(32);
-        for (int i = 0; i < 32; i++) {
+        final keyBytes = Uint8List(_keyLength);
+        for (int i = 0; i < _keyLength; i++) {
           keyBytes[i] = random.nextInt(256);
         }
-        _encryptionKey = Key(keyBytes);
-        // Guardar clave para uso futuro
-        await keyFile.writeAsBytes(_encryptionKey!.bytes);
+        _encryptionKey = keyBytes;
+
+        // Guardar clave en SecureStorage (protegida por hardware)
+        await _secureStorage.write(
+          _keyStorageKey,
+          base64Encode(_encryptionKey!),
+        );
       }
 
-      // IV fijo basado en un hash de la clave (mejor práctica: usar IV único por archivo)
-      final ivBytes = sha256
-          .convert(_encryptionKey!.bytes)
-          .bytes
-          .take(16)
-          .toList();
-      _initializationVector = IV(Uint8List.fromList(ivBytes));
-
-      _encrypter = Encrypter(AES(_encryptionKey!, mode: AESMode.cbc));
+      if (kDebugMode) {
+        _logger.success(
+          'Encriptación AES-GCM inicializada correctamente (clave en SecureStorage)',
+        );
+      }
     } catch (e) {
       throw Exception('Error inicializando encriptación: $e');
     }
   }
 
-  /// Obtiene el archivo de clave
-  Future<File> _getKeyFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final keyPath = '${directory.path}/$_keyFileName';
-    return File(keyPath);
+  /// Genera un IV único para cada archivo (mejor práctica de seguridad)
+  Uint8List _generateIV() {
+    final random = Random.secure();
+    final iv = Uint8List(_ivLength);
+    for (int i = 0; i < _ivLength; i++) {
+      iv[i] = random.nextInt(256);
+    }
+    return iv;
   }
 
-  /// Encripta un archivo de video
+  /// Encripta un archivo de video usando AES-256-GCM
   /// Retorna la ruta del archivo encriptado
-  /// Usa un enfoque simple: encripta el archivo completo como un stream continuo
+  /// Formato del archivo encriptado: [IV (12 bytes)][Tag (16 bytes)][Ciphertext]
   Future<String> encryptVideoFile(String videoFilePath) async {
     await _ensureInitialized();
     try {
@@ -80,38 +95,66 @@ class VideoEncryptionService {
         throw Exception('El archivo de video no existe: $videoFilePath');
       }
 
-      // Leer todo el archivo en memoria (para videos pequeños) o usar streaming
-      // Para videos grandes, usamos un buffer grande para reducir llamadas
+      // Generar IV único para este archivo
+      final iv = _generateIV();
+
+      // Configurar AES-GCM
+      final key = KeyParameter(_encryptionKey!);
+      final params = AEADParameters(
+        key,
+        _tagLength * 8,
+        iv,
+        Uint8List(0),
+      ); // Sin AAD
+      final cipher = GCMBlockCipher(AESEngine())..init(true, params);
+
+      // Leer el archivo completo
+      final videoBytes = await videoFile.readAsBytes();
+
+      // Encriptar
+      final encryptedBytes = cipher.process(videoBytes);
+
+      // Obtener el tag de autenticación
+      final tag = cipher.mac;
+
+      if (tag.length != _tagLength) {
+        // Limpiar memoria antes de lanzar excepción
+        _clearMemory(videoBytes);
+        _clearMemory(encryptedBytes);
+        throw Exception('Error generando tag de autenticación GCM');
+      }
+
+      // Escribir archivo encriptado: IV + Tag + Ciphertext
       final encryptedFilePath = '$videoFilePath.encrypted';
       final encryptedFile = File(encryptedFilePath);
       final outputStream = encryptedFile.openWrite();
 
-      // Leer el archivo completo y encriptarlo de una vez
-      // Esto asegura que el padding se maneje correctamente
-      final videoBytes = await videoFile.readAsBytes();
+      outputStream.add(iv); // 12 bytes
+      outputStream.add(tag); // 16 bytes
+      outputStream.add(encryptedBytes);
 
-      // Encriptar todo el archivo de una vez con el IV inicial
-      // El padding se manejará automáticamente
-      final encrypted = _encrypter!.encryptBytes(
-        videoBytes,
-        iv: _initializationVector!,
-      );
-
-      outputStream.add(encrypted.bytes);
       await outputStream.close();
+
+      // Limpiar buffers de memoria después de usar
+      _clearMemory(videoBytes);
+      _clearMemory(encryptedBytes);
 
       // Eliminar archivo original
       await videoFile.delete();
 
+      if (kDebugMode) {
+        _logger.success('Video encriptado exitosamente con AES-GCM');
+      }
+
       return encryptedFilePath;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.e('Error encriptando video', e, stackTrace);
       throw Exception('Error encriptando video: $e');
     }
   }
 
-  /// Desencripta un archivo de video en chunks
+  /// Desencripta un archivo de video en chunks usando AES-256-GCM
   /// Retorna un stream de bytes desencriptados
-  /// Soporta tanto el método antiguo (chunks arbitrarios) como el nuevo (archivo completo)
   Stream<Uint8List> decryptVideoFileStream(String encryptedFilePath) async* {
     await _ensureInitialized();
     try {
@@ -120,171 +163,88 @@ class VideoEncryptionService {
         throw Exception('El archivo encriptado no existe: $encryptedFilePath');
       }
 
-      // Intentar desencriptar como archivo completo primero (método nuevo)
-      try {
-        final encryptedBytes = await encryptedFile.readAsBytes();
-        final decrypted = _encrypter!.decryptBytes(
-          Encrypted(encryptedBytes),
-          iv: _initializationVector!,
+      // Leer el archivo completo
+      final encryptedBytes = await encryptedFile.readAsBytes();
+
+      if (encryptedBytes.length < _ivLength + _tagLength) {
+        throw Exception('Archivo encriptado inválido: demasiado corto');
+      }
+
+      // Extraer IV, Tag y Ciphertext
+      final iv = encryptedBytes.sublist(0, _ivLength);
+      final tag = encryptedBytes.sublist(_ivLength, _ivLength + _tagLength);
+      final ciphertext = encryptedBytes.sublist(_ivLength + _tagLength);
+
+      // Configurar AES-GCM para desencriptar
+      final key = KeyParameter(_encryptionKey!);
+      final params = AEADParameters(
+        key,
+        _tagLength * 8,
+        iv,
+        Uint8List(0),
+      ); // Sin AAD
+      final cipher = GCMBlockCipher(AESEngine())..init(false, params);
+
+      // Desencriptar
+      final decryptedBytes = cipher.process(ciphertext);
+
+      // Verificar el tag de autenticación
+      final computedTag = cipher.mac;
+      if (!_constantTimeEquals(computedTag, tag)) {
+        // Limpiar memoria antes de lanzar excepción
+        _clearMemory(decryptedBytes);
+        _clearMemory(ciphertext);
+        throw Exception(
+          'Error de autenticación: el tag no coincide. Posible corrupción o manipulación.',
         );
-
-        final decryptedBytes = decrypted is Uint8List
-            ? decrypted
-            : Uint8List.fromList(decrypted);
-
-        // Dividir en chunks para el stream (para no cargar todo en memoria de una vez)
-        const chunkSize = 64 * 1024; // 64KB chunks
-        for (int i = 0; i < decryptedBytes.length; i += chunkSize) {
-          final end = (i + chunkSize < decryptedBytes.length)
-              ? i + chunkSize
-              : decryptedBytes.length;
-          yield decryptedBytes.sublist(i, end);
-        }
-
-        if (kDebugMode) {
-          _logger.success('Video desencriptado exitosamente (método completo)');
-        }
-        return;
-      } catch (e, stackTrace) {
-        if (kDebugMode) {
-          _logger.w(
-            'Método completo falló, intentando método por chunks',
-            e,
-            stackTrace,
-          );
-        }
-        // Si falla, intentar el método antiguo (por chunks con IVs encadenados)
       }
 
-      // Método antiguo: procesar por chunks con IVs encadenados
-      // Necesitamos procesar en bloques de 16 bytes para que funcione correctamente
-      final buffer = <int>[];
-      bool isFirstBlock = true;
-      Uint8List? lastEncryptedBlock;
-      const blockSize = 16;
-
-      await for (final chunk in encryptedFile.openRead()) {
-        // Agregar chunk al buffer
-        buffer.addAll(chunk);
-
-        // Procesar bloques completos de 16 bytes
-        while (buffer.length >= blockSize) {
-          // Extraer un bloque completo
-          final blockBytes = Uint8List.fromList(buffer.sublist(0, blockSize));
-          buffer.removeRange(0, blockSize);
-
-          Uint8List decryptedBlock;
-
-          if (isFirstBlock) {
-            // Primer bloque: usar IV inicial
-            final decrypted = _encrypter!.decryptBytes(
-              Encrypted(blockBytes),
-              iv: _initializationVector!,
-            );
-            decryptedBlock = decrypted is Uint8List
-                ? decrypted
-                : Uint8List.fromList(decrypted);
-            isFirstBlock = false;
-            // Guardar este bloque encriptado para usar como IV del siguiente
-            lastEncryptedBlock = Uint8List.fromList(blockBytes);
-          } else {
-            // Bloques siguientes: usar el bloque encriptado anterior como IV
-            if (lastEncryptedBlock != null) {
-              final decrypted = _encrypter!.decryptBytes(
-                Encrypted(blockBytes),
-                iv: IV(lastEncryptedBlock),
-              );
-              decryptedBlock = decrypted is Uint8List
-                  ? decrypted
-                  : Uint8List.fromList(decrypted);
-              // Actualizar el último bloque encriptado para el siguiente
-              lastEncryptedBlock = Uint8List.fromList(blockBytes);
-            } else {
-              // Fallback: usar el IV original (no debería ocurrir)
-              final decrypted = _encrypter!.decryptBytes(
-                Encrypted(blockBytes),
-                iv: _initializationVector!,
-              );
-              decryptedBlock = decrypted is Uint8List
-                  ? decrypted
-                  : Uint8List.fromList(decrypted);
-              lastEncryptedBlock = Uint8List.fromList(blockBytes);
-            }
-          }
-
-          yield decryptedBlock;
-        }
+      // Dividir en chunks para el stream (para no cargar todo en memoria de una vez)
+      const chunkSize = 64 * 1024; // 64KB chunks
+      for (int i = 0; i < decryptedBytes.length; i += chunkSize) {
+        final end = (i + chunkSize < decryptedBytes.length)
+            ? i + chunkSize
+            : decryptedBytes.length;
+        final chunk = decryptedBytes.sublist(i, end);
+        yield chunk;
+        // Nota: No limpiamos el chunk aquí porque se está usando en el stream
+        // La limpieza se hará cuando el stream termine
       }
 
-      // Procesar el último bloque si queda algo en el buffer
-      if (buffer.isNotEmpty) {
-        if (buffer.length != blockSize) {
-          if (kDebugMode) {
-            _logger.w(
-              'Último bloque incompleto: ${buffer.length} bytes (esperado $blockSize)',
-            );
-          }
-          // Intentar procesarlo de todas formas (puede ser padding)
-          if (buffer.length >= blockSize) {
-            final lastBlockBytes = Uint8List.fromList(
-              buffer.sublist(0, blockSize),
-            );
-            Uint8List decryptedBlock;
-
-            if (lastEncryptedBlock != null) {
-              final decrypted = _encrypter!.decryptBytes(
-                Encrypted(lastBlockBytes),
-                iv: IV(lastEncryptedBlock),
-              );
-              decryptedBlock = decrypted is Uint8List
-                  ? decrypted
-                  : Uint8List.fromList(decrypted);
-            } else {
-              final decrypted = _encrypter!.decryptBytes(
-                Encrypted(lastBlockBytes),
-                iv: _initializationVector!,
-              );
-              decryptedBlock = decrypted is Uint8List
-                  ? decrypted
-                  : Uint8List.fromList(decrypted);
-            }
-
-            yield decryptedBlock;
-          }
-        } else {
-          // Procesar el último bloque completo
-          final lastBlockBytes = Uint8List.fromList(buffer);
-          Uint8List decryptedBlock;
-
-          if (lastEncryptedBlock != null) {
-            final decrypted = _encrypter!.decryptBytes(
-              Encrypted(lastBlockBytes),
-              iv: IV(lastEncryptedBlock),
-            );
-            decryptedBlock = decrypted is Uint8List
-                ? decrypted
-                : Uint8List.fromList(decrypted);
-          } else {
-            final decrypted = _encrypter!.decryptBytes(
-              Encrypted(lastBlockBytes),
-              iv: _initializationVector!,
-            );
-            decryptedBlock = decrypted is Uint8List
-                ? decrypted
-                : Uint8List.fromList(decrypted);
-          }
-
-          yield decryptedBlock;
-        }
-      }
+      // Limpiar buffers después de procesar
+      _clearMemory(decryptedBytes);
+      _clearMemory(ciphertext);
 
       if (kDebugMode) {
-        _logger.success('Video desencriptado exitosamente (método por chunks)');
+        _logger.success('Video desencriptado exitosamente con AES-GCM');
       }
     } catch (e, stackTrace) {
       _logger.e('Error desencriptando video', e, stackTrace);
       throw Exception('Error desencriptando video: $e');
     }
+  }
+
+  /// Comparación de tiempo constante para prevenir timing attacks
+  bool _constantTimeEquals(Uint8List a, Uint8List b) {
+    if (a.length != b.length) return false;
+    int result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result |= a[i] ^ b[i];
+    }
+    return result == 0;
+  }
+
+  /// Limpia un buffer de memoria sobrescribiéndolo con ceros
+  /// Esto previene que datos sensibles queden en memoria
+  void _clearMemory(Uint8List buffer) {
+    if (buffer.isEmpty) return;
+    // Sobrescribir con datos aleatorios (más seguro que ceros)
+    final random = Random.secure();
+    for (int i = 0; i < buffer.length; i++) {
+      buffer[i] = random.nextInt(256);
+    }
+    // Finalmente, llenar con ceros
+    buffer.fillRange(0, buffer.length, 0);
   }
 
   /// Desencripta un archivo completo (para casos especiales)

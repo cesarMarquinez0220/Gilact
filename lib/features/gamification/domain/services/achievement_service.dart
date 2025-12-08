@@ -1,12 +1,15 @@
-import 'package:flutter/foundation.dart';
 import '../entities/achievement.dart';
 import '../entities/user_gamification_profile.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
 
 /// Servicio para detectar y gestionar logros
 class AchievementService {
   static final AchievementService _instance = AchievementService._internal();
   factory AchievementService() => _instance;
   AchievementService._internal();
+
+  final AppLogger _logger = getIt<AppLogger>();
 
   /// Obtiene el badge específico para un achievement según su ID
   /// Retorna el path del badge específico o un badge genérico si no existe
@@ -429,8 +432,8 @@ class AchievementService {
             case 'milestone_250':
             case 'milestone_500':
               shouldUnlock = totalLactationRecords >= achievement.requiredValue;
-              if (kDebugMode && achievement.id == 'milestone_10') {
-                print(
+              if (achievement.id == 'milestone_10') {
+                _logger.d(
                   '🔍 [AchievementService] Verificando milestone_10: totalLactationRecords=$totalLactationRecords, requiredValue=${achievement.requiredValue}, shouldUnlock=$shouldUnlock',
                 );
               }
@@ -519,7 +522,7 @@ class AchievementService {
   /// Filtra logros relacionados con lactancia, peso y sueño
   List<Achievement> getAvailableAchievementsForPrepartum() {
     final allAchievements = getAllAchievements();
-    
+
     // IDs de logros que NO están disponibles para preparto
     final prepartumExcludedIds = {
       // Logros diarios de lactancia
@@ -543,7 +546,7 @@ class AchievementService {
       'weight_10',
       'sleep_20',
     };
-    
+
     return allAchievements
         .where((achievement) => !prepartumExcludedIds.contains(achievement.id))
         .toList();
