@@ -189,7 +189,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
 
       // Guardar localmente
       await sleepOfflineDataSource.saveRecord(sleepRecord);
-      
+
       // Marcar que se guardó un registro para cancelar notificaciones de reenvío
       try {
         final tracker = NotificationRecordTracker();
@@ -429,11 +429,13 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final screenWidth = constraints.maxWidth;
-                              final screenHeight = MediaQuery.of(context).size.height;
+                              final screenHeight = MediaQuery.of(
+                                context,
+                              ).size.height;
                               final isSmallScreen = screenWidth < 360;
                               final isVerySmallScreen = screenWidth < 320;
                               final isShortScreen = screenHeight < 700;
-                              
+
                               return Padding(
                                 padding: EdgeInsets.fromLTRB(
                                   isSmallScreen ? 16.0 : 24.0,
@@ -444,10 +446,16 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                                 child: Column(
                                   children: [
                                     SizedBox(height: isShortScreen ? 8 : 16),
-                                    _buildHeader(isSmallScreen, isVerySmallScreen),
+                                    _buildHeader(
+                                      isSmallScreen,
+                                      isVerySmallScreen,
+                                    ),
                                     SizedBox(height: isShortScreen ? 20 : 30),
                                     // Campo de horas de sueño
-                                    _buildHoursInput(isSmallScreen, isVerySmallScreen),
+                                    _buildHoursInput(
+                                      isSmallScreen,
+                                      isVerySmallScreen,
+                                    ),
                                     SizedBox(height: isShortScreen ? 16 : 24),
                                     // Opcional: Despertares
                                     _buildWakeUpsSection(isSmallScreen),
@@ -477,12 +485,18 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
 
   Widget _buildHeader(bool isSmallScreen, bool isVerySmallScreen) {
     final iconSize = isVerySmallScreen ? 80.0 : (isSmallScreen ? 90.0 : 100.0);
-    final iconInnerSize = isVerySmallScreen ? 40.0 : (isSmallScreen ? 45.0 : 50.0);
-    final titleFontSize = isVerySmallScreen ? 24.0 : (isSmallScreen ? 28.0 : 32.0);
-    final subtitleFontSize = isVerySmallScreen ? 14.0 : (isSmallScreen ? 15.0 : 16.0);
+    final iconInnerSize = isVerySmallScreen
+        ? 40.0
+        : (isSmallScreen ? 45.0 : 50.0);
+    final titleFontSize = isVerySmallScreen
+        ? 24.0
+        : (isSmallScreen ? 28.0 : 32.0);
+    final subtitleFontSize = isVerySmallScreen
+        ? 14.0
+        : (isSmallScreen ? 15.0 : 16.0);
     final spacing1 = isSmallScreen ? 20.0 : 32.0;
     final spacing2 = isSmallScreen ? 8.0 : 12.0;
-    
+
     return Column(
       children: [
         Container(
@@ -503,7 +517,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
               ),
             ],
           ),
-          child: Icon(Icons.nights_stay, color: Colors.white, size: iconInnerSize),
+          child: Icon(
+            Icons.nights_stay,
+            color: Colors.white,
+            size: iconInnerSize,
+          ),
         ),
         SizedBox(height: spacing1),
         Text(
@@ -542,14 +560,24 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
   }
 
   Widget _buildHoursInput(bool isSmallScreen, bool isVerySmallScreen) {
-    final containerPadding = isVerySmallScreen ? 16.0 : (isSmallScreen ? 20.0 : 24.0);
-    final numberFontSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 42.0 : 48.0);
-    final unitFontSize = isVerySmallScreen ? 18.0 : (isSmallScreen ? 20.0 : 24.0);
-    final minutesFontSize = isVerySmallScreen ? 22.0 : (isSmallScreen ? 26.0 : 30.0);
-    final minutesLabelFontSize = isVerySmallScreen ? 14.0 : (isSmallScreen ? 16.0 : 18.0);
+    final containerPadding = isVerySmallScreen
+        ? 16.0
+        : (isSmallScreen ? 20.0 : 24.0);
+    final numberFontSize = isVerySmallScreen
+        ? 36.0
+        : (isSmallScreen ? 42.0 : 48.0);
+    final unitFontSize = isVerySmallScreen
+        ? 18.0
+        : (isSmallScreen ? 20.0 : 24.0);
+    final minutesFontSize = isVerySmallScreen
+        ? 22.0
+        : (isSmallScreen ? 26.0 : 30.0);
+    final minutesLabelFontSize = isVerySmallScreen
+        ? 14.0
+        : (isSmallScreen ? 16.0 : 18.0);
     final buttonSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 38.0 : 44.0);
     final buttonIconSize = isVerySmallScreen ? 20.0 : 24.0;
-    
+
     return Container(
       padding: EdgeInsets.all(containerPadding),
       decoration: BoxDecoration(
@@ -591,7 +619,9 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
                           },
                           child: _isEditingHours
                               ? SizedBox(
-                                  width: isVerySmallScreen ? 90 : (isSmallScreen ? 100 : 110),
+                                  width: isVerySmallScreen
+                                      ? 90
+                                      : (isSmallScreen ? 100 : 110),
                                   child: TextField(
                                     controller: _hoursController,
                                     focusNode: _hoursFocusNode,
@@ -755,7 +785,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     final titleFontSize = isSmallScreen ? 14.0 : 16.0;
     final spacing = isSmallScreen ? 8.0 : 12.0;
     final chipSpacing = isSmallScreen ? 6.0 : 8.0;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -789,7 +819,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     final paddingH = isSmallScreen ? 16.0 : 20.0;
     final paddingV = isSmallScreen ? 8.0 : 10.0;
     final fontSize = isSmallScreen ? 12.0 : 14.0;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -826,7 +856,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     final titleFontSize = isSmallScreen ? 14.0 : 16.0;
     final spacing = isSmallScreen ? 8.0 : 12.0;
     final chipSpacing = isSmallScreen ? 8.0 : 12.0;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -844,7 +874,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
         Row(
           children: [
             Expanded(
-              child: _buildQualityChip('forms.sleep.qualityGood'.tr(), 'bueno', isSmallScreen),
+              child: _buildQualityChip(
+                'forms.sleep.qualityGood'.tr(),
+                'bueno',
+                isSmallScreen,
+              ),
             ),
             SizedBox(width: chipSpacing),
             Expanded(
@@ -856,7 +890,11 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
             ),
             SizedBox(width: chipSpacing),
             Expanded(
-              child: _buildQualityChip('forms.sleep.qualityPoor'.tr(), 'malo', isSmallScreen),
+              child: _buildQualityChip(
+                'forms.sleep.qualityPoor'.tr(),
+                'malo',
+                isSmallScreen,
+              ),
             ),
           ],
         ),
@@ -868,7 +906,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     final isSelected = _quality == value;
     final paddingV = isSmallScreen ? 10.0 : 12.0;
     final fontSize = isSmallScreen ? 11.0 : 13.0;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -908,7 +946,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
     final buttonHeight = isSmallScreen ? 50.0 : 56.0;
     final buttonFontSize = isSmallScreen ? 16.0 : 18.0;
     final cancelFontSize = isSmallScreen ? 13.0 : 15.0;
-    
+
     return Column(
       children: [
         // --- INICIO: Botón Guardar con el nuevo estilo ---
@@ -997,7 +1035,7 @@ class _DailySleepFormPageState extends State<DailySleepFormPage>
             }
           },
           child: Text(
-            'Cancelar',
+            'common.cancel'.tr(),
             style: GoogleFonts.quicksand(
               fontSize: cancelFontSize,
               fontWeight: FontWeight.w500,

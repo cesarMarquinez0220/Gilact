@@ -12,6 +12,7 @@ import '../../domain/services/level_service.dart';
 import '../../domain/services/streak_service.dart';
 import '../../domain/services/achievement_service.dart';
 import '../../domain/services/gamification_service.dart';
+import '../../domain/services/user_statistics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_logger.dart';
 
@@ -57,14 +58,32 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
     // Manejar Right (perfil)
     final profile = result.fold((_) => null, (p) => p);
     if (profile == null) {
-      // Crear perfil inicial
+      // Crear perfil inicial con el logro de nivel 1 desbloqueado automáticamente
+      // ya que todos los usuarios empiezan en nivel 1
       final newProfile = UserGamificationProfile(
         userId: event.userId,
+        unlockedAchievements: const [
+          'level_1',
+        ], // Desbloquear nivel 1 automáticamente
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
       await _repository.saveProfile(newProfile);
-      emit(GamificationLoaded(profile: newProfile));
+
+      // Obtener el logro de nivel 1 para incluirlo en el estado
+      final achievementService = AchievementService();
+      final allAchievements = achievementService.getAllAchievements();
+      final level1Achievement = allAchievements.firstWhere(
+        (a) => a.id == 'level_1',
+        orElse: () => allAchievements.first,
+      );
+
+      emit(
+        GamificationLoaded(
+          profile: newProfile,
+          unlockedAchievements: [level1Achievement],
+        ),
+      );
     } else {
       // VALIDACIÓN CRÍTICA: Recalcular nivel basándose en XP total
       // Esto corrige cualquier inconsistencia entre nivel y XP total
@@ -102,13 +121,79 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
         unawaited(_repository.saveProfile(correctedProfile));
       }
 
+      // Asegurar que el logro de nivel 1 esté desbloqueado si el usuario tiene nivel 1
+      UserGamificationProfile finalProfile = correctedProfile;
+      if (correctedProfile.currentLevel >= 1 &&
+          !correctedProfile.unlockedAchievements.contains('level_1')) {
+        finalProfile = correctedProfile.copyWith(
+          unlockedAchievements: [
+            ...correctedProfile.unlockedAchievements,
+            'level_1',
+          ],
+          updatedAt: DateTime.now(),
+        );
+        // Guardar el perfil actualizado
+        unawaited(_repository.saveProfile(finalProfile));
+      }
+
+      // Detectar logros que deberían estar desbloqueados pero no lo están
+      // (útil para corregir perfiles existentes)
+      try {
+        final userStatsService = getIt<UserStatisticsService>();
+        final userStats = await userStatsService.getUserStatistics(
+          finalProfile.userId,
+        );
+
+        final missingAchievements = _achievementService.detectNewAchievements(
+          profile: finalProfile,
+          totalLactationRecords: userStats.totalLactationRecords,
+          completeLactationRecords: userStats.completeLactationRecords,
+          totalLessonsCompleted: userStats.totalLessonsCompleted,
+          babyWeightRecords: userStats.babyWeightRecords,
+          hasNocturnalRecord: userStats.hasNocturnalRecord,
+          dailyRecordsToday: userStats.dailyRecordsToday,
+          babySleepRecords: userStats.babySleepRecords,
+          perfectTrivias: userStats.perfectTrivias,
+          nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+          daysUsingApp: userStats.daysUsingApp,
+        );
+
+        // Si hay logros que deberían estar desbloqueados, guardarlos
+        if (missingAchievements.isNotEmpty) {
+          final missingAchievementIds = missingAchievements
+              .map((a) => a.id)
+              .toList();
+          final updatedUnlockedAchievements = [
+            ...finalProfile.unlockedAchievements,
+            ...missingAchievementIds,
+          ];
+
+          finalProfile = finalProfile.copyWith(
+            unlockedAchievements: updatedUnlockedAchievements,
+            updatedAt: DateTime.now(),
+          );
+
+          // Guardar en background
+          unawaited(_repository.saveProfile(finalProfile));
+
+          _logger.d(
+            '🔍 [GamificationBloc] Detectados ${missingAchievements.length} logro(s) faltante(s) al cargar perfil: ${missingAchievementIds.join(", ")}',
+          );
+        }
+      } catch (e) {
+        // Si hay error obteniendo estadísticas, continuar sin detectar logros
+        _logger.w(
+          '⚠️ [GamificationBloc] Error detectando logros faltantes al cargar perfil: $e',
+        );
+      }
+
       // Cargar logros desbloqueados
       final achievements = _achievementService.getUnlockedAchievements(
-        correctedProfile,
+        finalProfile,
       );
       emit(
         GamificationLoaded(
-          profile: correctedProfile,
+          profile: finalProfile,
           unlockedAchievements: achievements,
         ),
       );
@@ -205,7 +290,65 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
             final todayRecordsCount = await gamificationService
                 .getTodayCompleteRecordsCount(currentProfile.userId);
 
-            // 5. Actualizar estado de mascota
+            // 5. Si el nivel subió, detectar logros de nivel
+            if (leveledUp) {
+              final userStatsService = getIt<UserStatisticsService>();
+              final userStats = await userStatsService.getUserStatistics(
+                currentProfile.userId,
+              );
+
+              final newAchievements = _achievementService.detectNewAchievements(
+                profile: finalProfile,
+                totalLactationRecords: userStats.totalLactationRecords,
+                completeLactationRecords: userStats.completeLactationRecords,
+                totalLessonsCompleted: userStats.totalLessonsCompleted,
+                babyWeightRecords: userStats.babyWeightRecords,
+                hasNocturnalRecord: userStats.hasNocturnalRecord,
+                dailyRecordsToday: todayRecordsCount,
+                babySleepRecords: userStats.babySleepRecords,
+                perfectTrivias: userStats.perfectTrivias,
+                nocturnalRecordsCount: userStats.nocturnalRecordsCount,
+                daysUsingApp: userStats.daysUsingApp,
+              );
+
+              // Si se detectaron logros nuevos (nivel, lecciones, etc.), agregarlos al perfil
+              if (newAchievements.isNotEmpty) {
+                final newAchievementIds = newAchievements
+                    .map((a) => a.id)
+                    .toList();
+
+                final updatedUnlockedAchievements = [
+                  ...finalProfile.unlockedAchievements,
+                  ...newAchievementIds,
+                ];
+
+                finalProfile = finalProfile.copyWith(
+                  unlockedAchievements: updatedUnlockedAchievements,
+                  newAchievements: [
+                    ...finalProfile.newAchievements,
+                    ...newAchievementIds,
+                  ],
+                  updatedAt: DateTime.now(),
+                );
+
+                // Agregar XP por todos los logros nuevos (nivel, lecciones, etc.)
+                for (final achievement in newAchievements) {
+                  final xpTransaction = _xpService.calculateXPForAchievement(
+                    userId: currentProfile.userId,
+                    achievementId: achievement.id,
+                    xpReward: achievement.xpReward,
+                    timestamp: DateTime.now(),
+                  );
+                  transactions.add(xpTransaction);
+                  finalProfile = _levelService.updateLevelAfterXP(
+                    finalProfile,
+                    achievement.xpReward,
+                  );
+                }
+              }
+            }
+
+            // 6. Actualizar estado de mascota
             final mascotState = _determineMascotState(
               finalProfile,
               finalStreak,
@@ -213,18 +356,17 @@ class GamificationBloc extends Bloc<GamificationEvent, GamificationState> {
             );
             finalProfile = finalProfile.copyWith(mascotState: mascotState);
 
-            // 6. EJECUTAR BATCH UPDATE (1 sola escritura en lugar de 3-5)
+            // 7. EJECUTAR BATCH UPDATE (1 sola escritura en lugar de 3-5)
             await _repository.performBatchUpdate(
               profile: finalProfile,
               streak: finalStreak,
               transactions: transactions,
             );
 
-            // Si hubo bonus, recargar para asegurar consistencia
-            if (transactions.length > 1) {
-               add(LoadGamificationProfile(currentProfile.userId));
+            // Si hubo bonus o nivel subió, recargar para asegurar consistencia
+            if (transactions.length > 1 || leveledUp) {
+              add(LoadGamificationProfile(currentProfile.userId));
             }
-
           } catch (e) {
             if (kDebugMode) {
               print('⚠️ Error en operaciones de background al agregar XP: $e');

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../entities/trivia_question.dart';
 
 /// Servicio para gestionar preguntas de trivia después de cada lección
@@ -48,64 +50,91 @@ class TriviaService {
 
   // Lección 1: Lactancia materna y sus beneficios
   List<TriviaQuestion> _getLesson1Questions(String lessonId) {
+    // #region agent log
+    if (kDebugMode) {
+      try {
+        final testQ1 = 'trivia.lessons.lesson1.question1.text'.tr();
+        final testO1 = 'trivia.lessons.lesson1.question1.option1'.tr();
+        final testO2 = 'trivia.lessons.lesson1.question1.option2'.tr();
+        print('🔍 [TriviaService] Test traducciones:');
+        print('   Q1: $testQ1');
+        print('   O1: $testO1');
+        print('   O2: $testO2');
+      } catch (e) {
+        print('❌ [TriviaService] Error en traducciones: $e');
+      }
+    }
+    // #endregion
+
+    // Evaluar traducciones y crear opciones
+    final q1 = 'trivia.lessons.lesson1.question1.text'.tr();
+    final q1Opt1 = 'trivia.lessons.lesson1.question1.option1'.tr();
+    final q1Opt2 = 'trivia.lessons.lesson1.question1.option2'.tr();
+    final q1Opt3 = 'trivia.lessons.lesson1.question1.option3'.tr();
+    final q1Opt4 = 'trivia.lessons.lesson1.question1.option4'.tr();
+    final q1Exp = 'trivia.lessons.lesson1.question1.explanation'.tr();
+
+    // #region agent log
+    if (kDebugMode) {
+      print('🔍 [TriviaService] Valores evaluados para pregunta 1:');
+      print('   Pregunta: $q1');
+      print('   Opción 1: $q1Opt1');
+      print('   Opción 2: $q1Opt2');
+      print('   Opción 3: $q1Opt3');
+      print('   Opción 4: $q1Opt4');
+    }
+    // #endregion
+
     return [
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question:
-            '¿Cuál es uno de los principales beneficios de la lactancia materna para el bebé?',
-        options: const [
-          'Mayor riesgo de infecciones',
-          'Fortalece el sistema inmunológico y reduce infecciones',
-          'Aumenta el riesgo de alergias',
-          'No tiene beneficios especiales',
-        ],
+        question: q1,
+        options: [q1Opt1, q1Opt2, q1Opt3, q1Opt4],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna contiene anticuerpos y factores inmunológicos que fortalecen el sistema inmunológico del bebé y reducen el riesgo de infecciones.',
+        explanation: q1Exp,
       ),
+      // Pregunta 2
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Qué beneficio tiene la lactancia materna para la madre?',
-        options: const [
-          'Aumenta el riesgo de cáncer de mama',
-          'Ayuda a la recuperación postparto y reduce el riesgo de ciertos cánceres',
-          'No tiene beneficios para la madre',
-          'Solo beneficia al bebé',
+        question: 'trivia.lessons.lesson1.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson1.question2.option1'.tr(),
+          'trivia.lessons.lesson1.question2.option2'.tr(),
+          'trivia.lessons.lesson1.question2.option3'.tr(),
+          'trivia.lessons.lesson1.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La lactancia materna ayuda a la madre a recuperarse del parto, reduce el riesgo de cáncer de mama y ovario, y fortalece el vínculo madre-hijo.',
+        explanation: 'trivia.lessons.lesson1.question2.explanation'.tr(),
       ),
+      // Pregunta 3
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question:
-            '¿La leche materna es suficiente para alimentar al bebé durante los primeros 6 meses?',
-        options: const [
-          'No, siempre necesita complementos',
-          'Sí, proporciona todos los nutrientes necesarios',
-          'Solo para los primeros 3 meses',
-          'Depende del bebé',
+        question: 'trivia.lessons.lesson1.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson1.question3.option1'.tr(),
+          'trivia.lessons.lesson1.question3.option2'.tr(),
+          'trivia.lessons.lesson1.question3.option3'.tr(),
+          'trivia.lessons.lesson1.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna es el alimento completo e ideal para los bebés durante los primeros 6 meses de vida, proporcionando todos los nutrientes necesarios.',
+        explanation: 'trivia.lessons.lesson1.question3.explanation'.tr(),
       ),
+      // Pregunta 4
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Cuál es un beneficio económico de la lactancia materna?',
-        options: const [
-          'Es más costosa que la fórmula',
-          'Es gratuita y ahorra dinero en fórmula',
-          'Requiere equipos costosos',
-          'No tiene beneficios económicos',
+        question: 'trivia.lessons.lesson1.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson1.question4.option1'.tr(),
+          'trivia.lessons.lesson1.question4.option2'.tr(),
+          'trivia.lessons.lesson1.question4.option3'.tr(),
+          'trivia.lessons.lesson1.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La lactancia materna es gratuita y puede ahorrar significativamente en costos de fórmula, biberones y otros suministros.',
+        explanation: 'trivia.lessons.lesson1.question4.explanation'.tr(),
       ),
     ];
   }
@@ -116,58 +145,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Qué es el calostro?',
-        options: const [
-          'Leche que aparece después de 1 mes',
-          'La primera leche rica en anticuerpos que produce la madre',
-          'Leche de fórmula especial',
-          'Leche que solo aparece en algunas madres',
+        question: 'trivia.lessons.lesson2.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson2.question1.option1'.tr(),
+          'trivia.lessons.lesson2.question1.option2'.tr(),
+          'trivia.lessons.lesson2.question1.option3'.tr(),
+          'trivia.lessons.lesson2.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El calostro es la primera leche que produce la madre, rica en anticuerpos, proteínas y factores inmunológicos esenciales para el recién nacido.',
+        explanation: 'trivia.lessons.lesson2.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Cuándo aparece la leche de transición?',
-        options: const [
-          'Inmediatamente después del parto',
-          'Entre el día 3 y 14 después del parto',
-          'Después de 1 mes',
-          'Solo en algunas madres',
+        question: 'trivia.lessons.lesson2.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson2.question2.option1'.tr(),
+          'trivia.lessons.lesson2.question2.option2'.tr(),
+          'trivia.lessons.lesson2.question2.option3'.tr(),
+          'trivia.lessons.lesson2.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche de transición aparece entre el día 3 y 14 después del parto, es más abundante que el calostro y contiene más grasa y lactosa.',
+        explanation: 'trivia.lessons.lesson2.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Cuándo se establece la leche madura?',
-        options: const [
-          'Inmediatamente después del parto',
-          'Después de aproximadamente 2 semanas',
-          'Después de 3 meses',
-          'Nunca se establece',
+        question: 'trivia.lessons.lesson2.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson2.question3.option1'.tr(),
+          'trivia.lessons.lesson2.question3.option2'.tr(),
+          'trivia.lessons.lesson2.question3.option3'.tr(),
+          'trivia.lessons.lesson2.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche madura se establece aproximadamente después de 2 semanas del parto y tiene una composición más estable con el equilibrio adecuado de nutrientes.',
+        explanation: 'trivia.lessons.lesson2.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Por qué es importante el calostro para el recién nacido?',
-        options: const [
-          'No tiene importancia especial',
-          'Proporciona la primera inmunización y es rico en nutrientes',
-          'Solo hidrata al bebé',
-          'Es igual que la leche madura',
+        question: 'trivia.lessons.lesson2.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson2.question4.option1'.tr(),
+          'trivia.lessons.lesson2.question4.option2'.tr(),
+          'trivia.lessons.lesson2.question4.option3'.tr(),
+          'trivia.lessons.lesson2.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El calostro es crucial porque proporciona la primera inmunización del bebé, es rico en proteínas y anticuerpos, y ayuda a establecer el sistema digestivo.',
+        explanation: 'trivia.lessons.lesson2.question4.explanation'.tr(),
       ),
     ];
   }
@@ -178,58 +203,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Qué es importante considerar antes de amamantar?',
-        options: const [
-          'Nada, solo dar el pecho',
-          'Comodidad de la madre, posición del bebé y ambiente tranquilo',
-          'Solo la posición del bebé',
-          'Solo el ambiente',
+        question: 'trivia.lessons.lesson3.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson3.question1.option1'.tr(),
+          'trivia.lessons.lesson3.question1.option2'.tr(),
+          'trivia.lessons.lesson3.question1.option3'.tr(),
+          'trivia.lessons.lesson3.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Es importante considerar la comodidad de la madre, la posición correcta del bebé, un ambiente tranquilo y que ambos estén relajados.',
+        explanation: 'trivia.lessons.lesson3.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Cuál es una posición adecuada para amamantar?',
-        options: const [
-          'Solo de pie',
-          'Posición cuna, balón de rugby, acostada de lado',
-          'Solo sentada',
-          'Cualquier posición es igual',
+        question: 'trivia.lessons.lesson3.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson3.question2.option1'.tr(),
+          'trivia.lessons.lesson3.question2.option2'.tr(),
+          'trivia.lessons.lesson3.question2.option3'.tr(),
+          'trivia.lessons.lesson3.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Existen varias posiciones adecuadas como la posición cuna, balón de rugby, acostada de lado, etc. Lo importante es que madre y bebé estén cómodos.',
+        explanation: 'trivia.lessons.lesson3.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué indica un buen agarre del pecho?',
-        options: const [
-          'El bebé solo toca el pezón',
-          'El bebé tiene la boca bien abierta, abarca parte de la areola y no hay dolor',
-          'Siempre hay dolor al amamantar',
-          'El bebé solo chupa el pezón',
+        question: 'trivia.lessons.lesson3.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson3.question3.option1'.tr(),
+          'trivia.lessons.lesson3.question3.option2'.tr(),
+          'trivia.lessons.lesson3.question3.option3'.tr(),
+          'trivia.lessons.lesson3.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Un buen agarre incluye que el bebé tenga la boca bien abierta, abarque parte de la areola (no solo el pezón), y que la madre no sienta dolor.',
+        explanation: 'trivia.lessons.lesson3.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Es necesario limpiar el pecho antes de cada toma?',
-        options: const [
-          'Sí, siempre con jabón',
-          'No, la higiene diaria normal es suficiente',
-          'Solo con agua caliente',
-          'Solo si está sucio',
+        question: 'trivia.lessons.lesson3.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson3.question4.option1'.tr(),
+          'trivia.lessons.lesson3.question4.option2'.tr(),
+          'trivia.lessons.lesson3.question4.option3'.tr(),
+          'trivia.lessons.lesson3.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'No es necesario limpiar el pecho antes de cada toma. La higiene diaria normal es suficiente, y el exceso de limpieza puede eliminar las bacterias beneficiosas.',
+        explanation: 'trivia.lessons.lesson3.question4.explanation'.tr(),
       ),
     ];
   }
@@ -240,58 +261,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Qué componente principal contiene la leche materna?',
-        options: const [
-          'Solo agua',
-          'Agua, proteínas, grasas, carbohidratos, vitaminas y minerales',
-          'Solo proteínas',
-          'Solo grasas',
+        question: 'trivia.lessons.lesson4.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson4.question1.option1'.tr(),
+          'trivia.lessons.lesson4.question1.option2'.tr(),
+          'trivia.lessons.lesson4.question1.option3'.tr(),
+          'trivia.lessons.lesson4.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna contiene una composición completa: agua, proteínas, grasas, carbohidratos (lactosa), vitaminas, minerales y factores inmunológicos.',
+        explanation: 'trivia.lessons.lesson4.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿La composición de la leche materna cambia?',
-        options: const [
-          'No, siempre es igual',
-          'Sí, cambia durante la toma, durante el día y según la edad del bebé',
-          'Solo cambia una vez',
-          'Solo cambia según la hora del día',
+        question: 'trivia.lessons.lesson4.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson4.question2.option1'.tr(),
+          'trivia.lessons.lesson4.question2.option2'.tr(),
+          'trivia.lessons.lesson4.question2.option3'.tr(),
+          'trivia.lessons.lesson4.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La composición de la leche materna es dinámica: cambia durante la toma (más grasa al final), durante el día, y se adapta a las necesidades del bebé según su edad.',
+        explanation: 'trivia.lessons.lesson4.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué tipo de proteínas contiene la leche materna?',
-        options: const [
-          'Solo proteínas de origen animal',
-          'Proteínas de fácil digestión como la lactoferrina y la inmunoglobulina A',
-          'Solo proteínas vegetales',
-          'No contiene proteínas',
+        question: 'trivia.lessons.lesson4.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson4.question3.option1'.tr(),
+          'trivia.lessons.lesson4.question3.option2'.tr(),
+          'trivia.lessons.lesson4.question3.option3'.tr(),
+          'trivia.lessons.lesson4.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna contiene proteínas de fácil digestión como la lactoferrina y la inmunoglobulina A, que son específicas para las necesidades del bebé.',
+        explanation: 'trivia.lessons.lesson4.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Por qué es importante la grasa en la leche materna?',
-        options: const [
-          'No es importante',
-          'Proporciona energía y es esencial para el desarrollo del cerebro',
-          'Solo proporciona sabor',
-          'Solo es importante para el peso',
+        question: 'trivia.lessons.lesson4.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson4.question4.option1'.tr(),
+          'trivia.lessons.lesson4.question4.option2'.tr(),
+          'trivia.lessons.lesson4.question4.option3'.tr(),
+          'trivia.lessons.lesson4.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La grasa en la leche materna es crucial porque proporciona la mayor parte de la energía y contiene ácidos grasos esenciales para el desarrollo del cerebro y el sistema nervioso.',
+        explanation: 'trivia.lessons.lesson4.question4.explanation'.tr(),
       ),
     ];
   }
@@ -302,61 +319,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question:
-            '¿Cuál es una señal de que el bebé está recibiendo suficiente leche?',
-        options: const [
-          'Llora constantemente',
-          'Aumenta de peso adecuadamente, moja 6+ pañales al día y está contento',
-          'Duerme todo el día',
-          'Rechaza el pecho',
+        question: 'trivia.lessons.lesson5.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson5.question1.option1'.tr(),
+          'trivia.lessons.lesson5.question1.option2'.tr(),
+          'trivia.lessons.lesson5.question1.option3'.tr(),
+          'trivia.lessons.lesson5.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Las señales de que el bebé recibe suficiente leche incluyen: aumento de peso adecuado, mojar al menos 6 pañales al día, estar contento entre tomas y tener deposiciones regulares.',
+        explanation: 'trivia.lessons.lesson5.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Cuántos pañales mojados al día indica que el bebé está bien alimentado?',
-        options: const [
-          '1-2 pañales',
-          'Al menos 6 pañales mojados',
-          'Solo 3 pañales',
-          'No importa la cantidad',
+        question: 'trivia.lessons.lesson5.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson5.question2.option1'.tr(),
+          'trivia.lessons.lesson5.question2.option2'.tr(),
+          'trivia.lessons.lesson5.question2.option3'.tr(),
+          'trivia.lessons.lesson5.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Un bebé bien alimentado debe mojar al menos 6 pañales al día con orina clara o amarilla pálida, lo que indica una hidratación adecuada.',
+        explanation: 'trivia.lessons.lesson5.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué indica un buen aumento de peso en el bebé?',
-        options: const [
-          'No aumenta de peso',
-          'Aumenta aproximadamente 20-30 gramos por día en los primeros meses',
-          'Aumenta 100 gramos por día',
-          'El peso no es importante',
+        question: 'trivia.lessons.lesson5.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson5.question3.option1'.tr(),
+          'trivia.lessons.lesson5.question3.option2'.tr(),
+          'trivia.lessons.lesson5.question3.option3'.tr(),
+          'trivia.lessons.lesson5.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Un buen aumento de peso en los primeros meses es aproximadamente de 20-30 gramos por día, aunque puede variar. Lo importante es una tendencia de crecimiento constante.',
+        explanation: 'trivia.lessons.lesson5.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question:
-            '¿Cuándo se debe buscar ayuda si hay preocupación sobre la alimentación?',
-        options: const [
-          'Nunca',
-          'Si el bebé no aumenta de peso, moja menos de 6 pañales o está muy somnoliento',
-          'Solo después de 6 meses',
-          'Solo si llora mucho',
+        question: 'trivia.lessons.lesson5.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson5.question4.option1'.tr(),
+          'trivia.lessons.lesson5.question4.option2'.tr(),
+          'trivia.lessons.lesson5.question4.option3'.tr(),
+          'trivia.lessons.lesson5.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Se debe buscar ayuda profesional si el bebé no aumenta de peso adecuadamente, moja menos de 6 pañales al día, está muy somnoliento o muestra signos de deshidratación.',
+        explanation: 'trivia.lessons.lesson5.question4.explanation'.tr(),
       ),
     ];
   }
@@ -367,59 +377,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Cuál es un hito de peso esperado en los primeros días?',
-        options: const [
-          'El bebé no debe perder peso',
-          'Es normal que pierda hasta 10% del peso al nacer en los primeros días',
-          'Debe ganar peso inmediatamente',
-          'El peso no importa',
+        question: 'trivia.lessons.lesson6.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson6.question1.option1'.tr(),
+          'trivia.lessons.lesson6.question1.option2'.tr(),
+          'trivia.lessons.lesson6.question1.option3'.tr(),
+          'trivia.lessons.lesson6.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Es normal que un recién nacido pierda hasta un 10% de su peso al nacer en los primeros días, pero debe recuperarlo alrededor del día 10-14.',
+        explanation: 'trivia.lessons.lesson6.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Cuándo debe recuperar el bebé su peso al nacer?',
-        options: const [
-          'Inmediatamente',
-          'Alrededor de los 10-14 días de vida',
-          'Después de 1 mes',
-          'Nunca lo recupera',
+        question: 'trivia.lessons.lesson6.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson6.question2.option1'.tr(),
+          'trivia.lessons.lesson6.question2.option2'.tr(),
+          'trivia.lessons.lesson6.question2.option3'.tr(),
+          'trivia.lessons.lesson6.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El bebé debe recuperar su peso al nacer alrededor de los 10-14 días de vida. Si no lo hace, es importante consultar con un profesional.',
+        explanation: 'trivia.lessons.lesson6.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué indica un crecimiento adecuado del bebé?',
-        options: const [
-          'Aumenta de peso de forma irregular',
-          'Sigue una curva de crecimiento consistente según su percentil',
-          'Aumenta mucho peso de golpe',
-          'El peso no es indicador',
+        question: 'trivia.lessons.lesson6.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson6.question3.option1'.tr(),
+          'trivia.lessons.lesson6.question3.option2'.tr(),
+          'trivia.lessons.lesson6.question3.option3'.tr(),
+          'trivia.lessons.lesson6.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Un crecimiento adecuado se refleja en que el bebé sigue una curva de crecimiento consistente según su percentil, no necesariamente aumentando mucho, sino de forma constante.',
+        explanation: 'trivia.lessons.lesson6.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question:
-            '¿Con qué frecuencia se debe pesar al bebé en los primeros meses?',
-        options: const [
-          'Todos los días',
-          'Según las recomendaciones del pediatra, típicamente en controles regulares',
-          'Solo una vez al mes',
-          'No es necesario pesarlo',
+        question: 'trivia.lessons.lesson6.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson6.question4.option1'.tr(),
+          'trivia.lessons.lesson6.question4.option2'.tr(),
+          'trivia.lessons.lesson6.question4.option3'.tr(),
+          'trivia.lessons.lesson6.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El bebé debe pesarse según las recomendaciones del pediatra en controles regulares. No es necesario pesarlo diariamente en casa a menos que haya una preocupación específica.',
+        explanation: 'trivia.lessons.lesson6.question4.explanation'.tr(),
       ),
     ];
   }
@@ -430,60 +435,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Cuándo es importante lavarse las manos antes de amamantar?',
-        options: const [
-          'Nunca es necesario',
-          'Antes de cada toma, especialmente después de cambiar pañales o tocar objetos',
-          'Solo por la mañana',
-          'Solo si están visiblemente sucias',
+        question: 'trivia.lessons.lesson7.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson7.question1.option1'.tr(),
+          'trivia.lessons.lesson7.question1.option2'.tr(),
+          'trivia.lessons.lesson7.question1.option3'.tr(),
+          'trivia.lessons.lesson7.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Es importante lavarse las manos antes de cada toma, especialmente después de cambiar pañales, tocar objetos o preparar alimentos, para prevenir la transmisión de gérmenes.',
+        explanation: 'trivia.lessons.lesson7.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Es necesario limpiar el pecho con jabón antes de cada toma?',
-        options: const [
-          'Sí, siempre con jabón',
-          'No, la higiene diaria normal es suficiente',
-          'Solo con agua caliente',
-          'Solo si está sucio',
+        question: 'trivia.lessons.lesson7.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson7.question2.option1'.tr(),
+          'trivia.lessons.lesson7.question2.option2'.tr(),
+          'trivia.lessons.lesson7.question2.option3'.tr(),
+          'trivia.lessons.lesson7.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'No es necesario limpiar el pecho con jabón antes de cada toma. La higiene diaria normal durante el baño es suficiente y evita eliminar las bacterias beneficiosas.',
+        explanation: 'trivia.lessons.lesson7.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué técnica ayuda a facilitar el flujo de leche?',
-        options: const  [
-          'Presionar fuerte el pecho',
-          'Masajes suaves, compresión del pecho y relajación',
-          'Solo esperar',
-          'No hay técnicas',
+        question: 'trivia.lessons.lesson7.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson7.question3.option1'.tr(),
+          'trivia.lessons.lesson7.question3.option2'.tr(),
+          'trivia.lessons.lesson7.question3.option3'.tr(),
+          'trivia.lessons.lesson7.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Técnicas como masajes suaves del pecho, compresión del pecho durante la toma y mantener un ambiente relajado pueden ayudar a facilitar el flujo de leche.',
+        explanation: 'trivia.lessons.lesson7.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question:
-            '¿Qué hacer si el bebé tiene dificultad para agarrar el pecho?',
-        options: const [
-          'Forzar el agarre',
-          'Buscar ayuda profesional, verificar la posición y ser paciente',
-          'Cambiar a biberón inmediatamente',
-          'Esperar que se resuelva solo',
+        question: 'trivia.lessons.lesson7.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson7.question4.option1'.tr(),
+          'trivia.lessons.lesson7.question4.option2'.tr(),
+          'trivia.lessons.lesson7.question4.option3'.tr(),
+          'trivia.lessons.lesson7.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Si hay dificultades de agarre, es importante buscar ayuda profesional, verificar que la posición sea correcta, y ser paciente. No se debe forzar ni cambiar inmediatamente a biberón.',
+        explanation: 'trivia.lessons.lesson7.question4.explanation'.tr(),
       ),
     ];
   }
@@ -494,60 +493,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Se puede tomar medicamentos durante la lactancia?',
-        options: const [
-          'Nunca se puede tomar ningún medicamento',
-          'Muchos medicamentos son seguros, pero siempre se debe consultar con el médico',
-          'Todos los medicamentos son seguros',
-          'Solo medicamentos naturales',
+        question: 'trivia.lessons.lesson8.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson8.question1.option1'.tr(),
+          'trivia.lessons.lesson8.question1.option2'.tr(),
+          'trivia.lessons.lesson8.question1.option3'.tr(),
+          'trivia.lessons.lesson8.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Muchos medicamentos son seguros durante la lactancia, pero es esencial consultar siempre con el médico o farmacéutico antes de tomar cualquier medicamento.',
+        explanation: 'trivia.lessons.lesson8.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Qué hacer si necesitas tomar un medicamento durante la lactancia?',
-        options: const [
-          'Tomarlo sin consultar',
-          'Consultar con el médico sobre la compatibilidad con la lactancia',
-          'Suspender la lactancia automáticamente',
-          'Solo tomar medicamentos naturales',
+        question: 'trivia.lessons.lesson8.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson8.question2.option1'.tr(),
+          'trivia.lessons.lesson8.question2.option2'.tr(),
+          'trivia.lessons.lesson8.question2.option3'.tr(),
+          'trivia.lessons.lesson8.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Siempre se debe consultar con el médico sobre la compatibilidad del medicamento con la lactancia. La mayoría de medicamentos comunes son seguros, pero es importante verificarlo.',
+        explanation: 'trivia.lessons.lesson8.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Los medicamentos pasan a la leche materna?',
-        options: const [
-          'Nunca pasan',
-          'Algunos medicamentos pueden pasar en pequeñas cantidades, por eso es importante consultar',
-          'Todos pasan en grandes cantidades',
-          'Solo los antibióticos pasan',
+        question: 'trivia.lessons.lesson8.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson8.question3.option1'.tr(),
+          'trivia.lessons.lesson8.question3.option2'.tr(),
+          'trivia.lessons.lesson8.question3.option3'.tr(),
+          'trivia.lessons.lesson8.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Algunos medicamentos pueden pasar a la leche materna en pequeñas cantidades. Por eso es crucial consultar con un profesional de la salud para evaluar el riesgo-beneficio.',
+        explanation: 'trivia.lessons.lesson8.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question:
-            '¿Dónde se puede consultar sobre la seguridad de medicamentos durante la lactancia?',
-        options: const [
-          'Solo en internet',
-          'Con el médico, farmacéutico o en bases de datos especializadas como e-lactancia',
-          'No hay forma de consultar',
-          'Solo con otros padres',
+        question: 'trivia.lessons.lesson8.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson8.question4.option1'.tr(),
+          'trivia.lessons.lesson8.question4.option2'.tr(),
+          'trivia.lessons.lesson8.question4.option3'.tr(),
+          'trivia.lessons.lesson8.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Se debe consultar con el médico, farmacéutico o en bases de datos especializadas como e-lactancia.org que proporcionan información actualizada sobre medicamentos y lactancia.',
+        explanation: 'trivia.lessons.lesson8.question4.explanation'.tr(),
       ),
     ];
   }
@@ -558,58 +551,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Cuál es un signo de complicación en la lactancia?',
-        options: const [
-          'El bebé se alimenta bien',
-          'Dolor persistente, grietas en el pezón, mastitis o el bebé no aumenta de peso',
-          'Solo si el bebé llora',
-          'No hay signos de complicación',
+        question: 'trivia.lessons.lesson9.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson9.question1.option1'.tr(),
+          'trivia.lessons.lesson9.question1.option2'.tr(),
+          'trivia.lessons.lesson9.question1.option3'.tr(),
+          'trivia.lessons.lesson9.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Signos de complicación incluyen: dolor persistente, grietas en el pezón, mastitis, el bebé no aumenta de peso adecuadamente, o dificultades de agarre persistentes.',
+        explanation: 'trivia.lessons.lesson9.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Qué es la mastitis?',
-        options: const [
-          'Una condición normal',
-          'Una inflamación del tejido mamario que puede incluir infección',
-          'Solo dolor en el pecho',
-          'No existe',
+        question: 'trivia.lessons.lesson9.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson9.question2.option1'.tr(),
+          'trivia.lessons.lesson9.question2.option2'.tr(),
+          'trivia.lessons.lesson9.question2.option3'.tr(),
+          'trivia.lessons.lesson9.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La mastitis es una inflamación del tejido mamario que puede incluir una infección. Se caracteriza por dolor, enrojecimiento, calor y a veces fiebre. Requiere atención médica.',
+        explanation: 'trivia.lessons.lesson9.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Qué hacer si hay dolor persistente al amamantar?',
-        options: const [
-          'Ignorarlo',
-          'Buscar ayuda profesional para identificar y tratar la causa',
-          'Suspender la lactancia',
-          'Solo tomar analgésicos',
+        question: 'trivia.lessons.lesson9.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson9.question3.option1'.tr(),
+          'trivia.lessons.lesson9.question3.option2'.tr(),
+          'trivia.lessons.lesson9.question3.option3'.tr(),
+          'trivia.lessons.lesson9.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El dolor persistente al amamantar no es normal y requiere buscar ayuda profesional para identificar la causa (mala posición, agarre incorrecto, infección) y tratarla adecuadamente.',
+        explanation: 'trivia.lessons.lesson9.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Las grietas en el pezón son normales?',
-        options: const [
-          'Sí, siempre aparecen',
-          'No, generalmente indican un problema de agarre o posición que debe corregirse',
-          'Solo aparecen en algunas madres',
-          'No son importantes',
+        question: 'trivia.lessons.lesson9.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson9.question4.option1'.tr(),
+          'trivia.lessons.lesson9.question4.option2'.tr(),
+          'trivia.lessons.lesson9.question4.option3'.tr(),
+          'trivia.lessons.lesson9.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Las grietas en el pezón generalmente indican un problema de agarre o posición. No son normales y deben abordarse corrigiendo la técnica de lactancia con ayuda profesional.',
+        explanation: 'trivia.lessons.lesson9.question4.explanation'.tr(),
       ),
     ];
   }
@@ -620,58 +609,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Para qué sirven los masajes al seno antes de amamantar?',
-        options: const [
-          'No sirven para nada',
-          'Ayudan a estimular el flujo de leche y facilitar el agarre',
-          'Solo para relajar',
-          'Solo si hay dolor',
+        question: 'trivia.lessons.lesson10.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson10.question1.option1'.tr(),
+          'trivia.lessons.lesson10.question1.option2'.tr(),
+          'trivia.lessons.lesson10.question1.option3'.tr(),
+          'trivia.lessons.lesson10.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Los masajes al seno antes de amamantar ayudan a estimular el flujo de leche, ablandar el pecho si está muy lleno, y facilitar que el bebé pueda agarrar mejor el pecho.',
+        explanation: 'trivia.lessons.lesson10.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question: '¿Cómo se realizan los masajes al seno?',
-        options: const [
-          'Con mucha fuerza',
-          'Con movimientos suaves y circulares desde la base hacia el pezón',
-          'Solo presionando el pezón',
-          'No hay técnica específica',
+        question: 'trivia.lessons.lesson10.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson10.question2.option1'.tr(),
+          'trivia.lessons.lesson10.question2.option2'.tr(),
+          'trivia.lessons.lesson10.question2.option3'.tr(),
+          'trivia.lessons.lesson10.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Los masajes se realizan con movimientos suaves y circulares desde la base del seno hacia el pezón, ayudando a movilizar la leche y preparar el pecho para la toma.',
+        explanation: 'trivia.lessons.lesson10.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Cuándo es especialmente útil masajear el seno?',
-        options: const  [
-          'Nunca es útil',
-          'Cuando el pecho está muy lleno, antes de amamantar o para aliviar congestión',
-          'Solo por la noche',
-          'Solo si hay dolor',
+        question: 'trivia.lessons.lesson10.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson10.question3.option1'.tr(),
+          'trivia.lessons.lesson10.question3.option2'.tr(),
+          'trivia.lessons.lesson10.question3.option3'.tr(),
+          'trivia.lessons.lesson10.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Los masajes son especialmente útiles cuando el pecho está muy lleno, antes de amamantar para facilitar el flujo, o para aliviar la congestión mamaria.',
+        explanation: 'trivia.lessons.lesson10.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Los masajes pueden ayudar con la extracción de leche?',
-        options: const [
-          'No, no tienen efecto',
-          'Sí, pueden mejorar la extracción manual o con bomba',
-          'Solo con bomba eléctrica',
-          'Solo manualmente',
+        question: 'trivia.lessons.lesson10.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson10.question4.option1'.tr(),
+          'trivia.lessons.lesson10.question4.option2'.tr(),
+          'trivia.lessons.lesson10.question4.option3'.tr(),
+          'trivia.lessons.lesson10.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Los masajes pueden mejorar significativamente la extracción de leche, ya sea manual o con bomba, ayudando a vaciar mejor el pecho y aumentar la producción.',
+        explanation: 'trivia.lessons.lesson10.question4.explanation'.tr(),
       ),
     ];
   }
@@ -682,60 +667,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question:
-            '¿Cuánto tiempo se puede conservar la leche materna extraída a temperatura ambiente?',
-        options: const [
-          'Solo 1 hora',
-          'Hasta 4 horas a temperatura ambiente (hasta 6-8 horas en condiciones muy limpias)',
-          'Todo el día',
-          'Solo 30 minutos',
+        question: 'trivia.lessons.lesson11.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson11.question1.option1'.tr(),
+          'trivia.lessons.lesson11.question1.option2'.tr(),
+          'trivia.lessons.lesson11.question1.option3'.tr(),
+          'trivia.lessons.lesson11.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna extraída se puede conservar hasta 4 horas a temperatura ambiente (hasta 6-8 horas en condiciones muy limpias y frescas).',
+        explanation: 'trivia.lessons.lesson11.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Cuánto tiempo se puede conservar la leche materna en el refrigerador?',
-        options: const [
-          'Solo 1 día',
-          'Hasta 4 días en el refrigerador (a 4°C o menos)',
-          'Solo 2 días',
-          'No se puede refrigerar',
+        question: 'trivia.lessons.lesson11.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson11.question2.option1'.tr(),
+          'trivia.lessons.lesson11.question2.option2'.tr(),
+          'trivia.lessons.lesson11.question2.option3'.tr(),
+          'trivia.lessons.lesson11.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna se puede conservar hasta 4 días en el refrigerador a una temperatura de 4°C o menos, preferiblemente en la parte trasera del refrigerador.',
+        explanation: 'trivia.lessons.lesson11.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Cómo se debe almacenar la leche materna extraída?',
-        options: const [
-          'En cualquier recipiente',
-          'En recipientes limpios y esterilizados, etiquetados con fecha y hora',
-          'Solo en biberones',
-          'No importa el recipiente',
+        question: 'trivia.lessons.lesson11.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson11.question3.option1'.tr(),
+          'trivia.lessons.lesson11.question3.option2'.tr(),
+          'trivia.lessons.lesson11.question3.option3'.tr(),
+          'trivia.lessons.lesson11.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna debe almacenarse en recipientes limpios y esterilizados (bolsas especiales o recipientes de vidrio/plástico aptos), etiquetados con fecha y hora de extracción.',
+        explanation: 'trivia.lessons.lesson11.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Cómo se debe descongelar la leche materna congelada?',
-        options: const [
-          'En el microondas directamente',
-          'En el refrigerador durante la noche o bajo agua tibia, nunca en microondas',
-          'Solo a temperatura ambiente',
-          'En agua hirviendo',
+        question: 'trivia.lessons.lesson11.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson11.question4.option1'.tr(),
+          'trivia.lessons.lesson11.question4.option2'.tr(),
+          'trivia.lessons.lesson11.question4.option3'.tr(),
+          'trivia.lessons.lesson11.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche congelada debe descongelarse en el refrigerador durante la noche o bajo agua tibia corriente. Nunca se debe usar microondas porque destruye nutrientes y crea puntos calientes.',
+        explanation: 'trivia.lessons.lesson11.question4.explanation'.tr(),
       ),
     ];
   }
@@ -746,61 +725,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question: '¿Existen leyes en Panamá que protegen la lactancia materna?',
-        options: const [
-          'No existen leyes',
-          'Sí, existen leyes que protegen y promueven la lactancia materna',
-          'Solo en algunos lugares',
-          'Solo para funcionarias públicas',
+        question: 'trivia.lessons.lesson12.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson12.question1.option1'.tr(),
+          'trivia.lessons.lesson12.question1.option2'.tr(),
+          'trivia.lessons.lesson12.question1.option3'.tr(),
+          'trivia.lessons.lesson12.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Sí, Panamá tiene leyes que protegen y promueven la lactancia materna, incluyendo derechos laborales para las madres trabajadoras.',
+        explanation: 'trivia.lessons.lesson12.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Qué derechos tienen las madres trabajadoras en Panamá respecto a la lactancia?',
-        options: const [
-          'Ningún derecho especial',
-          'Derecho a pausas para amamantar y espacios adecuados',
-          'Solo pueden amamantar en casa',
-          'Deben renunciar para amamantar',
+        question: 'trivia.lessons.lesson12.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson12.question2.option1'.tr(),
+          'trivia.lessons.lesson12.question2.option2'.tr(),
+          'trivia.lessons.lesson12.question2.option3'.tr(),
+          'trivia.lessons.lesson12.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Las madres trabajadoras en Panamá tienen derecho a pausas para amamantar y a espacios adecuados (salas de lactancia) en sus lugares de trabajo.',
+        explanation: 'trivia.lessons.lesson12.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question:
-            '¿Las leyes panameñas protegen la lactancia en espacios públicos?',
-        options: const [
-          'No, está prohibido',
-          'Sí, protegen el derecho de amamantar en espacios públicos',
-          'Solo en algunos lugares',
-          'Depende del lugar',
+        question: 'trivia.lessons.lesson12.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson12.question3.option1'.tr(),
+          'trivia.lessons.lesson12.question3.option2'.tr(),
+          'trivia.lessons.lesson12.question3.option3'.tr(),
+          'trivia.lessons.lesson12.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Las leyes panameñas protegen el derecho de las madres a amamantar en espacios públicos, promoviendo la normalización de la lactancia materna.',
+        explanation: 'trivia.lessons.lesson12.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question:
-            '¿Por qué son importantes las leyes que protegen la lactancia?',
-        options: const [
-          'No son importantes',
-          'Garantizan los derechos de las madres y promueven la salud de los bebés',
-          'Solo protegen a algunas madres',
-          'Solo son simbólicas',
+        question: 'trivia.lessons.lesson12.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson12.question4.option1'.tr(),
+          'trivia.lessons.lesson12.question4.option2'.tr(),
+          'trivia.lessons.lesson12.question4.option3'.tr(),
+          'trivia.lessons.lesson12.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Las leyes que protegen la lactancia son importantes porque garantizan los derechos de las madres, promueven la salud de los bebés y crean un entorno favorable para la lactancia materna.',
+        explanation: 'trivia.lessons.lesson12.question4.explanation'.tr(),
       ),
     ];
   }
@@ -811,60 +783,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question:
-            '¿Cuál es una diferencia clave entre la leche materna y la leche de vaca?',
-        options: const  [
-          'Son iguales',
-          'La leche materna tiene anticuerpos y se adapta al bebé, la de vaca no',
-          'Solo difieren en el sabor',
-          'No hay diferencias importantes',
+        question: 'trivia.lessons.lesson13.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson13.question1.option1'.tr(),
+          'trivia.lessons.lesson13.question1.option2'.tr(),
+          'trivia.lessons.lesson13.question1.option3'.tr(),
+          'trivia.lessons.lesson13.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna contiene anticuerpos, factores inmunológicos y se adapta a las necesidades del bebé. La leche de vaca no tiene estos componentes y está diseñada para terneros, no para bebés humanos.',
+        explanation: 'trivia.lessons.lesson13.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Por qué la leche materna es más fácil de digerir que la de vaca?',
-        options: const [
-          'No hay diferencia',
-          'Tiene proteínas de fácil digestión y composición específica para humanos',
-          'Solo porque es más líquida',
-          'Por el sabor',
+        question: 'trivia.lessons.lesson13.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson13.question2.option1'.tr(),
+          'trivia.lessons.lesson13.question2.option2'.tr(),
+          'trivia.lessons.lesson13.question2.option3'.tr(),
+          'trivia.lessons.lesson13.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna tiene proteínas de fácil digestión (como la lactoferrina) y una composición específicamente diseñada para el sistema digestivo humano, a diferencia de la leche de vaca.',
+        explanation: 'trivia.lessons.lesson13.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿La leche materna cambia según las necesidades del bebé?',
-        options: const [
-          'No, siempre es igual',
-          'Sí, se adapta según la edad del bebé, hora del día y necesidades',
-          'Solo cambia una vez',
-          'Solo cambia el sabor',
+        question: 'trivia.lessons.lesson13.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson13.question3.option1'.tr(),
+          'trivia.lessons.lesson13.question3.option2'.tr(),
+          'trivia.lessons.lesson13.question3.option3'.tr(),
+          'trivia.lessons.lesson13.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna es dinámica y se adapta según la edad del bebé, la hora del día, e incluso durante la misma toma, proporcionando exactamente lo que el bebé necesita.',
+        explanation: 'trivia.lessons.lesson13.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Qué contiene la leche materna que la de vaca no tiene?',
-        options: const [
-          'Nada especial',
-          'Anticuerpos, factores de crecimiento, probióticos y componentes inmunológicos',
-          'Solo más agua',
-          'Solo más grasa',
+        question: 'trivia.lessons.lesson13.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson13.question4.option1'.tr(),
+          'trivia.lessons.lesson13.question4.option2'.tr(),
+          'trivia.lessons.lesson13.question4.option3'.tr(),
+          'trivia.lessons.lesson13.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'La leche materna contiene componentes únicos como anticuerpos, factores de crecimiento, probióticos y otros componentes inmunológicos que la leche de vaca no proporciona.',
+        explanation: 'trivia.lessons.lesson13.question4.explanation'.tr(),
       ),
     ];
   }
@@ -875,60 +841,54 @@ class TriviaService {
       TriviaQuestion(
         id: 'trivia_${lessonId}_1',
         lessonId: lessonId,
-        question:
-            '¿Es cierto que algunas mujeres no producen suficiente leche?',
-        options: const [
-          'Sí, la mayoría no produce suficiente',
-          'Es un mito común; la mayoría de mujeres pueden producir suficiente leche con apoyo adecuado',
-          'Solo algunas pueden amamantar',
-          'Depende de la edad',
+        question: 'trivia.lessons.lesson14.question1.text'.tr(),
+        options: [
+          'trivia.lessons.lesson14.question1.option1'.tr(),
+          'trivia.lessons.lesson14.question1.option2'.tr(),
+          'trivia.lessons.lesson14.question1.option3'.tr(),
+          'trivia.lessons.lesson14.question1.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'Es un mito común. La mayoría de mujeres pueden producir suficiente leche. Las dificultades generalmente se deben a problemas de técnica, apoyo inadecuado o información incorrecta, no a falta de capacidad.',
+        explanation: 'trivia.lessons.lesson14.question1.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_2',
         lessonId: lessonId,
-        question:
-            '¿Es necesario dar agua al bebé además de leche materna en los primeros 6 meses?',
-        options: const [
-          'Sí, siempre necesita agua',
-          'No, la leche materna proporciona toda la hidratación necesaria',
-          'Solo en verano',
-          'Solo si tiene fiebre',
+        question: 'trivia.lessons.lesson14.question2.text'.tr(),
+        options: [
+          'trivia.lessons.lesson14.question2.option1'.tr(),
+          'trivia.lessons.lesson14.question2.option2'.tr(),
+          'trivia.lessons.lesson14.question2.option3'.tr(),
+          'trivia.lessons.lesson14.question2.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'No es necesario dar agua adicional a un bebé amamantado en los primeros 6 meses. La leche materna proporciona toda la hidratación y nutrición necesaria.',
+        explanation: 'trivia.lessons.lesson14.question2.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
-        question: '¿Es cierto que amamantar duele siempre?',
-        options: const [
-          'Sí, siempre duele',
-          'No, el dolor indica un problema (mala posición o agarre) que debe corregirse',
-          'Solo duele al principio',
-          'Depende de la madre',
+        question: 'trivia.lessons.lesson14.question3.text'.tr(),
+        options: [
+          'trivia.lessons.lesson14.question3.option1'.tr(),
+          'trivia.lessons.lesson14.question3.option2'.tr(),
+          'trivia.lessons.lesson14.question3.option3'.tr(),
+          'trivia.lessons.lesson14.question3.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El dolor al amamantar no es normal. Si hay dolor, generalmente indica un problema de posición o agarre que debe identificarse y corregirse con ayuda profesional.',
+        explanation: 'trivia.lessons.lesson14.question3.explanation'.tr(),
       ),
       TriviaQuestion(
         id: 'trivia_${lessonId}_4',
         lessonId: lessonId,
-        question: '¿Se puede amamantar si los senos son pequeños?',
-        options: const [
-          'No, se necesita senos grandes',
-          'Sí, el tamaño del seno no afecta la capacidad de producir leche',
-          'Solo si son medianos',
-          'Depende de la forma',
+        question: 'trivia.lessons.lesson14.question4.text'.tr(),
+        options: [
+          'trivia.lessons.lesson14.question4.option1'.tr(),
+          'trivia.lessons.lesson14.question4.option2'.tr(),
+          'trivia.lessons.lesson14.question4.option3'.tr(),
+          'trivia.lessons.lesson14.question4.option4'.tr(),
         ],
         correctAnswerIndex: 1,
-        explanation:
-            'El tamaño del seno no afecta la capacidad de producir leche. Las mujeres con senos pequeños pueden amamantar perfectamente, ya que la producción de leche depende del tejido glandular, no del tamaño.',
+        explanation: 'trivia.lessons.lesson14.question4.explanation'.tr(),
       ),
     ];
   }
@@ -969,7 +929,7 @@ class TriviaService {
         id: 'trivia_${lessonId}_3',
         lessonId: lessonId,
         question: '¿Qué indica que el bebé está recibiendo suficiente leche?',
-        options: const  [
+        options: const [
           'Llora constantemente',
           'Aumenta de peso adecuadamente y moja 6+ pañales al día',
           'Duerme todo el día',
@@ -984,7 +944,7 @@ class TriviaService {
         lessonId: lessonId,
         question:
             '¿Cuándo se debe buscar ayuda profesional para problemas de lactancia?',
-        options: const  [
+        options: const [
           'Nunca, todo se resuelve solo',
           'Solo si hay dolor extremo',
           'Cuando hay dolor persistente, dificultades de agarre o preocupaciones sobre la alimentación',

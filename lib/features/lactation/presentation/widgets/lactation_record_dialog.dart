@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
@@ -152,7 +153,7 @@ class _LactationRecordDialogState extends State<LactationRecordDialog>
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(
-                              'Registro de Lactancia',
+                              'lactation.registerLactation'.tr(),
                               style: GoogleFonts.quicksand(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,

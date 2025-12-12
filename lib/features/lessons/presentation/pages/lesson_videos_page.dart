@@ -495,9 +495,7 @@ class _LessonVideosPageState extends State<LessonVideosPage>
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text('lessons.pathTitle'.tr()),
-                    content: const Text(
-                      "Sigue el camino paso a paso para aprender sobre lactancia materna.",
-                    ),
+                    content: Text('lessons.pathDescription'.tr()),
                     actions: <Widget>[
                       TextButton(
                         child: Text('common.close'.tr()),
@@ -1236,6 +1234,32 @@ class LessonPathPainter extends CustomPainter {
         }
       }
     }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _LessonPathPainter extends CustomPainter {
+  final List<Video> videos;
+  final Map<int, double> progressMap;
+  final Function(int) onVideoTap;
+  final Function(int) onTriviaTap;
+  final Set<int> completedTriviaLessons;
+  final int? lastCompletedLesson;
+
+  _LessonPathPainter({
+    required this.videos,
+    required this.progressMap,
+    required this.onVideoTap,
+    required this.onTriviaTap,
+    required this.completedTriviaLessons,
+    this.lastCompletedLesson,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // ... existing code ...
   }
 
   @override

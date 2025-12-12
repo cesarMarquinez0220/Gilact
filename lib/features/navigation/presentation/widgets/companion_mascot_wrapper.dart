@@ -314,12 +314,13 @@ class _BabyRiveAnimation extends StatefulWidget {
 
 class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  late final rive.FileLoader _fileLoader;
+  late rive.FileLoader _fileLoader;
   rive.RiveWidgetController? _controller;
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   final GlobalKey _riveWidgetKey = GlobalKey();
   bool _isVisible = true;
   Timer? _visibilityCheckTimer;
+  bool _isDisposed = false; // Flag para prevenir operaciones después de dispose
   final AppLogger _logger = getIt<AppLogger>();
 
   @override
@@ -374,19 +375,45 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
   /// Optimizado: Reducido de 500ms a 2s para reducir carga de CPU
   void _startVisibilityCheck() {
     _visibilityCheckTimer?.cancel();
-    _visibilityCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+    _visibilityCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      // Verificaciones exhaustivas antes de ejecutar
+      if (_isDisposed || !mounted) {
+        timer.cancel();
+        _visibilityCheckTimer = null;
+        return;
+      }
+
+      // Verificar que el contexto esté disponible y montado
+      final context = _repaintBoundaryKey.currentContext;
+      if (context == null || !context.mounted) {
+        // Si el contexto no está disponible, cancelar el timer
+        timer.cancel();
+        _visibilityCheckTimer = null;
+        return;
+      }
+
       _checkVisibility();
     });
   }
 
   /// Verifica si el widget está visible en el viewport
+  /// Versión robusta que previene errores de BuildContext no montado
   void _checkVisibility() {
-    if (!mounted || _controller == null) return;
+    // Verificaciones tempranas exhaustivas para prevenir errores
+    if (_isDisposed || !mounted || _controller == null) {
+      // Si no está montado, cancelar el timer
+      _visibilityCheckTimer?.cancel();
+      _visibilityCheckTimer = null;
+      return;
+    }
 
     final context = _repaintBoundaryKey.currentContext;
-    if (context == null) {
-      if (_isVisible) {
-        setState(() {
+    if (context == null || !context.mounted) {
+      // Si el contexto no está disponible, cancelar el timer y pausar animación
+      _visibilityCheckTimer?.cancel();
+      _visibilityCheckTimer = null;
+      if (_isVisible && mounted && !_isDisposed) {
+        _safeSetState(() {
           _isVisible = false;
         });
         _pauseAnimation();
@@ -394,10 +421,54 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
       return;
     }
 
-    final renderObject = context.findRenderObject();
-    if (renderObject == null || !renderObject.attached) {
-      if (_isVisible) {
-        setState(() {
+    // Intentar acceder al renderObject de forma segura
+    // Usar un enfoque defensivo que cancela el timer si hay cualquier problema
+    RenderObject? renderObject;
+    try {
+      // Verificar que el elemento esté en el árbol antes de buscar el renderObject
+      // Usar una verificación más segura del estado del elemento
+      if (context is Element) {
+        final element = context;
+        // Verificar el estado del elemento antes de intentar acceder al renderObject
+        if (!element.mounted) {
+          _visibilityCheckTimer?.cancel();
+          _visibilityCheckTimer = null;
+          return;
+        }
+      }
+
+      // Intentar obtener el renderObject
+      // Esto puede lanzar una excepción si el elemento está inactivo
+      renderObject = context.findRenderObject();
+
+      // Verificar que el renderObject esté disponible y adjunto
+      if (renderObject == null || !renderObject.attached) {
+        if (_isVisible && mounted && !_isDisposed) {
+          _safeSetState(() {
+            _isVisible = false;
+          });
+          _pauseAnimation();
+        }
+        return;
+      }
+    } catch (e) {
+      // Si hay cualquier error (elemento inactivo, no montado, etc.), cancelar el timer
+      // inmediatamente para evitar más intentos fallidos
+      _visibilityCheckTimer?.cancel();
+      _visibilityCheckTimer = null;
+
+      // Solo loguear en modo debug y no repetir el mismo error
+      if (kDebugMode) {
+        final errorMsg = e.toString();
+        // Evitar spam de logs del mismo error
+        if (!errorMsg.contains('inactive element')) {
+          _logger.d('⚠️ Error verificando visibilidad, cancelando timer: $e');
+        }
+      }
+
+      // Pausar animación si estaba visible
+      if (_isVisible && mounted && !_isDisposed) {
+        _safeSetState(() {
           _isVisible = false;
         });
         _pauseAnimation();
@@ -405,33 +476,90 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
       return;
     }
 
-    final renderBox = renderObject as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
+    // Verificar que el renderObject sea un RenderBox
+    if (renderObject is! RenderBox) {
+      return;
+    }
 
-    // Obtener el tamaño de la pantalla
-    final screenSize = MediaQuery.of(context).size;
-    final screenHeight = screenSize.height;
-    final screenWidth = screenSize.width;
+    final renderBox = renderObject;
 
-    // Calcular si el widget está dentro del viewport
-    // Considerar un margen de 100px fuera de la pantalla como "no visible"
-    const margin = 100.0;
-    final isInViewport =
-        position.dx + size.width + margin > 0 &&
-        position.dx - margin < screenWidth &&
-        position.dy + size.height + margin > 0 &&
-        position.dy - margin < screenHeight;
+    try {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
 
-    if (isInViewport != _isVisible) {
-      setState(() {
-        _isVisible = isInViewport;
-      });
+      // Obtener el tamaño de la pantalla de forma segura
+      MediaQueryData? mediaQuery;
+      try {
+        mediaQuery = MediaQuery.maybeOf(context);
+      } catch (e) {
+        // Si no podemos obtener MediaQuery, asumir que no está visible
+        if (_isVisible && mounted && !_isDisposed) {
+          _safeSetState(() {
+            _isVisible = false;
+          });
+          _pauseAnimation();
+        }
+        return;
+      }
 
-      if (_isVisible) {
-        _resumeAnimation();
-      } else {
+      if (mediaQuery == null) {
+        return;
+      }
+
+      final screenSize = mediaQuery.size;
+      final screenHeight = screenSize.height;
+      final screenWidth = screenSize.width;
+
+      // Calcular si el widget está dentro del viewport
+      // Considerar un margen de 100px fuera de la pantalla como "no visible"
+      const margin = 100.0;
+      final isInViewport =
+          position.dx + size.width + margin > 0 &&
+          position.dx - margin < screenWidth &&
+          position.dy + size.height + margin > 0 &&
+          position.dy - margin < screenHeight;
+
+      if (isInViewport != _isVisible && mounted && !_isDisposed) {
+        _safeSetState(() {
+          _isVisible = isInViewport;
+        });
+
+        if (_isVisible) {
+          _resumeAnimation();
+        } else {
+          _pauseAnimation();
+        }
+      }
+    } catch (e) {
+      // Si hay cualquier error durante el cálculo, cancelar el timer
+      // para evitar más intentos fallidos
+      _visibilityCheckTimer?.cancel();
+      _visibilityCheckTimer = null;
+
+      if (kDebugMode) {
+        _logger.w('⚠️ Error calculando visibilidad, cancelando timer: $e');
+      }
+
+      // Pausar animación si estaba visible
+      if (_isVisible && mounted && !_isDisposed) {
+        _safeSetState(() {
+          _isVisible = false;
+        });
         _pauseAnimation();
+      }
+      return;
+    }
+  }
+
+  /// Wrapper seguro para setState que verifica mounted y _isDisposed
+  void _safeSetState(VoidCallback fn) {
+    if (!_isDisposed && mounted) {
+      try {
+        setState(fn);
+      } catch (e) {
+        if (kDebugMode) {
+          _logger.w('⚠️ Error en setState: $e');
+        }
       }
     }
   }
@@ -453,7 +581,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
   /// Reanuda la animación Rive
   void _resumeAnimation() {
-    if (_controller == null) return;
+    if (_controller == null || _isDisposed || !mounted) return;
 
     try {
       // La animación se reanudará automáticamente cuando el widget vuelva a ser visible
@@ -461,11 +589,13 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
         _logger.d('▶️ Animación Rive reanudada (dentro del viewport)');
       }
       // Actualizar el estado para que la animación continúe
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         _updateState(widget.state);
       }
     } catch (e) {
-      _logger.w('⚠️ Error reanudando animación Rive: $e');
+      if (kDebugMode) {
+        _logger.w('⚠️ Error reanudando animación Rive: $e');
+      }
     }
   }
 
@@ -492,15 +622,29 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
     if (oldWidget.state != widget.state && _controller != null) {
       _updateState(widget.state);
     }
+
+    // Reiniciar el timer de visibilidad si fue cancelado previamente y el widget está montado
+    if (_visibilityCheckTimer == null && mounted && !_isDisposed) {
+      _startVisibilityCheck();
+    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    // Marcar como disposed ANTES de cancelar timers para prevenir ejecuciones
+    _isDisposed = true;
+
+    // Cancelar el timer primero para prevenir ejecuciones adicionales
     _visibilityCheckTimer?.cancel();
+    _visibilityCheckTimer = null;
+
+    // Remover observer
+    WidgetsBinding.instance.removeObserver(this);
+
     // No desechar _controller manualmente - RiveWidget lo maneja automáticamente
     // Desecharlo manualmente causa un error de doble disposición
     _fileLoader.dispose();
+
     super.dispose();
   }
 
@@ -630,7 +774,7 @@ class _BabyRiveAnimationState extends State<_BabyRiveAnimation>
 
       _controller = state.controller;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && !_isDisposed) {
           _updateState(widget.state);
         }
       });

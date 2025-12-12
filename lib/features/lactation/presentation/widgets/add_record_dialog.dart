@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/lactation_record.dart';
 import '../../data/datasources/lactation_database.dart';
 import '../../../../core/utils/responsive_helper.dart';
@@ -507,7 +508,7 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
               ),
             ),
             child: Text(
-              'Cancelar',
+              'common.cancel'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -651,8 +652,9 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
           width: double.maxFinite,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
-                                   ResponsiveHelper.isSmall(context);
+              final isSmallScreen =
+                  ResponsiveHelper.isExtraSmall(context) ||
+                  ResponsiveHelper.isSmall(context);
               final columns = ResponsiveHelper.getResponsiveColumns(
                 context,
                 small: 3,
@@ -660,7 +662,7 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
                 large: 4,
               );
               final spacing = ResponsiveHelper.getResponsiveSpacing(context);
-              
+
               return GridView.builder(
                 shrinkWrap: true,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -674,30 +676,30 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
                   final minutes = durations[index];
                   final isSelected = currentMinutes == minutes;
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() => _duration = Duration(minutes: minutes));
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: isSelected
-                        ? const Color(0xFF667eea)
-                        : Colors.grey[200],
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${minutes}m',
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : Colors.black,
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _duration = Duration(minutes: minutes));
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: isSelected
+                            ? const Color(0xFF667eea)
+                            : Colors.grey[200],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${minutes}m',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
+                  );
                 },
               );
             },
@@ -707,7 +709,7 @@ class _AddRecordDialogState extends State<_AddRecordDialog>
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              'Cancelar',
+              'common.cancel'.tr(),
               style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
             ),
           ),

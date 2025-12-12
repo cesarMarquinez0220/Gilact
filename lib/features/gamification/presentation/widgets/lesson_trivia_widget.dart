@@ -113,7 +113,26 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
   }
 
   void _loadQuestions() {
+    // #region agent log
+    if (kDebugMode) {
+      print(
+        '🔍 [LessonTriviaWidget] Cargando preguntas para lección: ${widget.lessonId}',
+      );
+    }
+    // #endregion
     final questions = _triviaService.getTriviaForLesson(widget.lessonId);
+    // #region agent log
+    if (kDebugMode && questions.isNotEmpty) {
+      final firstQ = questions.first;
+      print('🔍 [LessonTriviaWidget] Primera pregunta cargada:');
+      print('   ID: ${firstQ.id}');
+      print('   Pregunta: ${firstQ.question}');
+      print('   Opciones (${firstQ.options.length}):');
+      for (int i = 0; i < firstQ.options.length; i++) {
+        print('     [$i]: ${firstQ.options[i]}');
+      }
+    }
+    // #endregion
     // Seleccionar 3-4 preguntas aleatorias
     questions.shuffle();
     setState(() {
@@ -232,6 +251,14 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
           widget.userId,
         );
 
+        // #region agent log
+        if (kDebugMode) {
+          print('🔍 [LessonTriviaWidget] Estadísticas del usuario:');
+          print('   perfectTrivias: ${userStats.perfectTrivias}');
+          print('   totalLessonsCompleted: ${userStats.totalLessonsCompleted}');
+        }
+        // #endregion
+
         final achievements = await gamificationService
             .detectAndUnlockAchievements(
               userId: widget.userId,
@@ -247,17 +274,38 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
               daysUsingApp: userStats.daysUsingApp,
             );
 
+        // #region agent log
+        if (kDebugMode) {
+          achievements.fold(
+            (error) {
+              print('❌ [LessonTriviaWidget] Error detectando logros: $error');
+            },
+            (newAchievements) {
+              print(
+                '🔍 [LessonTriviaWidget] Logros detectados: ${newAchievements.length}',
+              );
+              for (final achievement in newAchievements) {
+                print('   - ${achievement.id}: ${achievement.title}');
+              }
+            },
+          );
+        }
+        // #endregion
+
         // Mostrar diálogo si hay logros nuevos
         if (achievements.isRight()) {
           final newAchievements = achievements.getOrElse(() => []);
           if (newAchievements.isNotEmpty && mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && context.mounted) {
+              // Usar el contexto original que tiene acceso al Overlay
+              // o el contexto actual si está montado
+              final contextToUse = widget.originalContext ?? context;
+              if (mounted && contextToUse.mounted) {
                 // Mostrar logros uno a la vez usando el servicio de cola
                 final achievementQueueService =
                     getIt<AchievementQueueService>();
                 achievementQueueService.queueAchievements(
-                  context,
+                  contextToUse,
                   newAchievements,
                 );
               }

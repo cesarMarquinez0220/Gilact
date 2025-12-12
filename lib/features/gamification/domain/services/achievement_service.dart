@@ -460,6 +460,11 @@ class AchievementService {
               break;
             case 'trivia_perfect_5':
               shouldUnlock = perfectTrivias >= 5;
+              // #region agent log
+              _logger.d(
+                '🔍 [AchievementService] Verificando trivia_perfect_5: perfectTrivias=$perfectTrivias, requiredValue=5, shouldUnlock=$shouldUnlock',
+              );
+              // #endregion
               break;
           }
           break;

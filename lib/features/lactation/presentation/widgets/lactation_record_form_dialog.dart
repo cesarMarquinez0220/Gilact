@@ -788,7 +788,7 @@ class _LactationRecordFormDialogState extends State<LactationRecordFormDialog>
                 ),
               ),
               child: Text(
-                'Cancelar',
+                'common.cancel'.tr(),
                 style: GoogleFonts.quicksand(
                   fontWeight: FontWeight.bold,
                   color: Colors.grey[600],

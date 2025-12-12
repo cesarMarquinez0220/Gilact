@@ -8,9 +8,13 @@ import '../../../gamification/domain/entities/user_gamification_profile.dart';
 import '../../../../core/di/injection.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../lactation/data/datasources/lactation_database.dart';
-import '../../../lessons/data/repositories/lesson_repository_impl.dart';
 import '../../../lactation/data/datasources/baby_weight_offline_local_data_source.dart';
 import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
+import '../../../gamification/domain/services/user_statistics_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../lessons/data/services/video_service.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Diálogo de detalles de logro con carga optimizada de estadísticas
 class CompanionAchievementDialog extends StatelessWidget {
@@ -213,14 +217,137 @@ class _AchievementDetailsDialogContentState
             // TODO: Implementar lógica para trivias perfectas
             // Por ahora, usar descripción por defecto
           } else {
-            // Solo necesitamos lecciones completadas
-            final lessonRepo = getIt<LessonRepositoryImpl>();
-            final lessonsResult = await lessonRepo.getAllLessons();
-            lessonsResult.fold((failure) => null, (lessons) {
-              final completed = lessons.where((l) => l.isCompleted).length;
-              progressText =
-                  '$completed/${widget.achievement.requiredValue} lecciones completadas.';
-            });
+            // Obtener lecciones completadas desde Firestore (datos reales)
+            try {
+              final authUser = FirebaseAuth.instance.currentUser;
+              if (authUser != null) {
+                final videosCollection = FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(authUser.uid)
+                    .collection('videos');
+
+                // Leer directamente del servidor para obtener datos actualizados
+                // (no usar caché para evitar datos obsoletos después de hot restart)
+                List<QueryDocumentSnapshot> docs = [];
+                try {
+                  final serverSnapshot = await videosCollection.get(
+                    const GetOptions(source: Source.server),
+                  );
+                  docs = serverSnapshot.docs;
+
+                  // #region agent log
+                  final appLogger = getIt<AppLogger>();
+                  appLogger.d(
+                    '🔍 [CompanionAchievementDialog] Videos encontrados en Firestore: ${docs.length}',
+                  );
+                  // #endregion
+                } catch (e) {
+                  // Si falla, intentar leer de caché como fallback
+                  try {
+                    final cacheSnapshot = await videosCollection.get(
+                      const GetOptions(source: Source.cache),
+                    );
+                    if (cacheSnapshot.docs.isNotEmpty) {
+                      docs = cacheSnapshot.docs;
+
+                      // #region agent log
+                      final appLogger = getIt<AppLogger>();
+                      appLogger.w(
+                        '⚠️ [CompanionAchievementDialog] Usando caché como fallback: ${docs.length} videos',
+                      );
+                      // #endregion
+                    }
+                  } catch (e2) {
+                    // Si también falla, continuar con lista vacía
+                  }
+                }
+
+                // Procesar videos completados
+                final completedVideoIds = <int>{};
+                for (final doc in docs) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final estaCompletado =
+                      data['estaCompletado'] as bool? ?? false;
+                  if (estaCompletado) {
+                    final videoId =
+                        data['videoId'] as int? ?? int.tryParse(doc.id);
+                    if (videoId != null) {
+                      completedVideoIds.add(videoId);
+                    }
+                  }
+                }
+
+                // Calcular lecciones únicas completadas
+                if (completedVideoIds.isNotEmpty) {
+                  try {
+                    // Obtener todos los videos para mapear videoId -> leccionId
+                    final allVideos = await VideoService.getVideos();
+                    final videoToLessonMap = <int, int>{};
+                    for (final video in allVideos) {
+                      videoToLessonMap[video.videoId] = video.leccionId;
+                    }
+
+                    // Obtener lecciones únicas de los videos completados
+                    final uniqueLessons = <int>{};
+                    for (final videoId in completedVideoIds) {
+                      final leccionId = videoToLessonMap[videoId];
+                      if (leccionId != null && leccionId > 0) {
+                        uniqueLessons.add(leccionId);
+                      }
+                    }
+
+                    final completed = uniqueLessons.length;
+                    progressText =
+                        '$completed/${widget.achievement.requiredValue} lecciones completadas.';
+
+                    // #region agent log
+                    final appLogger = getIt<AppLogger>();
+                    appLogger.d(
+                      '🔍 [CompanionAchievementDialog] Logro ${widget.achievement.id}: $completed/${widget.achievement.requiredValue} lecciones completadas',
+                    );
+                    // #endregion
+                  } catch (e) {
+                    // Si hay error, usar conteo de videos como aproximación
+                    final completed = completedVideoIds.length;
+                    progressText =
+                        '$completed/${widget.achievement.requiredValue} lecciones completadas.';
+
+                    // #region agent log
+                    final appLogger = getIt<AppLogger>();
+                    appLogger.w(
+                      '⚠️ [CompanionAchievementDialog] Error calculando lecciones únicas, usando aproximación: $completed/${widget.achievement.requiredValue}',
+                    );
+                    // #endregion
+                  }
+                } else {
+                  progressText =
+                      '0/${widget.achievement.requiredValue} lecciones completadas.';
+                }
+              } else {
+                // Si no hay usuario, usar UserStatisticsService como fallback
+                final userStatsService = getIt<UserStatisticsService>();
+                final userId = widget.profile.userId;
+                final userStats = await userStatsService.getUserStatistics(
+                  userId,
+                );
+                progressText =
+                    '${userStats.totalLessonsCompleted}/${widget.achievement.requiredValue} lecciones completadas.';
+              }
+            } catch (e) {
+              // Si hay error, usar UserStatisticsService como fallback
+              try {
+                final userStatsService = getIt<UserStatisticsService>();
+                final userId = widget.profile.userId;
+                final userStats = await userStatsService.getUserStatistics(
+                  userId,
+                );
+                progressText =
+                    '${userStats.totalLessonsCompleted}/${widget.achievement.requiredValue} lecciones completadas.';
+              } catch (e2) {
+                // Si también falla, usar descripción por defecto
+                progressText = widget.initialProgressDescription;
+              }
+            }
           }
           break;
 

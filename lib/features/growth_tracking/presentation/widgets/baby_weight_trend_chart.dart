@@ -32,7 +32,9 @@ class BabyWeightTrendChart extends StatelessWidget {
         trendData.where((data) => data.actualWeight != null).toList()
           ..sort((a, b) => a.date.compareTo(b.date));
 
-    if (dataWithWeight.isEmpty) {
+    // Si no hay datos o solo hay un punto (peso de nacimiento), mostrar estado vacío
+    // Se necesita al menos 2 puntos para mostrar una tendencia significativa
+    if (dataWithWeight.isEmpty || dataWithWeight.length < 2) {
       return FadeInUp(
         duration: const Duration(milliseconds: 600),
         child: _buildEmptyState(),
@@ -643,7 +645,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             Icon(Icons.show_chart, color: Colors.grey[400], size: 48),
             const SizedBox(height: 16),
             Text(
-              'No hay suficientes datos para mostrar la tendencia',
+              'growth.insufficientData'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -652,7 +654,7 @@ class BabyWeightTrendChart extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Registra el peso de tu bebé para ver la gráfica',
+              'growth.registerWeightToSeeChart'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 12,
                 color: Colors.grey[500],

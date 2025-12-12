@@ -564,7 +564,7 @@ class _HomePageState extends State<HomePage> {
             streakStatus,
             profile.currentStreak,
           )
-        : '¡Comienza tu primera racha hoy!';
+        : 'gamification.messages.startFirstStreak'.tr();
 
     Color streakColor;
     IconData streakIcon;

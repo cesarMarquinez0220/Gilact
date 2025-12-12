@@ -156,22 +156,24 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
       } catch (e) {
         videoIdInt = int.tryParse(widget.video.videoId.toString());
       }
-      
+
       if (videoIdInt != null) {
         final fileInfo = await VideoCacheService.getCachedVideoFile(videoIdInt);
         if (fileInfo != null) {
-           if (kDebugMode) {
-             print('🚀 VIDEO EN CACHE EXITOSO: Usando archivo local para ahorrar datos');
-           }
-           if (mounted) {
-             setState(() {
-               _cachedFile = fileInfo.file;
-               _isOfflineMode = true; // Usar reproductor offline (File player)
-               _isCheckingDownload = false;
-             });
-             widget.onVideoReady?.call();
-             return; // Salir temprano, ya tenemos video
-           }
+          if (kDebugMode) {
+            print(
+              '🚀 VIDEO EN CACHE EXITOSO: Usando archivo local para ahorrar datos',
+            );
+          }
+          if (mounted) {
+            setState(() {
+              _cachedFile = fileInfo.file;
+              _isOfflineMode = true; // Usar reproductor offline (File player)
+              _isCheckingDownload = false;
+            });
+            widget.onVideoReady?.call();
+            return; // Salir temprano, ya tenemos video
+          }
         }
       }
 
@@ -543,37 +545,47 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        widget.video.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              offset: Offset(1, 1),
-                              blurRadius: 3,
-                            ),
-                          ],
+                      // Envolver en GestureDetector para evitar selección automática de texto
+                      GestureDetector(
+                        onTap: () {}, // Capturar toques para evitar selección
+                        behavior: HitTestBehavior.opaque,
+                        child: Text(
+                          widget.video.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black,
+                                offset: Offset(1, 1),
+                                blurRadius: 3,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        widget.video.description,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              offset: Offset(1, 1),
-                              blurRadius: 3,
-                            ),
-                          ],
+                      // Envolver en GestureDetector para evitar selección automática de texto
+                      GestureDetector(
+                        onTap: () {}, // Capturar toques para evitar selección
+                        behavior: HitTestBehavior.opaque,
+                        child: Text(
+                          widget.video.description,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black,
+                                offset: Offset(1, 1),
+                                blurRadius: 3,
+                              ),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

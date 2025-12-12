@@ -165,7 +165,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Registro de Lactancia',
+                      'lactation.registerLactation'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: fontSizeTitle,
                         fontWeight: FontWeight.bold,
@@ -1129,7 +1129,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
                     foregroundColor: Colors.white,
                   ),
                   child: Text(
-                    'Cancelar',
+                    'common.cancel'.tr(),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: fontSize,

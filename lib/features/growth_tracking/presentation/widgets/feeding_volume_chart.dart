@@ -294,14 +294,14 @@ class FeedingVolumeChart extends StatelessWidget {
       if (expectedVolume != null) {
         final ratio = volume / expectedVolume!;
         if (ratio >= 0.9) {
-          barColor = Colors.green.withValues(alpha:0.7); // Normal
+          barColor = Colors.green.withValues(alpha: 0.7); // Normal
         } else if (ratio >= 0.7) {
-          barColor = Colors.orange.withValues(alpha:0.7); // Bajo
+          barColor = Colors.orange.withValues(alpha: 0.7); // Bajo
         } else {
-          barColor = Colors.red.withValues(alpha:0.7); // Muy bajo
+          barColor = Colors.red.withValues(alpha: 0.7); // Muy bajo
         }
       } else {
-        barColor = const Color(0xFF03A696).withValues(alpha:0.7);
+        barColor = const Color(0xFF03A696).withValues(alpha: 0.7);
       }
 
       barGroups.add(
@@ -412,7 +412,7 @@ class FeedingVolumeChart extends StatelessWidget {
             Icon(Icons.local_drink, color: Colors.grey[400], size: 40),
             const SizedBox(height: 12),
             Text(
-              'No hay datos de alimentación registrados',
+              'feeding.noDataRegistered'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: 12,
                 color: Colors.grey[600],
@@ -472,4 +472,3 @@ class FeedingVolumeChart extends StatelessWidget {
     );
   }
 }
-

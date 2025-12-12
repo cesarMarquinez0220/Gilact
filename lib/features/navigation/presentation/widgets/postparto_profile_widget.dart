@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../user/domain/entities/user_profile_entities.dart';
 import '../../../growth_tracking/domain/services/weight_trend_service.dart';
-import '../../../growth_tracking/domain/services/who_percentiles_service.dart';
 import '../../../growth_tracking/domain/entities/weight_trend_data.dart';
 import '../../../growth_tracking/presentation/widgets/baby_weight_trend_chart.dart';
 import '../../../growth_tracking/presentation/widgets/feeding_volume_chart.dart';
@@ -139,37 +138,20 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         print('   - Días con volumen de leche: ${dataWithVolume.length}');
       }
 
-      // Verificar si hay datos reales
-      final hasRealWeightData = analysis.trendData.any(
-        (data) => data.actualWeight != null,
-      );
-      final hasRealFeedingData = analysis.trendData.any(
-        (data) => data.feedingVolume != null && data.feedingVolume! > 0,
-      );
-
-      // DATOS DE PRUEBA: Solo generar datos de prueba de peso si no hay datos reales
-      // NO generar datos de prueba de lactancia si no hay registros reales
-      // Parsear el peso al nacer de String a double
-      double? birthWeight;
-      if (widget.userProfile.babyInfo?.weight != null) {
-        birthWeight = double.tryParse(widget.userProfile.babyInfo!.weight);
-      }
-      final finalAnalysis = !hasRealWeightData
-          ? _generateTestData(
-              birthDate,
-              birthWeight: birthWeight,
-              includeFeedingData: hasRealFeedingData,
-            )
-          : analysis;
+      // SOLO usar datos reales - NO generar datos simulados
+      // Esto evita confusión y ansiedad en las madres al mostrar datos que no registraron
+      final finalAnalysis = analysis;
 
       if (kDebugMode) {
-        if (!hasRealWeightData) {
-          print('🧪 PostpartoProfileWidget: Generando datos de prueba...');
-          print(
-            '   - Días de prueba generados: ${finalAnalysis.trendData.length}',
-          );
-        } else {
+        final hasRealWeightData = analysis.trendData.any(
+          (data) => data.actualWeight != null,
+        );
+        if (hasRealWeightData) {
           print('✅ PostpartoProfileWidget: Usando datos reales');
+        } else {
+          print(
+            'ℹ️ PostpartoProfileWidget: No hay datos reales - se mostrará estado vacío',
+          );
         }
       }
 
@@ -350,123 +332,6 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
         ],
       ),
     );
-  }
-
-  /// Genera datos de prueba para visualizar las gráficas
-  /// [birthWeight] - Peso al nacer del bebé (en kg). Si es null, usa 3.2 kg como default
-  /// [includeFeedingData] - Si es false, NO genera datos de lactancia (para usuarios sin registros reales)
-  GrowthTrendAnalysis _generateTestData(
-    DateTime birthDate, {
-    double? birthWeight,
-    bool includeFeedingData = false,
-  }) {
-    if (kDebugMode) {
-      print('🧪 _generateTestData: Generando datos de prueba...');
-      print('   - Fecha de nacimiento: $birthDate');
-      print('   - Peso al nacer: ${birthWeight ?? 3.2} kg');
-      print('   - Incluir datos de lactancia: $includeFeedingData');
-    }
-
-    final today = DateTime.now();
-    final testData = <WeightTrendData>[];
-
-    // Usar el peso al nacer del bebé si está disponible, sino usar 3.2 kg como default
-    final baseWeight = birthWeight ?? 3.2;
-
-    // Generar datos para los últimos 30 días
-    for (int i = 29; i >= 0; i--) {
-      final date = today.subtract(Duration(days: i));
-      final ageInDays = date.difference(birthDate).inDays;
-
-      if (ageInDays < 0) continue;
-
-      // Calcular percentiles OMS para esta edad
-      final whoService = WHOPercentilesService();
-      final percentiles = whoService.getAllPercentiles(ageInDays);
-
-      // Simular peso que crece gradualmente desde el peso al nacer
-      // Solo agregar peso real cada 3-4 días para simular registros reales
-      double? actualWeight;
-      if (i % 3 == 0 || i == 0) {
-        // Peso inicial: peso al nacer + crecimiento diario
-        // Los bebés recién nacidos pueden perder un poco de peso los primeros días,
-        // luego ganan aproximadamente 20-30g por día
-        const growthPerDay = 0.025; // 25g por día (promedio)
-        // Para los primeros 7 días, considerar pérdida inicial de peso
-        double weightAdjustment = 0.0;
-        if (ageInDays <= 7) {
-          // Pérdida inicial típica del 5-10% del peso al nacer
-          weightAdjustment =
-              -(baseWeight * 0.05) + (ageInDays * 0.01 * baseWeight);
-        }
-        actualWeight =
-            baseWeight + weightAdjustment + (ageInDays * growthPerDay);
-        // Asegurar que esté dentro de un rango razonable
-        actualWeight = actualWeight.clamp(2.0, 10.0);
-      }
-
-      // SOLO simular volumen de leche si includeFeedingData es true
-      // (es decir, solo si hay registros reales de lactancia)
-      double? feedingVolume;
-      int? feedingFrequency;
-      if (includeFeedingData && (i % 2 == 0 || i == 0)) {
-        // Volumen aumenta con la edad del bebé
-        double baseVolume;
-        if (ageInDays <= 7) {
-          baseVolume = 240.0 + (i * 5.0); // Primera semana
-          feedingFrequency = 8;
-        } else if (ageInDays <= 30) {
-          baseVolume = 560.0 + (i * 3.0); // Primer mes
-          feedingFrequency = 7;
-        } else if (ageInDays <= 60) {
-          baseVolume = 810.0 + (i * 2.0); // Segundo mes
-          feedingFrequency = 6;
-        } else {
-          baseVolume = 900.0 + (i * 1.5); // Tercer mes+
-          feedingFrequency = 5;
-        }
-        // Agregar variación aleatoria pequeña
-        feedingVolume = baseVolume + (i % 5 - 2) * 10.0;
-        feedingVolume = feedingVolume.clamp(200.0, 1200.0);
-      }
-
-      testData.add(
-        WeightTrendData(
-          date: date,
-          ageInDays: ageInDays,
-          actualWeight: actualWeight,
-          percentile3: percentiles['p3'],
-          percentile15: percentiles['p15'],
-          percentile50: percentiles['p50'],
-          percentile85: percentiles['p85'],
-          percentile97: percentiles['p97'],
-          feedingVolume: feedingVolume,
-          feedingFrequency: feedingFrequency,
-          feedingScore: feedingFrequency != null ? 75.0 + (i % 10) : null,
-        ),
-      );
-    }
-
-    if (kDebugMode) {
-      final dataWithWeight = testData
-          .where((data) => data.actualWeight != null)
-          .toList();
-      final dataWithVolume = testData
-          .where(
-            (data) => data.feedingVolume != null && data.feedingVolume! > 0,
-          )
-          .toList();
-      print('🧪 _generateTestData: Datos generados:');
-      print('   - Total días: ${testData.length}');
-      print('   - Días con peso: ${dataWithWeight.length}');
-      print('   - Días con volumen: ${dataWithVolume.length}');
-      if (dataWithWeight.isNotEmpty) {
-        print('   - Primer peso: ${dataWithWeight.first.actualWeight} kg');
-        print('   - Último peso: ${dataWithWeight.last.actualWeight} kg');
-      }
-    }
-
-    return GrowthTrendAnalysis(trendData: testData, hasAlert: false);
   }
 
   Widget _buildTrendSection() {

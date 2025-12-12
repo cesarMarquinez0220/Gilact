@@ -1904,7 +1904,7 @@ class _LactationCalendarWidgetState extends State<LactationCalendarWidget>
                               ),
                             ),
                             child: Text(
-                              'Cancelar',
+                              'common.cancel'.tr(),
                               style: GoogleFonts.quicksand(
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w600,

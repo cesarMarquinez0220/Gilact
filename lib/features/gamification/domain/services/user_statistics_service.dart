@@ -1,5 +1,7 @@
 import 'package:injectable/injectable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../lactation/data/services/lactation_service.dart';
 import '../../../lactation/data/datasources/lactation_database.dart';
 import '../../../lessons/domain/repositories/lesson_repository.dart';
@@ -7,6 +9,7 @@ import '../../../lactation/data/datasources/baby_weight_offline_local_data_sourc
 import '../../../lactation/data/datasources/sleep_offline_local_data_source.dart';
 import '../repositories/gamification_repository.dart';
 import '../entities/xp_transaction.dart';
+import '../../../lessons/data/services/video_service.dart';
 
 /// Servicio para obtener estadísticas reales del usuario
 /// Utilizado para mejorar la detección de logros
@@ -63,17 +66,116 @@ class UserStatisticsService {
         return hour >= 0 && hour < 6;
       });
 
-      // Obtener estadísticas de lecciones
-      final lessonsResult = await _lessonRepository.getAllLessons();
+      // Obtener estadísticas de lecciones desde Firestore (datos reales)
       int totalLessonsCompleted = 0;
-      int totalLessons = 0;
+      int totalLessons = 14; // Total de lecciones en la app
 
-      lessonsResult.fold((failure) => null, (lessons) {
-        totalLessons = lessons.length;
-        totalLessonsCompleted = lessons
-            .where((lesson) => lesson.isCompleted)
-            .length;
-      });
+      try {
+        // Consultar videos completados desde Firestore
+        // Usar el userId pasado como parámetro
+        final videosCollection = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userId)
+            .collection('videos');
+
+        // Intentar leer de caché primero
+        List<QueryDocumentSnapshot> docs = [];
+        try {
+          final cacheSnapshot = await videosCollection.get(
+            const GetOptions(source: Source.cache),
+          );
+          if (cacheSnapshot.docs.isNotEmpty) {
+            docs = cacheSnapshot.docs;
+          }
+        } catch (e) {
+          // Si no hay caché, leer del servidor
+        }
+
+        // Si no hay docs en caché, leer del servidor
+        if (docs.isEmpty) {
+          try {
+            final serverSnapshot = await videosCollection.get(
+              const GetOptions(source: Source.server),
+            );
+            docs = serverSnapshot.docs;
+          } catch (e) {
+            // Error leyendo del servidor, continuar con datos mock como fallback
+          }
+        }
+
+        // Procesar videos completados
+        final completedVideoIds = <int>{};
+        for (final doc in docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final estaCompletado = data['estaCompletado'] as bool? ?? false;
+          if (estaCompletado) {
+            final videoId = data['videoId'] as int? ?? int.tryParse(doc.id);
+            if (videoId != null) {
+              completedVideoIds.add(videoId);
+            }
+          }
+        }
+
+        // #region agent log
+        final appLogger = getIt<AppLogger>();
+        appLogger.d(
+          '🔍 [UserStatisticsService] Videos completados encontrados: ${completedVideoIds.length} (IDs: ${completedVideoIds.toList()})',
+        );
+        // #endregion
+
+        // Calcular lecciones únicas completadas
+        if (completedVideoIds.isNotEmpty) {
+          try {
+            // Obtener todos los videos para mapear videoId -> leccionId
+            final allVideos = await VideoService.getVideos();
+            final videoToLessonMap = <int, int>{};
+            for (final video in allVideos) {
+              videoToLessonMap[video.videoId] = video.leccionId;
+            }
+
+            // Obtener lecciones únicas de los videos completados
+            final uniqueLessons = <int>{};
+            for (final videoId in completedVideoIds) {
+              final leccionId = videoToLessonMap[videoId];
+              if (leccionId != null && leccionId > 0) {
+                uniqueLessons.add(leccionId);
+              }
+            }
+
+            totalLessonsCompleted = uniqueLessons.length;
+
+            // #region agent log
+            appLogger.d(
+              '🔍 [UserStatisticsService] Lecciones únicas completadas: $totalLessonsCompleted (de ${completedVideoIds.length} videos)',
+            );
+            // #endregion
+          } catch (e) {
+            // Si hay error obteniendo videos, usar conteo de videos como aproximación
+            totalLessonsCompleted = completedVideoIds.length;
+            // #region agent log
+            appLogger.w(
+              '⚠️ [UserStatisticsService] Error obteniendo videos, usando aproximación: $totalLessonsCompleted',
+            );
+            // #endregion
+          }
+        } else {
+          // #region agent log
+          final appLogger = getIt<AppLogger>();
+          appLogger.d(
+            '🔍 [UserStatisticsService] No se encontraron videos completados para userId: $userId',
+          );
+          // #endregion
+        }
+      } catch (e) {
+        // En caso de error, usar datos del repositorio como fallback
+        final lessonsResult = await _lessonRepository.getAllLessons();
+        lessonsResult.fold((failure) => null, (lessons) {
+          totalLessons = lessons.length;
+          totalLessonsCompleted = lessons
+              .where((lesson) => lesson.isCompleted)
+              .length;
+        });
+      }
 
       // Obtener registros de peso
       final weightRecords = await _weightDataSource.getAllRecords();
@@ -96,10 +198,11 @@ class UserStatisticsService {
         );
         completedTrivias = triviaTransactions.length;
 
-        // Contar trivias perfectas (100% - esto requiere lógica adicional)
-        // Por ahora, asumimos que si hay una transacción de trivia, fue completada
-        // Para detectar trivias perfectas, necesitaríamos guardar el porcentaje
-        perfectTrivias = completedTrivias; // Placeholder - mejorar después
+        // Contar trivias perfectas basándose en el bonusReason
+        // Las trivias perfectas tienen bonusReason == 'trivia_perfect'
+        perfectTrivias = triviaTransactions
+            .where((t) => t.bonusReason == 'trivia_perfect')
+            .length;
       });
 
       // Calcular días usando la app (desde la fecha de creación del perfil)

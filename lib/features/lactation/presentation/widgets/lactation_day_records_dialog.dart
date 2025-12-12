@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../domain/entities/lactation_record.dart';
 import '../../data/services/lactation_service.dart';
@@ -470,7 +471,7 @@ class _LactationDayRecordsDialogState extends State<LactationDayRecordsDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar', style: GoogleFonts.quicksand()),
+            child: Text('common.cancel'.tr(), style: GoogleFonts.quicksand()),
           ),
           ElevatedButton(
             onPressed: () async {

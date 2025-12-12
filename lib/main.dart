@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:device_preview/device_preview.dart' show DevicePreview;
+// import 'package:device_preview/device_preview.dart' show DevicePreview;
 import 'firebase_options.dart';
 import 'core/di/injection.dart';
 import 'features/auth/presentation/pages/login_page.dart';
@@ -174,12 +173,14 @@ void main() async {
   }
 
   // Solo usar DevicePreview en modo debug
-  if (kDebugMode) {
-    runApp(DevicePreview(enabled: true, builder: (context) => const MyApp()));
-  } else {
-    // En release, ejecutar directamente sin DevicePreview
-    runApp(const MyApp());
-  }
+  // if (kDebugMode) {
+  //   runApp(DevicePreview(enabled: true, builder: (context) => const MyApp()));
+  // } else {
+  //   // En release, ejecutar directamente sin DevicePreview
+  //   runApp(const MyApp());
+  // }
+  // Comentado temporalmente para pruebas
+  runApp(const MyApp());
 }
 
 /// Muestra una notificación de sincronización
@@ -348,11 +349,13 @@ class MyApp extends StatelessWidget {
               child: Builder(
                 builder: (context) => MaterialApp(
                   // Solo usar DevicePreview en modo debug
-                  useInheritedMediaQuery: kDebugMode,
-                  locale: kDebugMode
-                      ? (DevicePreview.locale(context) ?? context.locale)
-                      : context.locale,
-                  builder: kDebugMode ? DevicePreview.appBuilder : null,
+                  // useInheritedMediaQuery: kDebugMode,
+                  // locale: kDebugMode
+                  //     ? (DevicePreview.locale(context) ?? context.locale)
+                  //     : context.locale,
+                  // builder: kDebugMode ? DevicePreview.appBuilder : null,
+                  // Comentado temporalmente para pruebas
+                  locale: context.locale,
                   debugShowCheckedModeBanner: false,
                   theme: ThemeData.light().copyWith(
                     // Color de fondo que coincide con el gradiente del login
@@ -360,6 +363,12 @@ class MyApp extends StatelessWidget {
                     scaffoldBackgroundColor: const Color(0xFF2C5F5D),
                     // Color de fondo del MaterialApp
                     canvasColor: const Color(0xFF2C5F5D),
+                    // Deshabilitar selección de texto por defecto para evitar líneas amarillas
+                    textSelectionTheme: const TextSelectionThemeData(
+                      selectionColor: Colors.transparent,
+                      selectionHandleColor: Colors.transparent,
+                      cursorColor: Colors.transparent,
+                    ),
                   ),
                   navigatorKey: navigatorKey,
                   localizationsDelegates: context.localizationDelegates,
