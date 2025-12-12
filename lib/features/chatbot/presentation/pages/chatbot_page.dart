@@ -19,8 +19,9 @@ class ChatbotPage extends StatefulWidget {
 
 class _ChatbotPageState extends State<ChatbotPage> {
   final ScrollController _scrollController = ScrollController();
-  final PredefinedQuestionsService _questionsService = PredefinedQuestionsService();
-  
+  final PredefinedQuestionsService _questionsService =
+      PredefinedQuestionsService();
+
   // Preguntas actualmente mostradas
   List<PredefinedQuestion> _currentQuestions = [];
   // IDs de preguntas que ya se han mostrado (para rotación)
@@ -28,11 +29,38 @@ class _ChatbotPageState extends State<ChatbotPage> {
   // ID de la última pregunta seleccionada (para mostrar preguntas relacionadas)
   // ignore: unused_field
   String? _lastSelectedQuestionId;
+  // Idioma actual para detectar cambios
+  Locale? _currentLocale;
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _loadInitialQuestions();
+    // No acceder a context.locale aquí, se hará en didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Detectar cambios de idioma y recargar preguntas
+    // Solo acceder a context.locale después de que didChangeDependencies se complete
+    try {
+      final newLocale = context.locale;
+
+      // Primera inicialización o cambio de idioma
+      if (!_hasInitialized || _currentLocale != newLocale) {
+        _currentLocale = newLocale;
+        _hasInitialized = true;
+        // Recargar preguntas con el nuevo idioma
+        _loadInitialQuestions();
+      }
+    } catch (e) {
+      // Si hay error, simplemente cargar las preguntas sin verificar el idioma
+      if (!_hasInitialized) {
+        _hasInitialized = true;
+        _loadInitialQuestions();
+      }
+    }
   }
 
   void _loadInitialQuestions() {
@@ -49,7 +77,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         count: 3,
       );
       _shownQuestionIds.addAll(_currentQuestions.map((q) => q.id));
-      _lastSelectedQuestionId = null; // Resetear para mostrar preguntas generales
+      _lastSelectedQuestionId =
+          null; // Resetear para mostrar preguntas generales
     });
   }
 
@@ -79,12 +108,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
         : [];
 
     // Enviar mensaje con respuesta predefinida
-    bloc.add(SendMessage(
-      question: question.question,
-      userId: widget.userId ?? 'default_user',
-      messages: messages,
-      predefinedAnswer: question.answer, // Pasar la respuesta predefinida
-    ));
+    bloc.add(
+      SendMessage(
+        question: question.question,
+        userId: widget.userId ?? 'default_user',
+        messages: messages,
+        predefinedAnswer: question.answer, // Pasar la respuesta predefinida
+      ),
+    );
 
     // Actualizar preguntas mostradas con preguntas relacionadas
     setState(() {
@@ -180,11 +211,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   Widget _buildHeader() {
     final padding = ResponsiveHelper.getResponsivePadding(context);
-    final iconContainerSize =
-        ResponsiveHelper.isExtraSmall(context) ? 40.0 : 50.0;
+    final iconContainerSize = ResponsiveHelper.isExtraSmall(context)
+        ? 40.0
+        : 50.0;
     final iconSize = ResponsiveHelper.getResponsiveIconSize(context, 28);
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 20);
-    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(
+      context,
+      14,
+    );
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -205,7 +240,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 Icons.arrow_back_ios_rounded,
                 color: Colors.white,
               ),
-              tooltip: 'Volver',
+              tooltip: 'chatbot.back'.tr(),
             ),
           ),
           SizedBox(width: padding * 0.8),
@@ -300,7 +335,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 ],
               ),
               border: Border(
-                top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
+                top: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
             ),
             child: Column(
@@ -310,7 +348,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Preguntas relacionadas',
+                      'chatbot.relatedQuestions'.tr(),
                       style: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: Colors.white70,
@@ -321,10 +359,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       onTap: onRefresh,
                       child: Row(
                         children: [
-                          const Icon(Icons.refresh_rounded, size: 16, color: Colors.white70),
+                          const Icon(
+                            Icons.refresh_rounded,
+                            size: 16,
+                            color: Colors.white70,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            'Otras preguntas',
+                            'chatbot.otherQuestions'.tr(),
                             style: GoogleFonts.quicksand(
                               fontSize: 12,
                               color: Colors.white,
@@ -361,8 +403,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
       child: Container(
         margin: EdgeInsets.only(bottom: padding * 0.6),
         child: Row(
-          mainAxisAlignment:
-              message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment: message.isUser
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!message.isUser) ...[
@@ -399,10 +442,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   vertical: padding * 0.7,
                 ),
                 decoration: BoxDecoration(
-                  color:
-                      message.isUser
-                          ? const Color(0xFF4FD1C7).withValues(alpha: 0.95)
-                          : Colors.white.withValues(alpha: 0.2),
+                  color: message.isUser
+                      ? const Color(0xFF4FD1C7).withValues(alpha: 0.95)
+                      : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.3),
@@ -528,11 +570,13 @@ class _EmptyChatWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final padding = ResponsiveHelper.getResponsivePadding(context);
-    final iconContainerSize =
-        ResponsiveHelper.isSmall(context) ? 100.0 : 120.0;
+    final iconContainerSize = ResponsiveHelper.isSmall(context) ? 100.0 : 120.0;
     final mainIconSize = ResponsiveHelper.getResponsiveIconSize(context, 60);
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 32);
-    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
+    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(
+      context,
+      18,
+    );
     final textFontSize = ResponsiveHelper.getResponsiveFontSize(context, 15);
     final smallFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
 
@@ -568,7 +612,7 @@ class _EmptyChatWidget extends StatelessWidget {
             ),
             SizedBox(height: padding),
             Text(
-              '¡Hola! 👋',
+              'chatbot.greeting'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
@@ -578,7 +622,7 @@ class _EmptyChatWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Soy tu asistente virtual',
+              'chatbot.assistantDescription'.tr(),
               style: GoogleFonts.quicksand(
                 fontSize: subtitleFontSize,
                 color: Colors.white,
@@ -588,7 +632,7 @@ class _EmptyChatWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Pregúntame sobre lactancia materna',
+              'chatbot.askPrompt'.tr(),
               textAlign: TextAlign.center,
               style: GoogleFonts.quicksand(
                 fontSize: textFontSize,
@@ -601,7 +645,7 @@ class _EmptyChatWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Preguntas frecuentes',
+                  'chatbot.frequentQuestions'.tr(),
                   style: GoogleFonts.quicksand(
                     fontSize: smallFontSize,
                     color: Colors.white70,
@@ -617,7 +661,7 @@ class _EmptyChatWidget extends StatelessWidget {
                 GestureDetector(
                   onTap: onRefresh,
                   child: Text(
-                    ' Actualizar',
+                    ' ${'chatbot.refresh'.tr()}',
                     style: GoogleFonts.quicksand(
                       fontSize: smallFontSize,
                       color: Colors.white,

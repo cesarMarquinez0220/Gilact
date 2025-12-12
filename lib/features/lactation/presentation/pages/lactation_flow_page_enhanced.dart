@@ -392,7 +392,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Text(
-                '¿Cuánto tiempo duró la lactancia?',
+                'lactation.decisionTree.breastDuration'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
@@ -432,7 +432,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
       LactationOption(
         id: 'otro',
         title: 'common.other'.tr(),
-        description: 'Ingresar volumen personalizado',
+        description: 'lactation.flow.customVolumeHint'.tr(),
         icon: '✏️',
         color: 0xFF9E9E9E,
       ),
@@ -473,7 +473,7 @@ class _LactationFlowPageState extends State<LactationFlowPage>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Text(
-                '¿Cuánto volumen tomó?',
+                'lactation.decisionTree.bottleVolume'.tr(),
                 style: GoogleFonts.quicksand(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,

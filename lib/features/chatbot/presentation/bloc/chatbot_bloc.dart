@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/usecases/chatbot_usecases.dart';
 import '../../../../core/services/connectivity_service.dart';
@@ -27,7 +28,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   ) async {
     // Verificar conectividad antes de enviar mensaje
     final isConnected = await _connectivityService.isConnected();
-    
+
     if (!isConnected) {
       // Sin conexión: mostrar mensaje de error
       final currentMessages = state is ChatbotLoaded
@@ -43,7 +44,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
       final errorMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: 'Es necesario tener conexión a internet para obtener una respuesta del chatbot. Por favor, verifica tu conexión e intenta nuevamente.',
+        text: 'chatbot.connectionRequired'.tr(),
         isUser: false,
         timestamp: DateTime.now(),
       );
@@ -58,8 +59,8 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
       final currentMessages = event.messages.isNotEmpty
           ? event.messages
           : (state is ChatbotLoaded
-              ? (state as ChatbotLoaded).messages
-              : <ChatMessage>[]);
+                ? (state as ChatbotLoaded).messages
+                : <ChatMessage>[]);
 
       final userMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),

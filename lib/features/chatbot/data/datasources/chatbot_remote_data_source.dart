@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chatbot_knowledge.dart';
@@ -121,21 +122,45 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
       // Respuestas por defecto si no encuentra coincidencia
       return _getDefaultAnswer(question);
     } catch (e) {
-      return 'Ocurrió un error al procesar tu pregunta. Por favor, intenta de nuevo.';
+      // Mensaje de error traducido según el idioma actual
+      try {
+        return 'chatbot.errorProcessing'.tr();
+      } catch (_) {
+        // Fallback si no hay traducción
+        return 'Ocurrió un error al procesar tu pregunta. Por favor, intenta de nuevo.';
+      }
     }
   }
 
   String _getDefaultAnswer(String question) {
     final lowerQuestion = question.toLowerCase();
 
-    if (lowerQuestion.contains('hola') || lowerQuestion.contains('hi')) {
-      return '¡Hola! 👋 Estoy aquí para ayudarte con preguntas sobre lactancia materna. ¿En qué puedo asistirte?';
+    // Detectar idioma basado en palabras clave
+    final isEnglish =
+        lowerQuestion.contains('hi') ||
+        lowerQuestion.contains('hello') ||
+        lowerQuestion.contains('thank') ||
+        lowerQuestion.contains('thanks');
+
+    if (lowerQuestion.contains('hola') ||
+        lowerQuestion.contains('hi') ||
+        lowerQuestion.contains('hello')) {
+      return isEnglish
+          ? 'Hello! 👋 I\'m here to help you with questions about breastfeeding. How can I assist you?'
+          : '¡Hola! 👋 Estoy aquí para ayudarte con preguntas sobre lactancia materna. ¿En qué puedo asistirte?';
     }
 
-    if (lowerQuestion.contains('gracias') || lowerQuestion.contains('thank')) {
-      return 'De nada. ¡Estoy aquí cuando me necesites! 😊';
+    if (lowerQuestion.contains('gracias') ||
+        lowerQuestion.contains('thank') ||
+        lowerQuestion.contains('thanks')) {
+      return isEnglish
+          ? 'You\'re welcome. I\'m here whenever you need me! 😊'
+          : 'De nada. ¡Estoy aquí cuando me necesites! 😊';
     }
 
-    return 'No tengo información específica sobre eso en este momento, pero puedo ayudarte con temas relacionados a:\n\n✅ Lactancia materna\n✅ Posturas correctas\n✅ Alimentación complementaria\n✅ Salud del bebé\n\n¿Tienes alguna pregunta sobre estos temas?';
+    // Respuesta genérica traducida
+    return isEnglish
+        ? 'I don\'t have specific information about that at the moment, but I can help you with topics related to:\n\n✅ Breastfeeding\n✅ Correct positions\n✅ Complementary feeding\n✅ Baby\'s health\n\nDo you have any questions about these topics?'
+        : 'No tengo información específica sobre eso en este momento, pero puedo ayudarte con temas relacionados a:\n\n✅ Lactancia materna\n✅ Posturas correctas\n✅ Alimentación complementaria\n✅ Salud del bebé\n\n¿Tienes alguna pregunta sobre estos temas?';
   }
 }

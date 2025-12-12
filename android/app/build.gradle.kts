@@ -71,15 +71,20 @@ android {
             } catch (e: Exception) {
                 println("WARNING: Release signing configuration failed: ${e.message}")
                 println("Falling back to debug signing. This should NOT be used in production!")
-                // No lanzar excepción para permitir builds de desarrollo, pero registrar el error
+                // No configurar nada si falla - el SigningConfig quedará vacío
             }
         }
     }
 
     buildTypes {
         release {
-            // Configuración de signing para release
-            signingConfig = signingConfigs.getByName("release")
+            // Configuración de signing para release (solo si está correctamente configurado)
+            val releaseConfig = signingConfigs.getByName("release")
+            if (releaseConfig.storeFile != null) {
+                signingConfig = releaseConfig
+            } else {
+                println("WARNING: Using debug signing for release build. This should NOT be used in production!")
+            }
             
             // Optimizaciones de MobSF: ofuscación y reducción de recursos
             isMinifyEnabled = true

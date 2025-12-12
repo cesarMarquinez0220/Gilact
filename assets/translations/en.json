@@ -352,6 +352,7 @@
       "back": "Back",
       "confirmRecord": "Confirm record",
       "customTimeHint": "Enter custom time",
+      "customVolumeHint": "Enter custom volume",
       "other": "Other",
       "edit": "Edit",
       "save": "Save",
@@ -1499,7 +1500,122 @@
   "chatbot": {
     "title": "ChatBot Gilact",
     "subtitle": "Your lactation assistant",
-    "quickQuestions": "Quick questions"
+    "quickQuestions": "Quick questions",
+    "writeQuestion": "Write your question...",
+    "loginRequired": "Login required",
+    "loginRequiredMessage": "Please log in to access the lessons.",
+    "greeting": "Hello! 👋",
+    "assistantDescription": "I am your virtual assistant",
+    "askPrompt": "Ask me about breastfeeding",
+    "frequentQuestions": "Frequent questions",
+    "refresh": "Refresh",
+    "relatedQuestions": "Related questions",
+    "otherQuestions": "Other questions",
+    "back": "Back",
+    "errorProcessing": "An error occurred while processing your question. Please try again.",
+    "connectionRequired": "Internet connection is required to get a response from the chatbot. Please check your connection and try again.",
+    "questions": {
+      "q1": {
+        "question": "What is colostrum?",
+        "answer": "Colostrum is the first milk your body produces after childbirth. It is rich in proteins, antibodies, and essential nutrients that protect your baby from diseases. It is yellowish and thick, and is produced in small amounts during the first few days."
+      },
+      "q2": {
+        "question": "How do I start breastfeeding?",
+        "answer": "To start breastfeeding, place your baby skin-to-skin immediately after birth if possible. Find a quiet environment, place the baby near your breast, and wait for them to open their mouth. Make sure the baby has a good latch, with their mouth covering most of the areola."
+      },
+      "q3": {
+        "question": "How to improve the latch?",
+        "answer": "To improve the latch, make sure the baby has their mouth wide open before bringing them to your breast. The lower lip should be turned outward, and the nose and chin should touch the breast. The baby should have more areola in the lower part of the mouth than in the upper part."
+      },
+      "q4": {
+        "question": "How many times should a baby eat?",
+        "answer": "Newborns should feed 8 to 12 times a day, approximately every 2-3 hours. It is important to feed the baby on demand, that is, when they show signs of hunger such as bringing their hands to their mouth, making sucking movements, or being restless."
+      },
+      "q5": {
+        "question": "What is mastitis?",
+        "answer": "Mastitis is an inflammation of breast tissue that can cause pain, redness, swelling, and fever. It can occur when milk is not completely drained from the breast. It is important to continue breastfeeding or expressing milk from the affected breast, apply warm compresses, and rest."
+      },
+      "q6": {
+        "question": "How to treat cracked nipples?",
+        "answer": "To treat cracked nipples, make sure the baby has a good latch. After each feeding, apply a little of your own breast milk to the nipples and let them air dry. Use nipple shields if necessary temporarily. Avoid harsh soaps and creams with alcohol."
+      },
+      "q7": {
+        "question": "How do I know if my baby is eating enough?",
+        "answer": "Signs that your baby is eating enough: wets 6-8 diapers a day, has regular bowel movements, gains weight appropriately, is alert and active when awake, and looks satisfied after feedings. If you have doubts, consult with a healthcare professional."
+      },
+      "q8": {
+        "question": "How to store breast milk?",
+        "answer": "Breast milk can be stored in the refrigerator for up to 4 days at 4°C or less, in the freezer for up to 6 months (ideally 3 months), and at room temperature for up to 4 hours. Use clean containers and label them with the date. Thaw in the refrigerator or under warm water, never in the microwave."
+      },
+      "q9": {
+        "question": "How to express breast milk?",
+        "answer": "You can express milk manually or with a pump. Wash your hands before, gently massage your breast, and place the pump or your hand in a C-shape around the areola. Express until the flow decreases, then switch to the other breast. Alternate between both breasts several times."
+      },
+      "q10": {
+        "question": "What are the benefits of breastfeeding?",
+        "answer": "Breastfeeding benefits both the baby and the mother. For the baby: protects against infections, reduces the risk of allergies, promotes brain development, and provides ideal nutrients. For the mother: helps recover weight, reduces the risk of breast and ovarian cancer, and strengthens the bond with the baby."
+      },
+      "q11": {
+        "question": "What should I eat during breastfeeding?",
+        "answer": "During breastfeeding, it is important to maintain a balanced and varied diet. Include fruits, vegetables, lean proteins, whole grains, and dairy products. Drink plenty of water (at least 8-10 glasses a day). Avoid alcohol and limit caffeine. You don't need a special diet, just eat healthily."
+      },
+      "q12": {
+        "question": "Can I take medications?",
+        "answer": "Many medications are safe during breastfeeding, but always consult with your doctor or pharmacist before taking any medication. Some medications can pass into breast milk. Your doctor can recommend safe alternatives if necessary."
+      },
+      "q13": {
+        "question": "How long does breastfeeding last?",
+        "answer": "The World Health Organization recommends exclusive breastfeeding for the first 6 months, and then continuing with breastfeeding along with complementary foods until 2 years or more. The duration depends on you and your baby. There is no 'correct' time to wean."
+      },
+      "q14": {
+        "question": "How to wean my baby?",
+        "answer": "Weaning can be gradual or abrupt, but gradual is usually more comfortable. Reduce one feeding at a time, replacing it with formula milk or solid foods depending on age. Offer comfort and extra attention during the process. Weaning can take weeks or months."
+      },
+      "q15": {
+        "question": "Can I breastfeed if I'm sick?",
+        "answer": "In most cases, yes you can breastfeed when you're sick. In fact, your milk contains antibodies that can protect your baby. If you have a high fever or a serious illness, consult with your doctor. Use a mask if you have respiratory symptoms."
+      },
+      "q16": {
+        "question": "Does breastfeeding hurt?",
+        "answer": "Breastfeeding should not hurt. If you feel pain, it may be a sign of an incorrect latch. Pain can indicate cracks, mastitis, or other problems. If the pain persists, consult with a lactation specialist or your doctor to identify and treat the cause."
+      },
+      "q17": {
+        "question": "Can I exercise during breastfeeding?",
+        "answer": "Yes, you can exercise during breastfeeding. Moderate exercise does not affect milk production or quality. Make sure to stay hydrated and use a supportive bra. You can breastfeed before exercise for greater comfort."
+      },
+      "q18": {
+        "question": "What positions are best for breastfeeding?",
+        "answer": "The best positions are those in which both you and your baby are comfortable. Some common options: cradle position, cross-cradle position, side-lying position, and rugby ball position. Try different positions to find what works best."
+      },
+      "q19": {
+        "question": "How to increase milk production?",
+        "answer": "To increase milk production: breastfeed frequently (on demand), make sure the baby has a good latch, alternate between both breasts, express milk after feedings if necessary, rest and maintain good hydration and nutrition."
+      },
+      "q20": {
+        "question": "Can I breastfeed in public?",
+        "answer": "Yes, you have the legal right to breastfeed in public in many countries. It is a natural and protected activity. If you feel more comfortable, you can use a blanket or a special nursing top. There is nothing wrong with breastfeeding your baby when they need it."
+      },
+      "q21": {
+        "question": "What is exclusive breastfeeding?",
+        "answer": "Exclusive breastfeeding means the baby only receives breast milk, without water, juices, formula, or other foods. It is recommended for the first 6 months of life. After 6 months, it is combined with complementary foods while continuing to breastfeed."
+      },
+      "q22": {
+        "question": "How do I know if I have enough milk?",
+        "answer": "Signs that you have enough milk: the baby wets 6-8 diapers a day, gains weight appropriately, looks satisfied after feedings, and your breasts feel softer after breastfeeding. If you have doubts, consult with a lactation specialist."
+      },
+      "q23": {
+        "question": "Can I breastfeed if I have flat or inverted nipples?",
+        "answer": "Yes, you can breastfeed with flat or inverted nipples. It may require more patience and special techniques. A lactation specialist can help you with techniques such as using nipple shields, Hoffman exercises, or expressing before breastfeeding to help the nipple protrude."
+      },
+      "q24": {
+        "question": "When should I seek professional help?",
+        "answer": "You should seek professional help if: you feel constant pain while breastfeeding, your baby is not gaining weight appropriately, you have a fever or symptoms of mastitis, the baby is not wetting enough diapers, or if you have any concerns about breastfeeding. Lactation specialists can help you."
+      },
+      "q25": {
+        "question": "Does breast milk change over time?",
+        "answer": "Yes, breast milk changes to adapt to the baby's needs. Colostrum (first days) is rich in antibodies. Transitional milk (days 3-14) has more fat and lactose. Mature milk continuously adapts to the growing baby's nutritional needs."
+      }
+    }
   },
   "videos": {
     "playError": "Error playing video: {error}",
