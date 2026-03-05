@@ -27,8 +27,23 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+config = File.join(__dir__, 'Pods', 'Target Support Files', 'Pods-Runner', 'Pods-Runner.profile.xcconfig')
+if File.exist?(config)
+  ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+  ENV['PODS_TARGET_SRCROOT'] = config
+end
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    
+    # Corrige problemas de arquitectura con Xcode 16+
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+    end
+  end
+end
 target 'Runner' do
-  use_frameworks!
+  use_frameworks! :linkage => :static
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))

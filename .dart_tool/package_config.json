@@ -123,7 +123,7 @@
     },
     {
       "name": "card_swiper",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/card_swiper-3.0.1",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/card_swiper-3.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -140,6 +140,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "checked_yaml",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/checked_yaml-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "chewie",
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/chewie-1.12.1",
       "packageUri": "lib/",
@@ -150,6 +156,12 @@
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/cli_util-0.4.2",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "cli_util",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/cli_util-0.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "clock",
@@ -549,13 +561,13 @@
     },
     {
       "name": "flutter_test",
-      "rootUri": "file:///Users/gitce/Documents/dev/flutter/packages/flutter_test",
+      "rootUri": "file:///Users/gitcelexx/Documents/flutter/packages/flutter_test",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
     {
       "name": "flutter_web_plugins",
-      "rootUri": "file:///Users/gitce/Documents/dev/flutter/packages/flutter_web_plugins",
+      "rootUri": "file:///Users/gitcelexx/Documents/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
@@ -620,6 +632,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "image",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/image-4.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "intl",
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
@@ -627,7 +645,7 @@
     },
     {
       "name": "js",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/js-0.6.7",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/js-0.6.7",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -735,7 +753,13 @@
     },
     {
       "name": "nested",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/nested-1.0.0",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "nm",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/nm-0.5.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -795,7 +819,7 @@
     },
     {
       "name": "path_provider_linux",
-      "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -933,7 +957,7 @@
     },
     {
       "name": "sky_engine",
-      "rootUri": "file:///Users/gitce/Documents/dev/flutter/bin/cache/pkg/sky_engine",
+      "rootUri": "file:///Users/gitcelexx/Documents/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
@@ -1082,6 +1106,12 @@
       "languageVersion": "3.1"
     },
     {
+      "name": "velocity_x",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/velocity_x-4.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "video_player",
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/video_player-2.10.0",
       "packageUri": "lib/",
@@ -1116,6 +1146,18 @@
       "rootUri": "file:///Users/gitce/.pub-cache/hosted/pub.dev/vm_service-15.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "vm_service",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/vm_service-14.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "vxstate",
+      "rootUri": "file:///Users/gitcelexx/.pub-cache/hosted/pub.dev/vxstate-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "wakelock_plus",
