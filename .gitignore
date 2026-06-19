@@ -6,7 +6,7 @@
 .pub-cache/
 .pub/
 /build/
-*.lock
+# NOTA: No ignoramos *.lock para permitir el versionado de pubspec.lock y Podfile.lock (esencial en apps Flutter)
 
 # Archivos de configuración de IDE
 .vscode/
@@ -86,13 +86,9 @@ firebase-debug.*.log
 android/app/debug
 android/app/profile
 android/app/release
-android/gradle/
 android/local.properties
 android/.gradle
 android/captures/
-android/gradlew
-android/gradlew.bat
-android/local.properties
 android/.idea/workspace.xml
 android/.idea/tasks.xml
 android/.idea/gradle.xml
@@ -218,3 +214,10 @@ lib/generated/
 lib/temp/
 *.dart.bak
 *.swift.bak
+
+# Archivos generados por build_runner (muy comunes en Flutter con BLoC, Injectable, Freezed, etc.)
+*.g.dart
+*.freezed.dart
+*.chopper.dart
+*.mocks.dart
+.dart_tool/build/
