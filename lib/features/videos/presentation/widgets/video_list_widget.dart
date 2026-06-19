@@ -29,8 +29,6 @@ class _VideoListWidgetState extends State<VideoListWidget> {
         } else if (state is VideosLoaded) {
           return ListView.builder(
             itemCount: state.videos.length,
-            // Optimización: cacheExtent reduce reconstrucciones durante scroll
-            cacheExtent: 500, // Cache 500px fuera del viewport
             itemBuilder: (context, index) {
               final video = state.videos[index];
               return VideoCard(

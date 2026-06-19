@@ -1240,28 +1240,3 @@ class LessonPathPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _LessonPathPainter extends CustomPainter {
-  final List<Video> videos;
-  final Map<int, double> progressMap;
-  final Function(int) onVideoTap;
-  final Function(int) onTriviaTap;
-  final Set<int> completedTriviaLessons;
-  final int? lastCompletedLesson;
-
-  _LessonPathPainter({
-    required this.videos,
-    required this.progressMap,
-    required this.onVideoTap,
-    required this.onTriviaTap,
-    required this.completedTriviaLessons,
-    this.lastCompletedLesson,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // ... existing code ...
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

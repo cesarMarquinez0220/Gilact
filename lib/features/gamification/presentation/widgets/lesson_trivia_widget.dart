@@ -115,7 +115,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
   void _loadQuestions() {
     // #region agent log
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔍 [LessonTriviaWidget] Cargando preguntas para lección: ${widget.lessonId}',
       );
     }
@@ -124,12 +124,12 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
     // #region agent log
     if (kDebugMode && questions.isNotEmpty) {
       final firstQ = questions.first;
-      print('🔍 [LessonTriviaWidget] Primera pregunta cargada:');
-      print('   ID: ${firstQ.id}');
-      print('   Pregunta: ${firstQ.question}');
-      print('   Opciones (${firstQ.options.length}):');
+      debugPrint('🔍 [LessonTriviaWidget] Primera pregunta cargada:');
+      debugPrint('   ID: ${firstQ.id}');
+      debugPrint('   Pregunta: ${firstQ.question}');
+      debugPrint('   Opciones (${firstQ.options.length}):');
       for (int i = 0; i < firstQ.options.length; i++) {
-        print('     [$i]: ${firstQ.options[i]}');
+        debugPrint('     [$i]: ${firstQ.options[i]}');
       }
     }
     // #endregion
@@ -209,15 +209,15 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
 
     // Logs para debugging del cálculo de XP
     if (kDebugMode) {
-      print('📊 [LessonTriviaWidget] Cálculo de XP:');
-      print('   └─ Preguntas totales: ${_questions.length}');
-      print('   └─ Respuestas correctas: $_correctAnswers');
-      print(
+      debugPrint('📊 [LessonTriviaWidget] Cálculo de XP:');
+      debugPrint('   └─ Preguntas totales: ${_questions.length}');
+      debugPrint('   └─ Respuestas correctas: $_correctAnswers');
+      debugPrint(
         '   └─ XP Trivia: ${triviaTransaction.amount} ($_correctAnswers × 5 + ${_correctAnswers == _questions.length ? 20 : 0} bonus)',
       );
-      print('   └─ XP Lección: ${lessonTransaction.amount}');
-      print('   └─ XP Total mostrado: $_totalXP');
-      print(
+      debugPrint('   └─ XP Lección: ${lessonTransaction.amount}');
+      debugPrint('   └─ XP Total mostrado: $_totalXP');
+      debugPrint(
         '   └─ Nota: El registro rápido (10 XP) se agrega por separado cuando se hace el registro',
       );
     }
@@ -253,9 +253,9 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
 
         // #region agent log
         if (kDebugMode) {
-          print('🔍 [LessonTriviaWidget] Estadísticas del usuario:');
-          print('   perfectTrivias: ${userStats.perfectTrivias}');
-          print('   totalLessonsCompleted: ${userStats.totalLessonsCompleted}');
+          debugPrint('🔍 [LessonTriviaWidget] Estadísticas del usuario:');
+          debugPrint('   perfectTrivias: ${userStats.perfectTrivias}');
+          debugPrint('   totalLessonsCompleted: ${userStats.totalLessonsCompleted}');
         }
         // #endregion
 
@@ -278,14 +278,14 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
         if (kDebugMode) {
           achievements.fold(
             (error) {
-              print('❌ [LessonTriviaWidget] Error detectando logros: $error');
+              debugPrint('❌ [LessonTriviaWidget] Error detectando logros: $error');
             },
             (newAchievements) {
-              print(
+              debugPrint(
                 '🔍 [LessonTriviaWidget] Logros detectados: ${newAchievements.length}',
               );
               for (final achievement in newAchievements) {
-                print('   - ${achievement.id}: ${achievement.title}');
+                debugPrint('   - ${achievement.id}: ${achievement.title}');
               }
             },
           );
@@ -315,7 +315,7 @@ class _LessonTriviaWidgetState extends State<LessonTriviaWidget> {
       } catch (e) {
         // Ignorar errores en la detección de logros para no interrumpir el flujo
         if (kDebugMode) {
-          print('Error detectando logros después de lección: $e');
+          debugPrint('Error detectando logros después de lección: $e');
         }
       }
 

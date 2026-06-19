@@ -24,7 +24,7 @@ import '../widgets/companion_stats_summary.dart';
 import '../widgets/companion_mascot_wrapper.dart';
 import '../widgets/companion_new_achievements_animation.dart';
 import '../../../gamification/presentation/widgets/achievement_unlocked_dialog.dart';
-import '../../../gamification/presentation/widgets/baby_stage_upgrade_dialog.dart';
+
 import '../../../gamification/domain/services/achievement_service.dart';
 
 /// Página dedicada a la compañera de gamificación
@@ -528,58 +528,7 @@ class _CompanionPageState extends State<CompanionPage>
     );
   }
 
-  /// Método de prueba para mostrar la animación de desbloqueo del bebé de 3 meses
-  void _testBaby3Months(BuildContext context) {
-    BabyStageUpgradeDialog.show(
-      context,
-      newStage: 'baby_3months',
-      previousStage: 'baby_born',
-      completedLessons: 7,
-      withVibration: true,
-    );
-  }
 
-  /// Método de prueba para mostrar la animación de desbloqueo del bebé de 6 meses
-  void _testBaby6Months(BuildContext context) {
-    BabyStageUpgradeDialog.show(
-      context,
-      newStage: 'baby_6months',
-      previousStage: 'baby_3months',
-      completedLessons: 14,
-      withVibration: true,
-    );
-  }
-
-  /// Método de prueba para mostrar el diálogo de logro desbloqueado
-  void _testAchievementDialog(BuildContext context) {
-    final achievementService = AchievementService();
-    final allAchievements = achievementService.getAllAchievements();
-
-    if (allAchievements.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay logros disponibles')),
-      );
-      return;
-    }
-
-    // Buscar un logro con badge específico para la prueba
-    // Intentar encontrar uno de los milestones, niveles, o daily_3 (Día Activo)
-    final testAchievement = allAchievements.firstWhere(
-      (a) =>
-          a.id == 'daily_3' || // Día Activo
-          a.id == 'milestone_10' ||
-          a.id == 'level_3' ||
-          a.id == 'streak_7' ||
-          a.id == 'complete_25',
-      orElse: () => allAchievements.first,
-    );
-
-    AchievementUnlockedDialog.show(
-      context,
-      testAchievement,
-      testAchievement.xpReward,
-    );
-  }
 
   /// Método de prueba para simular desbloqueo real de un logro
   /// Esto agregará el logro al perfil y mostrará la animación automáticamente

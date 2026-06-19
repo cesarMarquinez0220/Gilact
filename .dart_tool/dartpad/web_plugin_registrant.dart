@@ -35,7 +35,12 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebaseMessagingWeb.registerWith(registrar);
   FirebasePerformanceWeb.registerWith(registrar);
   InAppWebViewFlutterPlugin.registerWith(registrar);
+  FlutterNativeSplashWeb.registerWith(registrar);
   FlutterSecureStorageWeb.registerWith(registrar);
   PackageInfoPlusWebPlugin.registerWith(registrar);
   RiveNativePlugin.registerWith(registrar);
   SharedPreferencesPlugin.registerWith(registrar);
+  VideoPlayerPlugin.registerWith(registrar);
+  WakelockPlusWebPlugin.registerWith(registrar);
+  registrar.registerMessageHandler();
+}
