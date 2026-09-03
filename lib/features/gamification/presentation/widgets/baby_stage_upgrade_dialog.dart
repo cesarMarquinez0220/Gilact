@@ -475,7 +475,7 @@ class _BabyRiveAnimationDialog extends StatefulWidget {
 }
 
 class _BabyRiveAnimationDialogState extends State<_BabyRiveAnimationDialog> {
-  late final rive.FileLoader _fileLoader;
+  late rive.FileLoader _fileLoader;
   final AppLogger _logger = getIt<AppLogger>();
 
   /// Obtiene la ruta del archivo Rive según la etapa del bebé

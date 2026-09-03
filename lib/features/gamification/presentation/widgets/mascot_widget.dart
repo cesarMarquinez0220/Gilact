@@ -362,7 +362,7 @@ class _BabyRiveAnimation extends StatefulWidget {
 }
 
 class _BabyRiveAnimationState extends State<_BabyRiveAnimation> {
-  late final rive.FileLoader _fileLoader;
+  late rive.FileLoader _fileLoader;
   rive.RiveWidgetController? _controller;
   final AppLogger _logger = getIt<AppLogger>();
 

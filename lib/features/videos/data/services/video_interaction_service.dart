@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -133,7 +134,7 @@ class VideoInteractionService {
   }
 
   /// Obtiene el ID del documento del usuario en Firestore
-  /// Usa la misma lógica que VideoProgressService
+  /// Usa SharedPreferences como caché persistente para que funcione offline
   Future<String?> _getUserDocumentId() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -142,44 +143,53 @@ class VideoInteractionService {
         return null;
       }
 
-      // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
-      if (user.email != null) {
-        final userQuery = await _firestore
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'cached_user_doc_id_${user.uid}';
+      final cachedId = prefs.getString(cacheKey);
+
+      try {
+        // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
+        if (user.email != null) {
+          final userQuery = await _firestore
+              .collection('Users')
+              .where('email', isEqualTo: user.email)
+              .limit(1)
+              .get();
+
+          if (userQuery.docs.isNotEmpty) {
+            final userDocId = userQuery.docs.first.id;
+            await prefs.setString(cacheKey, userDocId);
+            _logger.d(
+              'VideoInteractionService: Usuario encontrado por email, ID: $userDocId',
+            );
+            return userDocId;
+          }
+        }
+
+        // PRIORIDAD 2: Intentar con UID
+        final docSnapshot = await _firestore
             .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .limit(1)
+            .doc(user.uid)
             .get();
 
-        if (userQuery.docs.isNotEmpty) {
-          final userDocId = userQuery.docs.first.id;
-          _logger.d(
-            'VideoInteractionService: Usuario encontrado por email, ID del documento: $userDocId',
-          );
-          return userDocId;
-        } else {
-          _logger.w(
-            'VideoInteractionService: No se encontró usuario por email: ${user.email}',
-          );
+        if (docSnapshot.exists) {
+          await prefs.setString(cacheKey, user.uid);
+          return user.uid;
         }
-      } else {
-        _logger.w('VideoInteractionService: Usuario no tiene email');
+
+        if (cachedId != null) {
+          return cachedId;
+        }
+
+        _logger.e('VideoInteractionService: No se encontró usuario en Firestore ni en caché');
+        return null;
+      } catch (e) {
+        if (cachedId != null) {
+          return cachedId;
+        }
+        _logger.e('Error en query, intentando caché falló', e, null);
+        return null;
       }
-
-      // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
-      final docSnapshot = await _firestore
-          .collection('Users')
-          .doc(user.uid)
-          .get();
-
-      if (docSnapshot.exists) {
-        _logger.w(
-          'VideoInteractionService: Usando UID como fallback (no recomendado): ${user.uid}',
-        );
-        return user.uid;
-      }
-
-      _logger.e('VideoInteractionService: No se encontró usuario en Firestore');
-      return null;
     } catch (e, stackTrace) {
       _logger.e('Error obteniendo ID del usuario', e, stackTrace);
       return null;

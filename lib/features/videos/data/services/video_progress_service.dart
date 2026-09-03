@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/di/injection.dart';
@@ -14,21 +15,23 @@ class VideoProgressService {
   String? _cachedUserDocId;
 
   /// Obtiene el ID del documento del usuario en Firestore
-  /// SIEMPRE busca por email primero para obtener el ID correcto del documento
-  /// Solo usa UID como último recurso si no encuentra nada por email
+  /// Usa SharedPreferences como caché persistente para que funcione offline
   Future<String?> _getUserDocumentId() async {
-    // Si tenemos caché, usarlo
     if (_cachedUserDocId != null) {
       return _cachedUserDocId;
     }
 
-    try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        _logger.e('VideoProgressService: Usuario no autenticado');
-        return null;
-      }
+    final user = _auth.currentUser;
+    if (user == null) {
+      _logger.e('VideoProgressService: Usuario no autenticado');
+      return null;
+    }
 
+    final prefs = await SharedPreferences.getInstance();
+    final cacheKey = 'cached_user_doc_id_${user.uid}';
+    final cachedId = prefs.getString(cacheKey);
+
+    try {
       // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
       if (user.email != null) {
         final userQuery = await _firestore
@@ -39,38 +42,40 @@ class VideoProgressService {
 
         if (userQuery.docs.isNotEmpty) {
           _cachedUserDocId = userQuery.docs.first.id;
+          await prefs.setString(cacheKey, _cachedUserDocId!);
           _logger.d(
-            'VideoProgressService: Usuario encontrado por email, ID del documento: $_cachedUserDocId',
+            'VideoProgressService: Usuario encontrado por email, ID: $_cachedUserDocId',
           );
           return _cachedUserDocId;
-        } else {
-          _logger.w(
-            'VideoProgressService: No se encontró usuario por email: ${user.email}',
-          );
         }
-      } else {
-        _logger.w('VideoProgressService: Usuario no tiene email');
       }
 
-      // PRIORIDAD 2: Intentar con UID solo si no se encontró por email
-      // (Esto puede crear documentos en el lugar incorrecto, pero es un fallback)
+      // PRIORIDAD 2: Intentar con UID
       final docSnapshot = await _firestore
           .collection('Users')
           .doc(user.uid)
           .get();
 
       if (docSnapshot.exists) {
-        _logger.w(
-          'VideoProgressService: Usando UID como fallback (no recomendado): ${user.uid}',
-        );
         _cachedUserDocId = user.uid;
+        await prefs.setString(cacheKey, _cachedUserDocId!);
         return user.uid;
       }
+      
+      // Si llegamos aquí y hay caché, lo usamos
+      if (cachedId != null) {
+        _cachedUserDocId = cachedId;
+        return cachedId;
+      }
 
-      _logger.e('VideoProgressService: No se encontró usuario en Firestore');
+      _logger.e('VideoProgressService: No se encontró usuario en Firestore ni en caché');
       return null;
     } catch (e, stackTrace) {
-      _logger.e('Error obteniendo ID del usuario', e, stackTrace);
+      _logger.e('Error obteniendo ID del usuario, intentando caché', e, stackTrace);
+      if (cachedId != null) {
+        _cachedUserDocId = cachedId;
+        return cachedId;
+      }
       return null;
     }
   }

@@ -439,7 +439,7 @@ class _RegistrationPageState extends State<RegistrationPage>
     final isTablet = ResponsiveHelper.isTablet(context);
     final dialogWidth = isTablet ? 500.0 : double.infinity;
 
-    return await showDialog<bool>(
+    return (await showDialog<bool>(
           context: context,
           barrierDismissible: false,
           builder: (context) => Center(
@@ -448,28 +448,29 @@ class _RegistrationPageState extends State<RegistrationPage>
               child: AlertDialog(
                 backgroundColor: Colors.transparent,
                 contentPadding: EdgeInsets.zero,
-                content: Container(
-                  padding: EdgeInsets.all(ResponsiveHelper.getResponsiveValue(
-                    context,
-                    small: 24,
-                    medium: 32,
-                    large: 40,
-
-                  )),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                content: SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(ResponsiveHelper.getResponsiveValue(
+                      context,
+                      small: 24,
+                      medium: 32,
+                      large: 40,
+  
+                    )),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                       // Icono de confirmación
                       Container(
                         width: ResponsiveHelper.getResponsiveValue(context, small: 60, medium: 70, large: 80),
@@ -615,7 +616,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               ),
             ),
           ),
-        ) ??
+        ))) ??
         false;
   }
 

@@ -160,7 +160,10 @@ class _CompanionPageState extends State<CompanionPage>
                     return FadeInUp(
                       duration: const Duration(milliseconds: 800),
                       child: CompanionMascotWrapper(
-                        profile: gamificationState.profile,
+                        profile: gamificationState.profile.copyWith(
+                          // HARDCODE TEMPORAL A PETICIÓN DEL USUARIO
+                          babyStage: 'baby_6months',
+                        ),
                         size: mascotSize,
                       ),
                     );

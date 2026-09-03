@@ -162,10 +162,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
 
             // --- CONTENIDO MODIFICADO ---
-            content: Column(
-              mainAxisSize: MainAxisSize.min, // Para que la columna se ajuste
-              children: [
-                Text(
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Para que la columna se ajuste
+                children: [
+                  Text(
                   'Has completado "${widget.video.title}". ¿Qué deseas hacer?',
                   textAlign: TextAlign.center, // Centrado se ve mejor
                   style: GoogleFonts.quicksand(
@@ -202,7 +203,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ),
               ],
             ),
-            // ---------------------------------
+          ),
+          // ---------------------------------
 
             // --- ACCIONES SIMPLIFICADAS ---
             actions: [
