@@ -206,7 +206,7 @@ class _RegistrationPageState extends State<RegistrationPage>
 
   void _nextStep() {
     if (_validateCurrentStep()) {
-      if (_currentStep < 2) {
+      if (_currentStep < 1) { // Reducido de 2 a 1 paso
         // Animación de salida suave
         _slideController.reverse().then((_) {
           setState(() {
@@ -247,19 +247,13 @@ class _RegistrationPageState extends State<RegistrationPage>
 
   void _updateProfileCompletion() {
     int completedFields = 0;
-    int totalFields = 8; // Total de campos del formulario
+    int totalFields = 4; // Reducido a 4 campos: Name, Email, Password, BirthDate
 
     // Campos obligatorios
     if (_nameController.text.trim().isNotEmpty) completedFields++;
     if (_emailController.text.trim().isNotEmpty) completedFields++;
     if (_passwordController.text.isNotEmpty) completedFields++;
-    if (_birthDateController.text.trim().isNotEmpty) completedFields++;
-
-    // Campos opcionales
-    if (_phoneController.text.trim().isNotEmpty) completedFields++;
-    if (_locationController.text.trim().isNotEmpty) completedFields++;
-    if (_idNumberController.text.trim().isNotEmpty) completedFields++;
-    if (_motherNameController.text.trim().isNotEmpty) completedFields++;
+    if (_birthDateController.text.isNotEmpty) completedFields++;
 
     setState(() {
       _profileCompletion = completedFields / totalFields;
@@ -267,86 +261,49 @@ class _RegistrationPageState extends State<RegistrationPage>
   }
 
   bool _validateCurrentStep() {
-    Map<String, String> errors = {};
+    Map<String, String> newErrors = {};
 
     switch (_currentStep) {
       case 0:
-        // Validar paso 1: información básica (OBLIGATORIOS)
         if (_nameController.text.trim().isEmpty) {
-          errors['name'] = 'El nombre es requerido';
-        } else if (_nameController.text.trim().length < 3) {
-          errors['name'] = 'El nombre debe tener al menos 3 caracteres';
+          newErrors['name'] = 'auth.register.validation.nameRequired'.tr();
         }
-
         if (_emailController.text.trim().isEmpty) {
-          errors['email'] = 'El email es requerido';
-        } else if (!RegExp(
-          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-        ).hasMatch(_emailController.text.trim())) {
-          errors['email'] = 'Por favor ingresa un email válido';
+          newErrors['email'] = 'auth.register.validation.emailRequired'.tr();
+        } else if (!RegExp(r'^[\w-\.\+]+@([\w-]+\.)+[\w-]{2,4}$')
+            .hasMatch(_emailController.text.trim())) {
+          newErrors['email'] = 'auth.register.validation.emailInvalid'.tr();
         }
-
         if (_passwordController.text.isEmpty) {
-          errors['password'] = 'La contraseña es requerida';
+          newErrors['password'] = 'auth.register.validation.passwordRequired'.tr();
         } else if (_passwordController.text.length < 6) {
-          errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
+          newErrors['password'] = 'auth.register.validation.passwordShort'.tr();
         }
         break;
-
       case 1:
-        // Validar paso 2: datos personales
-        if (_phoneController.text.isNotEmpty) {
-          if (!RegExp(r'^\d{8}$').hasMatch(_phoneController.text.trim())) {
-            errors['phone'] = 'Formato de teléfono inválido (8 dígitos)';
-          }
-        }
-
-        if (_ageController.text.isNotEmpty) {
-          int? age = int.tryParse(_ageController.text.trim());
-          if (age == null || age < 16 || age > 50) {
-            errors['age'] = 'La edad debe estar entre 16 y 50 años';
-          }
-        }
-
-        // FECHA DE NACIMIENTO OBLIGATORIA
         if (_birthDateController.text.trim().isEmpty) {
-          errors['birthDate'] = 'La fecha de nacimiento es requerida';
+          newErrors['birthDate'] = 'auth.register.validation.birthDateRequired'.tr();
         } else {
-          // Validar formato de fecha
           try {
             final date = DateTime.parse(_birthDateController.text.trim());
             final now = DateTime.now();
             if (date.isAfter(now)) {
-              errors['birthDate'] =
-                  'La fecha de nacimiento no puede ser futura';
-            } else if (now.year - date.year > 100) {
-              errors['birthDate'] =
-                  'La fecha de nacimiento no puede ser anterior a 100 años';
+              newErrors['birthDate'] = 'La fecha de nacimiento no puede ser futura';
             } else if (now.year - date.year < 16) {
-              errors['birthDate'] =
-                  'Debes tener al menos 16 años para registrarte';
+              newErrors['birthDate'] = 'Debes tener al menos 16 años para registrarte';
             }
           } catch (e) {
-            errors['birthDate'] = 'Formato de fecha inválido';
-          }
-        }
-        break;
-
-      case 2:
-        // Validar paso 3: información adicional (opcional)
-        if (_idNumberController.text.isNotEmpty) {
-          if (!RegExp(r'^\d{8,9}$').hasMatch(_idNumberController.text.trim())) {
-            errors['idNumber'] = 'Formato de cédula inválido (8-9 dígitos)';
+            newErrors['birthDate'] = 'Formato de fecha inválido';
           }
         }
         break;
     }
 
     setState(() {
-      _errors = errors;
+      _errors = newErrors;
     });
 
-    return errors.isEmpty;
+    return _errors.isEmpty;
   }
 
   void _selectBirthDate() async {
@@ -413,24 +370,17 @@ class _RegistrationPageState extends State<RegistrationPage>
     if (!mounted) return;
 
     // Registrar usuario
+    // Registrar usuario
     context.read<AuthBloc>().add(
       SignUpRequested(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         name: _nameController.text.trim(),
         birthDate: _birthDateController.text.trim(),
-        phone: _phoneController.text.trim().isNotEmpty
-            ? _phoneController.text.trim()
-            : null,
-        location: _locationController.text.trim().isNotEmpty
-            ? _locationController.text.trim()
-            : null,
-        idNumber: _idNumberController.text.trim().isNotEmpty
-            ? _idNumberController.text.trim()
-            : null,
-        motherName: _motherNameController.text.trim().isNotEmpty
-            ? _motherNameController.text.trim()
-            : null,
+        phone: null,
+        location: null,
+        idNumber: null,
+        motherName: null,
       ),
     );
   }
@@ -525,26 +475,6 @@ class _RegistrationPageState extends State<RegistrationPage>
                               '${'profile.birthDate'.tr()}:',
                               _birthDateController.text.trim(),
                             ),
-                            if (_phoneController.text.trim().isNotEmpty)
-                              _buildConfirmationRow(
-                                '${'profile.phone'.tr()}:',
-                                _phoneController.text.trim(),
-                              ),
-                            if (_locationController.text.trim().isNotEmpty)
-                              _buildConfirmationRow(
-                                '${'profile.location'.tr()}:',
-                                _locationController.text.trim(),
-                              ),
-                            if (_motherNameController.text.trim().isNotEmpty)
-                              _buildConfirmationRow(
-                                '${'profile.motherName'.tr()}:',
-                                _motherNameController.text.trim(),
-                              ),
-                            if (_idNumberController.text.trim().isNotEmpty)
-                              _buildConfirmationRow(
-                                '${'profile.idNumber'.tr()}:',
-                                _idNumberController.text.trim(),
-                              ),
                           ],
                         ),
                       ),

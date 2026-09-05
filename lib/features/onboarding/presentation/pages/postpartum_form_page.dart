@@ -25,10 +25,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
   // Controladores de texto
   final _babyNameController = TextEditingController();
   final _birthDateController = TextEditingController();
-  final _birthTimeController = TextEditingController();
-  final _birthPlaceController = TextEditingController();
   final _birthWeightController = TextEditingController();
-  final _lastMenstruationController = TextEditingController();
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -40,14 +37,11 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
   bool _isLoading = false;
   DateTime? _selectedBirthDate;
-  DateTime? _selectedMenstruationDate;
-  int _calculatedGestationalAge = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-    _setupListeners();
   }
 
   void _initializeAnimations() {
@@ -90,11 +84,6 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
     });
   }
 
-  void _setupListeners() {
-    _birthDateController.addListener(_calculateGestationalAge);
-    _lastMenstruationController.addListener(_calculateGestationalAge);
-  }
-
   @override
   void dispose() {
     _slideController.dispose();
@@ -102,10 +91,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
     _pulseController.dispose();
     _babyNameController.dispose();
     _birthDateController.dispose();
-    _birthTimeController.dispose();
-    _birthPlaceController.dispose();
     _birthWeightController.dispose();
-    _lastMenstruationController.dispose();
     super.dispose();
   }
 
@@ -122,52 +108,6 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
         _selectedBirthDate = date;
         _birthDateController.text = DateFormat('yyyy-MM-dd').format(date);
       });
-      _calculateGestationalAge();
-    }
-  }
-
-  Future<void> _selectBirthTime() async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (time != null) {
-      setState(() {
-        _birthTimeController.text = time.format(context);
-      });
-    }
-  }
-
-  Future<void> _selectLastMenstruation() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 280)),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-    );
-
-    if (date != null) {
-      setState(() {
-        _selectedMenstruationDate = date;
-        _lastMenstruationController.text = DateFormat(
-          'yyyy-MM-dd',
-        ).format(date);
-      });
-      _calculateGestationalAge();
-    }
-  }
-
-  void _calculateGestationalAge() {
-    if (_selectedBirthDate != null && _selectedMenstruationDate != null) {
-      final difference = _selectedBirthDate!.difference(
-        _selectedMenstruationDate!,
-      );
-      final gestationalAgeInWeeks = difference.inDays ~/ 7;
-
-      setState(() {
-        _calculatedGestationalAge = gestationalAgeInWeeks;
-      });
     }
   }
 
@@ -176,7 +116,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       return;
     }
 
-    if (_selectedBirthDate == null || _selectedMenstruationDate == null) {
+    if (_selectedBirthDate == null) {
       DialogExample.showValidationErrorDialog(context, 'onboarding.dateRequired'.tr());
       return;
     }
@@ -199,11 +139,11 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
       final formData = {
         'babyName': _babyNameController.text.trim(),
         'birthDate': _selectedBirthDate!.toIso8601String(),
-        'birthTime': _birthTimeController.text.trim(),
-        'birthPlace': _birthPlaceController.text.trim(),
+        'birthTime': '00:00', // Campo eliminado del UI
+        'birthPlace': '', // Campo eliminado del UI
         'birthWeight': double.parse(_birthWeightController.text.trim()),
-        'gestationalAge': _calculatedGestationalAge,
-        'lastMenstruation': _selectedMenstruationDate!.toIso8601String(),
+        'gestationalAge': 40, // Valor por defecto
+        'lastMenstruation': DateTime.now().toIso8601String(), // Campo eliminado del UI
         'formType': 'postpartum',
         'completedAt': DateTime.now().toIso8601String(),
       };
@@ -349,7 +289,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
 
                               const SizedBox(height: 12),
 
-                              // Campos de fecha y hora en fila
+                              // Campos de fecha en fila
                               Row(
                                 children: [
                                   Expanded(
@@ -367,39 +307,7 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                       },
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _buildLargerTimeField(
-                                      label: 'onboarding.time'.tr(),
-                                      hint: 'onboarding.timeHint'.tr(),
-                                      controller: _birthTimeController,
-                                      onTap: _selectBirthTime,
-                                      icon: Icons.access_time_outlined,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'onboarding.timeRequired'.tr();
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
                                 ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Campo lugar de nacimiento
-                              _buildLargerTextField(
-                                label: 'onboarding.birthPlace'.tr(),
-                                hint: 'onboarding.birthPlaceHint'.tr(),
-                                controller: _birthPlaceController,
-                                icon: Icons.location_on_outlined,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'onboarding.placeRequired'.tr();
-                                  }
-                                  return null;
-                                },
                               ),
 
                               const SizedBox(height: 12),
@@ -423,23 +331,6 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
                                   final weight = double.tryParse(value);
                                   if (weight == null || weight <= 0) {
                                     return 'onboarding.invalidWeight'.tr();
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Campo última menstruación
-                              _buildLargerDateField(
-                                label: 'onboarding.lastMenstruation'.tr(),
-                                hint: 'onboarding.lastMenstruationHint'.tr(),
-                                controller: _lastMenstruationController,
-                                onTap: _selectLastMenstruation,
-                                icon: Icons.calendar_today_outlined,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'onboarding.dateRequired'.tr();
                                   }
                                   return null;
                                 },
@@ -709,77 +600,6 @@ class _PostpartumFormPageState extends State<PostpartumFormPage>
     );
   }
 
-  Widget _buildLargerTimeField({
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    required VoidCallback onTap,
-    required IconData icon,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.white.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            controller: controller,
-            readOnly: true,
-            onTap: onTap,
-            validator: validator,
-            enabled: !_isLoading,
-            textAlignVertical: TextAlignVertical.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-              prefixIcon: Icon(icon, color: Colors.white70, size: 22),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              // Reduce el padding interno del TextField
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildAnimatedBackground() {
     return AnimatedBuilder(

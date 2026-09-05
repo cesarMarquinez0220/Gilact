@@ -248,19 +248,11 @@ class _PostpartoProfileWidgetState extends State<PostpartoProfileWidget> {
                     widget.userProfile.babyInfo!.name,
                   ),
                   _buildInfoRow(
-                    'baby.data.gestationalAge'.tr(),
-                    '${widget.userProfile.babyInfo!.gestationalAge} ${'baby.data.weeks'.tr()}',
-                  ),
-                  _buildInfoRow(
                     'baby.data.birthDate'.tr(),
                     _formatBirthDate(
                       context,
                       widget.userProfile.babyInfo!.birthDate,
                     ),
-                  ),
-                  _buildInfoRow(
-                    'baby.data.birthPlace'.tr(),
-                    widget.userProfile.babyInfo!.birthPlace,
                   ),
                   _buildInfoRow(
                     'baby.data.weight'.tr(),

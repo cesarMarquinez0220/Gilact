@@ -338,11 +338,11 @@ class MyApp extends StatelessWidget {
               // Ruta donde están los archivos de traducción
               path: 'assets/translations',
               // Idioma de respaldo: si el dispositivo está en un idioma no soportado,
-              // se mostrará inglés (más universal que español)
-              fallbackLocale: const Locale('en'),
+              // se mostrará español por defecto (a petición del usuario)
+              fallbackLocale: const Locale('es'),
               // Si el usuario ya cambió el idioma manualmente, usar su preferencia guardada
-              // Si es null, easy_localization detectará automáticamente el idioma del dispositivo
-              startLocale: savedLocale,
+              // Si es null, forzamos español como idioma por defecto inicial
+              startLocale: savedLocale ?? const Locale('es'),
               // Guardar la preferencia del usuario cuando cambie el idioma manualmente
               // Esto permite que la app recuerde la selección del usuario
               saveLocale: true,

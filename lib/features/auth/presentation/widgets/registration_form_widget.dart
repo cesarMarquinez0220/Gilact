@@ -107,8 +107,6 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         return _buildStep1();
       case 1:
         return _buildStep2();
-      case 2:
-        return _buildStep3();
       default:
         return _buildStep1();
     }
@@ -307,163 +305,15 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
 
           SizedBox(height: spacingBeforeForm),
 
-          // Campo de teléfono
+          // Campo de fecha de nacimiento
           _buildTextField(
-            controller: widget.phoneController,
-            hintText: 'profile.phoneOptional'.tr(),
-            icon: Icons.phone_outlined,
-            keyboardType: TextInputType.phone,
-            errorText: widget.errors['phone'],
-            onChanged: (value) => widget.onFieldChanged('phone'),
-          ),
-
-          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
-
-          // Campo de ubicación
-          _buildTextField(
-            controller: widget.locationController,
-            hintText: 'profile.location'.tr(),
-            icon: Icons.location_on_outlined,
-            errorText: widget.errors['location'],
-            onChanged: (value) => widget.onFieldChanged('location'),
-          ),
-
-          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
-
-          // Fila con fecha de nacimiento y edad
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: widget.birthDateController,
-                  hintText: '${'profile.birthDate'.tr()} *',
-                  icon: Icons.calendar_today_outlined,
-                  readOnly: true,
-                  onTap: widget.onBirthDateTap,
-                  errorText: widget.errors['birthDate'],
-                  onChanged: (value) => widget.onFieldChanged('birthDate'),
-                ),
-              ),
-              SizedBox(width: isSmallScreen ? 12.0 : 16.0),
-              Expanded(
-                child: _buildTextField(
-                  controller: widget.ageController,
-                  hintText: 'profile.age'.tr(),
-                  icon: Icons.cake_outlined,
-                  keyboardType: TextInputType.number,
-                  errorText: widget.errors['age'],
-                  onChanged: (value) => widget.onFieldChanged('age'),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
-          // Botones de navegación
-          Row(
-            children: [
-              Expanded(
-                child: _buildSecondaryButton(
-                  text: 'auth.register.back'.tr(),
-                  onPressed: widget.onPreviousStep,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionButton(
-                  text: 'auth.register.next'.tr(),
-                  onPressed: widget.onNextStep,
-                  isLoading: widget.isLoading,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Indicador de pasos
-          _buildStepIndicator(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep3() {
-    // Valores responsive para pantallas pequeñas
-    final isSmallScreen = ResponsiveHelper.isExtraSmall(context) || 
-                         ResponsiveHelper.isSmall(context);
-    final isShortScreen = ResponsiveHelper.isShortScreen(context);
-    
-    final topPadding = isSmallScreen ? 20.0 : (isShortScreen ? 30.0 : 40.0);
-    final horizontalPadding = ResponsiveHelper.getResponsivePadding(context);
-    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 26.0 : 32.0);
-    final subtitleFontSize = ResponsiveHelper.getResponsiveFontSize(context, isSmallScreen ? 15.0 : 17.0);
-    final spacingAfterTitle = isSmallScreen ? 8.0 : 12.0;
-    final spacingBeforeForm = isSmallScreen ? 32.0 : (isShortScreen ? 40.0 : 48.0);
-    
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: isSmallScreen ? 16.0 : 24.0,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: topPadding),
-
-          // Título y subtítulo
-          Column(
-            children: [
-              Text(
-                'auth.register.additionalInfo'.tr(),
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                  shadows: const [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: spacingAfterTitle),
-              Text(
-                'auth.register.additionalInfoDescription'.tr(),
-                style: TextStyle(
-                  fontSize: subtitleFontSize,
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: spacingBeforeForm),
-
-          // Campo de nombre de la madre
-          _buildTextField(
-            controller: widget.motherNameController,
-            hintText: 'auth.register.motherNameOptional'.tr(),
-            icon: Icons.family_restroom_outlined,
-            errorText: widget.errors['motherName'],
-            onChanged: (value) => widget.onFieldChanged('motherName'),
-          ),
-
-          SizedBox(height: isSmallScreen ? 16.0 : 20.0),
-
-          // Campo de número de identificación
-          _buildTextField(
-            controller: widget.idNumberController,
-            hintText: 'auth.register.idNumberOptional'.tr(),
-            icon: Icons.badge_outlined,
-            errorText: widget.errors['idNumber'],
-            onChanged: (value) => widget.onFieldChanged('idNumber'),
+            controller: widget.birthDateController,
+            hintText: '${'profile.birthDate'.tr()} *',
+            icon: Icons.calendar_today_outlined,
+            readOnly: true,
+            onTap: widget.onBirthDateTap,
+            errorText: widget.errors['birthDate'],
+            onChanged: (value) => widget.onFieldChanged('birthDate'),
           ),
 
           SizedBox(height: isSmallScreen ? 24.0 : 32.0),
@@ -795,13 +645,12 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         ),
 
         const SizedBox(height: 12),
-
         // Información de progreso
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Paso ${widget.currentStep + 1} de 3',
+              'Paso ${widget.currentStep + 1} de 2',
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -824,7 +673,7 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         // Puntos indicadores
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (index) {
+          children: List.generate(2, (index) {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               width: 12,
