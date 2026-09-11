@@ -8,7 +8,7 @@ class ConnectivityService {
   Future<bool> isConnected() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      return connectivityResult != ConnectivityResult.none;
+      return !connectivityResult.contains(ConnectivityResult.none) && connectivityResult.isNotEmpty;
     } catch (e) {
       // En caso de error, asumir que no hay conexión
       return false;
@@ -18,7 +18,7 @@ class ConnectivityService {
   /// Stream que emite cambios en el estado de conectividad
   Stream<bool> get connectivityStream {
     return _connectivity.onConnectivityChanged.map(
-      (result) => result != ConnectivityResult.none,
+      (result) => !result.contains(ConnectivityResult.none) && result.isNotEmpty,
     );
   }
 
@@ -26,7 +26,7 @@ class ConnectivityService {
   Future<bool> isConnectedToWiFi() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      return connectivityResult == ConnectivityResult.wifi;
+      return connectivityResult.contains(ConnectivityResult.wifi);
     } catch (e) {
       return false;
     }
@@ -36,7 +36,7 @@ class ConnectivityService {
   Future<bool> isConnectedToMobile() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      return connectivityResult == ConnectivityResult.mobile;
+      return connectivityResult.contains(ConnectivityResult.mobile);
     } catch (e) {
       return false;
     }
@@ -46,8 +46,10 @@ class ConnectivityService {
   Future<ConnectivityResult> getConnectionType() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      // En la versión nueva de connectivity_plus, checkConnectivity retorna un solo resultado
-      return connectivityResult;
+      if (connectivityResult.isNotEmpty) {
+        return connectivityResult.first;
+      }
+      return ConnectivityResult.none;
     } catch (e) {
       return ConnectivityResult.none;
     }

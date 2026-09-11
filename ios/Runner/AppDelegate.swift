@@ -379,7 +379,7 @@ import UserNotifications
   // MARK: - UNUserNotificationCenterDelegate
   
   // Interceptar cuando se entrega una notificación para verificar si se debe mostrar el reenvío
-  func userNotificationCenter(
+  override func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
@@ -427,8 +427,4 @@ import UserNotifications
   deinit {
     NotificationCenter.default.removeObserver(self)
   }
-}
-
-// Extender AppDelegate para conformar UNUserNotificationCenterDelegate
-extension AppDelegate: UNUserNotificationCenterDelegate {
 }
