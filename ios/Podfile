@@ -51,7 +51,6 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
 
       # ✅ Excluimos arm64 en simuladores
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
 
       # ✅ Reemplazo para DT_TOOLCHAIN_DIR
       xcconfig_path = config.base_configuration_reference.real_path

@@ -379,7 +379,7 @@ import UserNotifications
   // MARK: - UNUserNotificationCenterDelegate
   
   // Interceptar cuando se entrega una notificación para verificar si se debe mostrar el reenvío
-  func userNotificationCenter(
+  override func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
@@ -420,15 +420,11 @@ import UserNotifications
       }
     }
     
-    // Mostrar la notificación normalmente
-    completionHandler([.banner, .sound, .badge])
+    // Mostrar la notificación normalmente (llamamos a super para que Flutter process la notificación también)
+    super.userNotificationCenter(center, willPresent: notification, withCompletionHandler: completionHandler)
   }
   
   deinit {
     NotificationCenter.default.removeObserver(self)
   }
-}
-
-// Extender AppDelegate para conformar UNUserNotificationCenterDelegate
-extension AppDelegate: UNUserNotificationCenterDelegate {
 }
