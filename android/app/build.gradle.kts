@@ -28,8 +28,8 @@ android {
         applicationId = "com.gilact.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Hardening: minSdk 29 (Android 10) para eliminar vulnerabilidades de versiones antiguas
-        minSdk = 29
+        // Hardening: minSdk 28 (Android 9) para mantener compatibilidad con el emulador actual
+        minSdk = 28
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -84,6 +84,7 @@ android {
                 signingConfig = releaseConfig
             } else {
                 println("WARNING: Using debug signing for release build. This should NOT be used in production!")
+                signingConfig = signingConfigs.getByName("debug")
             }
             
             // Optimizaciones de MobSF: ofuscación y reducción de recursos
