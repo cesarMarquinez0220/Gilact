@@ -1,0 +1,248 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/di/injection.dart';
+
+/// Servicio para manejar el progreso de videos con Firestore
+/// Mantiene la funcionalidad específica del reproductor anterior
+class VideoProgressService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AppLogger _logger = getIt<AppLogger>();
+
+  // Caché para el ID del documento del usuario
+  String? _cachedUserDocId;
+
+  /// Obtiene el ID del documento del usuario en Firestore
+  /// Usa SharedPreferences como caché persistente para que funcione offline
+  Future<String?> _getUserDocumentId() async {
+    if (_cachedUserDocId != null) {
+      return _cachedUserDocId;
+    }
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      _logger.e('VideoProgressService: Usuario no autenticado');
+      return null;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final cacheKey = 'cached_user_doc_id_${user.uid}';
+    final cachedId = prefs.getString(cacheKey);
+
+    try {
+      // PRIORIDAD 1: Buscar por email (el ID del documento del usuario)
+      if (user.email != null) {
+        final userQuery = await _firestore
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          _cachedUserDocId = userQuery.docs.first.id;
+          await prefs.setString(cacheKey, _cachedUserDocId!);
+          _logger.d(
+            'VideoProgressService: Usuario encontrado por email, ID: $_cachedUserDocId',
+          );
+          return _cachedUserDocId;
+        }
+      }
+
+      // PRIORIDAD 2: Intentar con UID
+      final docSnapshot = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        _cachedUserDocId = user.uid;
+        await prefs.setString(cacheKey, _cachedUserDocId!);
+        return user.uid;
+      }
+      
+      // Si llegamos aquí y hay caché, lo usamos
+      if (cachedId != null) {
+        _cachedUserDocId = cachedId;
+        return cachedId;
+      }
+
+      _logger.e('VideoProgressService: No se encontró usuario en Firestore ni en caché');
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e('Error obteniendo ID del usuario, intentando caché', e, stackTrace);
+      if (cachedId != null) {
+        _cachedUserDocId = cachedId;
+        return cachedId;
+      }
+      return null;
+    }
+  }
+
+  /// Guarda información detallada del video en Firestore
+  Future<void> saveVideoProgress({
+    required int videoId,
+    required int pauseCount,
+    required int forwardCount,
+    required int lastPosition,
+    required int totalDuration,
+    required double progress,
+    required bool isCompleted,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        _logger.e(
+          'VideoProgressService: No se pudo obtener el ID del documento del usuario',
+        );
+        return;
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
+      final videoDocRef = userDocRef
+          .collection('videos')
+          .doc(videoId.toString());
+
+      _logger.d(
+        'VideoProgressService: Guardando progreso en /Users/$userDocId/videos/$videoId',
+      );
+
+      final videoData = {
+        'videoId':
+            videoId, // Asegurar que el videoId esté presente para identificarlo
+        'contadorPausas': pauseCount,
+        'contadorAdelantos': forwardCount,
+        'ultimaPosicion': lastPosition,
+        'duracion': totalDuration,
+        'avance': progress,
+        'estaCompletado': isCompleted,
+        'fechaActualizacion': FieldValue.serverTimestamp(),
+      };
+
+      // Si el video está completado, incrementar contador de visualizaciones
+      if (isCompleted) {
+        final videoDoc = await videoDocRef.get();
+        final currentCount = videoDoc.data()?['contadorVisualizaciones'] ?? 0;
+        videoData['contadorVisualizaciones'] = currentCount + 1;
+      }
+
+      await videoDocRef.set(videoData, SetOptions(merge: true));
+
+      // Guardar información de adelantos en colección separada
+      if (forwardCount > 0) {
+        await userDocRef.collection('adelantosvideo').add({
+          'videoId': videoId,
+          'adelantos': forwardCount,
+          'milisegundoRetrocedido': lastPosition,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
+
+      _logger.success('Información del video guardada con éxito en Firestore');
+    } catch (error, stackTrace) {
+      _logger.e('Error al guardar información en Firestore', error, stackTrace);
+    }
+  }
+
+  /// Obtiene la información del progreso del video desde Firestore
+  Future<Map<String, dynamic>> getVideoProgress(int videoId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return {};
+
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        return {};
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
+      final videoDoc = await userDocRef
+          .collection('videos')
+          .doc(videoId.toString())
+          .get();
+
+      if (videoDoc.exists) {
+        return videoDoc.data() as Map<String, dynamic>;
+      }
+    } catch (error, stackTrace) {
+      _logger.e(
+        'Error al obtener información del video en Firestore',
+        error,
+        stackTrace,
+      );
+    }
+
+    return {};
+  }
+
+  /// Obtiene la última posición del video
+  Future<int> getLastPosition(int videoId) async {
+    final progress = await getVideoProgress(videoId);
+    return progress['ultimaPosicion'] ?? 0;
+  }
+
+  /// Verifica si el video está completado
+  Future<bool> isVideoCompleted(int videoId) async {
+    final progress = await getVideoProgress(videoId);
+    return progress['estaCompletado'] ?? false;
+  }
+
+  /// Obtiene el progreso del video como porcentaje
+  Future<double> getVideoProgressPercentage(int videoId) async {
+    final progress = await getVideoProgress(videoId);
+    return (progress['avance'] ?? 0.0).toDouble();
+  }
+
+  /// Obtiene estadísticas del video
+  Future<Map<String, dynamic>> getVideoStatistics(int videoId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return {};
+
+      // Obtener el ID del documento del usuario en Firestore (no el UID de Firebase Auth)
+      final userDocId = await _getUserDocumentId();
+      if (userDocId == null) {
+        return {};
+      }
+
+      final userDocRef = _firestore.collection('Users').doc(userDocId);
+
+      // Obtener información del video
+      final videoDoc = await userDocRef
+          .collection('videos')
+          .doc(videoId.toString())
+          .get();
+
+      // Obtener información de adelantos
+      final adelantosQuery = await userDocRef
+          .collection('adelantosvideo')
+          .where('videoId', isEqualTo: videoId)
+          .get();
+
+      final videoData = videoDoc.exists ? videoDoc.data()! : {};
+      final adelantosData = adelantosQuery.docs
+          .map((doc) => doc.data())
+          .toList();
+
+      return {
+        'videoData': videoData,
+        'adelantosData': adelantosData,
+        'totalAdelantos': adelantosData.length,
+        'totalPausas': videoData['contadorPausas'] ?? 0,
+        'contadorVisualizaciones': videoData['contadorVisualizaciones'] ?? 0,
+        'ultimaPosicion': videoData['ultimaPosicion'] ?? 0,
+        'avance': videoData['avance'] ?? 0.0,
+        'estaCompletado': videoData['estaCompletado'] ?? false,
+      };
+    } catch (error, stackTrace) {
+      _logger.e('Error al obtener estadísticas del video', error, stackTrace);
+      return {};
+    }
+  }
+}

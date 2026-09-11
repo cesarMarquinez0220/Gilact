@@ -1,0 +1,1685 @@
+{
+  "app": {
+    "name": "GuiLact",
+    "subtitle": "Interactive Breastfeeding Guide"
+  },
+  "navigation": {
+    "home": "Home",
+    "companion": "Companion",
+    "health": "Health",
+    "profile": "Profile",
+    "lessons": "Lessons",
+    "tips": "Tips",
+    "history": "History"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "name": "Name",
+    "email": "Email",
+    "motherName": "Mother's Name",
+    "idNumber": "ID Number",
+    "idNumberOptional": "ID Number (optional)",
+    "birthDate": "Birth Date",
+    "phone": "Phone",
+    "phoneOptional": "Phone (optional)",
+    "location": "Location",
+    "locationOptional": "Location (optional)",
+    "age": "Age",
+    "noUserAuthenticated": "No authenticated user"
+  },
+  "settings": {
+    "title": "Application Settings",
+    "sound": "Sound",
+    "soundDescription": "Play sounds in the app",
+    "vibration": "Vibration",
+    "vibrationDescription": "Vibrate on interactions",
+    "autoSave": "Auto Save",
+    "autoSaveDescription": "Save progress automatically",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "spanish": "Español",
+    "english": "English",
+    "languageChanged": "Language changed to {language}",
+    "@languageChanged": {
+      "placeholders": {
+        "language": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "help": {
+    "title": "Help and Support",
+    "helpCenter": "Help Center",
+    "helpCenterDescription": "Chat with our virtual assistant",
+    "contactSupport": "Contact Support",
+    "supportEmail": "soporte@gilact.com"
+  },
+  "account": {
+    "title": "Account",
+    "signOut": "Sign Out",
+    "signOutDescription": "Log out of your account",
+    "signOutConfirmTitle": "Sign Out",
+    "signOutConfirmMessage": "Are you sure you want to sign out?",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDescription": "Permanently delete your account",
+    "deleteAccountConfirmTitle": "Delete Account",
+    "deleteAccountConfirmMessage": "Are you sure you want to delete your account?\n\nThis action cannot be undone. All your data will be permanently deleted.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "featureInDevelopment": "Feature in development",
+    "version": "Version",
+    "signOutSuccess": "Session closed successfully",
+    "signOutError": "Error signing out",
+    "deleteAccountSuccess": "Account deleted successfully"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "unknownError": "Unknown error",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "next": "Next",
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Finish",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "accept": "Accept",
+    "understood": "Understood",
+    "other": "Other",
+    "newRecord": "New Record",
+    "retry": "Retry",
+    "markAsCompleted": "Mark as completed",
+    "noVideosAvailable": "No videos available",
+    "lesson": "Lesson",
+    "duration": "Duration",
+    "minutes": "minutes",
+    "description": "Description",
+    "syncNow": "Sync Now",
+    "languageChanged": "Language changed to {name}",
+    "@languageChanged": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+    },
+    "termsAndConditions": "Terms and Conditions",
+    "privacyPolicy": "Privacy Policy",
+    "noCredentialsFound": "No saved credentials found",
+    "biometricAuthError": "Biometric authentication error: {error}",
+    "@biometricAuthError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "settingsSaved": "Settings saved successfully",
+    "messageSent": "Message sent successfully",
+    "pleaseWriteMessage": "Please write a message",
+    "signOutError": "Error signing out: {error}",
+    "@signOutError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "saveError": "Error saving: {error}",
+    "@saveError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "contentMarkedCompleted": "Content marked as completed!",
+    "videoMarkedCompleted": "Video marked as completed",
+    "errorLoadingVideos": "Error loading videos: {error}",
+    "@errorLoadingVideos": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "validEmail": "Enter a valid email",
+    "motherNameRequired": "Mother's name is required",
+    "birthDateRequired": "Birth date is required",
+    "invalidIdNumber": "Invalid ID number format (8-9 digits)"
+  },
+  "messages": {
+    "profileUpdatedSuccess": "Profile updated successfully",
+    "profileUpdateError": "Error updating profile",
+    "settingsSaved": "Settings saved successfully"
+  },
+  "dialogs": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "understood": "Understood",
+    "emailAlreadyRegistered": "Email Already Registered",
+    "emailAlreadyRegisteredMessage": "This email is already associated with an existing account. Please use another email or sign in.",
+    "registrationSuccess": "Registration Successful!",
+    "registrationSuccessMessage": "Your account has been created successfully. You can now sign in with your credentials.",
+    "fieldRequired": "Required Field",
+    "fieldRequiredMessage": "Please complete the \"{field}\" field to continue with registration.",
+    "@fieldRequiredMessage": {
+      "placeholders": {
+        "field": {
+          "type": "String"
+        }
+      }
+    },
+    "invalidEmail": "Invalid Email",
+    "invalidEmailMessage": "Please enter a valid email address (example: user@domain.com).",
+    "connectionError": "Connection Error",
+    "connectionErrorMessage": "Could not connect to the server. Check your internet connection and try again."
+  },
+  "lactation": {
+    "title": "Lactation",
+    "registerLactation": "Register Lactation",
+    "quickRegister": "Quick Register",
+    "fullRegister": "Full Register",
+    "calendar": {
+      "title": "Lactation Calendar",
+      "recordsTitle": "Lactation Records",
+      "thisDay": "This day",
+      "today": "Today",
+      "duration": "Duration",
+      "total": "Total",
+      "sessions": "sessions",
+      "min": "min",
+      "addRecord": "Add Record",
+      "deleteRecord": "Delete record",
+      "savedSuccess": "Record saved successfully!",
+      "deletedSuccess": "Record deleted successfully",
+      "deleteError": "Error Deleting",
+      "deleteErrorMessage": "Could not delete the record. Please try again.",
+      "recordsOf": "Records of",
+      "deleteConfirmTitle": "Delete Record",
+      "deleteConfirmMessage": "Are you sure you want to delete this lactation record? This action cannot be undone.",
+      "deleteButton": "Delete",
+      "filters": {
+        "all": "All",
+        "lactation": "Lactation",
+        "weight": "Weight"
+      },
+      "weight": "Weight",
+      "viewList": "View records list",
+      "viewMonth": "View monthly calendar",
+      "noRecords": "No records for this day",
+      "tapToAdd": "Tap here to add a record",
+      "noRecordsWeek": "No records for this week",
+      "editRecord": "Edit record",
+      "noRecordsText": "No records",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
+    },
+    "records": "Records",
+    "quickDialog": {
+      "title": "Lactation Record",
+      "cancel": "Cancel",
+      "back": "Back",
+      "quickRegisterButton": "Quick Register"
+    },
+    "decisionTree": {
+      "initial": "How did you feed your baby this time?",
+      "breastSide": "Which breast did you use?",
+      "breastDuration": "How long did the feeding last?",
+      "bottleVolume": "How much milk did they drink?",
+      "sleepTime": "How long did they sleep after?",
+      "extractionVolume": "How much milk did you extract?",
+      "confirmation": "Do you confirm this data?",
+      "options": {
+        "pecho": "Breast",
+        "pechoDescription": "Direct breastfeeding",
+        "biberon": "Bottle",
+        "biberonDescription": "Formula or expressed milk",
+        "mixto": "Mixed",
+        "mixtoDescription": "Combination of breast and bottle",
+        "izquierdo": "Left Breast",
+        "izquierdoDescription": "Left side",
+        "derecho": "Right Breast",
+        "derechoDescription": "Right side",
+        "ambos": "Both Breasts",
+        "ambosDescription": "Both sides",
+        "5min": "5 minutes",
+        "5minDescription": "Short duration",
+        "10min": "10 minutes",
+        "10minDescription": "Medium duration",
+        "15min": "15 minutes",
+        "15minDescription": "Normal duration",
+        "20min": "20+ minutes",
+        "20minDescription": "Long duration",
+        "30ml": "30 ml",
+        "60ml": "60 ml",
+        "90ml": "90 ml",
+        "120ml": "120 ml",
+        "150ml": "150 ml",
+        "180ml": "180 ml",
+        "240ml": "240 ml",
+        "guardar": "Save",
+        "guardarDescription": "Save lactation record",
+        "noSleep": "No sleep",
+        "noSleepDescription": "Didn't sleep",
+        "30min": "30 minutes",
+        "30minDescription": "Short nap",
+        "1hour": "1 hour",
+        "1hourDescription": "Normal nap",
+        "2hours": "2 hours",
+        "2hoursDescription": "Long nap",
+        "3hours": "3+ hours",
+        "3hoursDescription": "Prolonged sleep",
+        "noExtraction": "No extraction",
+        "noExtractionDescription": "Didn't extract milk"
+      }
+    },
+    "recordForm": {
+      "title": "Lactation Record",
+      "deleteRecord": "Delete Record",
+      "saveRecord": "Save Record",
+      "updateRecord": "Update Record",
+      "cancel": "Cancel",
+      "feedingType": "Feeding Type",
+      "feedingTypeQuestion": "How did you feed your baby this time?",
+      "breast": "Breast",
+      "breastDescription": "Direct breastfeeding.",
+      "bottle": "Bottle",
+      "bottleDescription": "Expressed breast milk or formula.",
+      "mixed": "Mixed",
+      "mixedDescription": "Combination of breast and bottle.",
+      "selectType": "Select type",
+      "selectTypeHint": "Choose the feeding type.",
+      "breastSide": "Breast Side",
+      "breastSideQuestion": "Which side did you breastfeed from?",
+      "left": "Left",
+      "right": "Right",
+      "both": "Both",
+      "breastDuration": "Breast Duration",
+      "breastDurationQuestion": "How long did the feeding last?",
+      "min": "min",
+      "bottleVolume": "Bottle Volume",
+      "bottleVolumeQuestion": "How much volume did they drink from the bottle?",
+      "ml": "ml",
+      "oz": "oz",
+      "sleepTime": "Sleep Time",
+      "sleepTimeQuestion": "How long did the baby sleep?",
+      "hr": "hr",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes (optional)",
+      "saved": "Lactation record saved successfully",
+      "error": "Error Saving",
+      "errorMessage": "Could not save the record. Please try again.",
+      "deleteConfirm": "Are you sure you want to delete this lactation record? This action cannot be undone.",
+      "delete": "Delete",
+      "deleted": "Record Deleted",
+      "deletedMessage": "Deleted successfully.",
+      "deleteError": "Error Deleting",
+      "deleteErrorMessage": "Could not delete the record. Please try again.",
+      "breastfeeding": "Direct Breastfeeding",
+      "customVolume": "Custom volume",
+      "customTime": "Custom time",
+      "notSpecified": "Not specified"
+    },
+    "flow": {
+      "feedingTypeQuestion": "What type of feeding?",
+      "breastSideQuestion": "Which side of the breast?",
+      "back": "Back",
+      "confirmRecord": "Confirm record",
+      "customTimeHint": "Enter custom time",
+      "other": "Other",
+      "edit": "Edit",
+      "save": "Save",
+      "recordTitle": "Lactation Record",
+      "stepByStepRecord": "Step-by-step record",
+      "summaryTitle": "Record Summary",
+      "breastfeeding": "Breastfeeding",
+      "sleep": "Sleep",
+      "authenticationError": "Authentication Error",
+      "authenticationErrorMessage": "No authenticated user. Please sign in again.",
+      "userError": "User Error",
+      "userErrorMessage": "Could not find user information.",
+      "infoRequired": "Information Required",
+      "infoRequiredMessage": "You must complete the onboarding process and select the \"Postpartum\" situation.",
+      "recordSavedSuccess": "Lactation data has been recorded successfully.",
+      "saveError": "Save Error",
+      "saveErrorMessage": "Could not save data. Please try again.\n\nError: {error}",
+      "@saveErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteConfirmTitle": "Delete Record?",
+      "deleteConfirmMessage": "This action cannot be undone. Are you sure you want to delete this lactation record?",
+      "recordDeletedSuccess": "The lactation record has been deleted successfully.",
+      "deleteError": "Delete Error",
+      "deleteErrorMessage": "Could not delete the record. Please try again.\n\nError: {error}",
+      "@deleteErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSavedSuccessEnhanced": "Lactation record saved successfully",
+      "saveErrorEnhanced": "Error saving record: {error}",
+      "@saveErrorEnhanced": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "processingError": "Error processing selection: {error}",
+      "@processingError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveRecordError": "Error saving record: {error}",
+      "@saveRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteRecordError": "Error deleting record: {error}",
+      "@deleteRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSuccess": "Record Successful"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "health": {
+    "title": "Health",
+    "subtitle": "Monitor your baby's well-being",
+    "babyWeight": "Baby Weight",
+    "babyWeightDescription": "Register and monitor weight",
+    "sleep": "Sleep Record",
+    "sleepDescription": "Control sleep hours",
+    "assistant": "Virtual Assistant",
+    "assistantDescription": "Ask about health and care",
+    "emergencyContacts": "Emergency Contacts",
+    "emergencyContactsDescription": "Quick access to emergency contacts",
+    "growthTracking": "Growth Tracking",
+    "dailyWellness": "Daily Wellness",
+    "assistanceHelp": "Assistance and Help",
+    "emergencies": "Emergencies",
+    "available247": "Available 24/7",
+    "new": "New",
+    "active": "Active",
+    "last": "Last:",
+    "alwaysAvailable": "Always available",
+    "important": "Important",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{days} days ago",
+    "@daysAgo": {
+      "placeholders": {
+        "days": {
+          "type": "int"
+        }
+      }
+    },
+    "emergencyContactsTitle": "Emergency Contacts",
+    "emergencyContactMessage": "In case of emergency, contact immediately:",
+    "emergenciesLabel": "Emergencies",
+    "pediatrician": "Pediatrician",
+    "contactPediatrician": "Contact your pediatrician",
+    "breastfeedingLine": "Breastfeeding Line",
+    "refresh": "Refresh"
+  },
+  "lessons": {
+    "title": "Lessons",
+    "pathTitle": "Breastfeeding Path",
+    "pathDescription": "Follow the path step by step to learn about breastfeeding.",
+    "noLessonsAvailable": "No lessons available",
+    "errorLoading": "Error loading lessons",
+    "retry": "Retry",
+    "statistics": "Statistics",
+    "statisticsTitle": "Statistics",
+    "completedLessons": "Completed lessons",
+    "completedVideos": "Completed videos",
+    "totalTime": "Total time",
+    "overallProgress": "Overall progress",
+    "lesson": "Lesson",
+    "category": "Category",
+    "progress": "Progress",
+    "babyUnlock": {
+      "3months": "Complete this lesson to unlock the 3-month baby!",
+      "6months": "Complete this lesson to unlock the 6-month baby!"
+    },
+    "videos": "Videos",
+    "viewVideos": "View Videos",
+    "completed": "Completed",
+    "markCompleted": "Mark as completed",
+    "lessonMarkedCompleted": "Lesson marked as completed",
+    "percentCompleted": "% completed",
+    "subtitles": {
+      "lesson1": "Breastfeeding and its benefits",
+      "lesson2": "Colostrum, transitional milk and mature milk",
+      "lesson3": "Things to consider when breastfeeding",
+      "lesson4": "Nutritional Composition of Breast Milk",
+      "lesson5": "How to know if the baby fed enough?",
+      "lesson6": "Weight milestones to watch",
+      "lesson7": "Hand hygiene and breastfeeding techniques",
+      "lesson8": "Medications during breastfeeding",
+      "lesson9": "Signs or Complications in Breastfeeding",
+      "lesson10": "Breast massages before starting breastfeeding",
+      "lesson11": "My home milk bank and its preservation",
+      "lesson12": "Laws in Panama that support breastfeeding",
+      "lesson13": "Differences between breast milk and cow's milk",
+      "lesson14": "Breastfeeding myths"
+    }
+  },
+  "home": {
+    "lessons": "Lessons",
+    "lessonsDescription": "View your lesson progress",
+    "tips": "Tips",
+    "tipsDescription": "Useful tips for you",
+    "history": "History",
+    "historyDescription": "Recently watched videos",
+    "welcome": "Welcome!",
+    "welcomeMessage": "Start by registering your first lactation session to see your progress here.",
+    "registerLactation": "Register Lactation",
+    "quickRegister": "Predefined Quick Register",
+    "complete": "Complete",
+    "register": "Register",
+    "advanceLessons": "Shall we advance in the lessons?",
+    "streakAtRisk": "Your streak is at risk, but you can use a day of skip...",
+    "days": "days",
+    "hello": "Hello"
+  },
+  "companion": {
+    "mascotMessages": {
+      "keepGoing": "Keep it up, you're doing great! 🌟",
+      "everyRecordCounts": "Everything adds up! You're doing great ✨",
+      "yourWellbeing": "Remember: your wellbeing is the most important 💕",
+      "youAreAdvancing": "You're advancing incredibly! 🎉",
+      "takeYourTime": "Take your time, there's no rush ⏰",
+      "youAreSuperMom": "You're a super mom, keep it up! 🚀"
+    },
+    "title": "Companion",
+    "prepartumMessage": "Your journey is beginning!",
+    "prepartumSubmessage": "Complete lessons and trivias to earn XP and unlock achievements while you wait for your baby.",
+    "level": "Level",
+    "streak": "Streak",
+    "achievements": "Achievements",
+    "headerTitle": "My Progress",
+    "headerSubtitle": "Your support on this journey",
+    "errorLoadingCompanion": "Error loading companion",
+    "dailyChallenge": "Daily Challenge",
+    "completed": "Completed!",
+    "progress": "Progress",
+    "reward": "Reward",
+    "youWonXP": "You won {xp} XP!",
+    "@youWonXP": {
+      "placeholders": {
+        "xp": {
+          "type": "int"
+        }
+      }
+    },
+    "startUnlocking": "Start unlocking achievements",
+    "startJourney": "Start your journey! Every action brings you closer to new achievements 🎯",
+    "unlockedAchievements": "Unlocked Achievements",
+    "of": "of",
+    "howToEarnXP": "How to earn XP?",
+    "dailyActions": "Daily Actions",
+    "unlocked": "Unlocked",
+    "all": "All",
+    "summary": "Summary",
+    "totalXP": "Total XP",
+    "days": "days",
+    "restDays": "rest days",
+    "quickRecord": "Quick record",
+    "fullRecord": "Full record",
+    "completeLesson": "Complete lesson",
+    "completeTrivia": "Complete trivia",
+    "triviaXPInfo": "5 XP/question + 20 bonus",
+    "weightRecord": "Weight record",
+    "sleepRecord": "Sleep record",
+    "specialBonuses": "Special Bonuses",
+    "dailyStreaks": "Daily Streaks",
+    "recordMilestones": "Record Milestones",
+    "milestones": "Record milestones: +25 to +1000 XP",
+    "streaks": "Streaks: +50 to +2000 XP",
+    "unlockedAchievementsBonus": "Unlocked achievements: +20 to +3000 XP",
+    "understood": "Understood",
+    "baseXP": "{xp} XP",
+    "@baseXP": {
+      "placeholders": {
+        "xp": {
+          "type": "String"
+        }
+      }
+    },
+    "firstOfDay": "+5 XP if first of the day",
+    "firstOfDaySleep": "+5 XP first of day, +10 XP if includes sleep",
+    "fullRecordXPInfo": "20 XP base (without sleep). +10 XP if you include sleep data. +5 XP if it's the first of the day.",
+    "firstLessonOfDay": "+15 XP if first of the day",
+    "perQuestion": "5 XP per question",
+    "allCorrect": "+20 XP if all correct"
+  },
+  "trivia": {
+    "title": "Trivia",
+    "question": "Question",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "perfect": "Perfect!",
+    "wellDone": "Well done!",
+    "youGot": "You got {correct} out of {total} correct",
+    "@youGot": {
+      "placeholders": {
+        "correct": {
+          "type": "int"
+        },
+        "total": {
+          "type": "int"
+        }
+      }
+    },
+    "completed": "Trivia Completed ✓",
+    "completeToAdvance": "Complete Trivia to Advance",
+    "alreadyCompleted": "You already completed this trivia!",
+    "completePrevious": "Complete the previous lesson's trivia to unlock",
+    "selectAnswer": "Select an answer",
+    "xpEarned": "XP Earned",
+    "totalXP": "Total XP",
+    "continue": "Continue",
+    "repeatTrivia": "Repeat Trivia",
+    "lessons": {
+      "lesson1": {
+        "question1": "What is one of the main benefits of breastfeeding for the baby?",
+        "question1.option1": "Higher risk of infections",
+        "question1.option2": "Strengthens the immune system and reduces infections",
+        "question1.option3": "Increases the risk of allergies",
+        "question1.option4": "Has no special benefits",
+        "question1.explanation": "Breast milk contains antibodies and immune factors that strengthen the baby's immune system and reduce the risk of infections.",
+        "question2": "What benefit does breastfeeding have for the mother?",
+        "question2.option1": "Increases the risk of breast cancer",
+        "question2.option2": "Helps with postpartum recovery and reduces the risk of certain cancers",
+        "question2.option3": "Has no benefits for the mother",
+        "question2.option4": "Only benefits the baby",
+        "question2.explanation": "Breastfeeding helps the mother recover from childbirth, reduces the risk of breast and ovarian cancer, and strengthens the mother-child bond.",
+        "question3": "Is breast milk sufficient to feed the baby during the first 6 months?",
+        "question3.option1": "No, it always needs supplements",
+        "question3.option2": "Yes, it provides all necessary nutrients",
+        "question3.option3": "Only for the first 3 months",
+        "question3.option4": "Depends on the baby",
+        "question3.explanation": "Breast milk is the complete and ideal food for babies during the first 6 months of life, providing all necessary nutrients.",
+        "question4": "What is an economic benefit of breastfeeding?",
+        "question4.option1": "It is more expensive than formula",
+        "question4.option2": "It is free and saves money on formula",
+        "question4.option3": "Requires expensive equipment",
+        "question4.option4": "Has no economic benefits",
+        "question4.explanation": "Breastfeeding is free and can significantly save on formula, bottles, and other supplies costs."
+      },
+      "lesson2": {
+        "question1": "What is colostrum?",
+        "question1.option1": "Milk that appears after 1 month",
+        "question1.option2": "The first milk rich in antibodies produced by the mother",
+        "question1.option3": "Special formula milk",
+        "question1.option4": "Milk that only appears in some mothers",
+        "question1.explanation": "Colostrum is the first milk produced by the mother, rich in antibodies, proteins, and immune factors essential for the newborn.",
+        "question2": "When does transitional milk appear?",
+        "question2.option1": "Immediately after birth",
+        "question2.option2": "Between day 3 and 14 after birth",
+        "question2.option3": "After 1 month",
+        "question2.option4": "Only in some mothers",
+        "question2.explanation": "Transitional milk appears between day 3 and 14 after birth, is more abundant than colostrum and contains more fat and lactose.",
+        "question3": "When is mature milk established?",
+        "question3.option1": "Immediately after birth",
+        "question3.option2": "After approximately 2 weeks",
+        "question3.option3": "After 3 months",
+        "question3.option4": "It never establishes",
+        "question3.explanation": "Mature milk is established approximately after 2 weeks of birth and has a more stable composition with the proper balance of nutrients.",
+        "question4": "Why is colostrum important for the newborn?",
+        "question4.option1": "It has no special importance",
+        "question4.option2": "Provides the first immunization and is rich in nutrients",
+        "question4.option3": "It only hydrates the baby",
+        "question4.option4": "It's the same as mature milk",
+        "question4.explanation": "Colostrum is crucial because it provides the baby's first immunization, is rich in proteins and antibodies, and helps establish the digestive system."
+      },
+      "lesson3": {
+        "question1": "What is important to consider before breastfeeding?",
+        "question1.option1": "Nothing, just breastfeed",
+        "question1.option2": "Mother's comfort, baby's position and calm environment",
+        "question1.option3": "Only the baby's position",
+        "question1.option4": "Only the environment",
+        "question1.explanation": "It's important to consider the mother's comfort, the correct baby position, a calm environment, and that both are relaxed.",
+        "question2": "What is an adequate position for breastfeeding?",
+        "question2.option1": "Only standing",
+        "question2.option2": "Cradle position, rugby ball, lying on side",
+        "question2.option3": "Only sitting",
+        "question2.option4": "Any position is the same",
+        "question2.explanation": "There are several adequate positions such as cradle position, rugby ball, lying on side, etc. What's important is that mother and baby are comfortable.",
+        "question3": "What indicates a good latch?",
+        "question3.option1": "The baby only touches the nipple",
+        "question3.option2": "The baby has mouth wide open, covers part of the areola and there's no pain",
+        "question3.option3": "There's always pain when breastfeeding",
+        "question3.option4": "The baby only sucks the nipple",
+        "question3.explanation": "A good latch includes the baby having mouth wide open, covering part of the areola (not just the nipple), and the mother not feeling pain.",
+        "question4": "Is it necessary to clean the breast before each feeding?",
+        "question4.option1": "Yes, always with soap",
+        "question4.option2": "No, normal daily hygiene is sufficient",
+        "question4.option3": "Only with hot water",
+        "question4.option4": "Only if it's dirty",
+        "question4.explanation": "It's not necessary to clean the breast before each feeding. Normal daily hygiene is sufficient, and excessive cleaning can remove beneficial bacteria."
+      },
+      "lesson4": {
+        "question1": "What main component does breast milk contain?",
+        "question1.option1": "Only water",
+        "question1.option2": "Water, proteins, fats, carbohydrates, vitamins and minerals",
+        "question1.option3": "Only proteins",
+        "question1.option4": "Only fats",
+        "question1.explanation": "Breast milk contains a complete composition: water, proteins, fats, carbohydrates (lactose), vitamins, minerals and immune factors.",
+        "question2": "Does breast milk composition change?",
+        "question2.option1": "No, it's always the same",
+        "question2.option2": "Yes, it changes during feeding, during the day and according to the baby's age",
+        "question2.option3": "It only changes once",
+        "question2.option4": "It only changes according to time of day",
+        "question2.explanation": "Breast milk composition is dynamic: it changes during feeding (more fat at the end), during the day, and adapts to the baby's needs according to age.",
+        "question3": "What type of proteins does breast milk contain?",
+        "question3.option1": "Only animal proteins",
+        "question3.option2": "Easily digestible proteins like lactoferrin and immunoglobulin A",
+        "question3.option3": "Only plant proteins",
+        "question3.option4": "It doesn't contain proteins",
+        "question3.explanation": "Breast milk contains easily digestible proteins like lactoferrin and immunoglobulin A, which are specific to the baby's needs.",
+        "question4": "Why is fat important in breast milk?",
+        "question4.option1": "It's not important",
+        "question4.option2": "Provides energy and is essential for brain development",
+        "question4.option3": "It only provides flavor",
+        "question4.option4": "It's only important for weight",
+        "question4.explanation": "Fat in breast milk is crucial because it provides most of the energy and contains essential fatty acids for brain and nervous system development."
+      },
+      "lesson5": {
+        "question1": "What is a sign that the baby is receiving enough milk?",
+        "question1.option1": "Cries constantly",
+        "question1.option2": "Gains weight adequately, wets 6+ diapers per day and is content",
+        "question1.option3": "Sleeps all day",
+        "question1.option4": "Rejects the breast",
+        "question1.explanation": "Signs that the baby receives enough milk include: adequate weight gain, wetting at least 6 diapers per day, being content between feedings and having regular bowel movements.",
+        "question2": "How many wet diapers per day indicates the baby is well fed?",
+        "question2.option1": "1-2 diapers",
+        "question2.option2": "At least 6 wet diapers",
+        "question2.option3": "Only 3 diapers",
+        "question2.option4": "The amount doesn't matter",
+        "question2.explanation": "A well-fed baby should wet at least 6 diapers per day with clear or pale yellow urine, indicating adequate hydration.",
+        "question3": "What indicates good weight gain in the baby?",
+        "question3.option1": "Doesn't gain weight",
+        "question3.option2": "Gains approximately 20-30 grams per day in the first months",
+        "question3.option3": "Gains 100 grams per day",
+        "question3.option4": "Weight is not important",
+        "question3.explanation": "Good weight gain in the first months is approximately 20-30 grams per day, although it can vary. What's important is a consistent growth trend.",
+        "question4": "When should help be sought if there's concern about feeding?",
+        "question4.option1": "Never",
+        "question4.option2": "If the baby doesn't gain weight, wets less than 6 diapers or is very sleepy",
+        "question4.option3": "Only after 6 months",
+        "question4.option4": "Only if crying a lot",
+        "question4.explanation": "Professional help should be sought if the baby doesn't gain weight adequately, wets less than 6 diapers per day, is very sleepy or shows signs of dehydration."
+      },
+      "lesson6": {
+        "question1": "What is an expected weight milestone in the first days?",
+        "question1.option1": "The baby shouldn't lose weight",
+        "question1.option2": "It's normal to lose up to 10% of birth weight in the first days",
+        "question1.option3": "Should gain weight immediately",
+        "question1.option4": "Weight doesn't matter",
+        "question1.explanation": "It's normal for a newborn to lose up to 10% of their birth weight in the first days, but should recover it around day 10-14.",
+        "question2": "When should the baby recover their birth weight?",
+        "question2.option1": "Immediately",
+        "question2.option2": "Around 10-14 days of life",
+        "question2.option3": "After 1 month",
+        "question2.option4": "Never recovers it",
+        "question2.explanation": "The baby should recover their birth weight around 10-14 days of life. If not, it's important to consult with a professional.",
+        "question3": "What indicates adequate baby growth?",
+        "question3.option1": "Gains weight irregularly",
+        "question3.option2": "Follows a consistent growth curve according to their percentile",
+        "question3.option3": "Gains a lot of weight at once",
+        "question3.option4": "Weight is not an indicator",
+        "question3.explanation": "Adequate growth is reflected in the baby following a consistent growth curve according to their percentile, not necessarily gaining a lot of weight at once.",
+        "question4": "How often should the baby be weighed in the first months?",
+        "question4.option1": "Every day",
+        "question4.option2": "According to pediatrician's recommendations, typically in regular checkups",
+        "question4.option3": "Only once a month",
+        "question4.option4": "It's not necessary to weigh them",
+        "question4.explanation": "The baby should be weighed according to pediatrician's recommendations in regular checkups. It's not necessary to weigh them daily at home unless there's a specific concern."
+      },
+      "lesson7": {
+        "question1": "When is it important to wash hands before breastfeeding?",
+        "question1.option1": "Never necessary",
+        "question1.option2": "Before each feeding, especially after changing diapers or touching objects",
+        "question1.option3": "Only in the morning",
+        "question1.option4": "Only if visibly dirty",
+        "question1.explanation": "It's important to wash hands before each feeding, especially after changing diapers, touching objects or preparing food, to prevent germ transmission.",
+        "question2": "Is it necessary to clean the breast with soap before each feeding?",
+        "question2.option1": "Yes, always with soap",
+        "question2.option2": "No, normal daily hygiene is sufficient",
+        "question2.option3": "Only with hot water",
+        "question2.option4": "Only if dirty",
+        "question2.explanation": "It's not necessary to clean the breast with soap before each feeding. Normal daily hygiene during bathing is sufficient and avoids removing beneficial bacteria.",
+        "question3": "What technique helps facilitate milk flow?",
+        "question3.option1": "Press the breast hard",
+        "question3.option2": "Gentle massages, breast compression and relaxation",
+        "question3.option3": "Just wait",
+        "question3.option4": "There are no techniques",
+        "question3.explanation": "Techniques like gentle breast massages, breast compression during feeding and maintaining a relaxed environment can help facilitate milk flow.",
+        "question4": "What to do if the baby has difficulty latching?",
+        "question4.option1": "Force the latch",
+        "question4.option2": "Seek professional help, verify position and be patient",
+        "question4.option3": "Switch to bottle immediately",
+        "question4.option4": "Wait for it to resolve itself",
+        "question4.explanation": "If there are latch difficulties, it's important to seek professional help, verify that the position is correct, and be patient. Should not force or immediately switch to bottle."
+      },
+      "lesson8": {
+        "question1": "Can medications be taken during breastfeeding?",
+        "question1.option1": "Never can take any medication",
+        "question1.option2": "Many medications are safe, but should always consult with the doctor",
+        "question1.option3": "All medications are safe",
+        "question1.option4": "Only natural medications",
+        "question1.explanation": "Many medications are safe during breastfeeding, but it's essential to always consult with the doctor or pharmacist before taking any medication.",
+        "question2": "What to do if you need to take a medication during breastfeeding?",
+        "question2.option1": "Take it without consulting",
+        "question2.option2": "Consult with the doctor about compatibility with breastfeeding",
+        "question2.option3": "Automatically suspend breastfeeding",
+        "question2.option4": "Only take natural medications",
+        "question2.explanation": "Should always consult with the doctor about the medication's compatibility with breastfeeding. Most common medications are safe, but it's important to verify.",
+        "question3": "Do medications pass into breast milk?",
+        "question3.option1": "They never pass",
+        "question3.option2": "Some medications can pass in small amounts, that's why it's important to consult",
+        "question3.option3": "All pass in large amounts",
+        "question3.option4": "Only antibiotics pass",
+        "question3.explanation": "Some medications can pass into breast milk in small amounts. That's why it's crucial to consult with a health professional to evaluate the risk-benefit.",
+        "question4": "Where can you consult about medication safety during breastfeeding?",
+        "question4.option1": "Only on the internet",
+        "question4.option2": "With the doctor, pharmacist or in specialized databases like e-lactancia",
+        "question4.option3": "There's no way to consult",
+        "question4.option4": "Only with other parents",
+        "question4.explanation": "Should consult with the doctor, pharmacist or in specialized databases like e-lactancia.org that provide updated information about medications and breastfeeding."
+      },
+      "lesson9": {
+        "question1": "What is a sign of breastfeeding complication?",
+        "question1.option1": "The baby feeds well",
+        "question1.option2": "Persistent pain, nipple cracks, mastitis or baby not gaining weight",
+        "question1.option3": "Only if the baby cries",
+        "question1.option4": "There are no signs of complication",
+        "question1.explanation": "Signs of complication include: persistent pain, nipple cracks, mastitis, baby not gaining weight adequately, or persistent latch difficulties.",
+        "question2": "What is mastitis?",
+        "question2.option1": "A normal condition",
+        "question2.option2": "An inflammation of breast tissue that may include infection",
+        "question2.option3": "Only chest pain",
+        "question2.option4": "It doesn't exist",
+        "question2.explanation": "Mastitis is an inflammation of breast tissue that may include an infection. It's characterized by pain, redness, heat and sometimes fever. Requires medical attention.",
+        "question3": "What to do if there's persistent pain when breastfeeding?",
+        "question3.option1": "Ignore it",
+        "question3.option2": "Seek professional help to identify and treat the cause",
+        "question3.option3": "Suspend breastfeeding",
+        "question3.option4": "Only take painkillers",
+        "question3.explanation": "Persistent pain when breastfeeding is not normal and requires seeking professional help to identify the cause (poor position, incorrect latch, infection) and treat it adequately.",
+        "question4": "Are nipple cracks normal?",
+        "question4.option1": "Yes, they always appear",
+        "question4.option2": "No, they generally indicate a latch or position problem that should be corrected",
+        "question4.option3": "They only appear in some mothers",
+        "question4.option4": "They're not important",
+        "question4.explanation": "Nipple cracks generally indicate a latch or position problem. They're not normal and should be addressed by correcting breastfeeding technique with professional help."
+      },
+      "lesson10": {
+        "question1": "What are breast massages for before breastfeeding?",
+        "question1.option1": "They're useless",
+        "question1.option2": "Help stimulate milk flow and facilitate latch",
+        "question1.option3": "Only to relax",
+        "question1.option4": "Only if there's pain",
+        "question1.explanation": "Breast massages before breastfeeding help stimulate milk flow, soften the breast if it's very full, and facilitate the baby being able to latch better.",
+        "question2": "How are breast massages performed?",
+        "question2.option1": "With a lot of force",
+        "question2.option2": "With gentle circular movements from the base toward the nipple",
+        "question2.option3": "Only pressing the nipple",
+        "question2.option4": "There's no specific technique",
+        "question2.explanation": "Massages are performed with gentle circular movements from the base of the breast toward the nipple, helping to mobilize milk and prepare the breast for feeding.",
+        "question3": "When is it especially useful to massage the breast?",
+        "question3.option1": "It's never useful",
+        "question3.option2": "When the breast is very full, before breastfeeding or to relieve congestion",
+        "question3.option3": "Only at night",
+        "question3.option4": "Only if there's pain",
+        "question3.explanation": "Massages are especially useful when the breast is very full, before breastfeeding to facilitate flow, or to relieve breast congestion.",
+        "question4": "Can massages help with milk extraction?",
+        "question4.option1": "No, they have no effect",
+        "question4.option2": "Yes, they can improve manual or pump extraction",
+        "question4.option3": "Only with electric pump",
+        "question4.option4": "Only manually",
+        "question4.explanation": "Massages can significantly improve milk extraction, whether manual or with pump, helping to empty the breast better and increase production."
+      },
+      "lesson11": {
+        "question1": "How long can expressed breast milk be kept at room temperature?",
+        "question1.option1": "Only 1 hour",
+        "question1.option2": "Up to 4 hours at room temperature (up to 6-8 hours in very clean conditions)",
+        "question1.option3": "All day",
+        "question1.option4": "Only 30 minutes",
+        "question1.explanation": "Expressed breast milk can be kept up to 4 hours at room temperature (up to 6-8 hours in very clean and fresh conditions).",
+        "question2": "How long can breast milk be kept in the refrigerator?",
+        "question2.option1": "Only 1 day",
+        "question2.option2": "Up to 4 days in the refrigerator (at 4°C or less)",
+        "question2.option3": "Only 2 days",
+        "question2.option4": "It can't be refrigerated",
+        "question2.explanation": "Breast milk can be kept up to 4 days in the refrigerator at a temperature of 4°C or less, preferably in the back of the refrigerator.",
+        "question3": "How should expressed breast milk be stored?",
+        "question3.option1": "In any container",
+        "question3.option2": "In clean and sterilized containers, labeled with date and time",
+        "question3.option3": "Only in bottles",
+        "question3.option4": "The container doesn't matter",
+        "question3.explanation": "Breast milk should be stored in clean and sterilized containers (special bags or glass/plastic suitable containers), labeled with extraction date and time.",
+        "question4": "How should frozen breast milk be thawed?",
+        "question4.option1": "Directly in the microwave",
+        "question4.option2": "In the refrigerator overnight or under warm water, never in microwave",
+        "question4.option3": "Only at room temperature",
+        "question4.option4": "In boiling water",
+        "question4.explanation": "Frozen milk should be thawed in the refrigerator overnight or under running warm water. Microwave should never be used because it destroys nutrients and creates hot spots."
+      },
+      "lesson12": {
+        "question1": "Do laws exist in Panama that protect breastfeeding?",
+        "question1.option1": "No laws exist",
+        "question1.option2": "Yes, laws exist that protect and promote breastfeeding",
+        "question1.option3": "Only in some places",
+        "question1.option4": "Only for public employees",
+        "question1.explanation": "Yes, Panama has laws that protect and promote breastfeeding, including labor rights for working mothers.",
+        "question2": "What rights do working mothers have in Panama regarding breastfeeding?",
+        "question2.option1": "No special rights",
+        "question2.option2": "Right to breaks for breastfeeding and adequate spaces",
+        "question2.option3": "They can only breastfeed at home",
+        "question2.option4": "They must resign to breastfeed",
+        "question2.explanation": "Working mothers in Panama have the right to breaks for breastfeeding and to adequate spaces (breastfeeding rooms) in their workplaces.",
+        "question3": "Do Panamanian laws protect breastfeeding in public spaces?",
+        "question3.option1": "No, it's prohibited",
+        "question3.option2": "Yes, they protect the right to breastfeed in public spaces",
+        "question3.option3": "Only in some places",
+        "question3.option4": "Depends on the place",
+        "question3.explanation": "Panamanian laws protect mothers' right to breastfeed in public spaces, promoting the normalization of breastfeeding.",
+        "question4": "Why are laws that protect breastfeeding important?",
+        "question4.option1": "They're not important",
+        "question4.option2": "They guarantee mothers' rights and promote babies' health",
+        "question4.option3": "They only protect some mothers",
+        "question4.option4": "They're only symbolic",
+        "question4.explanation": "Laws that protect breastfeeding are important because they guarantee mothers' rights, promote babies' health and create a favorable environment for breastfeeding."
+      },
+      "lesson13": {
+        "question1": "What is a key difference between breast milk and cow's milk?",
+        "question1.option1": "They're the same",
+        "question1.option2": "Breast milk has antibodies and adapts to the baby, cow's milk doesn't",
+        "question1.option3": "They only differ in taste",
+        "question1.option4": "There are no important differences",
+        "question1.explanation": "Breast milk contains antibodies, immune factors and adapts to the baby's needs. Cow's milk doesn't have these components and is designed for calves, not human babies.",
+        "question2": "Why is breast milk easier to digest than cow's milk?",
+        "question2.option1": "There's no difference",
+        "question2.option2": "It has easily digestible proteins and composition specific for humans",
+        "question2.option3": "Only because it's more liquid",
+        "question2.option4": "Because of the taste",
+        "question2.explanation": "Breast milk has easily digestible proteins (like lactoferrin) and a composition specifically designed for the human digestive system, unlike cow's milk.",
+        "question3": "Does breast milk change according to the baby's needs?",
+        "question3.option1": "No, it's always the same",
+        "question3.option2": "Yes, it adapts according to the baby's age, time of day and needs",
+        "question3.option3": "It only changes once",
+        "question3.option4": "It only changes the taste",
+        "question3.explanation": "Breast milk is dynamic and adapts according to the baby's age, time of day, and even during the same feeding, providing exactly what the baby needs.",
+        "question4": "What does breast milk contain that cow's milk doesn't?",
+        "question4.option1": "Nothing special",
+        "question4.option2": "Antibodies, growth factors, probiotics and immune components",
+        "question4.option3": "Only more water",
+        "question4.option4": "Only more fat",
+        "question4.explanation": "Breast milk contains unique components like antibodies, growth factors, probiotics and other immune components that cow's milk doesn't provide."
+      },
+      "lesson14": {
+        "question1": "Is it true that some women don't produce enough milk?",
+        "question1.option1": "Yes, most don't produce enough",
+        "question1.option2": "It's a common myth; most women can produce enough milk with adequate support",
+        "question1.option3": "Only some can breastfeed",
+        "question1.option4": "Depends on age",
+        "question1.explanation": "It's a common myth. Most women can produce enough milk. Difficulties are generally due to technique problems, inadequate support or incorrect information, not lack of capacity.",
+        "question2": "Is it necessary to give water to the baby in addition to breast milk in the first 6 months?",
+        "question2.option1": "Yes, it always needs water",
+        "question2.option2": "No, breast milk provides all necessary hydration",
+        "question2.option3": "Only in summer",
+        "question2.option4": "Only if it has fever",
+        "question2.explanation": "It's not necessary to give additional water to a breastfed baby in the first 6 months. Breast milk provides all necessary hydration and nutrition.",
+        "question3": "Is it true that breastfeeding always hurts?",
+        "question3.option1": "Yes, it always hurts",
+        "question3.option2": "No, pain indicates a problem (poor position or latch) that should be corrected",
+        "question3.option3": "It only hurts at the beginning",
+        "question3.option4": "Depends on the mother",
+        "question3.explanation": "Pain when breastfeeding is not normal. If there's pain, it generally indicates a position or latch problem that should be identified and corrected with professional help.",
+        "question4": "Can you breastfeed if breasts are small?",
+        "question4.option1": "No, large breasts are needed",
+        "question4.option2": "Yes, breast size doesn't affect the ability to produce milk",
+        "question4.option3": "Only if they're medium",
+        "question4.option4": "Depends on the shape",
+        "question4.explanation": "Breast size doesn't affect the ability to produce milk. Women with small breasts can breastfeed perfectly, as milk production depends on glandular tissue, not size."
+      }
+    }
+  },
+  "helpSupport": {
+    "helpCenter": "Help Center",
+    "helpCenterDescription": "Chat with our virtual assistant",
+    "contactSupport": "Contact Support",
+    "supportEmail": "soporte@gilact.com",
+    "terms": "Terms and Conditions",
+    "termsDescription": "View terms of use",
+    "privacy": "Privacy Policy",
+    "privacyDescription": "View privacy policy",
+    "contactDialogTitle": "Contact Support",
+    "contactDialogMessage": "Need help?\n\nYou can contact us at:\n📧 soporte@gilact.com\n\nWe're here to help you with any questions or problems.",
+    "close": "Close"
+  },
+  "tips": {
+    "title": "Breastfeeding Tips",
+    "progress": "Progress",
+    "favorites": "Favorites",
+    "favoritesInDevelopment": "Favorites functionality in development",
+    "tip": "Tip",
+    "titles": {
+      "complementaryFeeding": "Complementary Feeding",
+      "ironSupplementation": "Iron Supplementation",
+      "benefitsBaby": "Benefits for the Baby",
+      "benefitsMom": "Benefits for the Mom",
+      "postureLatch": "Posture and Latch",
+      "colostrum": "Colostrum",
+      "breastfeedingTips": "Breastfeeding Tips",
+      "extractionStorage": "Extraction and Storage",
+      "extractionContinuation": "Extraction Continuation",
+      "hygiene": "Hygiene in Breastfeeding",
+      "hygieneContinuation": "Hygiene Continuation",
+      "successfulBreastfeeding": "Successful Breastfeeding",
+      "fatherRole": "Father's Role",
+      "commonProblems": "Common Problems"
+    },
+    "content": {
+      "complementaryFeeding": "It is recommended to give only breast milk to the baby until 6 months and from this moment, gradually add foods according to the suggestion of the pediatrician or nutritionist. It is recommended to maintain breastfeeding combined with feeding until the mother and child wish.",
+      "ironSupplementation": "If your baby had low birth weight and/or is premature, iron supplementation will be provided.\n\n*As indicated by health personnel.",
+      "benefitsBaby": {
+        "title": "Benefits of Exclusive Breastfeeding",
+        "subtitle": "During the first 6 months of life:",
+        "items": [
+          "Higher IQ and better school performance.",
+          "Strengthens love, communication and the emotional bond between mother and child.",
+          "More affectionate children.",
+          "Fewer dental cavities and better development of facial and neck muscles."
+        ]
+      },
+      "benefitsMom": {
+        "items": [
+          "Reduces postpartum bleeding.",
+          "Helps the uterus return to its normal state.",
+          "Protects against ovarian, breast and uterine cancer.",
+          "Quickly recovers figure by eliminating fat reserves.",
+          "Reduces the risk of postpartum depression."
+        ]
+      },
+      "postureLatch": {
+        "title": "Tips for Good Posture and Latch",
+        "items": [
+          "Place the baby belly to belly and in a straight line, with the face facing the nipple.",
+          "The mother should find a comfortable position, using pillows and keeping her back supported.",
+          "Proper Latch is Important:",
+          "The baby's mouth should be wide open and cover the entire areola (dark area around the nipple)."
+        ]
+      },
+      "colostrum": {
+        "title": "Colostrum: The First Milk",
+        "intro": "Colostrum is the first milk produced by the mother. Here is key information:",
+        "items": [
+          "It is yellowish in color and contains high nutritional value.",
+          "Satisfies the infant because it has the nutrients the baby needs.",
+          "Contains defenses that protect the baby against diseases.",
+          "It is the only food the baby needs in the first six months."
+        ]
+      },
+      "breastfeedingTips": {
+        "title": "Tips for Successful Breastfeeding",
+        "items": [
+          "Don't give up! You can breastfeed.",
+          "The mother should continue iron and folic acid supplementation during the first 3 months of breastfeeding.",
+          "Breastfeed your baby immediately after delivery.",
+          "The baby will let you know when hungry, usually nursing 8 to 12 times a day.",
+          "Breastfeed in a calm environment.",
+          "Find the most comfortable position for breastfeeding.",
+          "Drink plenty of water."
+        ]
+      },
+      "extractionStorage": {
+        "title": "Extraction, Handling and Storage",
+        "intro": "Extraction can be done manually or mechanically. To facilitate extraction, do stimulation by applying warm compresses and circular massages over the entire breast.",
+        "items": [
+          "Do not mix freshly expressed breast milk with breast milk that is already refrigerated."
+        ]
+      },
+      "extractionContinuation": {
+        "title": "Extraction, Handling and Storage of Breast Milk",
+        "items": [
+          "Thawed milk should be consumed and leftovers discarded.",
+          "Leave it at room temperature for a while before giving it.",
+          "All containers where milk is placed should be labeled with name and date."
+        ]
+      },
+      "hygiene": {
+        "title": "Hygiene and General Measures",
+        "items": [
+          "Wash your hands well with soap and water before breastfeeding.",
+          "Daily bathing is sufficient for nipple hygiene.",
+          "Wash your hands with soap and water after each diaper change.",
+          "Breastfeed with joy and it will increase your production."
+        ]
+      },
+      "hygieneContinuation": {
+        "title": "Your Diet and Breastfeeding",
+        "text": "You can eat all kinds of foods. Just make sure to eat healthy and drink plenty of water."
+      },
+      "successfulBreastfeeding": {
+        "title": "Tips for Successful Breastfeeding",
+        "items": [
+          "Inform yourself and prepare as much as you can about breastfeeding before the time of delivery.",
+          "Breastfeed immediately after delivery, this facilitates the start of breastfeeding.",
+          "Drink plenty of water.",
+          "Trust yourself and your ability to feed your baby: yes, you have milk!",
+          "Place the baby frequently on the breast: let them nurse on demand."
+        ]
+      },
+      "fatherRole": {
+        "title": "The Father's Role in Breastfeeding",
+        "items": [
+          "The father figure plays a main role in ensuring and supporting exclusive breastfeeding, for the well-being and full development of the mother and baby.",
+          "Sharing responsibility for care tasks and household chores during this very important period makes it easier for the mother to dedicate the time the baby needs, as well as have time for herself."
+        ]
+      },
+      "commonProblems": {
+        "title": "Common Breastfeeding Problems",
+        "congestion": {
+          "title": "Breast Congestion:",
+          "items": [
+            "Don't stop breastfeeding; do circular massages all over the breast.",
+            "Breastfeed frequently to avoid breast abscesses."
+          ]
+        },
+        "fissures": {
+          "title": "Nipple Fissures and Erosions:",
+          "items": [
+            "Check if the child has thrush (Oral candidiasis in the baby or mother).",
+            "See a doctor for diagnosis and treatment."
+          ]
+        },
+        "lowProduction": {
+          "title": "Low Milk Production:",
+          "items": [
+            "Drink more water.",
+            "Rest and try to relax."
+          ]
+        }
+      }
+    }
+  },
+  "forms": {
+    "babyWeight": {
+      "title": "Baby Weight Record",
+      "question": "What is the baby's current weight?",
+      "weight": "Weight",
+      "weightPlaceholder": "Enter weight in kg",
+      "weightRequired": "Weight is required",
+      "weightInvalid": "Enter a valid weight (e.g., 3.5)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes (optional)",
+      "save": "Save Weight",
+      "saving": "Saving...",
+      "saved": "Weight saved successfully",
+      "error": "Error saving weight",
+      "kg": "kg"
+    },
+    "sleep": {
+      "title": "Baby Sleep Record",
+      "question": "How many hours did the baby sleep last night?",
+      "wakeUpsQuestion": "How many times did the baby wake up? (Optional)",
+      "qualityQuestion": "How was the sleep? (Optional)",
+      "hoursSlept": "Hours Slept",
+      "hoursPlaceholder": "Enter hours",
+      "hoursRequired": "Hours are required",
+      "hoursInvalid": "Enter a valid value (e.g., 8.0)",
+      "wakeUps": "Wake Ups",
+      "wakeUpsPlaceholder": "Number of wake ups (optional)",
+      "quality": "Sleep Quality",
+      "qualityExcellent": "Excellent",
+      "qualityGood": "Good",
+      "qualityFair": "Fair",
+      "qualityPoor": "Poor",
+      "save": "Save Sleep",
+      "saving": "Saving...",
+      "saved": "Sleep saved successfully",
+      "error": "Error saving sleep",
+      "hours": "hours"
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Welcome back",
+      "loginToContinue": "Sign in to continue",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Remember",
+      "forgotPassword": "Forgot your password?",
+      "login": "Sign In",
+      "noAccount": "Don't have an account? ",
+      "signUp": "Sign Up",
+      "alreadyHaveAccount": "Do you already have an account? "
+    },
+    "register": {
+      "createAccount": "Create Account",
+      "basicInfo": "Basic information to get started",
+      "fullName": "Full name *",
+      "email": "Email *",
+      "password": "Password *",
+      "passwordStrength": {
+        "veryWeak": "Very weak",
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+      },
+      "next": "Next",
+      "back": "Back",
+      "register": "Register",
+      "backToLogin": "Back to login",
+      "step": "Step {current} of {total}",
+      "@step": {
+        "placeholders": {
+          "current": {
+            "type": "int"
+          },
+          "total": {
+            "type": "int"
+          }
+        }
+      },
+      "personalData": "Personal Data",
+      "personalDataDescription": "Additional information about you",
+      "additionalInfo": "Additional Information",
+      "additionalInfoDescription": "Last details to complete",
+      "motherNameOptional": "Mother's name (optional)",
+      "idNumberOptional": "Identification number (optional)",
+      "acceptTerms": "I accept the terms and conditions of use",
+      "confirmRegistration": "Confirm Registration",
+      "confirmRegistrationMessage": "Are you sure you want to create your account with this information?",
+      "confirm": "Confirm"
+    }
+  },
+  "history": {
+    "title": "History",
+    "lastLessonCompleted": "Last lesson completed",
+    "generalProgress": "General Progress",
+    "percentCompleted": "% completed",
+    "completed": "Completed",
+    "pending": "Pending",
+    "noVideosAvailable": "No videos available",
+    "videosWillAppear": "Videos will appear here when available",
+    "video": "Video",
+    "loadingVideos": "Loading videos...",
+    "errorLoading": "Error loading videos",
+    "retry": "Retry",
+    "videoDownloaded": "Video downloaded successfully",
+    "videoDeleted": "Video deleted",
+    "deleteDownload": "Delete download",
+    "deleteDownloadConfirm": "Are you sure you want to delete the download of",
+    "unknownError": "Unknown error"
+  },
+  "baby": {
+    "data": {
+      "title": "Baby Data",
+      "name": "Baby's Name",
+      "gestationalAge": "Gestational Age",
+      "birthDate": "Date of Birth",
+      "birthPlace": "Place of Birth",
+      "weight": "Weight",
+      "weeks": "weeks",
+      "noInfoAvailable": "No baby information available"
+    }
+  },
+  "growth": {
+    "alertTitle": "Growth Alert",
+    "trendTitle": "Growth Trend",
+    "disclaimer": "This information is only indicative. Always consult with your pediatrician or nutritionist for any concern about your baby's growth or feeding.",
+    "currentWeight": "Current weight",
+    "percentile": "Percentile",
+    "trend": "Trend",
+    "stable": "Stable",
+    "increasing": "Increasing",
+    "decreasing": "Declining",
+    "normalRange": "Normal range",
+    "median": "Median (P50)",
+    "weightTrend": "Weight Trend",
+    "whoComparison": "Comparison with WHO standards",
+    "important": "Important",
+    "disclaimerFull": "This information is for guidance only and does not replace professional medical advice. Any concerns about your baby's weight or feeding should be consulted with a pediatrician or nutritionist.",
+    "insufficientData": "Not enough data to show the trend",
+    "registerWeightToSeeChart": "Register your baby's weight to see the chart"
+  },
+  "feeding": {
+    "totalExtractedMilk": "Total Extracted Milk",
+    "dailyVolumeSubtitle": "Daily volume of extracted and measured milk",
+    "extractedOnlyNote": "Only includes extracted milk. Does not include direct breastfeeding.",
+    "dailyAverage": "Daily average",
+    "extractedOnly": "Extracted only",
+    "lastRecord": "Last record",
+    "noDataRegistered": "No feeding data registered"
+  },
+  "welcome": {
+    "title": "Welcome!",
+    "verifying": "Verifying your profile...",
+    "loading": "Loading..."
+  },
+  "countdown": {
+    "myBabyArrives": "My Baby Arrives",
+    "specialCountdown": "Special countdown",
+    "days": "DAYS",
+    "hours": "HOURS",
+    "pregnancyProgress": "Pregnancy progress",
+    "motivationalMessage": "Every day is a step closer to meeting your baby. Keep it up!",
+    "preparingCountdown": "Preparing countdown...",
+    "newAdventure": "It's time to start a new adventure!",
+    "greatDayArrived": "The great day has arrived! Get ready to meet your baby.",
+    "verySoon": "Very soon! Your baby is almost here.",
+    "oneMonthLeft": "One more month and you'll have your baby in your arms. Keep going!",
+    "stayStrong": "Stay strong, the great day is approaching.",
+    "dayArrived": "The day has arrived!",
+    "completePostpartumInfo": "It's time to complete your postpartum information",
+    "updateToPostpartum": "Update to Postpartum",
+    "updateToPostpartumConfirm": "Are you sure you want to update your profile to postpartum? This will allow you to register your baby's information.",
+    "congratulationsTitle": "Congratulations!",
+    "congratulationsMessage": "Your baby has arrived! Now you can register all your baby's information and start using all the app's features.",
+    "congratulationsCareMessage": "Remember to take care of yourself and rest. This is a special moment for you and your baby.",
+    "registerBaby": "Register Baby"
+  },
+  "onboarding": {
+    "babyName": "Baby Name",
+    "babyNameHint": "Baby name",
+    "date": "Date",
+    "dateHint": "Date",
+    "time": "Time",
+    "timeHint": "Time",
+    "birthPlace": "Birth Place",
+    "birthPlaceHint": "Hospital, clinic, etc.",
+    "birthWeight": "Birth Weight (kg)",
+    "birthWeightHint": "Ex: 3.2",
+    "lastMenstruation": "Last Menstruation",
+    "lastMenstruationHint": "Last menstruation date",
+    "nameRequired": "Name required",
+    "dateRequired": "Date required",
+    "timeRequired": "Time required",
+    "placeRequired": "Place required",
+    "weightRequired": "Weight required",
+    "invalidWeight": "Invalid weight",
+    "preParto": "Pre-Partum",
+    "prePartoDescription": "I am pregnant",
+    "hypertension": "High blood pressure",
+    "swipe": "Swipe",
+    "continuingAutomatically": "Continuing automatically...",
+    "chooseSituation": "Choose your current situation",
+    "selectSituationDescription": "Select the option that best describes your moment",
+    "postParto": "Post-Partum",
+    "postPartoDescription": "I already had my baby",
+    "select": "Select",
+    "prepartoInfo": "Pre-delivery Information",
+    "prepartoInfoDescription": "Tell us when you expect your baby",
+    "selectExpectedDate": "Select the expected date",
+    "babyRegistration": "Baby Registration",
+    "completeBabyInfo": "Complete your baby's information",
+    "slides": {
+      "babyBenefits": "Benefits for the baby",
+      "decreasesRisk": "Decreases the possibility of getting sick from:",
+      "protectionAgainst": "Protection against diseases such as:",
+      "nothingCompares": "Nothing compares to",
+      "breastMilk": "Breast Milk!",
+      "bestFood": "It is the best food for the infant. It is a living nutritional complex fluid that contains antibodies, enzymes, fatty acids and hormones.",
+      "breastfeedWithPride": "Breastfeed with pride!",
+      "diseases": {
+        "diabetes": "Diabetes",
+        "hypertension": "High blood pressure",
+        "obesity": "Obesity",
+        "cancer": "Cancer (leukemia, lymphoma)",
+        "diarrhea": "Diarrhea",
+        "allergies": "Allergies",
+        "colds": "Colds",
+        "earInfections": "Ear infections",
+        "sids": "Sudden infant death syndrome"
+      }
+    }
+  },
+  "chatbot": {
+    "title": "ChatBot Gilact",
+    "subtitle": "Your lactation assistant",
+    "quickQuestions": "Quick questions"
+  },
+  "videos": {
+    "playError": "Error playing video: {error}",
+    "@playError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "download": {
+      "checkStatusError": "Error checking status: {error}",
+      "@checkStatusError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveError": "Error: Video was not saved correctly",
+      "metadataError": "Error saving metadata: {error}",
+      "@metadataError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "downloadError": "Error downloading video: {error}",
+      "@downloadError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      }
+    },
+    "noVideosAvailable": "No videos available",
+    "lesson": "Lesson",
+    "duration": "Duration",
+    "minutes": "minutes",
+    "description": "Description",
+    "markAsCompleted": "Mark as completed",
+    "videoMarkedCompleted": "Video marked as completed"
+  },
+  "educationalContent": {
+    "title": "Educational Content",
+    "statistics": "Statistics",
+    "searchContent": "Search content...",
+    "noContentAvailable": "No content available",
+    "contentMarkedCompleted": "Content marked as completed!",
+    "information": "Information",
+    "lactanciaExitosa": "Successful Breastfeeding",
+    "beneficiosBebe": "Benefits for the Baby",
+    "alimentacionComplementaria": "Complementary Feeding"
+  },
+  "gamification": {
+    "xp": "XP",
+    "level": "Level",
+    "streak": "Streak",
+    "achievements": "Achievements",
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "diamond": "Diamond",
+      "beginner": "Beginner"
+    },
+    "dailyChallenges": {
+      "weekStreak": {
+        "title": "Week Streak",
+        "description": "Maintain a 7-day consecutive streak"
+      },
+      "monthStreak": {
+        "title": "Month Streak",
+        "description": "Maintain a 30-day consecutive streak"
+      }
+    },
+    "achievementUnlocked": "Achievement Unlocked!",
+    "levelUp": "Level Up!",
+    "excellent": "Excellent!",
+    "achievementObjectivesTitle": "Objectives to unlock:",
+    "loadingProgress": "Loading progress...",
+    "achievementTitles": {
+      "daily3": "Active Day",
+      "daily5": "Dedicated Day",
+      "daily10": "Exceptional Day",
+      "milestone10": "First Steps",
+      "milestone25": "Consistent",
+      "milestone50": "Dedicated",
+      "milestone100": "Expert",
+      "milestone250": "Master",
+      "milestone500": "Legend",
+      "complete25": "Detail-Oriented",
+      "complete50": "Complete",
+      "complete100": "Perfectionist",
+      "lessons7": "Advanced Student",
+      "lessonsAll": "Breastfeeding Expert",
+      "streak7": "Committed",
+      "streak30": "Dedicated",
+      "streak90": "Quarter Consistency",
+      "streak180": "Legendary Semester",
+      "level1": "Level 1",
+      "level3": "Level 3",
+      "level5": "Level 5",
+      "level10": "Level 10",
+      "level15": "Level 15",
+      "level20": "Level 20",
+      "nocturnal10": "Early Bird",
+      "weight10": "Growth",
+      "sleep20": "Golden Sleep",
+      "triviaPerfect5": "Perfect Trivia",
+      "firstWeek": "First Week",
+      "firstMonth": "First Month",
+      "threeMonths": "Three Months",
+      "sixMonths": "Six Months"
+    },
+    "achievementDescriptions": {
+      "daily3": "3 records in a single day",
+      "daily5": "5 records in a single day",
+      "daily10": "10 records in a single day",
+      "milestone10": "Complete 10 lactation records",
+      "milestone25": "Complete 25 lactation records",
+      "milestone50": "Complete 50 lactation records",
+      "milestone100": "Complete 100 lactation records",
+      "milestone250": "Complete 250 lactation records",
+      "milestone500": "Complete 500 lactation records",
+      "complete25": "Complete 25 full records",
+      "complete50": "Complete 50 full records",
+      "complete100": "Complete 100 full records",
+      "lessons7": "Complete 7 lessons",
+      "lessonsAll": "Complete all lessons (14)",
+      "streak7": "Maintain a 7-day streak",
+      "streak30": "Maintain a 30-day streak",
+      "streak90": "Maintain a 90-day streak",
+      "streak180": "Maintain a 180-day (6-month) streak",
+      "level1": "Reach level 1",
+      "level3": "Reach level 3",
+      "level5": "Reach level 5",
+      "level10": "Reach level 10",
+      "level15": "Reach level 15",
+      "level20": "Reach level 20",
+      "nocturnal10": "Make 10 records between 12am and 6am",
+      "weight10": "Record baby weight 10 times",
+      "sleep20": "Record baby sleep 20 times",
+      "triviaPerfect5": "Complete 5 trivias with 100% correct answers",
+      "firstWeek": "Use the app for 7 days",
+      "firstMonth": "Use the app for 30 days",
+      "threeMonths": "Use the app for 90 days",
+      "sixMonths": "Use the app for 180 days"
+    },
+    "messages": {
+      "excellentWork": "Excellent work! 🎉",
+      "closeToLevelUp": "You're very close to leveling up",
+      "streakAtRisk": "Your streak is at risk, but you can use a rest day",
+      "takeYourTime": "Take your time, we'll be here 💙",
+      "restWell": "Rest well, we'll see you tomorrow",
+      "helloHowAreYou": "Hello! How are you today?",
+      "startFirstStreak": "Start your first streak today!",
+      "great": "Great!",
+      "congratulations": "Congratulations! It's time to start your new adventure with your baby 🎉",
+      "errorSavingXP": "Error saving XP: {error}",
+      "@errorSavingXP": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "videoCompleted": "Video Completed!",
+      "achievementDescriptions": {
+        "milestone": "Complete {value} lactation records in total.",
+        "@milestone": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "complete": "Complete {value} full records (with all details).",
+        "@complete": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "daily": "Make {value} records in a single day.",
+        "@daily": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "nocturnal": "Make 10 records between 12am and 6am.",
+        "lactation": "Complete {value} lactation records.",
+        "@lactation": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "triviaPerfect": "Complete 5 trivias with 100% correct answers.",
+        "lesson": "Complete {value} lessons.",
+        "@lesson": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "streak": "Maintain a streak of {value} consecutive days recording activity.",
+        "@streak": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "level": "Reach level {value} by earning XP.",
+        "@level": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "weight": "Record your baby's weight {value} times.",
+        "@weight": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "sleep": "Record your baby's sleep {value} times.",
+        "@sleep": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "appUsage": "Use the app for {value} days.",
+        "@appUsage": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "default": "Complete the required objective."
+      },
+      "streakMessages": {
+        "atRisk": "Your streak is at risk, but you can use a rest day if you need it",
+        "pauseMode": "Take your time. We'll be here when you return 💙",
+        "pauseActive": "Pause mode active. Take your time",
+        "active": "Excellent! You've been going for {days} consecutive days 🔥",
+        "@active": {
+          "placeholders": {
+            "days": {
+              "type": "int"
+            }
+          }
+        },
+        "lost": "Take your time. We'll be here when you return 💙",
+        "noActivity": "Start your first streak today!"
+      },
+      "babyStage": {
+        "upgradeTitle": "Your baby has grown!",
+        "upgradeMessage": "Congratulations!",
+        "upgradeDescription": "You've completed {lessons} lessons and your baby is now {newStage} 🎉",
+        "@upgradeDescription": {
+          "placeholders": {
+            "lessons": {
+              "type": "int"
+            },
+            "newStage": {
+              "type": "String"
+            }
+          }
+        },
+        "born": "Newborn",
+        "3months": "3 Months",
+        "6months": "6 Months"
+      }
+    }
+  },
+  "sync": {
+    "syncNow": "Sync Now",
+    "close": "Close"
+  }
+}

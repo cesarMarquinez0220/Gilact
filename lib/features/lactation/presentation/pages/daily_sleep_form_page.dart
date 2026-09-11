@@ -1,0 +1,1096 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../data/datasources/sleep_offline_local_data_source.dart';
+import '../../domain/entities/sleep_record.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/sync_queue_service.dart';
+import '../../presentation/providers/lactation_provider.dart';
+import 'dart:ui';
+import '../../../../alerta_dialoge.dart';
+import '../../../../main.dart';
+import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/notification_record_tracker.dart';
+import '../../../../core/di/injection.dart';
+
+/// Página de registro diario de sueño del bebé (llamada desde notificación 8 AM)
+class DailySleepFormPage extends StatefulWidget {
+  const DailySleepFormPage({super.key, this.cameFromNotification = false});
+
+  final bool cameFromNotification;
+
+  @override
+  State<DailySleepFormPage> createState() => _DailySleepFormPageState();
+}
+
+class _DailySleepFormPageState extends State<DailySleepFormPage>
+    with TickerProviderStateMixin {
+  final _formKey = GlobalKey<FormState>();
+  final _hoursController = TextEditingController();
+  final FocusNode _hoursFocusNode = FocusNode();
+  final AppLogger _logger = getIt<AppLogger>();
+
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late AnimationController _pulseController;
+
+  // Campos de animación no usados - mantenidos para uso futuro
+  // ignore: unused_field
+  late Animation<double> _slideAnimation;
+  // ignore: unused_field
+  late Animation<double> _fadeAnimation;
+  // ignore: unused_field
+  late Animation<double> _pulseAnimation;
+
+  bool _isLoading = false;
+  double _hoursSlept = 8.0; // Valor inicial del slider
+  int? _wakeUps; // Número de despertares (opcional)
+  String? _quality; // Calidad del sueño (opcional)
+  bool _isEditingHours = false; // Modo edición manual del número
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+    _hoursController.text = '8.0'; // Valor inicial
+  }
+
+  void _initializeAnimations() {
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<double>(begin: 80.0, end: 0.0).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    // Iniciar animaciones con delays escalonados
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _fadeController.forward();
+    });
+    Future.delayed(const Duration(milliseconds: 400), () {
+      _slideController.forward();
+    });
+    Future.delayed(const Duration(milliseconds: 600), () {
+      _pulseController.repeat(reverse: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    _pulseController.dispose();
+    _hoursController.dispose();
+    _hoursFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveSleepRecord() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error de Autenticación',
+          'No hay usuario autenticado. Por favor, inicia sesión nuevamente.',
+        );
+        return;
+      }
+
+      final userId = await _getUserDocumentId();
+      if (!mounted) return;
+
+      if (userId == null) {
+        DialogExample.showErrorDialog(
+          context,
+          'Error de Usuario',
+          'No se pudo encontrar la información del usuario.',
+        );
+        return;
+      }
+
+      // Fecha del día anterior (anoche)
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final fechaSueno =
+          '${yesterday.year}-${_pad(yesterday.month)}-${_pad(yesterday.day)}';
+
+      // Fecha de hoy para el registro
+      final today = DateTime.now();
+      final fechaRegistro =
+          '${today.year}-${_pad(today.month)}-${_pad(today.day)}';
+      // Estructura de datos simplificada (convertir DateTime a formato serializable)
+      final sleepData = {
+        'fecha_sueno': fechaSueno,
+        'horas_dormido': _hoursSlept,
+        if (_wakeUps != null) 'num_despertados': _wakeUps,
+        if (_quality != null) 'calidad': _quality,
+        'fecha_registro': fechaRegistro,
+        'creado_en': DateTime.now()
+            .toIso8601String(), // Convertir DateTime a String
+        'timestamp': DateTime.now()
+            .millisecondsSinceEpoch, // Usar int en lugar de FieldValue
+      };
+
+      // OFFLINE-FIRST: Guardar localmente primero
+      final sleepOfflineDataSource = SleepOfflineLocalDataSource();
+      final sleepRecordId = 'sleep_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Crear SleepRecord para guardar localmente
+      final sleepRecord = SleepRecord(
+        id: sleepRecordId,
+        userId: userId,
+        sleepStartTime: yesterday,
+        sleepEndTime: today,
+        totalSleepDuration: Duration(
+          hours: _hoursSlept.toInt(),
+          minutes: ((_hoursSlept % 1) * 60).toInt(),
+        ),
+        quality: _quality != null
+            ? SleepQuality.values.firstWhere(
+                (q) => q.displayName == _quality,
+                orElse: () => SleepQuality.good,
+              )
+            : SleepQuality.good,
+        notes: null,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Guardar localmente
+      await sleepOfflineDataSource.saveRecord(sleepRecord);
+
+      // Marcar que se guardó un registro para cancelar notificaciones de reenvío
+      try {
+        final tracker = NotificationRecordTracker();
+        await tracker.markSleepRecordSaved();
+      } catch (e) {
+        // Ignorar errores silenciosamente
+      }
+
+      // Si hay conexión, guardar también en Firestore
+      final connectivityService = ConnectivityService();
+      final isConnected = await connectivityService.isConnected();
+
+      if (isConnected) {
+        try {
+          final sleepCollection = FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userId)
+              .collection('situacion')
+              .doc('seleccion')
+              .collection('sueno_diario');
+
+          final docRef = await sleepCollection.add(sleepData);
+
+          // Marcar como sincronizado
+          await sleepOfflineDataSource.markAsSynced(sleepRecordId, docRef.id);
+        } catch (e) {
+          // Si falla Firestore, agregar a cola de sincronización
+          final syncQueueService = SyncQueueService();
+          final operation = SyncOperation(
+            id: '${sleepRecordId}_${DateTime.now().millisecondsSinceEpoch}',
+            operationType: SyncOperationType.create,
+            collectionPath: 'sueno_diario',
+            localId: sleepRecordId,
+            data: sleepData,
+            createdAt: DateTime.now(),
+          );
+          await syncQueueService.addOperation(operation);
+        }
+      } else {
+        // Sin conexión: agregar a cola de sincronización
+        final syncQueueService = SyncQueueService();
+        final operation = SyncOperation(
+          id: '${sleepRecordId}_${DateTime.now().millisecondsSinceEpoch}',
+          operationType: SyncOperationType.create,
+          collectionPath: 'sueno_diario',
+          localId: sleepRecordId,
+          data: sleepData,
+          createdAt: DateTime.now(),
+        );
+        await syncQueueService.addOperation(operation);
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Navegación y refresco igual que en flujos de lactancia
+        void showSuccessSnack() {
+          final homeCtx = navigatorKey.currentContext;
+          if (homeCtx != null && homeCtx.mounted) {
+            ScaffoldMessenger.of(homeCtx).showSnackBar(
+              SnackBar(
+                content: Text('forms.sleep.saved'.tr()),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        }
+
+        // Intentar refrescar datos de lactancia sin navegar si es posible
+        try {
+          final homeCtx = navigatorKey.currentContext;
+          if (homeCtx != null && homeCtx.mounted) {
+            // Si el HomePage ya está montado, refrescar datos sin navegar
+            final provider = Provider.of<LactationProvider>(
+              homeCtx,
+              listen: false,
+            );
+            provider.loadTodayData();
+            provider.loadWeekData();
+          }
+        } catch (e, stackTrace) {
+          // Si no está disponible, no es crítico
+          _logger.w(
+            'DailySleepFormPage: No se pudo refrescar datos sin navegar',
+            e,
+            stackTrace,
+          );
+        }
+
+        if (widget.cameFromNotification) {
+          // Si vino de notificación, navegar a home
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/home', (route) => false);
+          await Future.delayed(const Duration(milliseconds: 200));
+          showSuccessSnack();
+        } else {
+          // Si no vino de notificación, solo volver atrás
+          final canPop = Navigator.of(context).canPop();
+          if (canPop) {
+            Navigator.of(context).pop(true);
+            await Future.delayed(const Duration(milliseconds: 200));
+            showSuccessSnack();
+          } else {
+            // Fallback: navegar a home solo si no se puede volver atrás
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/home', (route) => false);
+            await Future.delayed(const Duration(milliseconds: 200));
+            showSuccessSnack();
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        DialogExample.showErrorDialog(
+          context,
+          'forms.sleep.error'.tr(),
+          'No se pudieron guardar los datos.\n\nError: ${e.toString()}',
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String _pad(int number) => number.toString().padLeft(2, '0');
+
+  double _snapToQuarter(double value) {
+    // Ajustar al múltiplo más cercano de 0.25 dentro del rango 0..12
+    final snapped = (value * 4).round() / 4.0;
+    if (snapped < 0) return 0;
+    if (snapped > 12) return 12;
+    return snapped;
+  }
+
+  String _formatHours(double hours) {
+    final totalMinutes = (hours * 60).round();
+    final h = totalMinutes ~/ 60;
+    final m = totalMinutes % 60;
+    return '$h h ${m.toString().padLeft(2, '0')} m';
+  }
+
+  Future<String?> _getUserDocumentId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return null;
+
+      if (user.email != null) {
+        final userQuery = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
+        if (userQuery.docs.isNotEmpty) {
+          return userQuery.docs.first.id;
+        }
+      }
+
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+      if (docSnapshot.exists) {
+        return user.uid;
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_isEditingHours,
+      onPopInvokedWithResult: (didPop, result) {
+        // Si está en modo edición manual, cerrar edición en lugar de navegar atrás
+        if (_isEditingHours && !didPop) {
+          setState(() {
+            // Normalizar valor escrito si quedó algo en el controlador
+            final parsed = double.tryParse(
+              _hoursController.text.replaceAll(',', '.'),
+            );
+            if (parsed != null) {
+              _hoursSlept = _snapToQuarter(parsed);
+            }
+            _hoursController.text = _hoursSlept.toStringAsFixed(1);
+            _isEditingHours = false;
+          });
+          FocusScope.of(context).unfocus();
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF2C5F5D), // Azul teal oscuro (secundario)
+                Color(0xFF1A365D), // Azul marino oscuro (primario)
+                Color(0xFF4FD1C7), // Verde azulado medio vibrante (primario)
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+          ),
+          child: Stack(
+            children: [
+              SafeArea(
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    overscroll: false, // Esto desactiva el resplandor
+                  ),
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position:
+                              Tween<Offset>(
+                                begin: const Offset(0, 0.1),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  // Apply curve here
+                                  parent: _slideController,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final screenWidth = constraints.maxWidth;
+                              final screenHeight = MediaQuery.of(
+                                context,
+                              ).size.height;
+                              final isSmallScreen = screenWidth < 360;
+                              final isVerySmallScreen = screenWidth < 320;
+                              final isShortScreen = screenHeight < 700;
+
+                              return Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                  isSmallScreen ? 16.0 : 24.0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: isShortScreen ? 8 : 16),
+                                    _buildHeader(
+                                      isSmallScreen,
+                                      isVerySmallScreen,
+                                    ),
+                                    SizedBox(height: isShortScreen ? 20 : 30),
+                                    // Campo de horas de sueño
+                                    _buildHoursInput(
+                                      isSmallScreen,
+                                      isVerySmallScreen,
+                                    ),
+                                    SizedBox(height: isShortScreen ? 16 : 24),
+                                    // Opcional: Despertares
+                                    _buildWakeUpsSection(isSmallScreen),
+                                    SizedBox(height: isShortScreen ? 16 : 24),
+                                    // Opcional: Calidad
+                                    _buildQualitySection(isSmallScreen),
+                                    SizedBox(height: isShortScreen ? 24 : 40),
+                                    // Botones
+                                    _buildActionButtons(isSmallScreen),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isSmallScreen, bool isVerySmallScreen) {
+    final iconSize = isVerySmallScreen ? 80.0 : (isSmallScreen ? 90.0 : 100.0);
+    final iconInnerSize = isVerySmallScreen
+        ? 40.0
+        : (isSmallScreen ? 45.0 : 50.0);
+    final titleFontSize = isVerySmallScreen
+        ? 24.0
+        : (isSmallScreen ? 28.0 : 32.0);
+    final subtitleFontSize = isVerySmallScreen
+        ? 14.0
+        : (isSmallScreen ? 15.0 : 16.0);
+    final spacing1 = isSmallScreen ? 20.0 : 32.0;
+    final spacing2 = isSmallScreen ? 8.0 : 12.0;
+
+    return Column(
+      children: [
+        Container(
+          width: iconSize,
+          height: iconSize,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.nights_stay,
+            color: Colors.white,
+            size: iconInnerSize,
+          ),
+        ),
+        SizedBox(height: spacing1),
+        Text(
+          'forms.sleep.title'.tr(),
+          style: TextStyle(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 0.5,
+            shadows: const [
+              Shadow(
+                color: Colors.black26,
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: spacing2),
+        Text(
+          'forms.sleep.question'.tr(),
+          style: GoogleFonts.quicksand(
+            fontSize: subtitleFontSize,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHoursInput(bool isSmallScreen, bool isVerySmallScreen) {
+    final containerPadding = isVerySmallScreen
+        ? 16.0
+        : (isSmallScreen ? 20.0 : 24.0);
+    final numberFontSize = isVerySmallScreen
+        ? 36.0
+        : (isSmallScreen ? 42.0 : 48.0);
+    final unitFontSize = isVerySmallScreen
+        ? 18.0
+        : (isSmallScreen ? 20.0 : 24.0);
+    final minutesFontSize = isVerySmallScreen
+        ? 22.0
+        : (isSmallScreen ? 26.0 : 30.0);
+    final minutesLabelFontSize = isVerySmallScreen
+        ? 14.0
+        : (isSmallScreen ? 16.0 : 18.0);
+    final buttonSize = isVerySmallScreen ? 36.0 : (isSmallScreen ? 38.0 : 44.0);
+    final buttonIconSize = isVerySmallScreen ? 20.0 : 24.0;
+
+    return Container(
+      padding: EdgeInsets.all(containerPadding),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Número editable
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isEditingHours = true;
+                              _hoursController.text = _hoursSlept
+                                  .toStringAsFixed(1);
+                            });
+                          },
+                          child: _isEditingHours
+                              ? SizedBox(
+                                  width: isVerySmallScreen
+                                      ? 90
+                                      : (isSmallScreen ? 100 : 110),
+                                  child: TextField(
+                                    controller: _hoursController,
+                                    focusNode: _hoursFocusNode,
+                                    autofocus: true,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: numberFontSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    onTapOutside: (_) {
+                                      // Mantener el cursor/edición aunque se toque fuera
+                                      _hoursFocusNode.requestFocus();
+                                    },
+                                    onSubmitted: (val) {
+                                      final parsed = double.tryParse(
+                                        val.replaceAll(',', '.'),
+                                      );
+                                      setState(() {
+                                        if (parsed != null) {
+                                          _hoursSlept = _snapToQuarter(parsed);
+                                          if (_hoursSlept > 12) {
+                                            _hoursSlept = 12;
+                                          }
+                                        }
+                                        _hoursController.text = _hoursSlept
+                                            .toStringAsFixed(1);
+                                        _isEditingHours = false;
+                                      });
+                                    },
+                                    // No cerramos edición al tocar fuera; solo con "Done"
+                                  ),
+                                )
+                              : Builder(
+                                  builder: (context) {
+                                    final totalMinutes = (_hoursSlept * 60)
+                                        .round();
+                                    final h = totalMinutes ~/ 60;
+                                    final m = totalMinutes % 60;
+                                    return RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.quicksand(
+                                          color: Colors.white,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: '$h',
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: numberFontSize,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: ' h  ',
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: unitFontSize,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.9,
+                                              ),
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: m.toString().padLeft(2, '0'),
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: minutesFontSize,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: ' min',
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: minutesLabelFontSize,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.9,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                        // Se omite el texto "horas" porque mostramos h y m
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: isSmallScreen ? 6 : 8),
+                  // Columna de botones + y -
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _HoursAdjustButton(
+                        icon: Icons.add,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
+                        onPressed: () {
+                          setState(() {
+                            _hoursSlept = _snapToQuarter(_hoursSlept + 0.25);
+                            _hoursController.text = _hoursSlept.toStringAsFixed(
+                              1,
+                            );
+                          });
+                        },
+                      ),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
+                      _HoursAdjustButton(
+                        icon: Icons.remove,
+                        size: buttonSize,
+                        iconSize: buttonIconSize,
+                        onPressed: () {
+                          setState(() {
+                            _hoursSlept = _snapToQuarter(_hoursSlept - 0.25);
+                            _hoursController.text = _hoursSlept.toStringAsFixed(
+                              1,
+                            );
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Slider(
+                value: _hoursSlept,
+                min: 0,
+                max: 12,
+                divisions: 48, // 0.25 horas por división (0..12)
+                label: _formatHours(_hoursSlept),
+                activeColor: Colors.white,
+                inactiveColor: Colors.white.withValues(alpha: 0.3),
+                onChanged: (value) {
+                  setState(() {
+                    _hoursSlept = _snapToQuarter(value);
+                    _hoursController.text = _hoursSlept.toStringAsFixed(1);
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWakeUpsSection(bool isSmallScreen) {
+    final titleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 12.0;
+    final chipSpacing = isSmallScreen ? 6.0 : 8.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'forms.sleep.wakeUpsQuestion'.tr(),
+          style: GoogleFonts.quicksand(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: spacing),
+        Wrap(
+          spacing: chipSpacing,
+          runSpacing: chipSpacing,
+          children: [
+            _buildChip('0', 0, isSmallScreen),
+            _buildChip('1', 1, isSmallScreen),
+            _buildChip('2', 2, isSmallScreen),
+            _buildChip('3+', 3, isSmallScreen),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChip(String label, int value, bool isSmallScreen) {
+    final isSelected = _wakeUps == value;
+    final paddingH = isSmallScreen ? 16.0 : 20.0;
+    final paddingV = isSmallScreen ? 8.0 : 10.0;
+    final fontSize = isSmallScreen ? 12.0 : 14.0;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _wakeUps = isSelected ? null : value;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.quicksand(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.7),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQualitySection(bool isSmallScreen) {
+    final titleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 12.0;
+    final chipSpacing = isSmallScreen ? 8.0 : 12.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'forms.sleep.qualityQuestion'.tr(),
+          style: GoogleFonts.quicksand(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: spacing),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQualityChip(
+                'forms.sleep.qualityGood'.tr(),
+                'bueno',
+                isSmallScreen,
+              ),
+            ),
+            SizedBox(width: chipSpacing),
+            Expanded(
+              child: _buildQualityChip(
+                'forms.sleep.qualityFair'.tr(),
+                'regular',
+                isSmallScreen,
+              ),
+            ),
+            SizedBox(width: chipSpacing),
+            Expanded(
+              child: _buildQualityChip(
+                'forms.sleep.qualityPoor'.tr(),
+                'malo',
+                isSmallScreen,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQualityChip(String label, String value, bool isSmallScreen) {
+    final isSelected = _quality == value;
+    final paddingV = isSmallScreen ? 10.0 : 12.0;
+    final fontSize = isSmallScreen ? 11.0 : 13.0;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _quality = isSelected ? null : value;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: paddingV),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1.5,
+          ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.quicksand(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.7),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(bool isSmallScreen) {
+    final buttonHeight = isSmallScreen ? 50.0 : 56.0;
+    final buttonFontSize = isSmallScreen ? 16.0 : 18.0;
+    final cancelFontSize = isSmallScreen ? 13.0 : 15.0;
+
+    return Column(
+      children: [
+        // --- INICIO: Botón Guardar con el nuevo estilo ---
+        Container(
+          // 1. Contenedor para el gradiente y sombra
+          width: double.infinity,
+          height: buttonHeight,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              // 2. Gradiente
+              colors: [
+                Color(0xFF1A365D), // Azul marino oscuro
+                Color(0xFF4FD1C7), // Verde azulado medio
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16), // 3. Bordes redondeados
+            boxShadow: [
+              // 4. Sombras
+              BoxShadow(
+                color: const Color(
+                  0xFF4FD1C7,
+                ).withValues(alpha: 0.4), // Sombra de color
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(
+                  alpha: 0.1,
+                ), // Sombra negra sutil
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            // 5. ElevatedButton transparente DENTRO del Container
+            onPressed: _isLoading
+                ? null
+                : _saveSleepRecord, // Mantiene tu lógica onPressed
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent, // Fondo transparente
+              shadowColor: Colors.transparent, // Sin sombra propia del botón
+              shape: RoundedRectangleBorder(
+                // Forma que coincide con el Container
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    // Mantiene tu indicador de carga
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white, // Color blanco para el indicador
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : Text(
+                    // 6. Texto con estilo blanco
+                    'forms.sleep.save'.tr(),
+                    style: GoogleFonts.quicksand(
+                      // Usa GoogleFonts si prefieres
+                      fontSize: buttonFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Texto blanco
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+          ),
+        ),
+
+        // --- FIN: Botón Guardar con el nuevo estilo ---
+        const SizedBox(height: 16),
+
+        // Botón Cancelar (se mantiene igual)
+        TextButton(
+          onPressed: () {
+            if (widget.cameFromNotification) {
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (route) => false);
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(
+            'common.cancel'.tr(),
+            style: GoogleFonts.quicksand(
+              fontSize: cancelFontSize,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+              decoration: TextDecoration.underline,
+              decorationColor: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HoursAdjustButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final double size;
+  final double iconSize;
+
+  const _HoursAdjustButton({
+    required this.icon,
+    required this.onPressed,
+    this.size = 44.0,
+    this.iconSize = 24.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.4),
+          width: 1.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(size / 2),
+          onTap: onPressed,
+          child: Icon(icon, color: Colors.white, size: iconSize),
+        ),
+      ),
+    );
+  }
+}

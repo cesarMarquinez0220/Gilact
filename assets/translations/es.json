@@ -1,0 +1,1930 @@
+{
+  "app": {
+    "name": "GuiLact",
+    "subtitle": "Guía Interactiva de Lactancia Materna"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "companion": "Compañera",
+    "health": "Salud",
+    "profile": "Perfil",
+    "lessons": "Lecciones",
+    "tips": "Tips",
+    "history": "Historial"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar Perfil",
+    "name": "Nombre",
+    "email": "Email",
+    "motherName": "Nombre de la Madre",
+    "idNumber": "Cédula",
+    "idNumberOptional": "Cédula (opcional)",
+    "birthDate": "Fecha de Nacimiento",
+    "phone": "Teléfono",
+    "phoneOptional": "Teléfono (opcional)",
+    "location": "Ubicación",
+    "locationOptional": "Ubicación (opcional)",
+    "age": "Edad",
+    "noUserAuthenticated": "No hay usuario autenticado"
+  },
+  "settings": {
+    "title": "Configuración de la Aplicación",
+    "sound": "Sonido",
+    "soundDescription": "Reproducir sonidos en la app",
+    "vibration": "Vibración",
+    "vibrationDescription": "Vibrar en interacciones",
+    "autoSave": "Guardado Automático",
+    "autoSaveDescription": "Guardar progreso automáticamente",
+    "language": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
+    "spanish": "Español",
+    "english": "English",
+    "languageChanged": "Idioma cambiado a {language}",
+    "@languageChanged": {
+      "placeholders": {
+        "language": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "help": {
+    "title": "Ayuda y Soporte",
+    "helpCenter": "Centro de Ayuda",
+    "helpCenterDescription": "Chatea con nuestro asistente virtual",
+    "contactSupport": "Contactar Soporte",
+    "supportEmail": "soporte@gilact.com"
+  },
+  "account": {
+    "title": "Cuenta",
+    "signOut": "Cerrar Sesión",
+    "signOutDescription": "Salir de tu cuenta",
+    "signOutConfirmTitle": "Cerrar Sesión",
+    "signOutConfirmMessage": "¿Estás seguro de que quieres cerrar sesión?",
+    "deleteAccount": "Eliminar Cuenta",
+    "deleteAccountDescription": "Eliminar permanentemente tu cuenta",
+    "deleteAccountConfirmTitle": "Eliminar Cuenta",
+    "deleteAccountConfirmMessage": "¿Estás seguro de que quieres eliminar tu cuenta?\n\nEsta acción no se puede deshacer. Se eliminarán todos tus datos de forma permanente.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "featureInDevelopment": "Funcionalidad en desarrollo",
+    "version": "Versión",
+    "signOutSuccess": "Sesión cerrada exitosamente",
+    "signOutError": "Error al cerrar sesión",
+    "deleteAccountSuccess": "Cuenta eliminada exitosamente"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "finish": "Finalizar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "unknownError": "Error desconocido",
+    "no": "No",
+    "accept": "Aceptar",
+    "understood": "Entendido",
+    "other": "Otro",
+    "newRecord": "Nuevo Registro",
+    "retry": "Reintentar",
+    "markAsCompleted": "Marcar como completado",
+    "noVideosAvailable": "No hay videos disponibles",
+    "lesson": "Lección",
+    "duration": "Duración",
+    "minutes": "minutos",
+    "description": "Descripción",
+    "syncNow": "Sincronizar Ahora",
+    "languageChanged": "Idioma cambiado a {name}",
+    "@languageChanged": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+    },
+    "termsAndConditions": "Términos y Condiciones",
+    "privacyPolicy": "Política de Privacidad",
+    "noCredentialsFound": "No se encontraron credenciales guardadas",
+    "biometricAuthError": "Error en autenticación biométrica: {error}",
+    "@biometricAuthError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "settingsSaved": "Configuración guardada exitosamente",
+    "messageSent": "Mensaje enviado exitosamente",
+    "pleaseWriteMessage": "Por favor, escribe un mensaje",
+    "signOutError": "Error al cerrar sesión: {error}",
+    "@signOutError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "saveError": "Error al guardar: {error}",
+    "@saveError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "contentMarkedCompleted": "¡Contenido marcado como completado!",
+    "videoMarkedCompleted": "Video marcado como completado",
+    "errorLoadingVideos": "Error al cargar los videos: {error}",
+    "@errorLoadingVideos": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "validation": {
+    "nameRequired": "El nombre es requerido",
+    "emailRequired": "El email es requerido",
+    "validEmail": "Ingresa un email válido",
+    "motherNameRequired": "El nombre de la madre es requerido",
+    "birthDateRequired": "La fecha de nacimiento es requerida",
+    "invalidIdNumber": "Formato de cédula inválido (8-9 dígitos)"
+  },
+  "messages": {
+    "profileUpdatedSuccess": "Perfil actualizado exitosamente",
+    "profileUpdateError": "Error al actualizar perfil",
+    "settingsSaved": "Configuración guardada exitosamente"
+  },
+  "dialogs": {
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "accept": "Aceptar",
+    "understood": "Entendido",
+    "emailAlreadyRegistered": "Email Ya Registrado",
+    "emailAlreadyRegisteredMessage": "Este correo electrónico ya está asociado a una cuenta existente. Por favor, utiliza otro email o inicia sesión.",
+    "registrationSuccess": "¡Registro Exitoso!",
+    "registrationSuccessMessage": "Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión con tus credenciales.",
+    "fieldRequired": "Campo Requerido",
+    "fieldRequiredMessage": "Por favor, completa el campo \"{field}\" para continuar con el registro.",
+    "@fieldRequiredMessage": {
+      "placeholders": {
+        "field": {
+          "type": "String"
+        }
+      }
+    },
+    "invalidEmail": "Email Inválido",
+    "invalidEmailMessage": "Por favor, ingresa una dirección de correo electrónico válida (ejemplo: usuario@dominio.com).",
+    "connectionError": "Error de Conexión",
+    "connectionErrorMessage": "No se pudo conectar al servidor. Verifica tu conexión a internet e inténtalo nuevamente."
+  },
+  "lactation": {
+    "title": "Lactancia",
+    "registerLactation": "Registrar Lactación",
+    "hints": {
+      "durationMinutes": "Duración en minutos",
+      "volumeMl": "Volumen en ml",
+      "observations": "Observaciones sobre la lactancia...",
+      "example120": "Ej: 120",
+      "example15": "Ej: 15",
+      "exampleNotes": "Ej: El bebé se durmió mientras comía...",
+      "addNotes": "Agregar notas sobre la sesión...",
+      "bottleTimes": "Veces que se le dio biberón",
+      "breastTimes": "Veces que se le dio pecho",
+      "extractionVolume": "Volumen de extracción",
+      "sleepHours": "Horas/minutos de sueño"
+    },
+    "labels": {
+      "quantity": "Cantidad",
+      "durationMinutes": "Duración en minutos",
+      "observationsOptional": "Observaciones (opcional)"
+    },
+    "quickRegister": "Registro Rápido",
+    "fullRegister": "Registro Completo",
+    "calendar": {
+      "title": "Calendario de Lactancia",
+      "recordsTitle": "Registros de Lactancia",
+      "thisDay": "Este día",
+      "today": "Hoy",
+      "duration": "Duración",
+      "total": "Total",
+      "sessions": "sesiones",
+      "min": "min",
+      "addRecord": "Agregar Registro",
+      "deleteRecord": "Eliminar registro",
+      "savedSuccess": "¡Registro guardado exitosamente!",
+      "deletedSuccess": "Registro eliminado exitosamente",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.",
+      "recordsOf": "Registros del",
+      "deleteConfirmTitle": "Eliminar Registro",
+      "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar este registro de lactancia? Esta acción no se puede deshacer.",
+      "deleteButton": "Eliminar",
+      "filters": {
+        "all": "Todos",
+        "lactation": "Lactancia",
+        "weight": "Peso"
+      },
+      "weight": "Peso",
+      "viewList": "Ver lista de registros",
+      "viewMonth": "Ver calendario mensual",
+      "noRecords": "No hay registros para este día",
+      "tapToAdd": "Toca aquí para agregar un registro",
+      "noRecordsWeek": "No hay registros para esta semana",
+      "editRecord": "Editar registro",
+      "noRecordsText": "Sin registros",
+      "months": {
+        "january": "Enero",
+        "february": "Febrero",
+        "march": "Marzo",
+        "april": "Abril",
+        "may": "Mayo",
+        "june": "Junio",
+        "july": "Julio",
+        "august": "Agosto",
+        "september": "Septiembre",
+        "october": "Octubre",
+        "november": "Noviembre",
+        "december": "Diciembre"
+      }
+    },
+    "records": "Registros",
+    "quickDialog": {
+      "title": "Registro de Lactancia",
+      "cancel": "Cancelar",
+      "back": "Atrás",
+      "quickRegisterButton": "Registro Rápido"
+    },
+    "decisionTree": {
+      "initial": "¿Cómo alimentaste a tu bebé esta vez?",
+      "breastSide": "¿Qué pecho le diste?",
+      "breastDuration": "¿Cuánto tiempo duró la lactancia?",
+      "bottleVolume": "¿Cuánta leche tomó?",
+      "sleepTime": "¿Cuánto tiempo durmió después?",
+      "extractionVolume": "¿Cuánta leche extrajiste?",
+      "confirmation": "¿Confirmas estos datos?",
+      "options": {
+        "pecho": "Pecho",
+        "pechoDescription": "Lactancia materna directa",
+        "biberon": "Biberón",
+        "biberonDescription": "Fórmula o leche extraída",
+        "mixto": "Mixto",
+        "mixtoDescription": "Combinación de pecho y biberón",
+        "izquierdo": "Pecho Izquierdo",
+        "izquierdoDescription": "Lado izquierdo",
+        "derecho": "Pecho Derecho",
+        "derechoDescription": "Lado derecho",
+        "ambos": "Ambos Pechos",
+        "ambosDescription": "Los dos lados",
+        "5min": "5 minutos",
+        "5minDescription": "Corta duración",
+        "10min": "10 minutos",
+        "10minDescription": "Duración media",
+        "15min": "15 minutos",
+        "15minDescription": "Duración normal",
+        "20min": "20+ minutos",
+        "20minDescription": "Duración larga",
+        "30ml": "30 ml",
+        "60ml": "60 ml",
+        "90ml": "90 ml",
+        "120ml": "120 ml",
+        "150ml": "150 ml",
+        "180ml": "180 ml",
+        "240ml": "240 ml",
+        "guardar": "Guardar",
+        "guardarDescription": "Guardar registro de lactancia",
+        "noSleep": "Sin sueño",
+        "noSleepDescription": "No durmió",
+        "30min": "30 minutos",
+        "30minDescription": "Siesta corta",
+        "1hour": "1 hora",
+        "1hourDescription": "Siesta normal",
+        "2hours": "2 horas",
+        "2hoursDescription": "Siesta larga",
+        "3hours": "3+ horas",
+        "3hoursDescription": "Sueño prolongado",
+        "noExtraction": "Sin extracción",
+        "noExtractionDescription": "No extraje leche"
+      }
+    },
+    "recordForm": {
+      "title": "Registro de Lactancia",
+      "deleteRecord": "Eliminar Registro",
+      "saveRecord": "Guardar Registro",
+      "updateRecord": "Actualizar Registro",
+      "cancel": "Cancelar",
+      "feedingType": "Tipo de Alimentación",
+      "feedingTypeQuestion": "¿Cómo alimentaste a tu bebé esta vez?",
+      "breast": "Pecho",
+      "breastDescription": "Lactancia directamente del pecho.",
+      "bottle": "Biberón",
+      "bottleDescription": "Leche materna extraída o fórmula.",
+      "mixed": "Mixto",
+      "mixedDescription": "Combinación de pecho y biberón.",
+      "selectType": "Seleccionar tipo",
+      "selectTypeHint": "Elige el tipo de alimentación.",
+      "breastSide": "Lado del Pecho",
+      "breastSideQuestion": "¿De qué lado amamantaste?",
+      "left": "Izquierdo",
+      "right": "Derecho",
+      "both": "Ambos",
+      "breastDuration": "Duración del Pecho",
+      "breastDurationQuestion": "¿Cuánto tiempo duró la toma?",
+      "min": "min",
+      "bottleVolume": "Volumen del Biberón",
+      "bottleVolumeQuestion": "¿Cuánto volumen tomó del biberón?",
+      "ml": "ml",
+      "oz": "oz",
+      "sleepTime": "Tiempo de Sueño",
+      "sleepTimeQuestion": "¿Cuánto tiempo durmió el bebé?",
+      "hr": "hr",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales (opcional)",
+      "saved": "Registro de lactancia guardado exitosamente",
+      "error": "Error al Guardar",
+      "errorMessage": "No se pudo guardar el registro. Por favor, inténtalo nuevamente.",
+      "deleteConfirm": "¿Estás seguro de que quieres eliminar este registro de lactancia? Esta acción no se puede deshacer.",
+      "delete": "Eliminar",
+      "deleted": "Registro Eliminado",
+      "deletedMessage": "Eliminado correctamente.",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.",
+      "breastfeeding": "Lactancia Directa",
+      "customVolume": "Volumen personalizado",
+      "customTime": "Tiempo personalizado",
+      "notSpecified": "No especificado"
+    },
+    "flow": {
+      "feedingTypeQuestion": "¿Qué tipo de alimentación?",
+      "breastSideQuestion": "¿Qué lado del pecho?",
+      "back": "Atrás",
+      "confirmRecord": "Confirmar registro",
+      "customTimeHint": "Ingresar tiempo personalizado",
+      "customVolumeHint": "Ingresar volumen personalizado",
+      "other": "Otro",
+      "edit": "Editar",
+      "save": "Guardar",
+      "recordTitle": "Registro de Lactancia",
+      "stepByStepRecord": "Registro paso a paso",
+      "summaryTitle": "Resumen del Registro",
+      "breastfeeding": "Lactancia Materna",
+      "sleep": "Sueño",
+      "authenticationError": "Error de Autenticación",
+      "authenticationErrorMessage": "No hay usuario autenticado. Por favor, inicia sesión nuevamente.",
+      "userError": "Error de Usuario",
+      "userErrorMessage": "No se pudo encontrar la información del usuario.",
+      "infoRequired": "Información Requerida",
+      "infoRequiredMessage": "Debes completar el proceso de onboarding y seleccionar la situación \"Post-Parto\".",
+      "recordSavedSuccess": "Los datos de lactancia han sido registrados correctamente.",
+      "saveError": "Error al Guardar",
+      "saveErrorMessage": "No se pudieron guardar los datos. Por favor, inténtalo nuevamente.\n\nError: {error}",
+      "@saveErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteConfirmTitle": "¿Eliminar Registro?",
+      "deleteConfirmMessage": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este registro de lactancia?",
+      "recordDeletedSuccess": "El registro de lactancia ha sido eliminado correctamente.",
+      "deleteError": "Error al Eliminar",
+      "deleteErrorMessage": "No se pudo eliminar el registro. Por favor, inténtalo nuevamente.\n\nError: {error}",
+      "@deleteErrorMessage": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSavedSuccessEnhanced": "Registro de lactancia guardado exitosamente",
+      "saveErrorEnhanced": "Error al guardar el registro: {error}",
+      "@saveErrorEnhanced": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "processingError": "Error al procesar selección: {error}",
+      "@processingError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveRecordError": "Error al guardar registro: {error}",
+      "@saveRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "deleteRecordError": "Error al eliminar registro: {error}",
+      "@deleteRecordError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "recordSuccess": "Registro Exitoso"
+    },
+    "today": "Hoy",
+    "yesterday": "Ayer"
+  },
+  "health": {
+    "title": "Salud",
+    "subtitle": "Monitorea el bienestar de tu bebé",
+    "babyWeight": "Peso del Bebé",
+    "babyWeightDescription": "Registra y monitorea el peso",
+    "sleep": "Registro de Sueño",
+    "sleepDescription": "Controla las horas de sueño",
+    "assistant": "Asistente Virtual",
+    "assistantDescription": "Pregunta sobre salud y cuidados",
+    "emergencyContacts": "Contactos de Emergencia",
+    "emergencyContactsDescription": "Acceso rápido a ayuda médica",
+    "growthTracking": "Seguimiento de Crecimiento",
+    "dailyWellness": "Bienestar Diario",
+    "assistanceHelp": "Asistencia y Ayuda",
+    "emergencies": "Emergencias",
+    "available247": "Disponible 24/7",
+    "new": "Nuevo",
+    "active": "Activo",
+    "last": "Último:",
+    "alwaysAvailable": "Siempre disponible",
+    "important": "Importante",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo": "Hace {days} días",
+    "@daysAgo": {
+      "placeholders": {
+        "days": {
+          "type": "int"
+        }
+      }
+    },
+    "emergencyContactsTitle": "Contactos de Emergencia",
+    "emergencyContactMessage": "En caso de emergencia, contacta inmediatamente:",
+    "emergenciesLabel": "Emergencias",
+    "pediatrician": "Pediatra",
+    "contactPediatrician": "Contacta a tu pediatra",
+    "breastfeedingLine": "Línea de Lactancia",
+    "refresh": "Actualizar"
+  },
+  "lessons": {
+    "title": "Lecciones",
+    "pathTitle": "Camino de Lactancia",
+    "pathDescription": "Sigue el camino paso a paso para aprender sobre lactancia materna.",
+    "noLessonsAvailable": "No hay lecciones disponibles",
+    "errorLoading": "Error al cargar lecciones",
+    "retry": "Reintentar",
+    "statistics": "Estadísticas",
+    "statisticsTitle": "Estadísticas",
+    "completedLessons": "Lecciones completadas",
+    "completedVideos": "Videos completados",
+    "totalTime": "Tiempo total",
+    "overallProgress": "Progreso general",
+    "lesson": "Lección",
+    "category": "Categoría",
+    "progress": "Progreso",
+    "babyUnlock": {
+      "3months": "¡Completa esta lección para desbloquear el bebé de 3 meses!",
+      "6months": "¡Completa esta lección para desbloquear el bebé de 6 meses!"
+    },
+    "videos": "Videos",
+    "viewVideos": "Ver Videos",
+    "completed": "Completado",
+    "markCompleted": "Marcar como completado",
+    "lessonMarkedCompleted": "Lección marcada como completada",
+    "percentCompleted": "% completado",
+    "subtitles": {
+      "lesson1": "Lactancia materna y sus beneficios",
+      "lesson2": "Calostro, leche de transición y leche madura",
+      "lesson3": "Cosas en tomar en cuenta al momento de amamantar",
+      "lesson4": "Composición Nutricional de la Leche Materna",
+      "lesson5": "¿Cómo saber que el bebé se alimentó lo suficiente?",
+      "lesson6": "Hitos de peso a vigilar",
+      "lesson7": "Higiene de manos y técnicas de lactancia materna",
+      "lesson8": "Medicamentos durante la lactancia materna",
+      "lesson9": "Signos o Complicaciones en la Lactancia",
+      "lesson10": "Masajes al seno antes de iniciar la lactancia",
+      "lesson11": "Mi banco de leche en casa y su preservacion",
+      "lesson12": "Leyes en Panamá que apoyan la lactancia materna",
+      "lesson13": "Diferencias entre la leche materna y la leche de vaca",
+      "lesson14": "Mitos de la lactancia materna"
+    }
+  },
+  "home": {
+    "lessons": "Lecciones",
+    "lessonsDescription": "Mira tu progreso de lecciones",
+    "tips": "Tips",
+    "tipsDescription": "Consejos útiles para ti",
+    "history": "Historial",
+    "historyDescription": "Videos vistos recientemente",
+    "welcome": "¡Bienvenida!",
+    "welcomeMessage": "Comienza registrando tu primera sesión de lactancia para ver tu progreso aquí.",
+    "registerLactation": "Registrar Lactancia",
+    "quickRegister": "Registro Rápido Predefinido",
+    "complete": "Completo",
+    "register": "Registro",
+    "advanceLessons": "¿Avanzamos en las lecciones?",
+    "streakAtRisk": "Tu racha está en riesgo, pero puedes usar un día de des...",
+    "days": "días",
+    "hello": "Hola"
+  },
+  "companion": {
+    "mascotMessages": {
+      "keepGoing": "¡Sigue así, lo estás haciendo genial! 🌟",
+      "everyRecordCounts": "¡Todo suma! Lo haces genial ✨",
+      "yourWellbeing": "Recuerda: tu bienestar es lo más importante 💕",
+      "youAreAdvancing": "¡Estás avanzando increíblemente! 🎉",
+      "takeYourTime": "Tómate tu tiempo, no hay prisa ⏰",
+      "youAreSuperMom": "Eres una super mamá, sigue así! 🚀"
+    },
+    "title": "Compañera",
+    "prepartumMessage": "¡Tu viaje está comenzando!",
+    "prepartumSubmessage": "Completa lecciones y trivias para ganar XP y desbloquear logros mientras esperas a tu bebé.",
+    "level": "Nivel",
+    "streak": "Racha",
+    "achievements": "Logros",
+    "headerTitle": "Mi Progreso",
+    "headerSubtitle": "Tu apoyo en este viaje",
+    "errorLoadingCompanion": "Error cargando compañera",
+    "dailyChallenge": "Desafío del Día",
+    "completed": "¡Completado!",
+    "progress": "Progreso",
+    "reward": "Recompensa",
+    "youWonXP": "¡Ganaste {xp} XP!",
+    "@youWonXP": {
+      "placeholders": {
+        "xp": {
+          "type": "int"
+        }
+      }
+    },
+    "startUnlocking": "Comienza a desbloquear logros",
+    "startJourney": "¡Comienza tu viaje! Cada acción te acerca a nuevos logros 🎯",
+    "unlockedAchievements": "Logros Desbloqueados",
+    "of": "de",
+    "howToEarnXP": "¿Cómo ganar XP?",
+    "dailyActions": "Acciones Diarias",
+    "unlocked": "Desbloqueados",
+    "all": "Todos",
+    "summary": "Resumen",
+    "totalXP": "XP Total",
+    "days": "días",
+    "restDays": "días de descanso",
+    "quickRecord": "Registro rápido",
+    "fullRecord": "Registro completo",
+    "completeLesson": "Completar lección",
+    "completeTrivia": "Completar trivia",
+    "triviaXPInfo": "5 XP/pregunta + 20 bonus",
+    "weightRecord": "Registro de peso",
+    "sleepRecord": "Registro de sueño",
+    "specialBonuses": "Bonuses Especiales",
+    "dailyStreaks": "Rachas Diarias",
+    "recordMilestones": "Hitos de Registros",
+    "milestones": "Milestones de registros: +25 a +1000 XP",
+    "streaks": "Rachas: +50 a +2000 XP",
+    "unlockedAchievementsBonus": "Logros desbloqueados: +20 a +3000 XP",
+    "understood": "Entendido",
+    "baseXP": "{xp} XP",
+    "@baseXP": {
+      "placeholders": {
+        "xp": {
+          "type": "String"
+        }
+      }
+    },
+    "firstOfDay": "+5 XP si es primero del día",
+    "firstOfDaySleep": "+5 XP primero del día, +10 XP si incluye sueño",
+    "fullRecordXPInfo": "20 XP base (sin sueño). +10 XP si incluyes datos de sueño. +5 XP si es el primero del día.",
+    "firstLessonOfDay": "+15 XP si es primera del día",
+    "perQuestion": "5 XP por pregunta",
+    "allCorrect": "+20 XP si todas correctas"
+  },
+  "trivia": {
+    "title": "Trivia",
+    "question": "Pregunta",
+    "of": "de",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "perfect": "¡Perfecto!",
+    "wellDone": "¡Bien hecho!",
+    "youGot": "Obtuviste {correct} de {total} correctas",
+    "@youGot": {
+      "placeholders": {
+        "correct": {
+          "type": "int"
+        },
+        "total": {
+          "type": "int"
+        }
+      }
+    },
+    "completed": "Trivia Completada ✓",
+    "completeToAdvance": "Completar Trivia para Avanzar",
+    "alreadyCompleted": "¡Ya completaste esta trivia!",
+    "completePrevious": "Completa la trivia de la lección anterior para desbloquear",
+    "selectAnswer": "Selecciona una respuesta",
+    "xpEarned": "XP Ganados",
+    "totalXP": "Total XP",
+    "continue": "Continuar",
+    "lessons": {
+      "lesson1": {
+        "question1": {
+          "text": "¿Cuál es uno de los principales beneficios de la lactancia materna para el bebé?",
+          "option1": "Mayor riesgo de infecciones",
+          "option2": "Fortalece el sistema inmunológico y reduce infecciones",
+          "option3": "Aumenta el riesgo de alergias",
+          "option4": "No tiene beneficios especiales",
+          "explanation": "La leche materna contiene anticuerpos y factores inmunológicos que fortalecen el sistema inmunológico del bebé y reducen el riesgo de infecciones."
+        },
+        "question2": {
+          "text": "¿Qué beneficio tiene la lactancia materna para la madre?",
+          "option1": "Aumenta el riesgo de cáncer de mama",
+          "option2": "Ayuda a la recuperación postparto y reduce el riesgo de ciertos cánceres",
+          "option3": "No tiene beneficios para la madre",
+          "option4": "Solo beneficia al bebé",
+          "explanation": "La lactancia materna ayuda a la madre a recuperarse del parto, reduce el riesgo de cáncer de mama y ovario, y fortalece el vínculo madre-hijo."
+        },
+        "question3": {
+          "text": "¿La leche materna es suficiente para alimentar al bebé durante los primeros 6 meses?",
+          "option1": "No, siempre necesita complementos",
+          "option2": "Sí, proporciona todos los nutrientes necesarios",
+          "option3": "Solo para los primeros 3 meses",
+          "option4": "Depende del bebé",
+          "explanation": "La leche materna es el alimento completo e ideal para los bebés durante los primeros 6 meses de vida, proporcionando todos los nutrientes necesarios."
+        },
+        "question4": {
+          "text": "¿Cuál es un beneficio económico de la lactancia materna?",
+          "option1": "Es más costosa que la fórmula",
+          "option2": "Es gratuita y ahorra dinero en fórmula",
+          "option3": "Requiere equipos costosos",
+          "option4": "No tiene beneficios económicos",
+          "explanation": "La lactancia materna es gratuita y puede ahorrar significativamente en costos de fórmula, biberones y otros suministros."
+        }
+      },
+      "lesson2": {
+        "question1": {
+          "text": "¿Qué es el calostro?",
+          "option1": "Leche que aparece después de 1 mes",
+          "option2": "La primera leche rica en anticuerpos que produce la madre",
+          "option3": "Leche de fórmula especial",
+          "option4": "Leche que solo aparece en algunas madres",
+          "explanation": "El calostro es la primera leche que produce la madre, rica en anticuerpos, proteínas y factores inmunológicos esenciales para el recién nacido."
+        },
+        "question2": {
+          "text": "¿Cuándo aparece la leche de transición?",
+          "option1": "Inmediatamente después del parto",
+          "option2": "Entre el día 3 y 14 después del parto",
+          "option3": "Después de 1 mes",
+          "option4": "Solo en algunas madres",
+          "explanation": "La leche de transición aparece entre el día 3 y 14 después del parto, es más abundante que el calostro y contiene más grasa y lactosa."
+        },
+        "question3": {
+          "text": "¿Cuándo se establece la leche madura?",
+          "option1": "Inmediatamente después del parto",
+          "option2": "Después de aproximadamente 2 semanas",
+          "option3": "Después de 3 meses",
+          "option4": "Nunca se establece",
+          "explanation": "La leche madura se establece aproximadamente después de 2 semanas del parto y tiene una composición más estable con el equilibrio adecuado de nutrientes."
+        },
+        "question4": {
+          "text": "¿Por qué es importante el calostro para el recién nacido?",
+          "option1": "No tiene importancia especial",
+          "option2": "Proporciona la primera inmunización y es rico en nutrientes",
+          "option3": "Solo hidrata al bebé",
+          "option4": "Es igual que la leche madura",
+          "explanation": "El calostro es crucial porque proporciona la primera inmunización del bebé, es rico en proteínas y anticuerpos, y ayuda a establecer el sistema digestivo."
+        }
+      },
+      "lesson3": {
+        "question1": {
+          "text": "¿Qué es importante considerar antes de amamantar?",
+          "option1": "Nada, solo dar el pecho",
+          "option2": "Comodidad de la madre, posición del bebé y ambiente tranquilo",
+          "option3": "Solo la posición del bebé",
+          "option4": "Solo el ambiente",
+          "explanation": "Es importante considerar la comodidad de la madre, la posición correcta del bebé, un ambiente tranquilo y que ambos estén relajados."
+        },
+        "question2": {
+          "text": "¿Cuál es una posición adecuada para amamantar?",
+          "option1": "Solo de pie",
+          "option2": "Posición cuna, balón de rugby, acostada de lado",
+          "option3": "Solo sentada",
+          "option4": "Cualquier posición es igual",
+          "explanation": "Existen varias posiciones adecuadas como la posición cuna, balón de rugby, acostada de lado, etc. Lo importante es que madre y bebé estén cómodos."
+        },
+        "question3": {
+          "text": "¿Qué indica un buen agarre del pecho?",
+          "option1": "El bebé solo toca el pezón",
+          "option2": "El bebé tiene la boca bien abierta, abarca parte de la areola y no hay dolor",
+          "option3": "Siempre hay dolor al amamantar",
+          "option4": "El bebé solo chupa el pezón",
+          "explanation": "Un buen agarre incluye que el bebé tenga la boca bien abierta, abarque parte de la areola (no solo el pezón), y que la madre no sienta dolor."
+        },
+        "question4": {
+          "text": "¿Es necesario limpiar el pecho antes de cada toma?",
+          "option1": "Sí, siempre con jabón",
+          "option2": "No, la higiene diaria normal es suficiente",
+          "option3": "Solo con agua caliente",
+          "option4": "Solo si está sucio",
+          "explanation": "No es necesario limpiar el pecho antes de cada toma. La higiene diaria normal es suficiente, y el exceso de limpieza puede eliminar las bacterias beneficiosas."
+        }
+      },
+      "lesson4": {
+        "question1": {
+          "text": "¿Qué componente principal contiene la leche materna?",
+          "option1": "Solo agua",
+          "option2": "Agua, proteínas, grasas, carbohidratos, vitaminas y minerales",
+          "option3": "Solo proteínas",
+          "option4": "Solo grasas",
+          "explanation": "La leche materna contiene una composición completa: agua, proteínas, grasas, carbohidratos (lactosa), vitaminas, minerales y factores inmunológicos."
+        },
+        "question2": {
+          "text": "¿La composición de la leche materna cambia?",
+          "option1": "No, siempre es igual",
+          "option2": "Sí, cambia durante la toma, durante el día y según la edad del bebé",
+          "option3": "Solo cambia una vez",
+          "option4": "Solo cambia según la hora del día",
+          "explanation": "La composición de la leche materna es dinámica: cambia durante la toma (más grasa al final), durante el día, y se adapta a las necesidades del bebé según su edad."
+        },
+        "question3": {
+          "text": "¿Qué tipo de proteínas contiene la leche materna?",
+          "option1": "Solo proteínas de origen animal",
+          "option2": "Proteínas de fácil digestión como la lactoferrina y la inmunoglobulina A",
+          "option3": "Solo proteínas vegetales",
+          "option4": "No contiene proteínas",
+          "explanation": "La leche materna contiene proteínas de fácil digestión como la lactoferrina y la inmunoglobulina A, que son específicas para las necesidades del bebé."
+        },
+        "question4": {
+          "text": "¿Por qué es importante la grasa en la leche materna?",
+          "option1": "No es importante",
+          "option2": "Proporciona energía y es esencial para el desarrollo del cerebro",
+          "option3": "Solo proporciona sabor",
+          "option4": "Solo es importante para el peso",
+          "explanation": "La grasa en la leche materna es crucial porque proporciona la mayor parte de la energía y contiene ácidos grasos esenciales para el desarrollo del cerebro y el sistema nervioso."
+        }
+      },
+      "lesson5": {
+        "question1": {
+          "text": "¿Cuál es una señal de que el bebé está recibiendo suficiente leche?",
+          "option1": "Llora constantemente",
+          "option2": "Aumenta de peso adecuadamente, moja 6+ pañales al día y está contento",
+          "option3": "Duerme todo el día",
+          "option4": "Rechaza el pecho",
+          "explanation": "Las señales de que el bebé recibe suficiente leche incluyen: aumento de peso adecuado, mojar al menos 6 pañales al día, estar contento entre tomas y tener deposiciones regulares."
+        },
+        "question2": {
+          "text": "¿Cuántos pañales mojados al día indica que el bebé está bien alimentado?",
+          "option1": "1-2 pañales",
+          "option2": "Al menos 6 pañales mojados",
+          "option3": "Solo 3 pañales",
+          "option4": "No importa la cantidad",
+          "explanation": "Un bebé bien alimentado debe mojar al menos 6 pañales al día con orina clara o amarilla pálida, lo que indica una hidratación adecuada."
+        },
+        "question3": {
+          "text": "¿Qué indica un buen aumento de peso en el bebé?",
+          "option1": "No aumenta de peso",
+          "option2": "Aumenta aproximadamente 20-30 gramos por día en los primeros meses",
+          "option3": "Aumenta 100 gramos por día",
+          "option4": "El peso no es importante",
+          "explanation": "Un buen aumento de peso en los primeros meses es aproximadamente de 20-30 gramos por día, aunque puede variar. Lo importante es una tendencia de crecimiento constante."
+        },
+        "question4": {
+          "text": "¿Cuándo se debe buscar ayuda si hay preocupación sobre la alimentación?",
+          "option1": "Nunca",
+          "option2": "Si el bebé no aumenta de peso, moja menos de 6 pañales o está muy somnoliento",
+          "option3": "Solo después de 6 meses",
+          "option4": "Solo si llora mucho",
+          "explanation": "Se debe buscar ayuda profesional si el bebé no aumenta de peso adecuadamente, moja menos de 6 pañales al día, está muy somnoliento o muestra signos de deshidratación."
+        }
+      },
+      "lesson6": {
+        "question1": {
+          "text": "¿Cuál es un hito de peso esperado en los primeros días?",
+          "option1": "El bebé no debe perder peso",
+          "option2": "Es normal que pierda hasta 10% del peso al nacer en los primeros días",
+          "option3": "Debe ganar peso inmediatamente",
+          "option4": "El peso no importa",
+          "explanation": "Es normal que un recién nacido pierda hasta un 10% de su peso al nacer en los primeros días, pero debe recuperarlo alrededor del día 10-14."
+        },
+        "question2": {
+          "text": "¿Cuándo debe recuperar el bebé su peso al nacer?",
+          "option1": "Inmediatamente",
+          "option2": "Alrededor de los 10-14 días de vida",
+          "option3": "Después de 1 mes",
+          "option4": "Nunca lo recupera",
+          "explanation": "El bebé debe recuperar su peso al nacer alrededor de los 10-14 días de vida. Si no lo hace, es importante consultar con un profesional."
+        },
+        "question3": {
+          "text": "¿Qué indica un crecimiento adecuado del bebé?",
+          "option1": "Aumenta de peso de forma irregular",
+          "option2": "Sigue una curva de crecimiento consistente según su percentil",
+          "option3": "Aumenta mucho peso de golpe",
+          "option4": "El peso no es indicador",
+          "explanation": "Un crecimiento adecuado se refleja en que el bebé sigue una curva de crecimiento consistente según su percentil, no necesariamente ganando mucho peso de golpe."
+        },
+        "question4": {
+          "text": "¿Con qué frecuencia se debe pesar al bebé en los primeros meses?",
+          "option1": "Todos los días",
+          "option2": "Según las recomendaciones del pediatra, típicamente en controles regulares",
+          "option3": "Solo una vez al mes",
+          "option4": "No es necesario pesarlo",
+          "explanation": "El bebé debe pesarse según las recomendaciones del pediatra en controles regulares. No es necesario pesarlo diariamente en casa a menos que haya una preocupación específica."
+        }
+      },
+      "lesson7": {
+        "question1": {
+          "text": "¿Cuándo es importante lavarse las manos antes de amamantar?",
+          "option1": "Nunca es necesario",
+          "option2": "Antes de cada toma, especialmente después de cambiar pañales o tocar objetos",
+          "option3": "Solo por la mañana",
+          "option4": "Solo si están visiblemente sucias",
+          "explanation": "Es importante lavarse las manos antes de cada toma, especialmente después de cambiar pañales, tocar objetos o preparar alimentos, para prevenir la transmisión de gérmenes."
+        },
+        "question2": {
+          "text": "¿Es necesario limpiar el pecho con jabón antes de cada toma?",
+          "option1": "Sí, siempre con jabón",
+          "option2": "No, la higiene diaria normal es suficiente",
+          "option3": "Solo con agua caliente",
+          "option4": "Solo si está sucio",
+          "explanation": "No es necesario limpiar el pecho con jabón antes de cada toma. La higiene diaria normal durante el baño es suficiente y evita eliminar las bacterias beneficiosas."
+        },
+        "question3": {
+          "text": "¿Qué técnica ayuda a facilitar el flujo de leche?",
+          "option1": "Presionar fuerte el pecho",
+          "option2": "Masajes suaves, compresión del pecho y relajación",
+          "option3": "Solo esperar",
+          "option4": "No hay técnicas",
+          "explanation": "Técnicas como masajes suaves del pecho, compresión del pecho durante la toma y mantener un ambiente relajado pueden ayudar a facilitar el flujo de leche."
+        },
+        "question4": {
+          "text": "¿Qué hacer si el bebé tiene dificultad para agarrar el pecho?",
+          "option1": "Forzar el agarre",
+          "option2": "Buscar ayuda profesional, verificar la posición y ser paciente",
+          "option3": "Cambiar a biberón inmediatamente",
+          "option4": "Esperar que se resuelva solo",
+          "explanation": "Si hay dificultades de agarre, es importante buscar ayuda profesional, verificar que la posición sea correcta, y ser paciente. No se debe forzar ni cambiar inmediatamente a biberón."
+        }
+      },
+      "lesson8": {
+        "question1": {
+          "text": "¿Se puede tomar medicamentos durante la lactancia?",
+          "option1": "Nunca se puede tomar ningún medicamento",
+          "option2": "Muchos medicamentos son seguros, pero siempre se debe consultar con el médico",
+          "option3": "Todos los medicamentos son seguros",
+          "option4": "Solo medicamentos naturales",
+          "explanation": "Muchos medicamentos son seguros durante la lactancia, pero es esencial consultar siempre con el médico o farmacéutico antes de tomar cualquier medicamento."
+        },
+        "question2": {
+          "text": "¿Qué hacer si necesitas tomar un medicamento durante la lactancia?",
+          "option1": "Tomarlo sin consultar",
+          "option2": "Consultar con el médico sobre la compatibilidad con la lactancia",
+          "option3": "Suspender la lactancia automáticamente",
+          "option4": "Solo tomar medicamentos naturales",
+          "explanation": "Siempre se debe consultar con el médico sobre la compatibilidad del medicamento con la lactancia. La mayoría de medicamentos comunes son seguros, pero es importante verificarlo."
+        },
+        "question3": {
+          "text": "¿Los medicamentos pasan a la leche materna?",
+          "option1": "Nunca pasan",
+          "option2": "Algunos medicamentos pueden pasar en pequeñas cantidades, por eso es importante consultar",
+          "option3": "Todos pasan en grandes cantidades",
+          "option4": "Solo los antibióticos pasan",
+          "explanation": "Algunos medicamentos pueden pasar a la leche materna en pequeñas cantidades. Por eso es crucial consultar con un profesional de la salud para evaluar el riesgo-beneficio."
+        },
+        "question4": {
+          "text": "¿Dónde se puede consultar sobre la seguridad de medicamentos durante la lactancia?",
+          "option1": "Solo en internet",
+          "option2": "Con el médico, farmacéutico o en bases de datos especializadas como e-lactancia",
+          "option3": "No hay forma de consultar",
+          "option4": "Solo con otros padres",
+          "explanation": "Se debe consultar con el médico, farmacéutico o en bases de datos especializadas como e-lactancia.org que proporcionan información actualizada sobre medicamentos y lactancia."
+        }
+      },
+      "lesson9": {
+        "question1": {
+          "text": "¿Cuál es un signo de complicación en la lactancia?",
+          "option1": "El bebé se alimenta bien",
+          "option2": "Dolor persistente, grietas en el pezón, mastitis o el bebé no aumenta de peso",
+          "option3": "Solo si el bebé llora",
+          "option4": "No hay signos de complicación",
+          "explanation": "Signos de complicación incluyen: dolor persistente, grietas en el pezón, mastitis, el bebé no aumenta de peso adecuadamente, o dificultades de agarre persistentes."
+        },
+        "question2": {
+          "text": "¿Qué es la mastitis?",
+          "option1": "Una condición normal",
+          "option2": "Una inflamación del tejido mamario que puede incluir infección",
+          "option3": "Solo dolor en el pecho",
+          "option4": "No existe",
+          "explanation": "La mastitis es una inflamación del tejido mamario que puede incluir una infección. Se caracteriza por dolor, enrojecimiento, calor y a veces fiebre. Requiere atención médica."
+        },
+        "question3": {
+          "text": "¿Qué hacer si hay dolor persistente al amamantar?",
+          "option1": "Ignorarlo",
+          "option2": "Buscar ayuda profesional para identificar y tratar la causa",
+          "option3": "Suspender la lactancia",
+          "option4": "Solo tomar analgésicos",
+          "explanation": "El dolor persistente al amamantar no es normal y requiere buscar ayuda profesional para identificar la causa (mala posición, agarre incorrecto, infección) y tratarla adecuadamente."
+        },
+        "question4": {
+          "text": "¿Las grietas en el pezón son normales?",
+          "option1": "Sí, siempre aparecen",
+          "option2": "No, generalmente indican un problema de agarre o posición que debe corregirse",
+          "option3": "Solo aparecen en algunas madres",
+          "option4": "No son importantes",
+          "explanation": "Las grietas en el pezón generalmente indican un problema de agarre o posición. No son normales y deben abordarse corrigiendo la técnica de lactancia con ayuda profesional."
+        }
+      },
+      "lesson10": {
+        "question1": {
+          "text": "¿Para qué sirven los masajes al seno antes de amamantar?",
+          "option1": "No sirven para nada",
+          "option2": "Ayudan a estimular el flujo de leche y facilitar el agarre",
+          "option3": "Solo para relajar",
+          "option4": "Solo si hay dolor",
+          "explanation": "Los masajes al seno antes de amamantar ayudan a estimular el flujo de leche, ablandar el pecho si está muy lleno, y facilitar que el bebé pueda agarrar mejor el pecho."
+        },
+        "question2": {
+          "text": "¿Cómo se realizan los masajes al seno?",
+          "option1": "Con mucha fuerza",
+          "option2": "Con movimientos suaves y circulares desde la base hacia el pezón",
+          "option3": "Solo presionando el pezón",
+          "option4": "No hay técnica específica",
+          "explanation": "Los masajes se realizan con movimientos suaves y circulares desde la base del seno hacia el pezón, ayudando a movilizar la leche y preparar el pecho para la toma."
+        },
+        "question3": {
+          "text": "¿Cuándo es especialmente útil masajear el seno?",
+          "option1": "Nunca es útil",
+          "option2": "Cuando el pecho está muy lleno, antes de amamantar o para aliviar congestión",
+          "option3": "Solo por la noche",
+          "option4": "Solo si hay dolor",
+          "explanation": "Los masajes son especialmente útiles cuando el pecho está muy lleno, antes de amamantar para facilitar el flujo, o para aliviar la congestión mamaria."
+        },
+        "question4": {
+          "text": "¿Los masajes pueden ayudar con la extracción de leche?",
+          "option1": "No, no tienen efecto",
+          "option2": "Sí, pueden mejorar la extracción manual o con bomba",
+          "option3": "Solo con bomba eléctrica",
+          "option4": "Solo manualmente",
+          "explanation": "Los masajes pueden mejorar significativamente la extracción de leche, ya sea manual o con bomba, ayudando a vaciar mejor el pecho y aumentar la producción."
+        }
+      },
+      "lesson11": {
+        "question1": {
+          "text": "¿Cuánto tiempo se puede conservar la leche materna extraída a temperatura ambiente?",
+          "option1": "Solo 1 hora",
+          "option2": "Hasta 4 horas a temperatura ambiente (hasta 6-8 horas en condiciones muy limpias)",
+          "option3": "Todo el día",
+          "option4": "Solo 30 minutos",
+          "explanation": "La leche materna extraída se puede conservar hasta 4 horas a temperatura ambiente (hasta 6-8 horas en condiciones muy limpias y frescas)."
+        },
+        "question2": {
+          "text": "¿Cuánto tiempo se puede conservar la leche materna en el refrigerador?",
+          "option1": "Solo 1 día",
+          "option2": "Hasta 4 días en el refrigerador (a 4°C o menos)",
+          "option3": "Solo 2 días",
+          "option4": "No se puede refrigerar",
+          "explanation": "La leche materna se puede conservar hasta 4 días en el refrigerador a una temperatura de 4°C o menos, preferiblemente en la parte trasera del refrigerador."
+        },
+        "question3": {
+          "text": "¿Cómo se debe almacenar la leche materna extraída?",
+          "option1": "En cualquier recipiente",
+          "option2": "En recipientes limpios y esterilizados, etiquetados con fecha y hora",
+          "option3": "Solo en biberones",
+          "option4": "No importa el recipiente",
+          "explanation": "La leche materna debe almacenarse en recipientes limpios y esterilizados (bolsas especiales o recipientes de vidrio/plástico aptos), etiquetados con fecha y hora de extracción."
+        },
+        "question4": {
+          "text": "¿Cómo se debe descongelar la leche materna congelada?",
+          "option1": "En el microondas directamente",
+          "option2": "En el refrigerador durante la noche o bajo agua tibia, nunca en microondas",
+          "option3": "Solo a temperatura ambiente",
+          "option4": "En agua hirviendo",
+          "explanation": "La leche congelada debe descongelarse en el refrigerador durante la noche o bajo agua tibia corriente. Nunca se debe usar microondas porque destruye nutrientes y crea puntos calientes."
+        }
+      },
+      "lesson12": {
+        "question1": {
+          "text": "¿Existen leyes en Panamá que protegen la lactancia materna?",
+          "option1": "No existen leyes",
+          "option2": "Sí, existen leyes que protegen y promueven la lactancia materna",
+          "option3": "Solo en algunos lugares",
+          "option4": "Solo para funcionarias públicas",
+          "explanation": "Sí, Panamá tiene leyes que protegen y promueven la lactancia materna, incluyendo derechos laborales para las madres trabajadoras."
+        },
+        "question2": {
+          "text": "¿Qué derechos tienen las madres trabajadoras en Panamá respecto a la lactancia?",
+          "option1": "Ningún derecho especial",
+          "option2": "Derecho a pausas para amamantar y espacios adecuados",
+          "option3": "Solo pueden amamantar en casa",
+          "option4": "Deben renunciar para amamantar",
+          "explanation": "Las madres trabajadoras en Panamá tienen derecho a pausas para amamantar y a espacios adecuados (salas de lactancia) en sus lugares de trabajo."
+        },
+        "question3": {
+          "text": "¿Las leyes panameñas protegen la lactancia en espacios públicos?",
+          "option1": "No, está prohibido",
+          "option2": "Sí, protegen el derecho de amamantar en espacios públicos",
+          "option3": "Solo en algunos lugares",
+          "option4": "Depende del lugar",
+          "explanation": "Las leyes panameñas protegen el derecho de las madres a amamantar en espacios públicos, promoviendo la normalización de la lactancia materna."
+        },
+        "question4": {
+          "text": "¿Por qué son importantes las leyes que protegen la lactancia?",
+          "option1": "No son importantes",
+          "option2": "Garantizan los derechos de las madres y promueven la salud de los bebés",
+          "option3": "Solo protegen a algunas madres",
+          "option4": "Solo son simbólicas",
+          "explanation": "Las leyes que protegen la lactancia son importantes porque garantizan los derechos de las madres, promueven la salud de los bebés y crean un entorno favorable para la lactancia materna."
+        }
+      },
+      "lesson13": {
+        "question1": {
+          "text": "¿Cuál es una diferencia clave entre la leche materna y la leche de vaca?",
+          "option1": "Son iguales",
+          "option2": "La leche materna tiene anticuerpos y se adapta al bebé, la de vaca no",
+          "option3": "Solo difieren en el sabor",
+          "option4": "No hay diferencias importantes",
+          "explanation": "La leche materna contiene anticuerpos, factores inmunológicos y se adapta a las necesidades del bebé. La leche de vaca no tiene estos componentes y está diseñada para terneros, no para bebés humanos."
+        },
+        "question2": {
+          "text": "¿Por qué la leche materna es más fácil de digerir que la de vaca?",
+          "option1": "No hay diferencia",
+          "option2": "Tiene proteínas de fácil digestión y composición específica para humanos",
+          "option3": "Solo porque es más líquida",
+          "option4": "Por el sabor",
+          "explanation": "La leche materna tiene proteínas de fácil digestión (como la lactoferrina) y una composición específicamente diseñada para el sistema digestivo humano, a diferencia de la leche de vaca."
+        },
+        "question3": {
+          "text": "¿La leche materna cambia según las necesidades del bebé?",
+          "option1": "No, siempre es igual",
+          "option2": "Sí, se adapta según la edad del bebé, hora del día y necesidades",
+          "option3": "Solo cambia una vez",
+          "option4": "Solo cambia el sabor",
+          "explanation": "La leche materna es dinámica y se adapta según la edad del bebé, la hora del día, e incluso durante la misma toma, proporcionando exactamente lo que el bebé necesita."
+        },
+        "question4": {
+          "text": "¿Qué contiene la leche materna que la de vaca no tiene?",
+          "option1": "Nada especial",
+          "option2": "Anticuerpos, factores de crecimiento, probióticos y componentes inmunológicos",
+          "option3": "Solo más agua",
+          "option4": "Solo más grasa",
+          "explanation": "La leche materna contiene componentes únicos como anticuerpos, factores de crecimiento, probióticos y otros componentes inmunológicos que la leche de vaca no proporciona."
+        }
+      },
+      "lesson14": {
+        "question1": {
+          "text": "¿Es cierto que algunas mujeres no producen suficiente leche?",
+          "option1": "Sí, la mayoría no produce suficiente",
+          "option2": "Es un mito común; la mayoría de mujeres pueden producir suficiente leche con apoyo adecuado",
+          "option3": "Solo algunas pueden amamantar",
+          "option4": "Depende de la edad",
+          "explanation": "Es un mito común. La mayoría de mujeres pueden producir suficiente leche. Las dificultades generalmente se deben a problemas de técnica, apoyo inadecuado o información incorrecta, no a falta de capacidad."
+        },
+        "question2": {
+          "text": "¿Es necesario dar agua al bebé además de leche materna en los primeros 6 meses?",
+          "option1": "Sí, siempre necesita agua",
+          "option2": "No, la leche materna proporciona toda la hidratación necesaria",
+          "option3": "Solo en verano",
+          "option4": "Solo si tiene fiebre",
+          "explanation": "No es necesario dar agua adicional a un bebé amamantado en los primeros 6 meses. La leche materna proporciona toda la hidratación y nutrición necesaria."
+        },
+        "question3": {
+          "text": "¿Es cierto que amamantar duele siempre?",
+          "option1": "Sí, siempre duele",
+          "option2": "No, el dolor indica un problema (mala posición o agarre) que debe corregirse",
+          "option3": "Solo duele al principio",
+          "option4": "Depende de la madre",
+          "explanation": "El dolor al amamantar no es normal. Si hay dolor, generalmente indica un problema de posición o agarre que debe identificarse y corregirse con ayuda profesional."
+        },
+        "question4": {
+          "text": "¿Se puede amamantar si los senos son pequeños?",
+          "option1": "No, se necesita senos grandes",
+          "option2": "Sí, el tamaño del seno no afecta la capacidad de producir leche",
+          "option3": "Solo si son medianos",
+          "option4": "Depende de la forma",
+          "explanation": "El tamaño del seno no afecta la capacidad de producir leche. Las mujeres con senos pequeños pueden amamantar perfectamente, ya que la producción de leche depende del tejido glandular, no del tamaño."
+        }
+      }
+    }
+  },
+  "helpSupport": {
+    "helpCenter": "Centro de Ayuda",
+    "helpCenterDescription": "Chatea con nuestro asistente virtual",
+    "contactSupport": "Contactar Soporte",
+    "supportEmail": "soporte@gilact.com",
+    "terms": "Términos y Condiciones",
+    "termsDescription": "Ver términos de uso",
+    "privacy": "Política de Privacidad",
+    "privacyDescription": "Ver política de privacidad",
+    "contactDialogTitle": "Contactar Soporte",
+    "contactDialogMessage": "¿Necesitas ayuda?\n\nPuedes contactarnos en:\n📧 soporte@gilact.com\n\nEstamos aquí para ayudarte con cualquier duda o problema.",
+    "close": "Cerrar"
+  },
+  "tips": {
+    "title": "Tips de Lactancia",
+    "progress": "Progreso",
+    "favorites": "Favoritos",
+    "favoritesInDevelopment": "Funcionalidad de favoritos en desarrollo",
+    "tip": "Tip",
+    "titles": {
+      "complementaryFeeding": "Alimentación Complementaria",
+      "ironSupplementation": "Suplementación de Hierro",
+      "benefitsBaby": "Beneficios para el Bebé",
+      "benefitsMom": "Beneficios para la Mamá",
+      "postureLatch": "Postura y Agarre",
+      "colostrum": "Calostro",
+      "breastfeedingTips": "Consejos de Lactancia",
+      "extractionStorage": "Extracción y Almacenamiento",
+      "extractionContinuation": "Continuación Extracción",
+      "hygiene": "Higiene en Lactancia",
+      "hygieneContinuation": "Continuación Higiene",
+      "successfulBreastfeeding": "Lactancia Exitosa",
+      "fatherRole": "Rol del Padre",
+      "commonProblems": "Problemas Comunes"
+    },
+    "content": {
+      "complementaryFeeding": "Es recomendable dar solo leche maternal al bebe hasta los 6 meses y a partir de este momento, agregar poco a poco alimentos de acuerdo con la sugerencia del pediatra o nutricionista. Se recomienda mantener la lactancia materna combinada con la alimentación hasta que la madre y el niño deseen.",
+      "ironSupplementation": "Si tu bebé tuvo bajo peso al nacer y/o es prematuro, se suplementará con hierro.\n\n*Según indicación del personal de salud.",
+      "benefitsBaby": {
+        "title": "Beneficios de Lactancia Materna Exclusiva",
+        "subtitle": "Durante los primeros 6 meses de vida:",
+        "items": [
+          "Mayor coeficiente intelectual y mejor rendimiento escolar.",
+          "Afianza el amor, la comunicación y el lazo afectivo entre madre e hijo.",
+          "Niños(as) más cariñosos(as).",
+          "Menos caries dentales y mejor desarrollo de musculatura facial y cuello."
+        ]
+      },
+      "benefitsMom": {
+        "items": [
+          "Disminuye el sangrado postparto.",
+          "Ayuda a que el útero vuelva a su estado normal.",
+          "Protege contra el cáncer de ovario, mama y útero.",
+          "Recupera rápidamente la figura eliminando reservas de grasa.",
+          "Disminuye el riesgo de depresión posparto."
+        ]
+      },
+      "postureLatch": {
+        "title": "Consejos para una Buena Postura y Agarre",
+        "items": [
+          "Coloca al bebé barriga con barriga y en línea recta, con la cara frente al pezón.",
+          "La madre debe buscar una posición cómoda, ayudándose con almohadas y manteniendo la espalda apoyada.",
+          "El Agarre Apropiado es Importante:",
+          "La boca del bebé debe estar bien abierta y abarcar toda la areola (zona oscura que rodea el pezón)."
+        ]
+      },
+      "colostrum": {
+        "title": "Calostro: La Primera Leche",
+        "intro": "El calostro es la primera leche que produce la madre. Aquí tienes información clave:",
+        "items": [
+          "Es de color amarillento y contiene alto valor nutritivo.",
+          "Satisface al lactante porque tiene los nutrientes que necesita el bebé.",
+          "Contiene defensas que protegen al bebé contra enfermedades.",
+          "Es el único alimento que el bebé necesita en los primeros seis meses."
+        ]
+      },
+      "breastfeedingTips": {
+        "title": "Consejos para una Lactancia Materna Exitosa",
+        "items": [
+          "¡No te rindas! Tú puedes amamantar.",
+          "La madre debe continuar la suplementación con hierro y ácido fólico durante los primeros 3 meses de la lactancia.",
+          "Dale pecho a tu bebé inmediatamente después del parto.",
+          "El bebé te hará saber cuando tiene hambre suele mamar de 8 a 12 veces al día.",
+          "Dale de mamar en un ambiente tranquilo.",
+          "Busca la posición más cómoda para amamantar.",
+          "Toma abundante agua."
+        ]
+      },
+      "extractionStorage": {
+        "title": "Extracción, Manejo y Almacenamiento",
+        "intro": "La extracción puede realizarse manual o mecánicamente. Para facilitar la extracción, haga estimulación aplicando compresas tibias y masajes circulares sobre toda la mama.",
+        "items": [
+          "No mezclar leche materna recién extraída con leche materna que ya está refrigerada."
+        ]
+      },
+      "extractionContinuation": {
+        "title": "Extracción, Manejo y Almacenamiento de la Leche Materna",
+        "items": [
+          "La leche descongelada debe consumirse y el sobrante descartarse.",
+          "Dejarla un rato a temperatura ambiente antes de darla.",
+          "A todos los recipientes donde se pone la leche se les debe etiquetar con nombre y fecha."
+        ]
+      },
+      "hygiene": {
+        "title": "Higiene y Medidas Generales",
+        "items": [
+          "Lávate bien las manos con agua y jabón antes de dar pecho.",
+          "El baño diario es suficiente para el aseo de los pezones.",
+          "Lávate las manos con agua y jabón después de cada cambio de pañal.",
+          "Da pecho con alegría y aumentará tu producción."
+        ]
+      },
+      "hygieneContinuation": {
+        "title": "Tu Dieta y la Lactancia",
+        "text": "Puedes comer todo tipo de alimentos. Solo asegúrate de comer saludable y tomar mucha agua."
+      },
+      "successfulBreastfeeding": {
+        "title": "Consejos para una Lactancia Exitosa",
+        "items": [
+          "Infórmate y prepárate todo lo que puedas acerca de la lactancia antes del momento del parto.",
+          "Da el pecho inmediatamente después del parto, esto facilita el inicio de la lactancia.",
+          "Toma mucha agua.",
+          "Confía en ti y en tu capacidad de alimentar a tu bebé: ¡sí tienes leche!",
+          "Coloca al bebé con frecuencia en el pecho: deja que lacte a libre demanda."
+        ]
+      },
+      "fatherRole": {
+        "title": "El Papel del Padre en la Lactancia",
+        "items": [
+          "La figura del padre desempeña un papel principal en asegurar y apoyar la lactancia materna exclusiva, para el bienestar y pleno desarrollo de la madre y el bebé.",
+          "Corresponsabilizarse de las tareas de cuidado y labores domésticas durante este periodo tan importante facilita que la madre pueda dedicarle al bebé el tiempo que necesita, así como tener tiempo para sí misma."
+        ]
+      },
+      "commonProblems": {
+        "title": "Problemas Comunes en la Lactancia",
+        "congestion": {
+          "title": "Congestión Mamaria:",
+          "items": [
+            "No suspendas la lactancia; hazte masajes circulares en toda la mama.",
+            "Amamanta con frecuencia para evitar los abcesos mamarios."
+          ]
+        },
+        "fissures": {
+          "title": "Fisuras y Erosiones del Pezón:",
+          "items": [
+            "Verifica si el niño tiene sapito (Moniliasis oral en el bebé o la madre).",
+            "Acude al médico para diagnóstico y tratamiento."
+          ]
+        },
+        "lowProduction": {
+          "title": "Baja Producción de Leche:",
+          "items": [
+            "Toma más agua.",
+            "Descansa y trata de relajarte."
+          ]
+        }
+      }
+    }
+  },
+  "forms": {
+    "babyWeight": {
+      "title": "Registro de Peso del Bebé",
+      "question": "¿Cuál es el peso actual del bebé?",
+      "weight": "Peso",
+      "weightPlaceholder": "Ingresa el peso en kg",
+      "weightRequired": "El peso es requerido",
+      "weightInvalid": "Ingresa un peso válido (ej: 3.5)",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales (opcional)",
+      "save": "Guardar Peso",
+      "saving": "Guardando...",
+      "saved": "Peso guardado exitosamente",
+      "error": "Error al guardar el peso",
+      "kg": "kg"
+    },
+    "sleep": {
+      "title": "Registro de Sueño del Bebé",
+      "question": "¿Cuántas horas durmió el bebé anoche?",
+      "wakeUpsQuestion": "¿Cuántas veces se despertó? (Opcional)",
+      "qualityQuestion": "¿Cómo fue el sueño? (Opcional)",
+      "hoursSlept": "Horas de Sueño",
+      "hoursPlaceholder": "Ingresa las horas",
+      "hoursRequired": "Las horas son requeridas",
+      "hoursInvalid": "Ingresa un valor válido (ej: 8.0)",
+      "wakeUps": "Despertares",
+      "wakeUpsPlaceholder": "Número de despertares (opcional)",
+      "quality": "Calidad del Sueño",
+      "qualityExcellent": "Excelente",
+      "qualityGood": "Buena",
+      "qualityFair": "Regular",
+      "qualityPoor": "Mala",
+      "save": "Guardar Sueño",
+      "saving": "Guardando...",
+      "saved": "Sueño guardado exitosamente",
+      "error": "Error al guardar el sueño",
+      "hours": "horas"
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Bienvenido de vuelta",
+      "loginToContinue": "Inicia sesión para continuar",
+      "email": "Email",
+      "password": "Contraseña",
+      "remember": "Recordar",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "login": "Iniciar Sesión",
+      "noAccount": "¿No tienes una cuenta? ",
+      "signUp": "Regístrate",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta? "
+    },
+    "register": {
+      "createAccount": "Crear Cuenta",
+      "basicInfo": "Información básica para comenzar",
+      "fullName": "Nombre completo *",
+      "email": "Email *",
+      "password": "Contraseña *",
+      "passwordStrength": {
+        "veryWeak": "Muy débil",
+        "weak": "Débil",
+        "medium": "Media",
+        "strong": "Fuerte"
+      },
+      "next": "Siguiente",
+      "back": "Atrás",
+      "register": "Registrarse",
+      "backToLogin": "Volver al inicio de sesión",
+      "step": "Paso {current} de {total}",
+      "@step": {
+        "placeholders": {
+          "current": {
+            "type": "int"
+          },
+          "total": {
+            "type": "int"
+          }
+        }
+      },
+      "personalData": "Datos Personales",
+      "personalDataDescription": "Información adicional sobre ti",
+      "additionalInfo": "Información Adicional",
+      "additionalInfoDescription": "Últimos detalles para completar",
+      "motherNameOptional": "Nombre de la madre (opcional)",
+      "idNumberOptional": "Número de identificación (opcional)",
+      "acceptTerms": "Acepto los términos y condiciones de uso",
+      "confirmRegistration": "Confirmar Registro",
+      "confirmRegistrationMessage": "¿Estás seguro de que quieres crear tu cuenta con esta información?",
+      "confirm": "Confirmar"
+    }
+  },
+  "history": {
+    "title": "Historial",
+    "lastLessonCompleted": "Última lección completada",
+    "generalProgress": "Progreso General",
+    "percentCompleted": "% completado",
+    "completed": "Completado",
+    "pending": "Pendiente",
+    "noVideosAvailable": "No hay videos disponibles",
+    "videosWillAppear": "Los videos aparecerán aquí cuando estén disponibles",
+    "video": "Video",
+    "loadingVideos": "Cargando videos...",
+    "errorLoading": "Error al cargar videos",
+    "retry": "Reintentar",
+    "videoDownloaded": "Video descargado exitosamente",
+    "videoDeleted": "Video eliminado",
+    "deleteDownload": "Eliminar descarga",
+    "deleteDownloadConfirm": "¿Estás seguro de que quieres eliminar la descarga de",
+    "unknownError": "Error desconocido"
+  },
+  "baby": {
+    "data": {
+      "title": "Datos del Bebé",
+      "name": "Nombre del bebé",
+      "gestationalAge": "Edad Gestacional",
+      "birthDate": "Fecha de Nacimiento",
+      "birthPlace": "Lugar de Nacimiento",
+      "weight": "Peso",
+      "weeks": "semanas",
+      "noInfoAvailable": "No hay información del bebé disponible"
+    }
+  },
+  "growth": {
+    "alertTitle": "Alerta de Crecimiento",
+    "trendTitle": "Tendencia de Crecimiento",
+    "disclaimer": "Esta información es solo orientativa. Siempre consulta con tu pediatra o nutricionista para cualquier preocupación sobre el crecimiento o alimentación de tu bebé.",
+    "currentWeight": "Peso actual",
+    "percentile": "Percentil",
+    "trend": "Tendencia",
+    "stable": "Estable",
+    "increasing": "En aumento",
+    "decreasing": "En descenso",
+    "normalRange": "Rango normal",
+    "median": "Mediana (P50)",
+    "weightTrend": "Tendencia de Peso",
+    "whoComparison": "Comparación con estándares OMS",
+    "important": "Importante",
+    "disclaimerFull": "Esta información es solo orientativa y no reemplaza el consejo médico profesional. Cualquier preocupación sobre el peso o la alimentación de tu bebé debe ser consultada con un pediatra o nutricionista.",
+    "insufficientData": "No hay suficientes datos para mostrar la tendencia",
+    "registerWeightToSeeChart": "Registra el peso de tu bebé para ver la gráfica"
+  },
+  "feeding": {
+    "totalExtractedMilk": "Total de Leche Extraída",
+    "dailyVolumeSubtitle": "Volumen diario de leche extraída y medida",
+    "extractedOnlyNote": "Solo incluye leche extraída. No incluye lactancia directa al pecho.",
+    "dailyAverage": "Promedio diario",
+    "extractedOnly": "Solo extraída",
+    "lastRecord": "Último registro",
+    "noDataRegistered": "No hay datos de alimentación registrados"
+  },
+  "welcome": {
+    "title": "¡Bienvenido!",
+    "verifying": "Verificando tu perfil...",
+    "loading": "Cargando..."
+  },
+  "countdown": {
+    "myBabyArrives": "Mi Bebé Llega",
+    "specialCountdown": "Cuenta regresiva especial",
+    "days": "DÍAS",
+    "hours": "HORAS",
+    "pregnancyProgress": "Progreso del embarazo",
+    "motivationalMessage": "Cada día es un paso más cerca de conocer a tu bebé. ¡Sigue así!",
+    "preparingCountdown": "Preparando cuenta regresiva...",
+    "newAdventure": "¡Es hora de comenzar una nueva aventura!",
+    "greatDayArrived": "¡El gran día ha llegado! Prepárate para conocer a tu bebé.",
+    "verySoon": "¡Falta muy poco! Tu bebé está casi aquí.",
+    "oneMonthLeft": "Un mes más y tendrás a tu bebé en brazos. ¡Ánimo!",
+    "stayStrong": "Mantente fuerte, el gran día se acerca.",
+    "dayArrived": "¡El día llegó!",
+    "completePostpartumInfo": "Es hora de completar tu información postparto",
+    "updateToPostpartum": "Actualizar a Postparto",
+    "updateToPostpartumConfirm": "¿Estás segura de que quieres actualizar tu perfil a postparto? Esto te permitirá registrar información de tu bebé.",
+    "congratulationsTitle": "¡Felicidades!",
+    "congratulationsMessage": "¡Tu bebé ha llegado! Ahora puedes registrar toda la información sobre tu bebé y comenzar a usar todas las funcionalidades de la app.",
+    "congratulationsCareMessage": "Recuerda cuidarte y descansar. Este es un momento especial para ti y tu bebé.",
+    "registerBaby": "Registrar Bebé"
+  },
+  "onboarding": {
+    "babyName": "Nombre del Bebé",
+    "babyNameHint": "Nombre del bebé",
+    "date": "Fecha",
+    "dateHint": "Fecha",
+    "time": "Hora",
+    "timeHint": "Hora",
+    "birthPlace": "Lugar de Nacimiento",
+    "birthPlaceHint": "Hospital, clínica, etc.",
+    "birthWeight": "Peso al Nacer (kg)",
+    "birthWeightHint": "Ej: 3.2",
+    "lastMenstruation": "Última Menstruación",
+    "lastMenstruationHint": "Fecha última menstruación",
+    "nameRequired": "Nombre requerido",
+    "dateRequired": "Fecha requerida",
+    "timeRequired": "Hora requerida",
+    "placeRequired": "Lugar requerido",
+    "weightRequired": "Peso requerido",
+    "invalidWeight": "Peso inválido",
+    "preParto": "Pre-Parto",
+    "prePartoDescription": "Estoy embarazada",
+    "hypertension": "Hipertensión arterial",
+    "swipe": "Desliza",
+    "continuingAutomatically": "Continuando automáticamente...",
+    "chooseSituation": "Elige tu situación actual",
+    "selectSituationDescription": "Selecciona la opción que mejor describa tu momento",
+    "postParto": "Post-Parto",
+    "postPartoDescription": "Ya tuve mi bebé",
+    "select": "Seleccionar",
+    "prepartoInfo": "Información de Preparto",
+    "prepartoInfoDescription": "Cuéntanos cuándo esperas a tu bebé",
+    "selectExpectedDate": "Selecciona la fecha esperada",
+    "babyRegistration": "Registro del Bebé",
+    "completeBabyInfo": "Completa la información de tu bebé",
+    "slides": {
+      "babyBenefits": "Beneficios para el bebé",
+      "decreasesRisk": "Disminuye la posibilidad de enfermarse de:",
+      "protectionAgainst": "Protección contra enfermedades como:",
+      "nothingCompares": "Nada se compara con la",
+      "breastMilk": "Leche Materna!",
+      "bestFood": "Es el mejor alimento para el lactante. Es un complejo fluido nutricional vivo que contiene anticuerpos, enzimas, ácidos grasos y hormonas.",
+      "breastfeedWithPride": "¡Amamanta con orgullo!",
+      "diseases": {
+        "diabetes": "Diabetes",
+        "hypertension": "Hipertensión arterial",
+        "obesity": "Obesidad",
+        "cancer": "Cáncer (leucemia, linfoma)",
+        "diarrhea": "Diarrea",
+        "allergies": "Alergias",
+        "colds": "Resfriados",
+        "earInfections": "Infecciones del oído",
+        "sids": "Síndrome de muerte súbita"
+      }
+    }
+  },
+  "chatbot": {
+    "title": "ChatBot Gilact",
+    "subtitle": "Tu asistente de lactancia",
+    "quickQuestions": "Preguntas rápidas",
+    "writeQuestion": "Escribe tu pregunta...",
+    "loginRequired": "Inicio de sesión requerido",
+    "loginRequiredMessage": "Por favor, inicia sesión para acceder a las lecciones.",
+    "greeting": "¡Hola! 👋",
+    "assistantDescription": "Soy tu asistente virtual",
+    "askPrompt": "Pregúntame sobre lactancia materna",
+    "frequentQuestions": "Preguntas frecuentes",
+    "refresh": "Actualizar",
+    "relatedQuestions": "Preguntas relacionadas",
+    "otherQuestions": "Otras preguntas",
+    "back": "Volver",
+    "errorProcessing": "Ocurrió un error al procesar tu pregunta. Por favor, intenta de nuevo.",
+    "connectionRequired": "Es necesario tener conexión a internet para obtener una respuesta del chatbot. Por favor, verifica tu conexión e intenta nuevamente.",
+    "questions": {
+      "q1": {
+        "question": "¿Qué es el calostro?",
+        "answer": "El calostro es la primera leche que produce tu cuerpo después del parto. Es rico en proteínas, anticuerpos y nutrientes esenciales que protegen a tu bebé de enfermedades. Es de color amarillento y espeso, y se produce en pequeñas cantidades durante los primeros días."
+      },
+      "q2": {
+        "question": "¿Cómo inicio la lactancia?",
+        "answer": "Para iniciar la lactancia, coloca a tu bebé piel con piel inmediatamente después del parto si es posible. Busca un ambiente tranquilo, coloca al bebé cerca del pecho y espera a que abra la boca. Asegúrate de que el bebé tenga un buen agarre, con la boca cubriendo la mayor parte de la areola."
+      },
+      "q3": {
+        "question": "¿Cómo mejorar el agarre?",
+        "answer": "Para mejorar el agarre, asegúrate de que el bebé tenga la boca bien abierta antes de acercarlo al pecho. El labio inferior debe estar volteado hacia afuera, y la nariz y el mentón deben tocar el pecho. El bebé debe tener más areola en la parte inferior de la boca que en la superior."
+      },
+      "q4": {
+        "question": "¿Cuántas veces debe comer un bebé?",
+        "answer": "Los recién nacidos deben alimentarse entre 8 y 12 veces al día, aproximadamente cada 2-3 horas. Es importante alimentar al bebé a demanda, es decir, cuando muestre señales de hambre como llevarse las manos a la boca, hacer movimientos de succión o estar inquieto."
+      },
+      "q5": {
+        "question": "¿Qué es la mastitis?",
+        "answer": "La mastitis es una inflamación del tejido mamario que puede causar dolor, enrojecimiento, hinchazón y fiebre. Puede ocurrir cuando la leche no se drena completamente del pecho. Es importante continuar amamantando o extrayendo leche del pecho afectado, aplicar compresas calientes y descansar."
+      },
+      "q6": {
+        "question": "¿Cómo tratar grietas en los pezones?",
+        "answer": "Para tratar grietas en los pezones, asegúrate de que el bebé tenga un buen agarre. Después de cada toma, aplica un poco de tu propia leche materna en los pezones y déjalos secar al aire. Usa pezoneras si es necesario temporalmente. Evita jabones fuertes y cremas con alcohol."
+      },
+      "q7": {
+        "question": "¿Cómo saber si mi bebé come suficiente?",
+        "answer": "Señales de que tu bebé come suficiente: moja 6-8 pañales al día, tiene deposiciones regulares, aumenta de peso adecuadamente, está alerta y activo cuando está despierto, y se ve satisfecho después de las tomas. Si tienes dudas, consulta con un profesional de la salud."
+      },
+      "q8": {
+        "question": "¿Cómo guardar leche materna?",
+        "answer": "La leche materna puede guardarse en el refrigerador hasta 4 días a 4°C o menos, en el congelador hasta 6 meses (idealmente 3 meses), y a temperatura ambiente hasta 4 horas. Usa recipientes limpios y etiquétalos con la fecha. Descongela en el refrigerador o bajo agua tibia, nunca en microondas."
+      },
+      "q9": {
+        "question": "¿Cómo extraer leche materna?",
+        "answer": "Puedes extraer leche manualmente o con un extractor. Lávate las manos antes, masajea suavemente el pecho, y coloca el extractor o tu mano en forma de C alrededor de la areola. Extrae hasta que el flujo disminuya, luego cambia al otro pecho. Alterna entre ambos pechos varias veces."
+      },
+      "q10": {
+        "question": "¿Qué beneficios tiene la lactancia?",
+        "answer": "La lactancia materna beneficia tanto al bebé como a la madre. Para el bebé: protege contra infecciones, reduce el riesgo de alergias, favorece el desarrollo cerebral, y proporciona nutrientes ideales. Para la madre: ayuda a recuperar el peso, reduce el riesgo de cáncer de mama y ovario, y fortalece el vínculo con el bebé."
+      },
+      "q11": {
+        "question": "¿Qué debo comer durante la lactancia?",
+        "answer": "Durante la lactancia, es importante mantener una dieta equilibrada y variada. Incluye frutas, verduras, proteínas magras, granos integrales y lácteos. Bebe mucha agua (al menos 8-10 vasos al día). Evita el alcohol y limita la cafeína. No necesitas una dieta especial, solo come de forma saludable."
+      },
+      "q12": {
+        "question": "¿Puedo tomar medicamentos?",
+        "answer": "Muchos medicamentos son seguros durante la lactancia, pero siempre consulta con tu médico o farmacéutico antes de tomar cualquier medicamento. Algunos medicamentos pueden pasar a la leche materna. Tu médico puede recomendarte alternativas seguras si es necesario."
+      },
+      "q13": {
+        "question": "¿Cuánto tiempo dura la lactancia?",
+        "answer": "La Organización Mundial de la Salud recomienda lactancia materna exclusiva durante los primeros 6 meses, y luego continuar con lactancia junto con alimentos complementarios hasta los 2 años o más. La duración depende de ti y de tu bebé. No hay un tiempo \"correcto\" para destetar."
+      },
+      "q14": {
+        "question": "¿Cómo destetar a mi bebé?",
+        "answer": "El destete puede ser gradual o abrupto, pero el gradual suele ser más cómodo. Reduce una toma a la vez, reemplazándola con leche de fórmula o alimentos sólidos según la edad. Ofrece consuelo y atención adicional durante el proceso. El destete puede tomar semanas o meses."
+      },
+      "q15": {
+        "question": "¿Puedo amamantar si estoy enferma?",
+        "answer": "En la mayoría de los casos, sí puedes amamantar cuando estás enferma. De hecho, tu leche contiene anticuerpos que pueden proteger a tu bebé. Si tienes fiebre alta o una enfermedad grave, consulta con tu médico. Usa mascarilla si tienes síntomas respiratorios."
+      },
+      "q16": {
+        "question": "¿La lactancia duele?",
+        "answer": "La lactancia no debería doler. Si sientes dolor, puede ser señal de un agarre incorrecto. El dolor puede indicar grietas, mastitis u otros problemas. Si el dolor persiste, consulta con un especialista en lactancia o tu médico para identificar y tratar la causa."
+      },
+      "q17": {
+        "question": "¿Puedo hacer ejercicio durante la lactancia?",
+        "answer": "Sí, puedes hacer ejercicio durante la lactancia. El ejercicio moderado no afecta la producción de leche ni su calidad. Asegúrate de mantenerte hidratada y usar un sostén de apoyo. Puedes amamantar antes del ejercicio para mayor comodidad."
+      },
+      "q18": {
+        "question": "¿Qué posiciones son mejores para amamantar?",
+        "answer": "Las mejores posiciones son aquellas en las que tanto tú como tu bebé están cómodos. Algunas opciones comunes: posición cuna, posición cuna cruzada, posición acostada de lado, y posición de balón de rugby. Prueba diferentes posiciones para encontrar la que mejor funcione."
+      },
+      "q19": {
+        "question": "¿Cómo aumentar la producción de leche?",
+        "answer": "Para aumentar la producción de leche: amamanta con frecuencia (a demanda), asegúrate de que el bebé tenga un buen agarre, alterna entre ambos pechos, extrae leche después de las tomas si es necesario, descansa y mantén una buena hidratación y nutrición."
+      },
+      "q20": {
+        "question": "¿Puedo amamantar en público?",
+        "answer": "Sí, tienes derecho legal a amamantar en público en muchos países. Es una actividad natural y protegida. Si te sientes más cómoda, puedes usar una manta o un top especial para lactancia. No hay nada de malo en amamantar a tu bebé cuando lo necesite."
+      },
+      "q21": {
+        "question": "¿Qué es la lactancia materna exclusiva?",
+        "answer": "La lactancia materna exclusiva significa que el bebé solo recibe leche materna, sin agua, jugos, fórmula u otros alimentos. Se recomienda durante los primeros 6 meses de vida. Después de los 6 meses, se combina con alimentos complementarios mientras se continúa amamantando."
+      },
+      "q22": {
+        "question": "¿Cómo saber si tengo suficiente leche?",
+        "answer": "Señales de que tienes suficiente leche: el bebé moja 6-8 pañales al día, aumenta de peso adecuadamente, se ve satisfecho después de las tomas, y tus pechos se sienten más blandos después de amamantar. Si tienes dudas, consulta con un especialista en lactancia."
+      },
+      "q23": {
+        "question": "¿Puedo amamantar si tengo pezones planos o invertidos?",
+        "answer": "Sí, puedes amamantar con pezones planos o invertidos. Puede requerir más paciencia y técnicas especiales. Un especialista en lactancia puede ayudarte con técnicas como el uso de pezoneras, ejercicios de Hoffman, o extracción antes de amamantar para ayudar a que el pezón sobresalga."
+      },
+      "q24": {
+        "question": "¿Cuándo debo buscar ayuda profesional?",
+        "answer": "Debes buscar ayuda profesional si: sientes dolor constante al amamantar, tu bebé no aumenta de peso adecuadamente, tienes fiebre o síntomas de mastitis, el bebé no moja suficientes pañales, o si tienes cualquier preocupación sobre la lactancia. Los especialistas en lactancia pueden ayudarte."
+      },
+      "q25": {
+        "question": "¿La leche materna cambia con el tiempo?",
+        "answer": "Sí, la leche materna cambia para adaptarse a las necesidades del bebé. El calostro (primeros días) es rico en anticuerpos. La leche de transición (días 3-14) tiene más grasa y lactosa. La leche madura se adapta continuamente a las necesidades nutricionales del bebé en crecimiento."
+      }
+    }
+  },
+  "videos": {
+    "playError": "Error al reproducir video: {error}",
+    "@playError": {
+      "placeholders": {
+        "error": {
+          "type": "String"
+        }
+      }
+    },
+    "download": {
+      "checkStatusError": "Error verificando estado: {error}",
+      "@checkStatusError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "saveError": "Error: El video no se guardó correctamente",
+      "metadataError": "Error guardando metadata: {error}",
+      "@metadataError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "downloadError": "Error descargando video: {error}",
+      "@downloadError": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      }
+    },
+    "noVideosAvailable": "No hay videos disponibles",
+    "lesson": "Lección",
+    "duration": "Duración",
+    "minutes": "minutos",
+    "description": "Descripción",
+    "markAsCompleted": "Marcar como completado",
+    "videoMarkedCompleted": "Video marcado como completado"
+  },
+  "educationalContent": {
+    "title": "Contenido Educativo",
+    "statistics": "Estadísticas",
+    "searchContent": "Buscar contenido...",
+    "noContentAvailable": "No hay contenido disponible",
+    "contentMarkedCompleted": "¡Contenido marcado como completado!",
+    "information": "Información",
+    "lactanciaExitosa": "Lactancia Exitosa",
+    "beneficiosBebe": "Beneficios para el Bebé",
+    "alimentacionComplementaria": "Alimentación Complementaria"
+  },
+  "gamification": {
+    "xp": "XP",
+    "level": "Nivel",
+    "streak": "Racha",
+    "achievements": "Logros",
+    "tiers": {
+      "bronze": "Bronce",
+      "silver": "Plata",
+      "gold": "Oro",
+      "diamond": "Diamante",
+      "beginner": "Principiante"
+    },
+    "dailyChallenges": {
+      "weekStreak": {
+        "title": "Racha de Semana",
+        "description": "Mantén una racha de 7 días consecutivos"
+      },
+      "monthStreak": {
+        "title": "Racha de Mes",
+        "description": "Mantén una racha de 30 días consecutivos"
+      }
+    },
+    "achievementUnlocked": "¡Logro Desbloqueado!",
+    "levelUp": "¡Subiste de Nivel!",
+    "excellent": "¡Excelente!",
+    "achievementObjectivesTitle": "Objetivos para desbloquear:",
+    "loadingProgress": "Cargando progreso...",
+    "achievementTitles": {
+      "daily3": "Día Activo",
+      "daily5": "Día Dedicado",
+      "daily10": "Día Excepcional",
+      "milestone10": "Primeros Pasos",
+      "milestone25": "Constante",
+      "milestone50": "Dedicada",
+      "milestone100": "Experta",
+      "milestone250": "Maestra",
+      "milestone500": "Leyenda",
+      "complete25": "Detallista",
+      "complete50": "Completa",
+      "complete100": "Perfeccionista",
+      "lessons7": "Estudiante Avanzada",
+      "lessonsAll": "Experta en Lactancia",
+      "streak7": "Comprometida",
+      "streak30": "Dedicada",
+      "streak90": "Trimestre Constante",
+      "streak180": "Semestre Legendario",
+      "level1": "Nivel 1",
+      "level3": "Nivel 3",
+      "level5": "Nivel 5",
+      "level10": "Nivel 10",
+      "level15": "Nivel 15",
+      "level20": "Nivel 20",
+      "nocturnal10": "Madrugadora",
+      "weight10": "Crecimiento",
+      "sleep20": "Sueño Dorado",
+      "triviaPerfect5": "Trivia Perfecta",
+      "firstWeek": "Primera Semana",
+      "firstMonth": "Primer Mes",
+      "threeMonths": "Tres Meses",
+      "sixMonths": "Seis Meses"
+    },
+    "achievementDescriptions": {
+      "daily3": "3 registros en un día",
+      "daily5": "5 registros en un día",
+      "daily10": "10 registros en un día",
+      "milestone10": "Completa 10 registros de lactancia",
+      "milestone25": "Completa 25 registros de lactancia",
+      "milestone50": "Completa 50 registros de lactancia",
+      "milestone100": "Completa 100 registros de lactancia",
+      "milestone250": "Completa 250 registros de lactancia",
+      "milestone500": "Completa 500 registros de lactancia",
+      "complete25": "Completa 25 registros completos",
+      "complete50": "Completa 50 registros completos",
+      "complete100": "Completa 100 registros completos",
+      "lessons7": "Completa 7 lecciones",
+      "lessonsAll": "Completa todas las lecciones (14)",
+      "streak7": "Mantén una racha de 7 días",
+      "streak30": "Mantén una racha de 30 días",
+      "streak90": "Mantén una racha de 90 días",
+      "streak180": "Mantén una racha de 180 días (6 meses)",
+      "level1": "Alcanza nivel 1",
+      "level3": "Alcanza nivel 3",
+      "level5": "Alcanza nivel 5",
+      "level10": "Alcanza nivel 10",
+      "level15": "Alcanza nivel 15",
+      "level20": "Alcanza nivel 20",
+      "nocturnal10": "Realiza 10 registros entre las 12am y las 6am",
+      "weight10": "Registra peso del bebé 10 veces",
+      "sleep20": "Registra sueño del bebé 20 veces",
+      "triviaPerfect5": "Completa 5 trivias con 100% de respuestas correctas",
+      "firstWeek": "Usa la app durante 7 días",
+      "firstMonth": "Usa la app durante 30 días",
+      "threeMonths": "Usa la app durante 90 días",
+      "sixMonths": "Usa la app durante 180 días"
+    },
+    "messages": {
+      "excellentWork": "¡Excelente trabajo! 🎉",
+      "closeToLevelUp": "Estás muy cerca de subir de nivel",
+      "streakAtRisk": "Tu racha está en riesgo, pero puedes usar un día de descanso",
+      "takeYourTime": "Tómate el tiempo que necesites, estaremos aquí 💙",
+      "restWell": "Descansa bien, te esperamos mañana",
+      "helloHowAreYou": "¡Hola! ¿Cómo estás hoy?",
+      "startFirstStreak": "¡Comienza tu primera racha hoy!",
+      "great": "¡Genial!",
+      "congratulations": "¡Felicidades! Es hora de comenzar tu nueva aventura con tu bebé 🎉",
+      "errorSavingXP": "Error al guardar XP: {error}",
+      "@errorSavingXP": {
+        "placeholders": {
+          "error": {
+            "type": "String"
+          }
+        }
+      },
+      "videoCompleted": "¡Video Completado!",
+      "achievementDescriptions": {
+        "milestone": "Completa {value} registros de lactancia en total.",
+        "@milestone": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "complete": "Completa {value} registros completos (con todos los detalles).",
+        "@complete": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "daily": "Realiza {value} registros en un solo día.",
+        "@daily": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "nocturnal": "Realiza 10 registros entre las 12am y las 6am.",
+        "lactation": "Completa {value} registros de lactancia.",
+        "@lactation": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "triviaPerfect": "Completa 5 trivias con 100% de respuestas correctas.",
+        "lesson": "Completa {value} lecciones.",
+        "@lesson": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "streak": "Mantén una racha de {value} días consecutivos registrando actividad.",
+        "@streak": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "level": "Alcanza el nivel {value} ganando XP.",
+        "@level": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "weight": "Registra el peso de tu bebé {value} veces.",
+        "@weight": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "sleep": "Registra el sueño de tu bebé {value} veces.",
+        "@sleep": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "appUsage": "Usa la app durante {value} días.",
+        "@appUsage": {
+          "placeholders": {
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        "default": "Completa el objetivo requerido."
+      },
+      "streakMessages": {
+        "atRisk": "Tu racha está en riesgo, pero puedes usar un día de descanso si lo necesitas",
+        "pauseMode": "Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙",
+        "pauseActive": "Modo pausa activo. Tómate el tiempo que necesites",
+        "active": "¡Excelente! Llevas {days} días consecutivos 🔥",
+        "@active": {
+          "placeholders": {
+            "days": {
+              "type": "int"
+            }
+          }
+        },
+        "lost": "Tómate el tiempo que necesites. Estaremos aquí cuando regreses 💙",
+        "noActivity": "¡Comienza tu primera racha hoy!"
+      },
+      "babyStage": {
+        "upgradeTitle": "¡Tu bebé ha crecido!",
+        "upgradeMessage": "¡Felicidades!",
+        "upgradeDescription": "Has completado {lessons} lecciones y tu bebé ahora tiene {newStage} 🎉",
+        "@upgradeDescription": {
+          "placeholders": {
+            "lessons": {
+              "type": "int"
+            },
+            "newStage": {
+              "type": "String"
+            }
+          }
+        },
+        "born": "Recién Nacido",
+        "3months": "3 Meses",
+        "6months": "6 Meses"
+      }
+    }
+  },
+  "sync": {
+    "syncNow": "Sincronizar Ahora",
+    "close": "Cerrar"
+  }
+}
