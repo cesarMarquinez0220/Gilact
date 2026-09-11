@@ -224,7 +224,7 @@ class GamificationService {
   Future<bool> isTriviaCompleted(String userId, String lessonId) async {
     try {
       final transactionsResult = await _repository.getXPTransactions(userId);
-      return transactionsResult.fold((error) => false, (transactions) {
+      return await transactionsResult.fold((error) => false, (transactions) {
         // Buscar si hay alguna transacción de trivia completada para esta lección
         return transactions.any(
           (transaction) =>
@@ -242,7 +242,7 @@ class GamificationService {
   Future<Set<String>> getCompletedTriviaLessonIds(String userId) async {
     try {
       final transactionsResult = await _repository.getXPTransactions(userId);
-      return transactionsResult.fold(
+      return await transactionsResult.fold(
         (error) => <String>{},
         (transactions) => transactions
             .where(
@@ -504,7 +504,7 @@ class GamificationService {
   }) async {
     try {
       final profileResult = await _repository.getProfile(userId);
-      return profileResult.fold(
+      return await profileResult.fold(
         (error) => Left('Error obteniendo perfil: $error'),
         (profile) async {
           if (profile == null) {
@@ -589,7 +589,7 @@ class GamificationService {
   Future<bool> isLessonTriviaCompleted(String userId, String lessonId) async {
     try {
       final profileResult = await _repository.getProfile(userId);
-      return profileResult.fold((error) => false, (profile) {
+      return await profileResult.fold((error) => false, (profile) {
         if (profile == null) return false;
         // Verificar si hay trivias completadas para esta lección
         // Por ahora, asumimos que si no está en la lista de logros, no está completada

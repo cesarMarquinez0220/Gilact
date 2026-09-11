@@ -78,7 +78,7 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, Lesson>> getLessonById(String id) async {
     try {
       final result = await getAllLessons();
-      return result.fold((failure) => Left(failure), (lessons) {
+      return await result.fold((failure) => Left(failure), (lessons) {
         final lesson = lessons.firstWhere((lesson) => lesson.id == id);
         return Right(lesson);
       });
@@ -93,7 +93,7 @@ class LessonRepositoryImpl implements LessonRepository {
   ) async {
     try {
       final result = await getAllLessons();
-      return result.fold((failure) => Left(failure), (lessons) {
+      return await result.fold((failure) => Left(failure), (lessons) {
         final filteredLessons = lessons
             .where((lesson) => lesson.category == category)
             .toList();
@@ -110,7 +110,7 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, List<Lesson>>> searchLessons(String query) async {
     try {
       final result = await getAllLessons();
-      return result.fold((failure) => Left(failure), (lessons) {
+      return await result.fold((failure) => Left(failure), (lessons) {
         final filteredLessons = lessons
             .where(
               (lesson) =>
@@ -148,7 +148,7 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, double>> getLessonProgress(String lessonId) async {
     try {
       final result = await getLessonById(lessonId);
-      return result.fold(
+      return await result.fold(
         (failure) => Left(failure),
         (lesson) => Right(lesson.progress),
       );
@@ -163,7 +163,7 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, Map<String, double>>> getUserProgress() async {
     try {
       final result = await getAllLessons();
-      return result.fold((failure) => Left(failure), (lessons) {
+      return await result.fold((failure) => Left(failure), (lessons) {
         final progress = <String, double>{};
         for (final lesson in lessons) {
           progress[lesson.id] = lesson.progress;
@@ -183,7 +183,7 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, Map<String, dynamic>>> getUserStatistics() async {
     try {
       final result = await getAllLessons();
-      return result.fold((failure) => Left(failure), (lessons) {
+      return await result.fold((failure) => Left(failure), (lessons) {
         final completedLessons = lessons
             .where((lesson) => lesson.isCompleted)
             .length;

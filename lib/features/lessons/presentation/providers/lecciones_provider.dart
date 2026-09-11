@@ -108,7 +108,7 @@ class LeccionesProvider extends ChangeNotifier {
         completedLessons: completedCount,
       );
 
-      return result.fold(
+      return await result.fold(
         (error) {
           _logger.w('Error actualizando etapa del bebé: $error');
           return null;

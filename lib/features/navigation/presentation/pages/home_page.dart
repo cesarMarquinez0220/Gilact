@@ -715,7 +715,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final repository = getIt<GamificationRepository>();
       final result = await repository.getStreak(userId);
-      return result.fold((error) {
+      return await result.fold((error) {
         _logger.e('Error obteniendo racha: $error');
         return null;
       }, (streak) => streak);

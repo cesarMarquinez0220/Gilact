@@ -599,7 +599,7 @@ Future<DailyStreak?> _getStreak(String userId) async {
     final repository = getIt<GamificationRepository>();
     final logger = getIt<AppLogger>();
     final result = await repository.getStreak(userId);
-    return result.fold((error) {
+    return await result.fold((error) {
       logger.e('Error obteniendo racha: $error');
       return null;
     }, (streak) => streak);

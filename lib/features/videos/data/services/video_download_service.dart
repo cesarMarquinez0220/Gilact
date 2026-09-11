@@ -229,7 +229,7 @@ class VideoDownloadService {
     try {
       // Verificar conectividad
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      if (connectivityResult.contains(ConnectivityResult.none) || connectivityResult.isEmpty) {
         throw Exception('No hay conexión a internet');
       }
 
